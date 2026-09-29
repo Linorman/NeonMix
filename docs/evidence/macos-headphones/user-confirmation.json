@@ -1,0 +1,10 @@
+{
+  "recorded_at": "2026-09-29T12:22:26.001987+00:00",
+  "source": "user confirmation in current conversation",
+  "listening": "先左后右，清晰且没有杂音",
+  "physical_action": "已完成拔插",
+  "gain_dbfs": -36,
+  "frequency_hz": 437,
+  "duration_seconds_per_channel": 3,
+  "scope": "subjective listening confirmation, not calibrated acoustic measurement"
+}

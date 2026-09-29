@@ -1,0 +1,18 @@
+{
+  "desktop_pid": 16200,
+  "launched_and_alive": true,
+  "termination_signal": "SIGTERM",
+  "exit_code": -15,
+  "purpose": "UI process termination while independently launched capture/output remain active; not graceful window-close or accessibility acceptance",
+  "audio_processes_after_ui_termination": "15337 /Volumes/projects-mac/NeonMix/target/release/neonmix-audio\n15338 /Volumes/projects-mac/NeonMix/target/release/neonmix-audio",
+  "audio_pids_alive": true,
+  "capture_continues_without_new_discontinuity": true,
+  "capture_after_ui_termination": {
+    "frames": 7200256,
+    "errors": 0,
+    "discontinuities": 1,
+    "clock_epoch": 1,
+    "dropped_frames": 0,
+    "stale_frames": 0
+  }
+}

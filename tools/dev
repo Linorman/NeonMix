@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+NEONMIX_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export CARGO_HOME="$NEONMIX_ROOT/.local/cargo"
+export CARGO_TARGET_DIR="$NEONMIX_ROOT/target"
+export TMPDIR="$NEONMIX_ROOT/.local/tmp"
+export TMP="$TMPDIR" TEMP="$TMPDIR"
+export UV_CACHE_DIR="$NEONMIX_ROOT/.local/uv"
+export npm_config_cache="$NEONMIX_ROOT/.local/npm"
+export PYTHONPYCACHEPREFIX="$NEONMIX_ROOT/.local/pycache"
+export UV_PYTHON_INSTALL_DIR="$NEONMIX_ROOT/.local/python"
+export MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-14.6}"
+export XDG_CACHE_HOME="$NEONMIX_ROOT/.local/cache"
+mkdir -p "$CARGO_HOME" "$TMPDIR" "$UV_CACHE_DIR" "$npm_config_cache" "$XDG_CACHE_HOME"
+# Read the already-installed pinned toolchain; do not mutate the global rustup cache.
+if command -v rustup >/dev/null 2>&1; then
+  NEONMIX_RUSTC=$(rustup which --toolchain 1.95.0 rustc)
+  PATH="$(dirname "$NEONMIX_RUSTC"):$PATH"
+  export PATH
+fi
+if [ "$(uname -s)" = Linux ] && [ -d "$NEONMIX_ROOT/.local/native/root" ]; then
+  NEONMIX_NATIVE="$NEONMIX_ROOT/.local/native/root"
+  export PKG_CONFIG_PATH="$NEONMIX_NATIVE/usr/lib/x86_64-linux-gnu/pkgconfig:$NEONMIX_NATIVE/usr/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+  export LIBRARY_PATH="$NEONMIX_NATIVE/usr/lib/x86_64-linux-gnu${LIBRARY_PATH:+:$LIBRARY_PATH}"
+  export LD_LIBRARY_PATH="$NEONMIX_NATIVE/usr/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  export NEONMIX_CJK_FONT="$NEONMIX_NATIVE/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+fi
+cd "$NEONMIX_ROOT"
+exec "$@"

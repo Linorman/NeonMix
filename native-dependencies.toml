@@ -1,0 +1,48 @@
+# E00/E01 build baseline. Exact resolved Rust versions: Cargo.lock.
+[rust]
+toolchain = "1.95.0"
+cpal = "0.18.2"
+cpal_patch = "patches/cpal-0.18.2-native-position.patch"
+pipewire_rs = "0.10.0"
+rubato = "0.16.2"
+eframe = "0.31.1"
+
+[windows]
+architecture = "x86_64"
+product_baseline = "Windows 11 24H2"
+ci_os = "windows-2025"
+toolchain = "x86_64-pc-windows-msvc"
+sdk_baseline = "10.0.26100.0"
+wdk = "E06: not used by E00/E01 user-mode build; must be locked with chosen driver"
+
+[linux]
+architecture = "x86_64"
+distribution = "Ubuntu 24.04 LTS"
+pipewire_abi = "1.0.5 / libpipewire-0.3"
+wireplumber_baseline = "0.4.17"
+headers_lock = "docs/evidence/linux-cross-dependencies.json"
+
+[macos]
+architecture = "arm64"
+deployment_target = "14.6"
+ci_os = "macos-15"
+ci_xcode = "16.4"
+ci_sdk = "15.5"
+local_sdk_observed = "27.0"
+capture_permission_binding = "objc2-avf-audio 0.3.2 / AVAudioApplication.recordPermission (macOS 14+)"
+virtual_test_device = "BlackHole 2ch 0.7.1; user-installed acceptance fixture, not bundled"
+plugin = "E06: AudioServerPlugIn build/signing/loading is a separate gate"
+
+[gstreamer]
+status = "E02 integration pending; not linked into E01 binaries"
+api_baseline = "1.24"
+required_plugins = ["app", "opus", "rtp", "rtpmanager", "udp", "dtls", "srtp"]
+distribution_gate = "Lock full native patch versions, redistributables and licenses before E02 integration; bundle and probe plugins on each OS before E09 packaging. Cargo.lock alone is insufficient."
+
+[linux_lab]
+qemu = "10.1.5"
+libslirp = "4.9.1"
+meson = "1.9.2"
+llvm_tools = "1.95.0"
+image = "ubuntu-24.04-server-cloudimg-amd64 release-20260911"
+image_sha256 = "612b2c0cc1bc413a6cb8c38fd611794caf0f2b436c50013d8b3794db12ad7354"

@@ -1,0 +1,12 @@
+{
+  "device_id": "coreaudio:BlackHole2ch_UID",
+  "binary_sha256": "3031f0d7fa961e5244788fbcb705a1e0a779f68f135bce8661f87d9e9af20a7c",
+  "passed": false,
+  "failure": {
+    "type": "TimeoutExpired",
+    "message": "Command '['/usr/bin/osascript', '-e', 'do shell script \"/bin/kill -0 20627 && /bin/kill -0 20628 && /usr/bin/killall coreaudiod\" with administrator privileges']' timed out after 30 seconds"
+  },
+  "coreaudiod_after": "98186",
+  "restart_confirmed": false,
+  "classification": "administrator authorization did not complete within the probe window; not a product failure verdict"
+}

@@ -1,0 +1,20 @@
+{
+  "binary_sha256": "10632c0cfb69211d90eba69c5d4f6a384ce5cacc486393fbca35932e5349dce1",
+  "command": [
+    "target/release/neonmix-audio",
+    "play",
+    "--device",
+    "coreaudio:BuiltInHeadphoneOutputDevice",
+    "--rate",
+    "48000",
+    "--period",
+    "256",
+    "--seconds",
+    "3",
+    "--signal",
+    "silence"
+  ],
+  "exit_code": 0,
+  "passed": true,
+  "scope": "Final formatted build, initial 48000 Hz nominal rate restored"
+}

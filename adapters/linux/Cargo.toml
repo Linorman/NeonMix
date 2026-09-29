@@ -1,0 +1,15 @@
+[package]
+name = "neonmix-linux"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+neonmix-core.workspace = true
+neonmix-io.workspace = true
+cpal.workspace = true
+[lints]
+workspace = true
+[target.'cfg(target_os = "linux")'.dependencies]
+cpal = { workspace = true, features = ["pipewire"] }
+pipewire = "=0.10.0"

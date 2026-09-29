@@ -1,0 +1,121 @@
+{
+  "device_id": "coreaudio:BuiltInHeadphoneOutputDevice",
+  "binary_sha256": "10632c0cfb69211d90eba69c5d4f6a384ce5cacc486393fbca35932e5349dce1",
+  "scope": "physical removal and fresh-process reopen; not same-process epoch allocation",
+  "passed": true,
+  "ready": true,
+  "removed": true,
+  "returned_same_id": true,
+  "original_exit_code": 1,
+  "fault": {
+    "clock": {
+      "callback_frames": 256,
+      "clock_timestamp_ns": 171733110427041,
+      "device_timestamp_ns": 171733117968708,
+      "epoch": 1,
+      "epoch_exhausted": false,
+      "internal_frames": 1414038,
+      "native_device_frame_position": 1414400,
+      "native_internal_frames": 1414400,
+      "native_stream_frames": 1414400,
+      "presented_frames": 1414038,
+      "reset": false,
+      "sample_rate": 48000,
+      "submitted_frames": 1414656
+    },
+    "event": "output_fault",
+    "info": {
+      "actual_period_frames": 256,
+      "backend": "core_audio",
+      "device_id": "coreaudio:BuiltInHeadphoneOutputDevice",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 48000
+      },
+      "requested_period_frames": 256,
+      "resampler_delay_frames": 0,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "stats": {
+      "callback_max_ns": 9583,
+      "callback_over_budget": 0,
+      "callbacks": 5526,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 1,
+      "frames": 1414656,
+      "last_arrival_ns": 29547548167,
+      "last_device_ns": 171733117968708,
+      "last_error": 1,
+      "native_device_frame_position": 1414400,
+      "native_internal_frames": 1414400,
+      "native_stream_frames": 1414400,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 256,
+      "period_min": 256,
+      "presented_frames": 1414038,
+      "silent_frames": 1414656,
+      "stale_frames": 0,
+      "submitted_frames": 1414656
+    }
+  },
+  "reopened": {
+    "clock": {
+      "callback_frames": 256,
+      "clock_timestamp_ns": 171744767570625,
+      "device_timestamp_ns": 171744775112292,
+      "epoch": 1,
+      "epoch_exhausted": false,
+      "internal_frames": 145046,
+      "native_device_frame_position": 145408,
+      "native_internal_frames": 145408,
+      "native_stream_frames": 145408,
+      "presented_frames": 145046,
+      "reset": false,
+      "sample_rate": 48000,
+      "submitted_frames": 145664
+    },
+    "event": "output_complete",
+    "info": {
+      "actual_period_frames": 256,
+      "backend": "core_audio",
+      "device_id": "coreaudio:BuiltInHeadphoneOutputDevice",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 48000
+      },
+      "requested_period_frames": 256,
+      "resampler_delay_frames": 0,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "stats": {
+      "callback_max_ns": 7917,
+      "callback_over_budget": 0,
+      "callbacks": 569,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 145664,
+      "last_arrival_ns": 3441126000,
+      "last_device_ns": 171744775112292,
+      "last_error": 0,
+      "native_device_frame_position": 145408,
+      "native_internal_frames": 145408,
+      "native_stream_frames": 145408,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 256,
+      "period_min": 256,
+      "presented_frames": 145046,
+      "silent_frames": 145664,
+      "stale_frames": 0,
+      "submitted_frames": 145664
+    }
+  },
+  "reopened_exit_code": 0
+}

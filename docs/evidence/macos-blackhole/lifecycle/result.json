@@ -1,0 +1,235 @@
+{
+  "device_id": "coreaudio:BlackHole2ch_UID",
+  "binary_sha256": "3031f0d7fa961e5244788fbcb705a1e0a779f68f135bce8661f87d9e9af20a7c",
+  "cases": {
+    "no_source": {
+      "passed": true,
+      "final": {
+        "event": "capture_complete",
+        "measurement": {
+          "analyzed_frames": 143872,
+          "estimated_frequency_hz": null,
+          "peak": 0.0,
+          "positive_zero_crossings": 0,
+          "rms": 0.0
+        },
+        "stats": {
+          "callback_max_ns": 7125,
+          "callback_over_budget": 0,
+          "callbacks": 563,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 144128,
+          "last_arrival_ns": 3118307208,
+          "last_device_ns": 174113515689542,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.0,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 0,
+          "silent_frames": 144128,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "interpretation": "BlackHole continues delivering silence, not absent callbacks"
+    },
+    "pause_resume": {
+      "passed": true,
+      "resumed": {
+        "event": "capture_block",
+        "header": {
+          "arrival_ns": 5092838458,
+          "capture_timestamp_ns": 174118770868125,
+          "discontinuity_flags": 18,
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 48000
+          },
+          "frame_count": 256,
+          "source_sample_position": 0,
+          "stream_epoch": 2,
+          "stream_id": 1
+        },
+        "silent": false
+      },
+      "final": {
+        "event": "capture_complete",
+        "measurement": {
+          "analyzed_frames": 190720,
+          "estimated_frequency_hz": 436.9992716678806,
+          "peak": 0.015848932787775993,
+          "positive_zero_crossings": 876,
+          "rms": 0.011207206855869858
+        },
+        "stats": {
+          "callback_max_ns": 5667,
+          "callback_over_budget": 0,
+          "callbacks": 747,
+          "clock_epoch": 2,
+          "discontinuities": 2,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 191232,
+          "last_arrival_ns": 7066052792,
+          "last_device_ns": 174120744201458,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 3,
+          "peak": 0.015848923474550247,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 0,
+          "silent_frames": 4,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      }
+    },
+    "system_mute": {
+      "passed": true,
+      "windows": [
+        {
+          "frames": 48128,
+          "silent": 7680
+        },
+        {
+          "frames": 47872,
+          "silent": 47872
+        },
+        {
+          "frames": 47872,
+          "silent": 47872
+        },
+        {
+          "frames": 48128,
+          "silent": 40961
+        },
+        {
+          "frames": 47872,
+          "silent": 1
+        },
+        {
+          "frames": 48128,
+          "silent": 1
+        }
+      ],
+      "final": {
+        "event": "capture_complete",
+        "measurement": {
+          "analyzed_frames": 383744,
+          "estimated_frequency_hz": 437.0006635700066,
+          "peak": 0.015848932787775993,
+          "positive_zero_crossings": 1373,
+          "rms": 0.008850824852438965
+        },
+        "stats": {
+          "callback_max_ns": 6458,
+          "callback_over_budget": 0,
+          "callbacks": 1500,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 384000,
+          "last_arrival_ns": 8059178167,
+          "last_device_ns": 174130977310250,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.015848670154809952,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 0,
+          "silent_frames": 144389,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      }
+    },
+    "source_stop_restart": {
+      "passed": true,
+      "windows": [
+        {
+          "frames": 48128,
+          "silent": 1
+        },
+        {
+          "frames": 47872,
+          "silent": 47828
+        },
+        {
+          "frames": 47872,
+          "silent": 47872
+        },
+        {
+          "frames": 48128,
+          "silent": 48128
+        },
+        {
+          "frames": 47872,
+          "silent": 10241
+        },
+        {
+          "frames": 47872,
+          "silent": 1
+        },
+        {
+          "frames": 48128,
+          "silent": 1
+        },
+        {
+          "frames": 48128,
+          "silent": 36881
+        }
+      ],
+      "final": {
+        "event": "capture_complete",
+        "measurement": {
+          "analyzed_frames": 479744,
+          "estimated_frequency_hz": 658.9971602097713,
+          "peak": 0.015848932787775993,
+          "positive_zero_crossings": 1988,
+          "rms": 0.007938025218475368
+        },
+        "stats": {
+          "callback_max_ns": 8416,
+          "callback_over_budget": 0,
+          "callbacks": 1875,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 480000,
+          "last_arrival_ns": 10060682750,
+          "last_device_ns": 174142235565083,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.0,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 0,
+          "silent_frames": 238826,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      }
+    }
+  },
+  "original_output_mute": 0,
+  "restored_output_mute": true,
+  "passed": true
+}

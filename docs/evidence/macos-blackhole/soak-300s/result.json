@@ -1,0 +1,107 @@
+{
+  "device_id": "coreaudio:BlackHole2ch_UID",
+  "seconds": 300,
+  "rate": 48000,
+  "period": 256,
+  "binary_sha256": "3031f0d7fa961e5244788fbcb705a1e0a779f68f135bce8661f87d9e9af20a7c",
+  "passed": true,
+  "scope": "bounded digital-path baseline; not analog or long-term certification",
+  "pids": {
+    "output": 15337,
+    "capture": 15338
+  },
+  "capture_exit": 0,
+  "output_exit": 0,
+  "capture": {
+    "event": "capture_complete",
+    "measurement": {
+      "analyzed_frames": 14400000,
+      "estimated_frequency_hz": 436.999974513696,
+      "peak": 0.015848932787775993,
+      "positive_zero_crossings": 131100,
+      "rms": 0.011206887846304782
+    },
+    "stats": {
+      "callback_max_ns": 6833,
+      "callback_over_budget": 0,
+      "callbacks": 56251,
+      "clock_epoch": 1,
+      "discontinuities": 1,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 14400256,
+      "last_arrival_ns": 300056204958,
+      "last_device_ns": 174713654644792,
+      "last_error": 0,
+      "native_device_frame_position": null,
+      "native_internal_frames": null,
+      "native_stream_frames": null,
+      "no_data_intervals": 0,
+      "peak": 0.01584768109023571,
+      "period_max": 256,
+      "period_min": 256,
+      "presented_frames": 0,
+      "silent_frames": 300,
+      "stale_frames": 0,
+      "submitted_frames": 0
+    }
+  },
+  "output": {
+    "clock": {
+      "callback_frames": 256,
+      "clock_timestamp_ns": 174715191644791,
+      "device_timestamp_ns": 174715196978124,
+      "epoch": 1,
+      "epoch_exhausted": false,
+      "internal_frames": 14497025,
+      "native_device_frame_position": 14497280,
+      "native_internal_frames": 14497280,
+      "native_stream_frames": 14497280,
+      "presented_frames": 14497025,
+      "reset": false,
+      "sample_rate": 48000,
+      "submitted_frames": 14497536
+    },
+    "event": "output_complete",
+    "info": {
+      "actual_period_frames": 256,
+      "backend": "core_audio",
+      "device_id": "coreaudio:BlackHole2ch_UID",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 48000
+      },
+      "requested_period_frames": 256,
+      "resampler_delay_frames": 0,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "stats": {
+      "callback_max_ns": 12750,
+      "callback_over_budget": 0,
+      "callbacks": 56631,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 14497536,
+      "last_arrival_ns": 302075830333,
+      "last_device_ns": 174715196978124,
+      "last_error": 0,
+      "native_device_frame_position": 14497280,
+      "native_internal_frames": 14497280,
+      "native_stream_frames": 14497280,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 256,
+      "period_min": 256,
+      "presented_frames": 14497025,
+      "silent_frames": 1087,
+      "stale_frames": 0,
+      "submitted_frames": 14497536
+    }
+  },
+  "max_steady_silent_fraction": 2.1001344086021507e-05,
+  "capture_epoch_count": 1,
+  "capture_discontinuities": 1
+}

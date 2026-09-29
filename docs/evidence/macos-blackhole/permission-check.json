@@ -1,0 +1,7 @@
+{
+  "av_authorization_status": 2,
+  "meaning": "denied",
+  "responsible_application": "com.openai.codex",
+  "checked_via": "AVCaptureDevice.authorizationStatus(for: .audio) plus TCC attribution log",
+  "permission_granted": false
+}
