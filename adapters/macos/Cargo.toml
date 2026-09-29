@@ -1,0 +1,14 @@
+[package]
+name = "neonmix-macos"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+neonmix-core.workspace = true
+neonmix-io.workspace = true
+cpal.workspace = true
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-avf-audio = { version = "=0.3.2", default-features = false, features = ["std", "AVAudioApplication"] }
+[lints]
+workspace = true

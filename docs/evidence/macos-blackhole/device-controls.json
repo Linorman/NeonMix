@@ -1,0 +1,90 @@
+{
+  "audio_device_id": 79,
+  "uid": "BlackHole2ch_UID",
+  "properties": [
+    {
+      "selector": "mute",
+      "scope": "inpt",
+      "element": 0,
+      "status": 0,
+      "value": 0
+    },
+    {
+      "selector": "volm",
+      "scope": "inpt",
+      "element": 0,
+      "status": 0,
+      "value": 1.0
+    },
+    {
+      "selector": "mute",
+      "scope": "inpt",
+      "element": 1,
+      "status": 2003332927,
+      "value": null
+    },
+    {
+      "selector": "volm",
+      "scope": "inpt",
+      "element": 1,
+      "status": 2003332927,
+      "value": null
+    },
+    {
+      "selector": "mute",
+      "scope": "inpt",
+      "element": 2,
+      "status": 2003332927,
+      "value": null
+    },
+    {
+      "selector": "volm",
+      "scope": "inpt",
+      "element": 2,
+      "status": 2003332927,
+      "value": null
+    },
+    {
+      "selector": "mute",
+      "scope": "outp",
+      "element": 0,
+      "status": 0,
+      "value": 0
+    },
+    {
+      "selector": "volm",
+      "scope": "outp",
+      "element": 0,
+      "status": 0,
+      "value": 1.0
+    },
+    {
+      "selector": "mute",
+      "scope": "outp",
+      "element": 1,
+      "status": 2003332927,
+      "value": null
+    },
+    {
+      "selector": "volm",
+      "scope": "outp",
+      "element": 1,
+      "status": 2003332927,
+      "value": null
+    },
+    {
+      "selector": "mute",
+      "scope": "outp",
+      "element": 2,
+      "status": 2003332927,
+      "value": null
+    },
+    {
+      "selector": "volm",
+      "scope": "outp",
+      "element": 2,
+      "status": 2003332927,
+      "value": null
+    }
+  ]
+}

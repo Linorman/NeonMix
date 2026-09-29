@@ -1,0 +1,17 @@
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+warning: function `frames_to_duration` is never used
+   --> vendor/cpal/src/host/mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cpal` (lib) generated 1 warning
+    Checking neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+    Checking neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-windows v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/windows)
+    Checking neonmix-linux v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/linux)
+    Checking neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+    Checking neonmix-audio v0.1.0 (/Volumes/projects-mac/NeonMix/apps/audio)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.02s

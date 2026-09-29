@@ -1,0 +1,9 @@
+{
+  "upstream": "https://crates.io/api/v1/crates/cpal/0.18.2/download",
+  "version": "0.18.2",
+  "sha256": "6f02e8d0327b42d3e2e4ab2119af397344eb9fc54a34bf0ddeaa1277af8681f1",
+  "license": "Apache-2.0",
+  "patch": "patches/cpal-0.18.2-native-position.patch",
+  "patch_sha256": "dfc9c6a98540df04d98b438b9e93e72d7b7e0244e8495dcfd56bd56419220f37",
+  "revision": "neonmix-native-io-3"
+}

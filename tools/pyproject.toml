@@ -1,0 +1,12 @@
+[project]
+name = "neonmix-dev-tools"
+version = "0.1.0"
+description = "Offline build evidence and audio probe orchestration; not a product runtime"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+linux-lab = ["meson==1.9.2"]

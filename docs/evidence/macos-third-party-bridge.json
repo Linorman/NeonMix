@@ -1,0 +1,26 @@
+{
+  "passed": false,
+  "capture_exit_code": 0,
+  "output_exit_code": 0,
+  "scope": "virtual-device digital bridge, not analog latency or end-to-end networking",
+  "stats": {
+    "callback_max_ns": 24458,
+    "callbacks": 469,
+    "clock_epoch": 1,
+    "discontinuities": 1,
+    "dropped_frames": 0,
+    "errors": 0,
+    "frames": 240128,
+    "last_arrival_ns": 5054003958,
+    "last_device_ns": 155004360990208,
+    "last_error": 0,
+    "no_data_intervals": 0,
+    "peak": 0.0,
+    "period_max": 512,
+    "period_min": 512,
+    "presented_frames": 0,
+    "silent_frames": 240128,
+    "stale_frames": 0,
+    "submitted_frames": 0
+  }
+}

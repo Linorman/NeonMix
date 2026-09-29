@@ -1,0 +1,20 @@
+[package]
+name = "neonmix-audio"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+neonmix-core.workspace = true
+neonmix-io.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+clap.workspace = true
+[target.'cfg(target_os = "windows")'.dependencies]
+neonmix-windows = { path = "../../adapters/windows" }
+[target.'cfg(target_os = "linux")'.dependencies]
+neonmix-linux = { path = "../../adapters/linux" }
+[target.'cfg(target_os = "macos")'.dependencies]
+neonmix-macos = { path = "../../adapters/macos" }
+[lints]
+workspace = true

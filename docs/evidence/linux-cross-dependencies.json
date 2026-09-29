@@ -1,0 +1,31 @@
+{
+  "rust_std_sha256": "047ea7098803d3500fa1072e9cee5392697e21525559e4458128a2bf874aa382",
+  "packages": {
+    "libasound2-dev": {
+      "Version": "1.2.11-1build2",
+      "Filename": "pool/main/a/alsa-lib/libasound2-dev_1.2.11-1build2_amd64.deb",
+      "SHA256": "6acdb3db0069cf386ee6b615de8bb11cfc8863bf3a593ca6957f03e017a4b3db"
+    },
+    "libc6-dev": {
+      "Version": "2.39-0ubuntu8",
+      "Filename": "pool/main/g/glibc/libc6-dev_2.39-0ubuntu8_amd64.deb",
+      "SHA256": "1f03b79223d9cf1a6ed3a648f6942619dcb97b2884dba8fd12e262b6771e247a"
+    },
+    "libpipewire-0.3-dev": {
+      "Version": "1.0.5-1",
+      "Filename": "pool/main/p/pipewire/libpipewire-0.3-dev_1.0.5-1_amd64.deb",
+      "SHA256": "c0b34ed6a34391a94c0711966dbea9b6b5a98758d88813824c05d6662e0b60c9"
+    },
+    "libspa-0.2-dev": {
+      "Version": "1.0.5-1",
+      "Filename": "pool/main/p/pipewire/libspa-0.2-dev_1.0.5-1_amd64.deb",
+      "SHA256": "6c99d162e23e13cacf8bc3edc312c60545281078398e52e34dc5ebb4209649dc"
+    },
+    "linux-libc-dev": {
+      "Version": "6.8.0-31.31",
+      "Filename": "pool/main/l/linux/linux-libc-dev_6.8.0-31.31_amd64.deb",
+      "SHA256": "21c631ba4da3d38d92a133e28a8a14278e1e00174ed135a20661d1e532e05ca5"
+    }
+  },
+  "type": "cross_check_only"
+}

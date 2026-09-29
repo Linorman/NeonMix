@@ -1,0 +1,10 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["apps/desktop/src"],
+  "locale": "zh-CN",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": ["Scrollbar"],
+  "requiredCommands": ["unit"],
+  "commands": {"unit": "tools/dev cargo test -p neonmix-desktop --locked"},
+  "evidence": {"failurePaths": "apps/desktop/src/main.rs"}
+}
