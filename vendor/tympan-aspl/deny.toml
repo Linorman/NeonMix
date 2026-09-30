@@ -1,0 +1,52 @@
+# cargo-deny configuration.
+#
+# https://embarkstudios.github.io/cargo-deny/
+#
+# The framework ships a single non-path dependency today
+# (`crossbeam-utils`). The checks below are primarily a regression
+# guard for the moment `coreaudio-sys` / `core-foundation` land in
+# the `raw` module and the dependency tree grows.
+
+[graph]
+# Cover every feature combination — a future optional dep that pulls
+# in a problematic transitive crate gets caught regardless of which
+# feature gates it.
+all-features = true
+
+[advisories]
+version = 2
+# Yanked crates surface as warnings rather than hard errors so a
+# transient yank does not block merges; vulnerabilities and
+# unmaintained advisories are always errors in v2.
+yanked = "warn"
+
+[licenses]
+version = 2
+# Standard permissive set — compatible with the crate's own
+# MIT OR Apache-2.0 dual licence.
+allow = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "0BSD",
+    "CC0-1.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "Zlib",
+]
+confidence-threshold = 0.93
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+highlight = "all"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

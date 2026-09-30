@@ -72,6 +72,9 @@ impl BlockProducer {
     }
 }
 impl BlockConsumer {
+    pub fn queued_blocks(&self) -> usize {
+        self.inner.slots()
+    }
     pub fn pop_fresh(&mut self, now_ns: u64, max_age_ns: u64) -> Option<AudioBlock> {
         for _ in 0..self.capacity {
             let entry = self.inner.pop().ok()?;

@@ -1,0 +1,63 @@
+[workspace]
+resolver = "2"
+members = ["examples/minimal-loopback", "examples/gain", "examples/lowpass"]
+
+[package]
+name = "tympan-aspl"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/penta2himajin/tympan-aspl"
+documentation = "https://docs.rs/tympan-aspl"
+description = "Rust framework for macOS AudioServerPlugins"
+readme = "README.md"
+keywords = ["audio", "macos", "coreaudio", "audioserverplugin", "realtime"]
+categories = ["multimedia::audio", "os::macos-apis"]
+
+# Library-only artefact. `plugin_entry!` emits the
+# `#[no_mangle] extern "C"` CFPlugIn factory from the consuming
+# driver crate's root (e.g. the minimal-loopback example), so the
+# framework crate itself is a plain `rlib` for downstream linking.
+[lib]
+crate-type = ["rlib"]
+
+[features]
+default = []
+
+# Lock-free `CachePadded` for the realtime SPSC ring buffer. The
+# realtime module is intentionally cross-platform so its invariants
+# can be unit-tested on any host, hence this is an unconditional
+# dependency rather than a `cfg(target_os = "macos")`-gated one.
+[dependencies]
+crossbeam-utils = { version = "0.8", default-features = false }
+
+[dev-dependencies]
+static_assertions = "1.1"
+# Global-allocator wrapper that aborts inside an
+# `assert_no_alloc(|| { ... })` span when an allocation traverses
+# the hook. Wired up in `tests/realtime_safety.rs` to enforce
+# CLAUDE.md prohibition #1.
+#
+# `default-features = false` switches off the `disable_release`
+# feature so `AllocDisabler` stays defined when test targets are
+# compiled in release mode under Tier 1's
+# `cargo build --release --all-targets` step.
+assert_no_alloc = { version = "1.1", default-features = false }
+
+[lints]
+workspace = true
+
+# Shared across the framework crate and the example workspace
+# members so a lint cannot be enforced in one and missed in
+# another.
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+missing_docs = "deny"
+
+[workspace.lints.clippy]
+undocumented_unsafe_blocks = "warn"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

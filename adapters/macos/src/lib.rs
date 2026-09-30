@@ -2,6 +2,10 @@
 //! Core Audio HAL I/O. Capture opens the readable side of an installed virtual device by UID.
 use neonmix_core::AudioError;
 use neonmix_io::NativeBackend;
+mod name;
+pub use name::set_virtual_output_name;
+/// Stable Core Audio UID exposed by the NeonMix HAL plug-in.
+pub const VIRTUAL_OUTPUT_UID: &str = "com.neonmix.audio.virtual-output";
 pub fn backend() -> Result<NativeBackend, AudioError> {
     cpal::host_from_id(cpal::HostId::CoreAudio)
         .map(|host| {

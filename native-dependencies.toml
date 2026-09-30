@@ -13,7 +13,11 @@ product_baseline = "Windows 11 24H2"
 ci_os = "windows-2025"
 toolchain = "x86_64-pc-windows-msvc"
 sdk_baseline = "10.0.26100.0"
-wdk = "E06: not used by E00/E01 user-mode build; must be locked with chosen driver"
+wdk = "Microsoft.Windows.WDK.x64 10.0.26100.6584; project-local NuGet lock in drivers/windows/wavert/sdk-lock.json"
+wdk_sdk_package = "Microsoft.Windows.SDK.CPP / CPP.x64 10.0.26100.6584"
+kmdf = "1.33"
+driver_source_commit = "2dc3fd3a0cc84a2933f2194e7ec0871584979071"
+driver_hardware_id = "ROOT\\NeonMixAudio"
 
 [linux]
 architecture = "x86_64"
@@ -31,13 +35,22 @@ ci_sdk = "15.5"
 local_sdk_observed = "27.0"
 capture_permission_binding = "objc2-avf-audio 0.3.2 / AVAudioApplication.recordPermission (macOS 14+)"
 virtual_test_device = "BlackHole 2ch 0.7.1; user-installed acceptance fixture, not bundled"
-plugin = "E06: AudioServerPlugIn build/signing/loading is a separate gate"
+plugin = "NeonMixHAL arm64 complete ad-hoc bundle verified; system loading untested; explicit BlackHole provider runtime tested"
+plugin_abi = "tympan-aspl 0.1.0 / NeonMix local revision 4 (MIT OR Apache-2.0), vendor patch documented in patches/tympan-aspl-0.1.0-realtime-clock.md"
+plugin_device_uid = "com.neonmix.audio.virtual-output"
 
 [gstreamer]
-status = "E02 integration pending; not linked into E01 binaries"
+status = "E02 integrated on macOS; E01 binaries stay independent; Windows/Linux native media packaging unverified"
 api_baseline = "1.24"
-required_plugins = ["app", "opus", "rtp", "rtpmanager", "udp", "dtls", "srtp"]
-distribution_gate = "Lock full native patch versions, redistributables and licenses before E02 integration; bundle and probe plugins on each OS before E09 packaging. Cargo.lock alone is insufficient."
+macos_runtime = "1.28.7"
+macos_archive_sha256 = "529fdf4a4027d942e59b5b3564f6400adaa008f63ce5f3fed4ffe35d73911994"
+glib = "2.82.4"
+opus = "1.5.2"
+libsrtp = "2.8.0"
+openssl = "3.5.0"
+required_plugins = ["app", "opus", "rtp", "rtpmanager", "dtls", "srtp", "coreelements", "audioconvert"]
+udp = "Rust nonblocking authenticated-session socket worker"
+distribution_gate = "Official macOS archive locally extracted and probed; full per-OS redistribution, licenses, bundling and signed installation remain E09 gates. Cargo.lock alone is insufficient."
 
 [linux_lab]
 qemu = "10.1.5"

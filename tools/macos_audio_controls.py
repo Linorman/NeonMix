@@ -1,5 +1,6 @@
 """Small Core Audio control-thread helper for explicit-device acceptance probes."""
 import ctypes as C
+import math
 import sys
 
 
@@ -63,3 +64,36 @@ class DeviceControls:
         address = Address(fourcc('mute'), fourcc('outp'), 0)
         value = C.c_uint32(bool(muted))
         self.check(self.ca.AudioObjectSetPropertyData(self.device, C.byref(address), 0, None, C.sizeof(value), C.byref(value)))
+
+    def rate(self):
+        return self.read(self.device, 'nsrt', 'glob', C.c_double)
+
+    def set_rate(self, rate):
+        address = Address(fourcc('nsrt'), fourcc('glob'), 0)
+        value = C.c_double(rate)
+        self.check(self.ca.AudioObjectSetPropertyData(self.device, C.byref(address), 0, None, C.sizeof(value), C.byref(value)))
+
+    def volume(self):
+        return self.read(self.device, 'volm', 'outp', C.c_float)
+
+    def volume_db(self):
+        return self.read(self.device, 'vold', 'outp', C.c_float)
+
+    def set_volume(self, volume):
+        if not math.isfinite(volume) or not 0 <= volume <= 1:
+            raise ValueError('volume must be finite and between 0 and 1')
+        self.write(self.device, 'volm', 'outp', C.c_float(volume))
+
+    def write(self, device, selector, scope, value):
+        address = Address(fourcc(selector), fourcc(scope), 0)
+        self.check(self.ca.AudioObjectSetPropertyData(device, C.byref(address), 0, None, C.sizeof(value), C.byref(value)))
+
+    def default_outputs(self):
+        return {selector: self.read(1, selector, 'glob', C.c_uint32) for selector in ('dOut', 'sOut')}
+
+    def select_default_output(self):
+        self.write(1, 'dOut', 'glob', C.c_uint32(self.device))
+
+    def restore_default_outputs(self, values):
+        for selector, device in values.items():
+            self.write(1, selector, 'glob', C.c_uint32(device))

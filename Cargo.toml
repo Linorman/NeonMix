@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-exclude = ["vendor/cpal"]
-members = ["crates/*", "adapters/*", "apps/*"]
+exclude = ["vendor/cpal", "vendor/tympan-aspl"]
+members = ["crates/*", "adapters/*", "apps/*", "drivers/macos/hal"]
 default-members = ["apps/audio"]
 
 [workspace.package]
@@ -35,3 +35,4 @@ codegen-units = 1
 
 [patch.crates-io]
 cpal = { path = "vendor/cpal" }
+tympan-aspl = { path = "vendor/tympan-aspl" }

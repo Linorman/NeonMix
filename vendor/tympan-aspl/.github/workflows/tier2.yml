@@ -1,0 +1,121 @@
+name: Tier 2
+
+# Bundle and ABI verification per
+# docs/decisions/0001-ci-verification-strategy.md § Tier 2.
+# Runs on every pull request and every push to main.
+#
+# Verifies: the committed and generated Info.plists are well-formed;
+# the example builds as a loadable `.driver` cdylib that exports the
+# CFPlugIn factory symbol unmangled; the assembled `.driver` bundle
+# ad-hoc code-signs and verifies.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tier2-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: short
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  tier2:
+    name: Bundle + ABI verification (macos-15)
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          # `tier2-v2`: the original `tier2` cache was poisoned with a
+          # stale `.cargo/bin` that shadowed the toolchain's `cargo`
+          # (a `cargo run` resolved to `rustup-init`). `cache-bin:
+          # false` stops caching `${CARGO_HOME}/bin` so the toolchain
+          # `dtolnay/rust-toolchain` installs each run is never
+          # overwritten by a cache restore.
+          shared-key: tier2-v2
+          cache-bin: false
+
+      - name: plutil -lint committed Info.plist fixtures
+        run: |
+          set -euo pipefail
+          plutil -lint examples/minimal-loopback/Info.plist
+          plutil -lint examples/gain/Info.plist
+          plutil -lint examples/lowpass/Info.plist
+
+      - name: plutil -lint Info.plist emitted by the bundle module
+        # The `bundle` module's generator must produce a plist that
+        # `plutil` accepts. `print-info-plist` is a tiny example
+        # binary that writes the generated plist to stdout.
+        run: |
+          set -euo pipefail
+          cargo run --quiet --example print-info-plist > generated-Info.plist
+          plutil -lint generated-Info.plist
+          cat generated-Info.plist
+
+      - name: Build the example cdylibs (release)
+        run: cargo build --release -p minimal-loopback -p gain -p lowpass
+
+      - name: nm — every CFPlugIn factory symbol is exported, unmangled
+        # `coreaudiod` resolves `TympanAsplDriverFactory` from each
+        # bundle's Info.plist; the macOS symbol carries a leading
+        # underscore. `nm -gU` lists external defined symbols. Every
+        # example's cdylib must export it.
+        run: |
+          set -euo pipefail
+          for DYLIB in \
+            target/release/libminimal_loopback.dylib \
+            target/release/libgain.dylib \
+            target/release/liblowpass.dylib; do
+            echo "--- $DYLIB ---"
+            nm -gU "$DYLIB" | tee /tmp/symbols.txt
+            if ! grep -qE '(^| )_TympanAsplDriverFactory$' /tmp/symbols.txt; then
+              echo "::error::_TympanAsplDriverFactory not exported by $DYLIB"
+              exit 1
+            fi
+          done
+          echo "CFPlugIn factory symbol present and unmangled in every example."
+
+      - name: lipo — report the cdylibs' architecture coverage
+        run: |
+          set -euo pipefail
+          lipo -info target/release/libminimal_loopback.dylib
+          lipo -info target/release/libgain.dylib
+          lipo -info target/release/liblowpass.dylib
+
+      - name: Assemble the MinimalLoopback.driver bundle
+        # The loadable bundle is the committed Info.plist plus the
+        # built cdylib, in the CFBundle layout `coreaudiod` expects.
+        run: |
+          set -euo pipefail
+          BUNDLE=MinimalLoopback.driver
+          mkdir -p "$BUNDLE/Contents/MacOS"
+          cp examples/minimal-loopback/Info.plist "$BUNDLE/Contents/Info.plist"
+          cp target/release/libminimal_loopback.dylib "$BUNDLE/Contents/MacOS/MinimalLoopback"
+          plutil -lint "$BUNDLE/Contents/Info.plist"
+          find "$BUNDLE" -print
+
+      - name: codesign — ad-hoc sign the bundle and verify
+        # An ad-hoc signature (`-`) is enough for `coreaudiod` to load
+        # a HAL plug-in on a SIP-enabled host; this exercises the
+        # signing wiring without a Developer ID certificate.
+        run: |
+          set -euo pipefail
+          codesign --force --sign - --timestamp=none MinimalLoopback.driver
+          codesign --verify --verbose MinimalLoopback.driver
+          echo "Bundle ad-hoc signed and verified."

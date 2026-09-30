@@ -4,6 +4,7 @@ pub mod capture;
 pub mod clock;
 pub mod device;
 pub mod epoch;
+pub mod mixer;
 pub mod position;
 pub mod queue;
 pub mod resample;

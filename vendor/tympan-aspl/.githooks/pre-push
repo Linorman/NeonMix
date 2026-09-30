@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Pre-push hook — runs the same fmt and clippy checks Tier 1 CI
+# enforces, so pushes fail locally instead of after the round-trip
+# to GitHub.
+#
+# Activate once per clone with:
+#   git config core.hooksPath .githooks
+#
+# Skip a single push (e.g. an emergency revert) with
+# `git push --no-verify`.
+
+set -euo pipefail
+
+if ! command -v cargo >/dev/null 2>&1; then
+    echo "pre-push: cargo not found in PATH; skipping fmt + clippy" >&2
+    exit 0
+fi
+
+# Only run when something Rust-related actually changed since the
+# remote's tip. Markdown-only / workflow-only pushes don't need a
+# clippy pass.
+range="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)..HEAD"
+if [ "${range#..}" = "HEAD" ]; then
+    # No upstream yet — first push of the branch. Check everything.
+    rust_touched=1
+else
+    if [ -n "$(git diff --name-only "$range" -- 'Cargo.toml' 'Cargo.lock' '*.rs')" ]; then
+        rust_touched=1
+    else
+        rust_touched=0
+    fi
+fi
+
+if [ "$rust_touched" = "0" ]; then
+    echo "pre-push: no Rust files changed, skipping fmt + clippy"
+    exit 0
+fi
+
+echo "pre-push: cargo fmt --all -- --check"
+cargo fmt --all -- --check
+
+echo "pre-push: cargo clippy --workspace --all-targets --all-features -- -D warnings"
+cargo clippy --workspace --all-targets --all-features -- -D warnings

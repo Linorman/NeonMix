@@ -1,0 +1,17 @@
+[Unit]
+Description=NeonMix local virtual output owner
+After=pipewire.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/neonmix/neonmix-audio virtual-output --state-directory %t/neonmix --output-binding %S/neonmix/output
+RuntimeDirectory=neonmix
+RuntimeDirectoryMode=0700
+StateDirectory=neonmix
+StateDirectoryMode=0700
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

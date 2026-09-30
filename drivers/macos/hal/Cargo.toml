@@ -1,0 +1,21 @@
+[package]
+name = "neonmix-hal"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+tympan-aspl = "=0.1.0"
+
+[features]
+diagnostics = ["tympan-aspl/trace-properties"]
+
+[dev-dependencies]
+stats_alloc = "=0.1.10"
+
+[lints]
+workspace = true

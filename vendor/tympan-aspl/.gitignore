@@ -1,0 +1,15 @@
+/target
+**/*.rs.bk
+Cargo.lock
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+*.driver/

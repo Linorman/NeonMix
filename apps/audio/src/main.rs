@@ -1,4 +1,5 @@
 mod measurement;
+mod virtual_output;
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use neonmix_core::{
     device_changes,
@@ -70,6 +71,14 @@ enum Command {
     },
     /// Build and runtime identity. No private host/device information.
     Version,
+    /// Own a fixed-identity virtual output independently of network sessions (Linux).
+    VirtualOutput {
+        #[arg(long)]
+        state_directory: std::path::PathBuf,
+        /// Restore the display name from a persistent output binding.
+        #[arg(long)]
+        output_binding: Option<std::path::PathBuf>,
+    },
     /// Create a user-session PipeWire sink for E01 capture experiments (Linux).
     Sink {
         #[arg(long, default_value = "lab")]
@@ -398,6 +407,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 "positive_zero_crossings":crossings,"resampler_delay_frames":converted.delay_frames()}),
             )?;
         }
+        Command::VirtualOutput {
+            state_directory,
+            output_binding,
+        } => virtual_output::run(&state_directory, output_binding.as_deref())?,
         Command::Sink {
             room,
             seconds,

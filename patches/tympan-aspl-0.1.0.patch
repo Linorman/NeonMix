@@ -1,0 +1,1945 @@
+--- a/src/dispatch.rs
++++ b/src/dispatch.rs
+@@ -252,6 +252,10 @@
+             PropertyValue::ObjectList(map.owned_objects(map.plugin_id(), address.scope))
+         }
+         S::PLUGIN_DEVICE_LIST => PropertyValue::ObjectList(vec![map.device_id()]),
++        // The raw ABI resolves this qualifier-dependent value. Its unqualified
++        // shape still supplies HasProperty, size and read-only metadata.
++        S::PLUGIN_TRANSLATE_UID_TO_DEVICE => PropertyValue::ObjectId(AudioObjectId::UNKNOWN),
++        S::PLUGIN_RESOURCE_BUNDLE => PropertyValue::Text(String::new()),
+         // The framework does not model boxes yet.
+         S::PLUGIN_BOX_LIST => PropertyValue::ObjectList(vec![]),
+         _ => return Err(OsStatus::UNKNOWN_PROPERTY),
+--- a/src/driver.rs
++++ b/src/driver.rs
+@@ -18,7 +18,8 @@
+ //! the lifecycle invariants are verified without a `coreaudiod`
+ //! round-trip.
+ 
+-use core::cell::UnsafeCell;
++use core::sync::atomic::{AtomicU32, Ordering};
++use std::sync::Mutex;
+ 
+ use crate::device::DeviceSpec;
+ use crate::error::OsStatus;
+@@ -75,7 +76,7 @@
+ /// [`Self::initialize`], and [`Self::start_io`] run on non-realtime
+ /// threads and may allocate freely — pre-allocate processing
+ /// buffers there.
+-pub trait Driver: Sized + Send {
++pub trait Driver: Sized + Send + Sync {
+     /// Human-readable plug-in name. Surfaced in the bundle
+     /// `Info.plist` and in the HAL's plug-in property protocol.
+     const NAME: &'static str;
+@@ -109,7 +110,7 @@
+     /// failure aborts plug-in initialisation.
+     ///
+     /// The default implementation succeeds without doing anything.
+-    fn initialize(&mut self) -> Result<(), OsStatus> {
++    fn initialize(&self) -> Result<(), OsStatus> {
+         Ok(())
+     }
+ 
+@@ -123,7 +124,7 @@
+     /// aborts the start and leaves the device idle.
+     ///
+     /// The default implementation succeeds without doing anything.
+-    fn start_io(&mut self) -> Result<(), OsStatus> {
++    fn start_io(&self) -> Result<(), OsStatus> {
+         Ok(())
+     }
+ 
+@@ -135,7 +136,7 @@
+     /// acquired is allowed here.
+     ///
+     /// The default implementation does nothing.
+-    fn stop_io(&mut self) {}
++    fn stop_io(&self) {}
+ 
+     /// Process one IO cycle.
+     ///
+@@ -150,7 +151,7 @@
+     /// output slice to write into (empty for an input-only device).
+     /// A loopback device's implementation copies `buffer.input`
+     /// into `buffer.output`.
+-    fn process_io(&mut self, rt: &RealtimeContext, buffer: &mut IoBuffer<'_>);
++    fn process_io(&self, rt: &RealtimeContext, buffer: &mut IoBuffer<'_>);
+ }
+ 
+ /// A type-erased view of a [`DriverInstance<T>`].
+@@ -199,30 +200,25 @@
+ /// directly — they implement [`Driver`] and the framework wraps it.
+ ///
+ /// ## Threading
+-///
+-/// The HAL serialises all non-realtime calls (`Initialize`,
+-/// `StartIO`, `StopIO`, the property protocol) on one thread, and
+-/// the IO callbacks run on the realtime thread only while the cell
+-/// is in [`State::Running`]. State transitions go through
+-/// `compare_exchange`, so the realtime path is allowed to see a
+-/// stable `T` as long as the HAL obeys its own contract.
+-/// `UnsafeCell<T>` is what exposes `&mut T` to the method dispatch
+-/// under that contract.
+-///
+-/// `DriverInstance<T>` is `Sync` even though `T: Driver` is only
+-/// `Send`: the framework guarantees that exactly one of the
+-/// wrappers' methods touches `T` at any moment, and the rest of the
+-/// struct is composed of atomic primitives.
++/// Drivers expose shared, Sync callbacks: input/output may overlap without creating
++/// aliased mutable references. Lifecycle calls serialize on a control-thread mutex.
++/// The high gate bit closes admission; StopIO drains admitted callbacks off realtime.
++/// IO admission makes at most eight atomic attempts and never waits on the mutex.
+ pub struct DriverInstance<T: Driver> {
+-    inner: UnsafeCell<T>,
++    inner: T,
+     state: StateCell,
+     refcount: Refcount,
+-}
+-
+-// Safety: see the struct-level doc-comment. The framework's CFPlugIn
+-// dispatch ensures exactly one method touches `inner` at a time, and
+-// the lifecycle CAS serialises lifecycle vs IO access.
+-unsafe impl<T: Driver> Sync for DriverInstance<T> {}
++    lifecycle: Mutex<()>,
++    io_gate: AtomicU32,
++}
++
++const IO_CLOSED: u32 = 1 << 31;
++struct IoLease<'a>(&'a AtomicU32);
++impl Drop for IoLease<'_> {
++    fn drop(&mut self) {
++        self.0.fetch_sub(1, Ordering::Release);
++    }
++}
+ 
+ impl<T: Driver> DriverInstance<T> {
+     /// Construct a fresh instance in [`State::Uninitialized`] with
+@@ -233,7 +229,9 @@
+     #[must_use]
+     pub fn new() -> Self {
+         Self {
+-            inner: UnsafeCell::new(T::new()),
++            inner: T::new(),
++            lifecycle: Mutex::new(()),
++            io_gate: AtomicU32::new(IO_CLOSED),
+             state: StateCell::new(),
+             refcount: Refcount::new(),
+         }
+@@ -275,96 +273,81 @@
+     /// [`OsStatus::ILLEGAL_OPERATION`] when the instance is not in
+     /// [`State::Uninitialized`].
+     pub fn initialize(&self) -> Result<(), OsStatus> {
++        let _lifecycle = self.lifecycle.lock().unwrap_or_else(|p| p.into_inner());
+         self.state
+             .initialize()
+             .map_err(|_| OsStatus::ILLEGAL_OPERATION)?;
+-        // Safety: `state.initialize()` succeeded, so the HAL is not
+-        // concurrently holding another alias to `inner` (it
+-        // serialises its non-realtime calls, and IO does not run
+-        // outside `Running`).
+-        let inner = unsafe { &mut *self.inner.get() };
+-        match inner.initialize() {
+-            Ok(()) => Ok(()),
+-            Err(status) => {
+-                // Roll the state machine back so the HAL can retry
+-                // from `Uninitialized`.
+-                let _ = self.state.reset();
+-                Err(status)
+-            }
+-        }
+-    }
+-
+-    /// Transition `Initialized → Running` and call
+-    /// [`Driver::start_io`] on the user.
+-    ///
+-    /// Rolls the state machine back to `Initialized` if the user's
+-    /// `start_io` fails, so the HAL can retry without first calling
+-    /// `StopIO`. Surfaces [`OsStatus::ILLEGAL_OPERATION`] when the
+-    /// instance is not in [`State::Initialized`].
++        if let Err(status) = self.inner.initialize() {
++            let _ = self.state.reset();
++            return Err(status);
++        }
++        Ok(())
++    }
++
++    /// Publish a fresh run only after the driver's preparation is complete.
+     pub fn start_io(&self) -> Result<(), OsStatus> {
++        let _lifecycle = self.lifecycle.lock().unwrap_or_else(|p| p.into_inner());
+         self.state
+             .start()
+             .map_err(|_| OsStatus::ILLEGAL_OPERATION)?;
+-        // Safety: `state.start()` succeeded, so no IO cycle is in
+-        // flight and the HAL is not aliasing `inner`.
+-        let inner = unsafe { &mut *self.inner.get() };
+-        match inner.start_io() {
+-            Ok(()) => Ok(()),
+-            Err(status) => {
+-                // Roll back to `Initialized` so the HAL can retry.
+-                let _ = self.state.stop();
+-                Err(status)
+-            }
+-        }
+-    }
+-
+-    /// Call [`Driver::stop_io`] on the user and transition
+-    /// `Running → Initialized`.
+-    ///
+-    /// Surfaces [`OsStatus::ILLEGAL_OPERATION`] when the instance is
+-    /// not in [`State::Running`].
++        if let Err(status) = self.inner.start_io() {
++            let _ = self.state.stop();
++            return Err(status);
++        }
++        self.io_gate.store(0, Ordering::Release);
++        Ok(())
++    }
++
++    /// Close admission before draining callbacks; only this control thread waits.
+     pub fn stop_io(&self) -> Result<(), OsStatus> {
+-        if self.state.load() != State::Running {
++        let _lifecycle = self.lifecycle.lock().unwrap_or_else(|p| p.into_inner());
++        if !self.state.is_running() {
+             return Err(OsStatus::ILLEGAL_OPERATION);
+         }
+-        // Safety: state == Running means no other thread is in a
+-        // lifecycle call; the HAL serialises StartIO/StopIO with
+-        // each other and with the property protocol.
+-        let inner = unsafe { &mut *self.inner.get() };
+-        inner.stop_io();
++        self.io_gate.fetch_or(IO_CLOSED, Ordering::AcqRel);
++        while self.io_gate.load(Ordering::Acquire) != IO_CLOSED {
++            std::thread::yield_now();
++        }
++        self.inner.stop_io();
+         self.state.stop().map_err(|_| OsStatus::ILLEGAL_OPERATION)?;
+         Ok(())
+     }
+ 
+-    /// Forward one IO cycle into the user's [`Driver::process_io`].
+-    ///
+-    /// Realtime-callable. Fails with [`OsStatus::NOT_RUNNING`] when
+-    /// the instance is not currently in [`State::Running`].
++    /// Shared realtime dispatch. Concurrent input/output are admitted together;
++    /// closed or contended admission returns silence without blocking or allocating.
+     pub fn process_io(
+         &self,
+         rt: &RealtimeContext,
+         buffer: &mut IoBuffer<'_>,
+     ) -> Result<(), OsStatus> {
+-        if !self.state.is_running() {
+-            return Err(OsStatus::NOT_RUNNING);
+-        }
+-        // Safety: state == Running and the HAL serialises IO cycles
+-        // against the lifecycle calls. No allocation, no kernel
+-        // calls in this dispatch.
+-        let inner = unsafe { &mut *self.inner.get() };
+-        inner.process_io(rt, buffer);
+-        Ok(())
+-    }
+-
+-    /// The device the user driver exposes (`T::device`).
++        let mut gate = self.io_gate.load(Ordering::Acquire);
++        for _ in 0..8 {
++            if gate >= IO_CLOSED - 1 {
++                buffer.silence_output();
++                return Err(OsStatus::NOT_RUNNING);
++            }
++            match self.io_gate.compare_exchange_weak(
++                gate,
++                gate + 1,
++                Ordering::Acquire,
++                Ordering::Relaxed,
++            ) {
++                Ok(_) => {
++                    let _lease = IoLease(&self.io_gate);
++                    self.inner.process_io(rt, buffer);
++                    return Ok(());
++                }
++                Err(current) => gate = current,
++            }
++        }
++        buffer.silence_output();
++        Err(OsStatus::NOT_READY)
++    }
++
++    /// Device metadata is shared immutable state.
+     #[must_use]
+     pub fn device(&self) -> DeviceSpec {
+-        // Safety: read-only access to `inner`. The framework's
+-        // dispatch is mutually exclusive with the `&mut` aliases
+-        // emitted by the lifecycle / IO paths through the HAL's
+-        // serialisation contract.
+-        let inner = unsafe { &*self.inner.get() };
+-        inner.device()
++        self.inner.device()
+     }
+ 
+     /// The driver's identity constants.
+@@ -431,18 +414,41 @@
+     use crate::format::StreamFormat;
+     use crate::io::{IoOperation, Timestamp};
+     use crate::stream::StreamSpec;
+-    use core::cell::Cell;
++    struct Counter(core::sync::atomic::AtomicU32);
++    impl Counter {
++        fn new(value: u32) -> Self {
++            Self(core::sync::atomic::AtomicU32::new(value))
++        }
++        fn get(&self) -> u32 {
++            self.0.load(Ordering::Relaxed)
++        }
++        fn set(&self, value: u32) {
++            self.0.store(value, Ordering::Relaxed);
++        }
++    }
++    struct Flag(core::sync::atomic::AtomicBool);
++    impl Flag {
++        fn new(value: bool) -> Self {
++            Self(core::sync::atomic::AtomicBool::new(value))
++        }
++        fn get(&self) -> bool {
++            self.0.load(Ordering::Relaxed)
++        }
++        fn set(&self, value: bool) {
++            self.0.store(value, Ordering::Relaxed);
++        }
++    }
+     use static_assertions::assert_impl_all;
+ 
+     /// Reference driver: a stereo loopback that copies input to
+-    /// output. Carries `Cell` counters so tests can observe which
++    /// output. Carries atomic counters so tests can observe which
+     /// lifecycle hooks fired.
+     struct Loopback {
+-        initialize_seen: Cell<u32>,
+-        start_seen: Cell<u32>,
+-        stop_seen: Cell<u32>,
+-        process_seen: Cell<u32>,
+-        start_should_fail: Cell<bool>,
++        initialize_seen: Counter,
++        start_seen: Counter,
++        stop_seen: Counter,
++        process_seen: Counter,
++        start_should_fail: Flag,
+     }
+ 
+     impl Driver for Loopback {
+@@ -452,11 +458,11 @@
+ 
+         fn new() -> Self {
+             Self {
+-                initialize_seen: Cell::new(0),
+-                start_seen: Cell::new(0),
+-                stop_seen: Cell::new(0),
+-                process_seen: Cell::new(0),
+-                start_should_fail: Cell::new(false),
++                initialize_seen: Counter::new(0),
++                start_seen: Counter::new(0),
++                stop_seen: Counter::new(0),
++                process_seen: Counter::new(0),
++                start_should_fail: Flag::new(false),
+             }
+         }
+ 
+@@ -470,12 +476,12 @@
+             .with_output(StreamSpec::output(StreamFormat::float32(48_000.0, 2)))
+         }
+ 
+-        fn initialize(&mut self) -> Result<(), OsStatus> {
++        fn initialize(&self) -> Result<(), OsStatus> {
+             self.initialize_seen.set(self.initialize_seen.get() + 1);
+             Ok(())
+         }
+ 
+-        fn start_io(&mut self) -> Result<(), OsStatus> {
++        fn start_io(&self) -> Result<(), OsStatus> {
+             if self.start_should_fail.get() {
+                 return Err(OsStatus::NOT_READY);
+             }
+@@ -483,11 +489,11 @@
+             Ok(())
+         }
+ 
+-        fn stop_io(&mut self) {
++        fn stop_io(&self) {
+             self.stop_seen.set(self.stop_seen.get() + 1);
+         }
+ 
+-        fn process_io(&mut self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
++        fn process_io(&self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
+             self.process_seen.set(self.process_seen.get() + 1);
+             let n = buffer.output.len().min(buffer.input.len());
+             buffer.output[..n].copy_from_slice(&buffer.input[..n]);
+@@ -503,6 +509,89 @@
+     }
+ 
+     #[test]
++    fn concurrent_callbacks_are_shared_and_stop_drains_before_restart() {
++        use std::sync::{Arc, Barrier};
++        struct Overlap {
++            entered: Barrier,
++            finish: Barrier,
++            stopped: core::sync::atomic::AtomicBool,
++        }
++        impl Driver for Overlap {
++            const NAME: &'static str = "overlap test";
++            const MANUFACTURER: &'static str = "test";
++            const VERSION: &'static str = "0";
++            fn new() -> Self {
++                Self {
++                    entered: Barrier::new(3),
++                    finish: Barrier::new(3),
++                    stopped: core::sync::atomic::AtomicBool::new(false),
++                }
++            }
++            fn device(&self) -> DeviceSpec {
++                DeviceSpec::new("overlap", "overlap", "test")
++            }
++            fn process_io(&self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
++                // Deliberately parked mock callbacks make lifecycle overlap
++                // deterministic. These barriers are never used by the product driver.
++                self.entered.wait();
++                self.finish.wait();
++                buffer.silence_output();
++            }
++            fn stop_io(&self) {
++                self.stopped.store(true, Ordering::Release);
++            }
++        }
++        let driver = Arc::new(DriverInstance::<Overlap>::new());
++        driver.initialize().unwrap();
++        driver.start_io().unwrap();
++        let mut callbacks = Vec::new();
++        for _ in 0..2 {
++            let driver = driver.clone();
++            callbacks.push(std::thread::spawn(move || {
++                let mut output = [1.0; 2];
++                driver
++                    .process_io(
++                        &rt(),
++                        &mut IoBuffer::new(
++                            Timestamp::ZERO,
++                            IoOperation::READ_INPUT,
++                            &[],
++                            &mut output,
++                        ),
++                    )
++                    .unwrap();
++                assert_eq!(output, [0.0; 2]);
++            }));
++        }
++        driver.inner.entered.wait();
++        let stopping = driver.clone();
++        let stop = std::thread::spawn(move || stopping.stop_io().unwrap());
++        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
++        while driver.io_gate.load(Ordering::Acquire) & IO_CLOSED == 0 {
++            assert!(std::time::Instant::now() < deadline);
++            std::thread::yield_now();
++        }
++        assert!(!driver.inner.stopped.load(Ordering::Acquire));
++        let mut output = [1.0; 2];
++        assert_eq!(
++            driver.process_io(
++                &rt(),
++                &mut IoBuffer::new(Timestamp::ZERO, IoOperation::READ_INPUT, &[], &mut output)
++            ),
++            Err(OsStatus::NOT_RUNNING)
++        );
++        assert_eq!(output, [0.0; 2]);
++        driver.inner.finish.wait();
++        for callback in callbacks {
++            callback.join().unwrap();
++        }
++        stop.join().unwrap();
++        assert!(driver.inner.stopped.load(Ordering::Acquire));
++        driver.start_io().unwrap();
++        driver.stop_io().unwrap();
++    }
++
++    #[test]
+     fn new_starts_uninitialized_with_refcount_one() {
+         let d = DriverInstance::<Loopback>::new();
+         assert_eq!(d.state(), State::Uninitialized);
+@@ -549,7 +638,7 @@
+         assert_eq!(d.state(), State::Initialized);
+         // Safety: no `&mut` alias is in flight in this single-
+         // threaded test.
+-        let inner = unsafe { &*d.inner.get() };
++        let inner = &d.inner;
+         assert_eq!(inner.initialize_seen.get(), 1);
+     }
+ 
+@@ -575,7 +664,7 @@
+         assert_eq!(d.state(), State::Running);
+         // SAFETY: no `&mut` alias is in flight in this single-
+         // threaded test.
+-        let inner = unsafe { &*d.inner.get() };
++        let inner = &d.inner;
+         assert_eq!(inner.start_seen.get(), 1);
+     }
+ 
+@@ -584,7 +673,7 @@
+         let d = DriverInstance::<Loopback>::new();
+         d.initialize().unwrap();
+         // Safety: single-threaded test, no alias in flight.
+-        unsafe { &*d.inner.get() }.start_should_fail.set(true);
++        d.inner.start_should_fail.set(true);
+         assert_eq!(d.start_io(), Err(OsStatus::NOT_READY));
+         // Rolled back so the HAL can retry from Initialized.
+         assert_eq!(d.state(), State::Initialized);
+@@ -599,7 +688,7 @@
+         assert_eq!(d.state(), State::Initialized);
+         // SAFETY: no `&mut` alias is in flight in this single-
+         // threaded test.
+-        let inner = unsafe { &*d.inner.get() };
++        let inner = &d.inner;
+         assert_eq!(inner.stop_seen.get(), 1);
+     }
+ 
+@@ -653,7 +742,7 @@
+ 
+         // SAFETY: no `&mut` alias is in flight in this single-
+         // threaded test.
+-        let inner = unsafe { &*d.inner.get() };
++        let inner = &d.inner;
+         assert_eq!(inner.process_seen.get(), 1);
+     }
+ 
+@@ -685,7 +774,7 @@
+ 
+         // SAFETY: no `&mut` alias is in flight in this single-
+         // threaded test.
+-        let inner = unsafe { &*d.inner.get() };
++        let inner = &d.inner;
+         assert_eq!(inner.process_seen.get(), 3);
+         assert_eq!(inner.start_seen.get(), 2);
+         assert_eq!(inner.stop_seen.get(), 2);
+--- a/src/io.rs
++++ b/src/io.rs
+@@ -84,24 +84,24 @@
+     /// `kAudioServerPlugInIOOperationConvertInput` (`'cinp'`) —
+     /// convert read input into the client's format.
+     pub const CONVERT_INPUT: Self = Self(FourCharCode::new(*b"cinp"));
+-    /// `kAudioServerPlugInIOOperationProcessInput` (`'pcin'`) —
++    /// `kAudioServerPlugInIOOperationProcessInput` (`'pinp'`) —
+     /// the driver's chance to process the input stream.
+-    pub const PROCESS_INPUT: Self = Self(FourCharCode::new(*b"pcin"));
+-    /// `kAudioServerPlugInIOOperationProcessOutput` (`'pcou'`) —
++    pub const PROCESS_INPUT: Self = Self(FourCharCode::new(*b"pinp"));
++    /// `kAudioServerPlugInIOOperationProcessOutput` (`'pout'`) —
+     /// the driver's chance to process a client's output stream.
+-    pub const PROCESS_OUTPUT: Self = Self(FourCharCode::new(*b"pcou"));
++    pub const PROCESS_OUTPUT: Self = Self(FourCharCode::new(*b"pout"));
+     /// `kAudioServerPlugInIOOperationMixOutput` (`'mixo'`) — mix a
+     /// client's output into the device's output buffer.
+     pub const MIX_OUTPUT: Self = Self(FourCharCode::new(*b"mixo"));
+-    /// `kAudioServerPlugInIOOperationProcessMix` (`'pcmx'`) — the
++    /// `kAudioServerPlugInIOOperationProcessMix` (`'pmix'`) — the
+     /// driver's chance to process the fully-mixed output.
+-    pub const PROCESS_MIX: Self = Self(FourCharCode::new(*b"pcmx"));
++    pub const PROCESS_MIX: Self = Self(FourCharCode::new(*b"pmix"));
+     /// `kAudioServerPlugInIOOperationConvertMix` (`'cmix'`) —
+     /// convert the mixed output into the device's physical format.
+     pub const CONVERT_MIX: Self = Self(FourCharCode::new(*b"cmix"));
+-    /// `kAudioServerPlugInIOOperationWriteMix` (`'wmix'`) — write
++    /// `kAudioServerPlugInIOOperationWriteMix` (`'rite'`) — write
+     /// the converted mix out to the device.
+-    pub const WRITE_MIX: Self = Self(FourCharCode::new(*b"wmix"));
++    pub const WRITE_MIX: Self = Self(FourCharCode::new(*b"rite"));
+ 
+     /// The underlying four-character code.
+     #[inline]
+@@ -154,6 +154,9 @@
+     /// Interleaved float32 output samples to write into, or an
+     /// empty slice for an input-only device.
+     pub output: &'a mut [Sample],
++    /// Device master gain for WriteMix; apply once before publishing loopback samples.
++    /// ReadInput always receives 1.0 because its samples already include the render gain.
++    pub render_gain: f32,
+ }
+ 
+ impl<'a> IoBuffer<'a> {
+@@ -174,6 +177,7 @@
+             operation,
+             input,
+             output,
++            render_gain: 1.0,
+         }
+     }
+ 
+@@ -220,9 +224,9 @@
+         assert_eq!(IoOperation::READ_INPUT.code(), FourCharCode::new(*b"read"));
+         assert_eq!(
+             IoOperation::PROCESS_OUTPUT.code(),
+-            FourCharCode::new(*b"pcou")
+-        );
+-        assert_eq!(IoOperation::WRITE_MIX.code(), FourCharCode::new(*b"wmix"));
++            FourCharCode::new(*b"pout")
++        );
++        assert_eq!(IoOperation::WRITE_MIX.code(), FourCharCode::new(*b"rite"));
+     }
+ 
+     #[test]
+--- a/src/macros.rs
++++ b/src/macros.rs
+@@ -37,7 +37,7 @@
+ ///     fn device(&self) -> DeviceSpec {
+ ///         DeviceSpec::new("com.me.mydriver", "My Driver", "Me")
+ ///     }
+-///     fn process_io(&mut self, _rt: &RealtimeContext, buf: &mut IoBuffer<'_>) {
++///     fn process_io(&self, _rt: &RealtimeContext, buf: &mut IoBuffer<'_>) {
+ ///         buf.silence_output();
+ ///     }
+ /// }
+--- a/src/property.rs
++++ b/src/property.rs
+@@ -317,6 +317,8 @@
+     /// A 64-bit float — `kAudioDevicePropertyNominalSampleRate` and
+     /// other scalar rates.
+     F64(f64),
++    /// A 32-bit scalar volume or decibel value.
++    F32(f32),
+     /// A UTF-8 string, marshalled to a `CFStringRef` at the FFI
+     /// boundary — device names, manufacturer strings, UIDs.
+     Text(alloc::string::String),
+@@ -351,6 +353,7 @@
+         match self {
+             Self::U32(_) | Self::ObjectId(_) => core::mem::size_of::<u32>(),
+             Self::F64(_) => core::mem::size_of::<f64>(),
++            Self::F32(_) => core::mem::size_of::<f32>(),
+             // A CFString property's value *is* a `CFStringRef` — a
+             // single pointer — no matter how long the string is.
+             Self::Text(_) => core::mem::size_of::<*const ()>(),
+--- a/src/raw/abi.rs
++++ b/src/raw/abi.rs
+@@ -145,8 +145,12 @@
+ #[repr(C)]
+ #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, Default)]
+ pub struct SMPTETime {
++    /// Fractional SMPTE frame count.
++    pub mSubframes: i16,
++    /// Divisor for the fractional frame count.
++    pub mSubframeDivisor: i16,
+     /// `mCounter` — total frame count.
+-    pub mCounter: UInt64,
++    pub mCounter: UInt32,
+     /// `mType` — the SMPTE timecode type.
+     pub mType: UInt32,
+     /// `mFlags` — validity / running flags.
+@@ -215,11 +219,21 @@
+ #[repr(C)]
+ #[derive(Copy, Clone, PartialEq, Debug, Default)]
+ pub struct AudioServerPlugInIOCycleInfo {
++    /// IO cycle ordinal.
++    pub mIOCycleCounter: UInt64,
++    /// Nominal buffer size for this cycle.
++    pub mNominalIOBufferFrameSize: UInt32,
++    /// Current device time.
++    pub mCurrentTime: AudioTimeStamp,
+     /// `mInputTime` — the timestamp the input data corresponds to.
+     pub mInputTime: AudioTimeStamp,
+     /// `mOutputTime` — the timestamp the output data is destined
+     /// for.
+     pub mOutputTime: AudioTimeStamp,
++    /// Host ticks per frame for the main device.
++    pub mMainHostTicksPerFrame: Float64,
++    /// Host ticks per frame for this device.
++    pub mDeviceHostTicksPerFrame: Float64,
+ }
+ 
+ /// `AudioServerPlugInDriverInterface` — the plug-in's vtable.
+@@ -532,7 +546,7 @@
+ 
+     #[test]
+     fn smpte_time_layout() {
+-        // mCounter(8) + mType(4) + mFlags(4) + 4×i16(8) = 24.
++        // mSubframes(2) + mSubframeDivisor(2) + mCounter(4) + mType(4) + mFlags(4) + 4×i16(8) = 24.
+         assert_eq!(size_of::<SMPTETime>(), 24);
+     }
+ 
+@@ -546,11 +560,8 @@
+     }
+ 
+     #[test]
+-    fn io_cycle_info_is_two_timestamps() {
+-        assert_eq!(
+-            size_of::<AudioServerPlugInIOCycleInfo>(),
+-            2 * size_of::<AudioTimeStamp>()
+-        );
++    fn io_cycle_info_matches_sdk_layout() {
++        assert_eq!(size_of::<AudioServerPlugInIOCycleInfo>(), 224);
+     }
+ 
+     #[test]
+--- a/src/raw/cf.rs
++++ b/src/raw/cf.rs
+@@ -41,6 +41,89 @@
+ 
+     /// `CFRelease` — drop one reference to a CoreFoundation object.
+     fn CFRelease(cf: *const c_void);
++    fn CFGetTypeID(cf: *const c_void) -> usize;
++    fn CFStringGetTypeID() -> usize;
++    fn CFStringGetLength(cf: CFStringRef) -> isize;
++    fn CFStringGetCharacters(cf: CFStringRef, range: CFRange, buffer: *mut u16);
++}
++
++#[repr(C)]
++struct CFRange {
++    location: isize,
++    length: isize,
++}
++
++/// Copy a borrowed HAL CFString into a bounded UTF-8 name.
++/// # Safety
++/// `cf` must be null or a live CF object supplied by the Core Audio property marshaller.
++pub unsafe fn read_name(cf: CFStringRef) -> Option<String> {
++    if cf.is_null() {
++        return None;
++    }
++    // SAFETY: HAL supplies a live CF object; its type is checked before String APIs.
++    if unsafe { CFGetTypeID(cf) != CFStringGetTypeID() } {
++        return None;
++    }
++    // SAFETY: type was verified above, and the borrowed reference outlives this call.
++    let length = unsafe { CFStringGetLength(cf) };
++    if !(1..=256).contains(&length) {
++        return None;
++    }
++    let mut characters = [0u16; 256];
++    // SAFETY: the range is inside this CFString and the destination has enough elements.
++    unsafe {
++        CFStringGetCharacters(
++            cf,
++            CFRange {
++                location: 0,
++                length,
++            },
++            characters.as_mut_ptr(),
++        )
++    };
++    let value = String::from_utf16(&characters[..length as usize]).ok()?;
++    if value.len() > 256 || value.trim().is_empty() || value.chars().any(char::is_control) {
++        return None;
++    }
++    Some(value)
++}
++
++/// Compare a borrowed UID qualifier without allocating or accepting a non-string.
++/// # Safety
++/// `cf` must be null or a live CF object supplied by the host for this call.
++pub unsafe fn uid_equals(cf: CFStringRef, expected: &str) -> Option<bool> {
++    if cf.is_null() {
++        return None;
++    }
++    // SAFETY: the caller supplies a live object; type is checked before string APIs.
++    if unsafe { CFGetTypeID(cf) != CFStringGetTypeID() } {
++        return None;
++    }
++    // SAFETY: type checked above, reference remains borrowed for this call.
++    let length = unsafe { CFStringGetLength(cf) };
++    if length < 0 {
++        return None;
++    }
++    if length > 256 {
++        return Some(false);
++    }
++    let mut characters = [0u16; 256];
++    // SAFETY: the exact bounded CFString range fits the stack destination.
++    unsafe {
++        CFStringGetCharacters(
++            cf,
++            CFRange {
++                location: 0,
++                length,
++            },
++            characters.as_mut_ptr(),
++        );
++    }
++    Some(
++        expected
++            .encode_utf16()
++            .eq(characters[..length as usize].iter().copied()),
++    )
+ }
+ 
+ /// Mint a `CFStringRef` from a UTF-8 string.
+--- a/src/raw/clock.rs
++++ b/src/raw/clock.rs
+@@ -42,8 +42,8 @@
+ /// Lives in the [`DriverRuntime`](crate::raw::runtime::DriverRuntime).
+ /// `StartIO` calls [`Self::start`] with the current host time;
+ /// `GetZeroTimeStamp` calls [`Self::zero_timestamp`]; `StopIO` calls
+-/// [`Self::stop`]. All three are lock-free — the clock is three
+-/// atomics — so the realtime `GetZeroTimeStamp` path never blocks.
++/// [`Self::stop`]. Lifecycle writers are serialized by the HAL control path;
++/// bounded snapshot reads never wait and never mix an old anchor with a new seed.
+ #[derive(Debug)]
+ pub struct DeviceClock {
+     /// The host time recorded at the most recent [`Self::start`].
+@@ -53,6 +53,7 @@
+     /// Whether the clock is currently running (between `StartIO` and
+     /// `StopIO`).
+     running: AtomicBool,
++    version: AtomicU64,
+ }
+ 
+ impl DeviceClock {
+@@ -63,6 +64,7 @@
+             anchor_host_time: AtomicU64::new(0),
+             seed: AtomicU64::new(0),
+             running: AtomicBool::new(false),
++            version: AtomicU64::new(0),
+         }
+     }
+ 
+@@ -72,15 +74,18 @@
+     /// the `StartIO` entry point with the host clock's current
+     /// value.
+     pub fn start(&self, now_host_time: u64) {
+-        self.anchor_host_time
+-            .store(now_host_time, Ordering::Release);
+-        self.seed.fetch_add(1, Ordering::AcqRel);
+-        self.running.store(true, Ordering::Release);
++        self.version.fetch_add(1, Ordering::SeqCst);
++        self.anchor_host_time.store(now_host_time, Ordering::SeqCst);
++        self.seed.fetch_add(1, Ordering::SeqCst);
++        self.running.store(true, Ordering::SeqCst);
++        self.version.fetch_add(1, Ordering::SeqCst);
+     }
+ 
+     /// Mark the clock stopped. Called from the `StopIO` entry point.
+     pub fn stop(&self) {
+-        self.running.store(false, Ordering::Release);
++        self.version.fetch_add(1, Ordering::SeqCst);
++        self.running.store(false, Ordering::SeqCst);
++        self.version.fetch_add(1, Ordering::SeqCst);
+     }
+ 
+     /// `true` between [`Self::start`] and [`Self::stop`].
+@@ -120,10 +125,25 @@
+         host_ticks_per_period: f64,
+         period_frames: f64,
+     ) -> Option<ZeroTimestamp> {
+-        if !self.is_running() {
+-            return None;
++        // Read one coherent lifecycle epoch without taking a realtime lock.
++        let mut snapshot = None;
++        for _ in 0..3 {
++            let before = self.version.load(Ordering::SeqCst);
++            if before % 2 != 0 {
++                continue;
++            }
++            let running = self.running.load(Ordering::SeqCst);
++            let anchor = self.anchor_host_time.load(Ordering::SeqCst);
++            let seed = self.seed.load(Ordering::SeqCst);
++            if self.version.load(Ordering::SeqCst) == before {
++                if !running {
++                    return None;
++                }
++                snapshot = Some((anchor, seed));
++                break;
++            }
+         }
+-        let anchor = self.anchor_host_time.load(Ordering::Acquire);
++        let (anchor, seed) = snapshot?;
+         // A `now` before the anchor (a clock that ran backwards, or
+         // a stale read racing `start`) clamps to the anchor itself —
+         // period zero.
+@@ -135,8 +155,8 @@
+         };
+         Some(ZeroTimestamp {
+             sample_time: periods * period_frames,
+-            host_time: anchor + (periods * host_ticks_per_period) as u64,
+-            seed: self.seed(),
++            host_time: anchor.saturating_add((periods * host_ticks_per_period) as u64),
++            seed,
+         })
+     }
+ }
+@@ -151,6 +171,26 @@
+ mod tests {
+     use super::*;
+     use static_assertions::assert_impl_all;
++
++    #[test]
++    fn clock_snapshot_cannot_mix_anchors_and_seeds_during_restart() {
++        use std::sync::Arc;
++        let clock = Arc::new(DeviceClock::new());
++        let writer = clock.clone();
++        let worker = std::thread::spawn(move || {
++            for index in 1..=10000 {
++                writer.start(index * 1000);
++                writer.stop();
++            }
++        });
++        while !worker.is_finished() {
++            if let Some(timestamp) = clock.zero_timestamp(0, 100.0, 480.0) {
++                assert_eq!(timestamp.host_time, timestamp.seed * 1000);
++                assert_eq!(timestamp.sample_time, 0.0);
++            }
++        }
++        worker.join().unwrap();
++    }
+ 
+     assert_impl_all!(DeviceClock: Send, Sync);
+ 
+--- a/src/raw/entry.rs
++++ b/src/raw/entry.rs
+@@ -335,22 +335,116 @@
+ /// driver ref.
+ pub unsafe extern "C" fn start_io(
+     driver: AudioServerPlugInDriverRef,
+-    _device_id: AudioObjectID,
+-    _client_id: UInt32,
++    device_id: AudioObjectID,
++    client_id: UInt32,
+ ) -> OSStatus {
+     // Safety: the HAL passes a live driver ref.
+     let Some(object) = (unsafe { DriverObject::from_ref(driver) }) else {
+         return OsStatus::BAD_OBJECT.as_i32();
+     };
+     let runtime = object.runtime();
++    if device_id != runtime.objects().device_id().as_u32() {
++        return OsStatus::BAD_OBJECT.as_i32();
++    }
++    let mut clients = runtime.io_clients();
++    if clients.contains(&client_id) {
++        return OsStatus::OK.as_i32();
++    }
++    if clients.len() >= 128 {
++        return OsStatus::NOT_READY.as_i32();
++    }
++    if !clients.is_empty() {
++        clients.push(client_id);
++        return OsStatus::OK.as_i32();
++    }
+     let status = guard(|| OsStatus::from(runtime.driver().start_io()));
+     if status.is_ok() {
++        clients.push(client_id);
+         runtime.state().running = true;
+         // Anchor the zero-timestamp clock at the moment IO starts,
+         // so `GetZeroTimeStamp` reports a timeline rooted here.
+         runtime.clock().start(platform::host_time_now());
+     }
++    drop(clients);
++    if status.is_ok() {
++        super::output_controls::notify_running(runtime);
++    }
+     status.as_i32()
++}
++
++/// Static virtual devices cannot be created by HAL clients.
++/// # Safety
++/// The host supplies a live driver and a writable output ID when non-null.
++pub unsafe extern "C" fn create_device(
++    driver: AudioServerPlugInDriverRef,
++    _description: super::abi::CFDictionaryRef,
++    _client: *const super::abi::AudioServerPlugInClientInfo,
++    out: *mut AudioObjectID,
++) -> OSStatus {
++    // SAFETY: the caller's driver follows the factory reference contract.
++    if unsafe { DriverObject::from_ref(driver) }.is_none() {
++        return OsStatus::BAD_OBJECT.as_i32();
++    }
++    if !out.is_null() {
++        // SAFETY: HAL guarantees the output ID is writable.
++        unsafe { *out = 0 };
++    }
++    OsStatus::UNSUPPORTED_OPERATION.as_i32()
++}
++
++/// Static virtual devices cannot be destroyed by HAL clients.
++/// # Safety
++/// The host supplies a live driver reference.
++pub unsafe extern "C" fn destroy_device(
++    driver: AudioServerPlugInDriverRef,
++    _device: AudioObjectID,
++) -> OSStatus {
++    // SAFETY: the caller's driver follows the factory reference contract.
++    if unsafe { DriverObject::from_ref(driver) }.is_none() {
++        OsStatus::BAD_OBJECT.as_i32()
++    } else {
++        OsStatus::UNSUPPORTED_OPERATION.as_i32()
++    }
++}
++
++/// The fixed-rate device has no deferred configuration changes.
++/// # Safety
++/// The host supplies a live driver reference; change_info is opaque and not dereferenced.
++pub unsafe extern "C" fn perform_device_configuration_change(
++    driver: AudioServerPlugInDriverRef,
++    device: AudioObjectID,
++    _action: u64,
++    _change_info: *mut c_void,
++) -> OSStatus {
++    // SAFETY: the caller's driver follows the factory reference contract.
++    let Some(object) = (unsafe { DriverObject::from_ref(driver) }) else {
++        return OsStatus::BAD_OBJECT.as_i32();
++    };
++    if device != object.runtime().objects().device_id().as_u32() {
++        OsStatus::BAD_OBJECT.as_i32()
++    } else {
++        OsStatus::UNSUPPORTED_OPERATION.as_i32()
++    }
++}
++
++/// Aborting an unsupported configuration request does not alter the device.
++/// # Safety
++/// Same pointer contract as PerformDeviceConfigurationChange.
++pub unsafe extern "C" fn abort_device_configuration_change(
++    driver: AudioServerPlugInDriverRef,
++    device: AudioObjectID,
++    _action: u64,
++    _change_info: *mut c_void,
++) -> OSStatus {
++    // SAFETY: the caller's driver follows the factory reference contract.
++    let Some(object) = (unsafe { DriverObject::from_ref(driver) }) else {
++        return OsStatus::BAD_OBJECT.as_i32();
++    };
++    if device != object.runtime().objects().device_id().as_u32() {
++        OsStatus::BAD_OBJECT.as_i32()
++    } else {
++        OsStatus::OK.as_i32()
++    }
+ }
+ 
+ /// `StopIO` — runs the user driver's `stop_io`, halts the device
+@@ -362,18 +456,34 @@
+ /// driver ref.
+ pub unsafe extern "C" fn stop_io(
+     driver: AudioServerPlugInDriverRef,
+-    _device_id: AudioObjectID,
+-    _client_id: UInt32,
++    device_id: AudioObjectID,
++    client_id: UInt32,
+ ) -> OSStatus {
+     // Safety: the HAL passes a live driver ref.
+     let Some(object) = (unsafe { DriverObject::from_ref(driver) }) else {
+         return OsStatus::BAD_OBJECT.as_i32();
+     };
+     let runtime = object.runtime();
++    if device_id != runtime.objects().device_id().as_u32() {
++        return OsStatus::BAD_OBJECT.as_i32();
++    }
++    let mut clients = runtime.io_clients();
++    let Some(index) = clients.iter().position(|id| *id == client_id) else {
++        return OsStatus::ILLEGAL_OPERATION.as_i32();
++    };
++    if clients.len() > 1 {
++        clients.swap_remove(index);
++        return OsStatus::OK.as_i32();
++    }
+     let status = guard(|| OsStatus::from(runtime.driver().stop_io()));
+     if status.is_ok() {
++        clients.clear();
+         runtime.state().running = false;
+         runtime.clock().stop();
++    }
++    drop(clients);
++    if status.is_ok() {
++        super::output_controls::notify_running(runtime);
+     }
+     status.as_i32()
+ }
+@@ -395,7 +505,7 @@
+ /// must each be a valid writable pointer (or null).
+ pub unsafe extern "C" fn get_zero_time_stamp(
+     driver: AudioServerPlugInDriverRef,
+-    _device_id: AudioObjectID,
++    device_id: AudioObjectID,
+     _client_id: UInt32,
+     out_sample_time: *mut crate::raw::abi::Float64,
+     out_host_time: *mut crate::raw::abi::UInt64,
+@@ -406,11 +516,14 @@
+         return OsStatus::BAD_OBJECT.as_i32();
+     };
+     let runtime = object.runtime();
++    if device_id != runtime.objects().device_id().as_u32() {
++        return OsStatus::BAD_OBJECT.as_i32();
++    }
+     // The zero-timestamp period is the device's nominal sample rate
+     // worth of frames — a one-second ring (see `dispatch`).
+     let period_frames = runtime.objects().spec().sample_rate();
+-    let sample_rate = runtime.state().sample_rate;
+-    let host_ticks_per_period = platform::host_ticks_per_period(period_frames, sample_rate);
++    // The fixed-format mach timebase conversion was prepared off the realtime path.
++    let host_ticks_per_period = runtime.host_ticks_per_period();
+     let now = platform::host_time_now();
+ 
+     let Some(timestamp) = runtime
+@@ -520,8 +633,8 @@
+ #[allow(clippy::too_many_arguments)] // one parameter per C ABI argument
+ pub unsafe extern "C" fn do_io_operation(
+     driver: AudioServerPlugInDriverRef,
+-    _device_id: AudioObjectID,
+-    _stream_id: AudioObjectID,
++    device_id: AudioObjectID,
++    stream_id: AudioObjectID,
+     _client_id: UInt32,
+     operation_id: UInt32,
+     io_buffer_frame_size: UInt32,
+@@ -541,6 +654,17 @@
+     }
+ 
+     let runtime = object.runtime();
++    if device_id != runtime.objects().device_id().as_u32() {
++        return OsStatus::BAD_OBJECT.as_i32();
++    }
++    let direction = if operation == IoOperation::READ_INPUT {
++        crate::StreamDirection::Input
++    } else {
++        crate::StreamDirection::Output
++    };
++    if runtime.objects().stream_id(direction).map(|id| id.as_u32()) != Some(stream_id) {
++        return OsStatus::BAD_STREAM.as_i32();
++    }
+     let ring = runtime.ring();
+     let channels = ring.channels();
+     let sample_count = io_buffer_frame_size as usize * channels;
+@@ -549,6 +673,9 @@
+         // it rather than allocating on the realtime thread.
+         return OsStatus::UNSPECIFIED.as_i32();
+     }
++    if io_buffer_frame_size > 0 && (io_main_buffer.is_null() || io_cycle_info.is_null()) {
++        return OsStatus::ILLEGAL_OPERATION.as_i32();
++    }
+ 
+     // The cycle's timestamp: `ReadInput` is keyed to the input
+     // timeline, `WriteMix` to the output timeline.
+@@ -578,6 +705,7 @@
+             // client's output samples and is readable.
+             let client = unsafe { in_samples(io_main_buffer, sample_count) };
+             let mut io = IoBuffer::new(timestamp, operation, client, scratch);
++            io.render_gain = runtime.output_controls().gain();
+             let result = runtime.driver().process_io(&rt, &mut io);
+             if result.is_ok() {
+                 ring.write_from(sample_time, io.output);
+@@ -648,8 +776,7 @@
+ }
+ 
+ /// `AddDeviceClient` — a process opened one of the plug-in's
+-/// devices. The framework keeps no per-client state yet, so this
+-/// simply succeeds.
++/// devices. Validates the device and the host's client record.
+ ///
+ /// # Safety
+ ///
+@@ -657,19 +784,25 @@
+ /// driver ref.
+ pub unsafe extern "C" fn add_device_client(
+     driver: AudioServerPlugInDriverRef,
+-    _device_id: AudioObjectID,
+-    _client_info: *const crate::raw::abi::AudioServerPlugInClientInfo,
++    device_id: AudioObjectID,
++    client_info: *const crate::raw::abi::AudioServerPlugInClientInfo,
+ ) -> OSStatus {
+     // Safety: the HAL passes a live driver ref.
+-    match unsafe { DriverObject::from_ref(driver) } {
+-        Some(_) => OsStatus::OK.as_i32(),
+-        None => OsStatus::BAD_OBJECT.as_i32(),
+-    }
++    let Some(object) = (unsafe { DriverObject::from_ref(driver) }) else {
++        return OsStatus::BAD_OBJECT.as_i32();
++    };
++    if device_id != object.runtime().objects().device_id().as_u32() {
++        return OsStatus::BAD_OBJECT.as_i32();
++    }
++    if client_info.is_null() {
++        return OsStatus::ILLEGAL_OPERATION.as_i32();
++    }
++    OsStatus::OK.as_i32()
+ }
+ 
+ /// `RemoveDeviceClient` — a process closed one of the plug-in's
+-/// devices. The inverse of [`add_device_client`]; also a no-op
+-/// while the framework keeps no per-client state.
++/// devices. Retires any outstanding StartIO for that client, including abrupt
++/// client loss; other clients retain their audio and clock.
+ ///
+ /// # Safety
+ ///
+@@ -677,13 +810,29 @@
+ /// driver ref.
+ pub unsafe extern "C" fn remove_device_client(
+     driver: AudioServerPlugInDriverRef,
+-    _device_id: AudioObjectID,
+-    _client_info: *const crate::raw::abi::AudioServerPlugInClientInfo,
++    device_id: AudioObjectID,
++    client_info: *const crate::raw::abi::AudioServerPlugInClientInfo,
+ ) -> OSStatus {
+     // Safety: the HAL passes a live driver ref.
+-    match unsafe { DriverObject::from_ref(driver) } {
+-        Some(_) => OsStatus::OK.as_i32(),
+-        None => OsStatus::BAD_OBJECT.as_i32(),
++    let Some(object) = (unsafe { DriverObject::from_ref(driver) }) else {
++        return OsStatus::BAD_OBJECT.as_i32();
++    };
++    let runtime = object.runtime();
++    if device_id != runtime.objects().device_id().as_u32() {
++        return OsStatus::BAD_OBJECT.as_i32();
++    }
++    // SAFETY: the HAL supplies a readable client structure when non-null.
++    let Some(client) = (unsafe { client_info.as_ref() }) else {
++        return OsStatus::ILLEGAL_OPERATION.as_i32();
++    };
++    // Lifecycle calls are control-thread operations, serialized by HAL. Release
++    // the list lock before StopIO acquires it; missing/stopped clients are benign.
++    let active = runtime.io_clients().contains(&client.mClientID);
++    if active {
++        // SAFETY: the same live driver and known device/client IDs were validated above.
++        unsafe { stop_io(driver, device_id, client.mClientID) }
++    } else {
++        OsStatus::OK.as_i32()
+     }
+ }
+ 
+@@ -708,6 +857,9 @@
+     };
+     let runtime = object.runtime();
+     let address = marshal::address_from_raw(raw_address);
++    if let Some(value) = super::output_controls::get(runtime, object_id, &address, None) {
++        return Boolean::from(value.is_ok());
++    }
+     let has = dispatch::get_property_data(
+         runtime.objects(),
+         runtime.info(),
+@@ -742,6 +894,18 @@
+     };
+     let runtime = object.runtime();
+     let address = marshal::address_from_raw(raw_address);
++    if let Some(result) = super::output_controls::settable(runtime, object_id, &address) {
++        return match result {
++            Ok(value) => {
++                if !out_is_settable.is_null() {
++                    // SAFETY: caller provides a writable Boolean output pointer.
++                    unsafe { *out_is_settable = Boolean::from(value) };
++                }
++                OsStatus::OK.as_i32()
++            }
++            Err(error) => error.as_i32(),
++        };
++    }
+     match dispatch::is_property_settable(
+         runtime.objects(),
+         runtime.info(),
+@@ -786,6 +950,18 @@
+     };
+     let runtime = object.runtime();
+     let address = marshal::address_from_raw(raw_address);
++    if let Some(result) = super::output_controls::get(runtime, object_id, &address, None) {
++        return match result {
++            Ok(value) => {
++                if !out_data_size.is_null() {
++                    // SAFETY: caller provides a writable UInt32 output pointer.
++                    unsafe { *out_data_size = value.byte_size() as UInt32 };
++                }
++                OsStatus::OK.as_i32()
++            }
++            Err(error) => error.as_i32(),
++        };
++    }
+     match dispatch::property_data_size(
+         runtime.objects(),
+         runtime.info(),
+@@ -820,8 +996,8 @@
+     object_id: AudioObjectID,
+     _client_pid: crate::raw::abi::pid_t,
+     address: *const AudioObjectPropertyAddress,
+-    _qualifier_size: UInt32,
+-    _qualifier_data: *const c_void,
++    qualifier_size: UInt32,
++    qualifier_data: *const c_void,
+     data_size: UInt32,
+     out_data_size: *mut UInt32,
+     out_data: *mut c_void,
+@@ -834,13 +1010,70 @@
+     };
+     let runtime = object.runtime();
+     let address = marshal::address_from_raw(raw_address);
+-    let value = match dispatch::get_property_data(
+-        runtime.objects(),
+-        runtime.info(),
+-        &runtime.state(),
+-        AudioObjectId::from_u32(object_id),
+-        &address,
+-    ) {
++    let selector = address.selector.0.as_u32();
++    if object_id == runtime.objects().plugin_id().as_u32()
++        && selector == u32::from_be_bytes(*b"uidd")
++        && address.scope == crate::PropertyScope::GLOBAL
++        && address.element.is_main()
++    {
++        if qualifier_size as usize != core::mem::size_of::<*const c_void>()
++            || qualifier_data.is_null()
++        {
++            return OsStatus::BAD_PROPERTY_SIZE.as_i32();
++        }
++        #[cfg(target_os = "macos")]
++        {
++            // SAFETY: the host supplies a readable CFStringRef qualifier of the validated size.
++            let uid = unsafe { qualifier_data.cast::<*const c_void>().read_unaligned() };
++            // SAFETY: the host's borrowed CF object stays live for this property call.
++            let Some(matches) =
++                (unsafe { super::cf::uid_equals(uid, runtime.objects().spec().uid()) })
++            else {
++                return OsStatus::ILLEGAL_OPERATION.as_i32();
++            };
++            let value = crate::PropertyValue::ObjectId(if matches {
++                runtime.objects().device_id()
++            } else {
++                AudioObjectId::UNKNOWN
++            });
++            // SAFETY: the host guarantees a writable data_size-byte output buffer.
++            let buffer = unsafe { out_slice(out_data, data_size) };
++            return match marshal::write_property_value(&value, buffer) {
++                Ok(size) => {
++                    if !out_data_size.is_null() {
++                        // SAFETY: the host supplies a writable UInt32 output pointer.
++                        unsafe {
++                            *out_data_size = size as UInt32;
++                        }
++                    }
++                    OsStatus::OK.as_i32()
++                }
++                Err(status) => status.as_i32(),
++            };
++        }
++        #[cfg(not(target_os = "macos"))]
++        return OsStatus::UNSUPPORTED_OPERATION.as_i32();
++    }
++    let conversion =
++        if [u32::from_be_bytes(*b"lcsd"), u32::from_be_bytes(*b"lcds")].contains(&selector) {
++            if out_data.is_null() || data_size < 4 {
++                return OsStatus::BAD_PROPERTY_SIZE.as_i32();
++            }
++            // SAFETY: these conversion properties take an input Float32 in the caller's buffer.
++            Some(unsafe { out_data.cast::<f32>().read_unaligned() })
++        } else {
++            None
++        };
++    let value = match super::output_controls::get(runtime, object_id, &address, conversion)
++        .unwrap_or_else(|| {
++            dispatch::get_property_data(
++                runtime.objects(),
++                runtime.info(),
++                &runtime.state(),
++                AudioObjectId::from_u32(object_id),
++                &address,
++            )
++        }) {
+         Ok(value) => value,
+         Err(status) => return status.as_i32(),
+     };
+@@ -899,6 +1132,32 @@
+     // Safety: the HAL guarantees `data` covers `data_size` readable
+     // bytes.
+     let buffer = unsafe { in_slice(data, data_size) };
++    if object_id == runtime.objects().device_id().as_u32()
++        && raw_address.mSelector == u32::from_be_bytes(*b"lnam")
++        && raw_address.mScope == u32::from_be_bytes(*b"glob")
++        && raw_address.mElement == 0
++    {
++        if data.is_null() || data_size as usize != core::mem::size_of::<*const c_void>() {
++            return OsStatus::BAD_PROPERTY_SIZE.as_i32();
++        }
++        #[cfg(target_os = "macos")]
++        {
++            // SAFETY: HAL property payload is a live CFString reference; the buffer size
++            // was validated. Its type, UTF16 length and UTF8/control characters are checked.
++            let text =
++                unsafe { super::cf::read_name(data.cast::<*const c_void>().read_unaligned()) };
++            let Some(text) = text else {
++                return OsStatus::ILLEGAL_OPERATION.as_i32();
++            };
++            super::output_controls::set_name(runtime, text);
++            return OsStatus::OK.as_i32();
++        }
++        #[cfg(not(target_os = "macos"))]
++        return OsStatus::UNSUPPORTED_OPERATION.as_i32();
++    }
++    if let Some(result) = super::output_controls::set(runtime, object_id, &address, buffer) {
++        return OsStatus::from(result).as_i32();
++    }
+     let mut state = runtime.state();
+     let result = dispatch::set_property_data(
+         runtime.objects(),
+@@ -938,7 +1197,7 @@
+                 .with_output(StreamSpec::output(format))
+         }
+ 
+-        fn process_io(&mut self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
++        fn process_io(&self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
+             // A real loopback: copy the operation's input straight
+             // to its output, so `DoIOOperation` round-trips audio
+             // through the device ring.
+@@ -1346,16 +1605,26 @@
+     #[test]
+     fn add_and_remove_device_client_succeed() {
+         let fixture = Fixture::new();
+-        // Safety: `driver_ref` is live; the client-info pointer is
+-        // not dereferenced by these no-op stubs.
++        let client = crate::raw::abi::AudioServerPlugInClientInfo {
++            mClientID: 1,
++            mProcessID: 1,
++            mIsNativeEndian: 1,
++            mBundleID: core::ptr::null(),
++        };
++        // Safety: the fixture and readable client record live for these calls.
+         unsafe {
+             assert_eq!(
+-                add_device_client(fixture.driver_ref, 2, core::ptr::null()),
++                add_device_client(fixture.driver_ref, 2, &client),
+                 OsStatus::OK.as_i32()
+             );
+             assert_eq!(
++                remove_device_client(fixture.driver_ref, 2, &client),
++                OsStatus::OK.as_i32()
++            );
++            assert_ne!(add_device_client(fixture.driver_ref, 999, &client), 0);
++            assert_ne!(
+                 remove_device_client(fixture.driver_ref, 2, core::ptr::null()),
+-                OsStatus::OK.as_i32()
++                0
+             );
+         }
+     }
+--- a/src/raw/marshal.rs
++++ b/src/raw/marshal.rs
+@@ -222,6 +222,9 @@
+         PropertyValue::F64(v) => {
+             buf[..8].copy_from_slice(&v.to_ne_bytes());
+         }
++        PropertyValue::F32(v) => {
++            buf[..4].copy_from_slice(&v.to_ne_bytes());
++        }
+         PropertyValue::ObjectList(ids) => {
+             for (i, id) in ids.iter().enumerate() {
+                 let off = i * 4;
+--- a/src/raw/mod.rs
++++ b/src/raw/mod.rs
+@@ -39,6 +39,7 @@
+ pub mod clock;
+ pub mod entry;
+ pub mod marshal;
++pub(crate) mod output_controls;
+ pub mod platform;
+ pub mod ring;
+ pub mod runtime;
+@@ -131,7 +132,7 @@
+             DeviceSpec::new("com.tympan.test.raw", "Raw Factory", Self::MANUFACTURER)
+         }
+ 
+-        fn process_io(&mut self, _rt: &RealtimeContext, _buffer: &mut IoBuffer<'_>) {}
++        fn process_io(&self, _rt: &RealtimeContext, _buffer: &mut IoBuffer<'_>) {}
+     }
+ 
+     fn create() -> Arc<dyn AnyDriver> {
+--- a/src/raw/output_controls.rs
++++ b/src/raw/output_controls.rs
+@@ -0,0 +1,316 @@
++//! NeonMix local extension: master output volume/Mute objects and legacy device aliases.
++use super::{
++    abi::{AudioObjectPropertyAddress, AudioServerPlugInHostRef},
++    runtime::DriverRuntime,
++};
++use crate::{AudioObjectId, OsStatus, PropertyAddress, PropertyScope, PropertyValue, ValueRange};
++use core::sync::atomic::{AtomicBool, AtomicU32, Ordering};
++use std::sync::Mutex;
++
++const DEVICE: u32 = 2;
++const VOLUME: u32 = 5;
++const MUTE: u32 = 6;
++const MIN_DB: f32 = -96.0;
++const fn code(value: &[u8; 4]) -> u32 {
++    u32::from_be_bytes(*value)
++}
++
++pub(crate) struct OutputControls {
++    scalar: AtomicU32,
++    muted: AtomicBool,
++    name: Mutex<String>,
++}
++
++impl OutputControls {
++    pub(crate) fn new(name: &str) -> Self {
++        Self {
++            scalar: AtomicU32::new(1.0_f32.to_bits()),
++            muted: AtomicBool::new(false),
++            name: Mutex::new(name.into()),
++        }
++    }
++    fn scalar(&self) -> f32 {
++        f32::from_bits(self.scalar.load(Ordering::Acquire))
++    }
++    pub(crate) fn gain(&self) -> f32 {
++        if self.muted.load(Ordering::Acquire) {
++            0.0
++        } else {
++            self.scalar()
++        }
++    }
++}
++
++fn scalar_to_db(value: f32) -> f32 {
++    if value <= 0.0 {
++        MIN_DB
++    } else {
++        (20.0 * value.log10()).max(MIN_DB)
++    }
++}
++fn db_to_scalar(value: f32) -> f32 {
++    if value <= MIN_DB {
++        0.0
++    } else {
++        10.0_f32.powf(value / 20.0)
++    }
++}
++
++pub(crate) fn get(
++    runtime: &DriverRuntime,
++    id: u32,
++    address: &PropertyAddress,
++    convert: Option<f32>,
++) -> Option<Result<PropertyValue, OsStatus>> {
++    if runtime.objects().spec().output().is_none() {
++        return None;
++    }
++    let selector = address.selector.0.as_u32();
++    let control = runtime.output_controls();
++    let global = address.scope == PropertyScope::GLOBAL;
++    let output = address.scope == PropertyScope::OUTPUT;
++    let main = address.element.is_main();
++    let value = if id == DEVICE && main {
++        match selector {
++            v if v == code(b"lnam") && global => PropertyValue::Text(
++                control
++                    .name
++                    .lock()
++                    .unwrap_or_else(|p| p.into_inner())
++                    .clone(),
++            ),
++            v if v == code(b"ctrl") => PropertyValue::ObjectList(if global || output {
++                vec![AudioObjectId(VOLUME), AudioObjectId(MUTE)]
++            } else {
++                vec![]
++            }),
++            v if v == code(b"ownd") => {
++                let mut ids = runtime.objects().device_streams(address.scope);
++                if global || output {
++                    ids.extend([AudioObjectId(VOLUME), AudioObjectId(MUTE)]);
++                }
++                PropertyValue::ObjectList(ids)
++            }
++            v if v == code(b"volm") && output => PropertyValue::F32(control.scalar()),
++            v if v == code(b"vold") && output => PropertyValue::F32(scalar_to_db(control.scalar())),
++            v if v == code(b"mute") && output => {
++                PropertyValue::U32(u32::from(control.muted.load(Ordering::Acquire)))
++            }
++            _ => return None,
++        }
++    } else if (id == VOLUME || id == MUTE) && global && main {
++        match selector {
++            v if v == code(b"bcls") => PropertyValue::U32(if id == VOLUME {
++                code(b"levl")
++            } else {
++                code(b"togl")
++            }),
++            v if v == code(b"clas") => PropertyValue::U32(if id == VOLUME {
++                code(b"vlme")
++            } else {
++                code(b"mute")
++            }),
++            v if v == code(b"stdv") => PropertyValue::ObjectId(AudioObjectId(DEVICE)),
++            v if v == code(b"lnam") => PropertyValue::Text(
++                if id == VOLUME {
++                    "Output volume"
++                } else {
++                    "Output mute"
++                }
++                .into(),
++            ),
++            v if v == code(b"ownd") => PropertyValue::ObjectList(vec![]),
++            v if v == code(b"cscp") => PropertyValue::U32(code(b"outp")),
++            v if v == code(b"celm") => PropertyValue::U32(0),
++            v if v == code(b"lcsv") && id == VOLUME => PropertyValue::F32(control.scalar()),
++            v if v == code(b"lcdv") && id == VOLUME => {
++                PropertyValue::F32(scalar_to_db(control.scalar()))
++            }
++            v if v == code(b"lcdr") && id == VOLUME => {
++                PropertyValue::RangeList(vec![ValueRange::new(f64::from(MIN_DB), 0.0)])
++            }
++            v if (v == code(b"lcsd") || v == code(b"lcds")) && id == VOLUME => {
++                let input = convert.unwrap_or(0.0);
++                if !input.is_finite() {
++                    return Some(Err(OsStatus::ILLEGAL_OPERATION));
++                }
++                PropertyValue::F32(if v == code(b"lcsd") {
++                    scalar_to_db(input.clamp(0.0, 1.0))
++                } else {
++                    db_to_scalar(input.clamp(MIN_DB, 0.0))
++                })
++            }
++            v if v == code(b"bcvl") && id == MUTE => {
++                PropertyValue::U32(u32::from(control.muted.load(Ordering::Acquire)))
++            }
++            _ => return Some(Err(OsStatus::UNKNOWN_PROPERTY)),
++        }
++    } else {
++        return None;
++    };
++    Some(Ok(value))
++}
++
++pub(crate) fn settable(
++    runtime: &DriverRuntime,
++    id: u32,
++    address: &PropertyAddress,
++) -> Option<Result<bool, OsStatus>> {
++    get(runtime, id, address, None).map(|value| {
++        value.map(|_| {
++            let selector = address.selector.0.as_u32();
++            (id == DEVICE
++                && [code(b"volm"), code(b"vold"), code(b"mute"), code(b"lnam")].contains(&selector))
++                || (id == VOLUME && [code(b"lcsv"), code(b"lcdv")].contains(&selector))
++                || (id == MUTE && selector == code(b"bcvl"))
++        })
++    })
++}
++
++pub(crate) fn set(
++    runtime: &DriverRuntime,
++    id: u32,
++    address: &PropertyAddress,
++    data: &[u8],
++) -> Option<Result<(), OsStatus>> {
++    let writable = settable(runtime, id, address)?;
++    Some((|| {
++        if !writable? {
++            return Err(OsStatus::ILLEGAL_OPERATION);
++        }
++        let bytes: [u8; 4] = data.try_into().map_err(|_| OsStatus::BAD_PROPERTY_SIZE)?;
++        let selector = address.selector.0.as_u32();
++        let mute = selector == code(b"mute") || selector == code(b"bcvl");
++        if mute {
++            runtime
++                .output_controls()
++                .muted
++                .store(u32::from_ne_bytes(bytes) != 0, Ordering::Release);
++        } else {
++            let value = f32::from_ne_bytes(bytes);
++            let decibel = selector == code(b"vold") || selector == code(b"lcdv");
++            if !value.is_finite()
++                || if decibel {
++                    !(MIN_DB..=0.0).contains(&value)
++                } else {
++                    !(0.0..=1.0).contains(&value)
++                }
++            {
++                return Err(OsStatus::ILLEGAL_OPERATION);
++            }
++            let scalar = if decibel { db_to_scalar(value) } else { value };
++            runtime
++                .output_controls()
++                .scalar
++                .store(scalar.to_bits(), Ordering::Release);
++        }
++        notify(runtime, mute);
++        Ok(())
++    })())
++}
++
++// The SDK's host interface starts with PropertiesChanged. Only that prefix is needed.
++#[repr(C)]
++struct HostPrefix {
++    changed: Option<
++        unsafe extern "C" fn(
++            AudioServerPlugInHostRef,
++            u32,
++            u32,
++            *const AudioObjectPropertyAddress,
++        ) -> i32,
++    >,
++}
++
++pub(crate) fn notify_running(runtime: &DriverRuntime) {
++    let host = runtime.host();
++    if host.is_null() {
++        return;
++    }
++    // SAFETY: the live SDK host interface begins with PropertiesChanged.
++    let Some(callback) = (unsafe { &*host.cast::<HostPrefix>() }).changed else {
++        return;
++    };
++    let address = AudioObjectPropertyAddress {
++        mSelector: code(b"goin"),
++        mScope: code(b"glob"),
++        mElement: 0,
++    };
++    // SAFETY: notification runs off realtime, after all framework list/state locks are released.
++    unsafe {
++        callback(host, DEVICE, 1, &address);
++    }
++}
++
++pub(crate) fn set_name(runtime: &DriverRuntime, value: String) {
++    *runtime
++        .output_controls()
++        .name
++        .lock()
++        .unwrap_or_else(|p| p.into_inner()) = value;
++    let host = runtime.host();
++    if host.is_null() {
++        return;
++    }
++    // SAFETY: Initialize supplies the stable SDK host interface; prefix matches PropertiesChanged.
++    let Some(callback) = (unsafe { &*host.cast::<HostPrefix>() }).changed else {
++        return;
++    };
++    let address = AudioObjectPropertyAddress {
++        mSelector: code(b"lnam"),
++        mScope: code(b"glob"),
++        mElement: 0,
++    };
++    // SAFETY: control-thread notification with live host and correctly sized address.
++    unsafe {
++        callback(host, DEVICE, 1, &address);
++    }
++}
++
++fn notify(runtime: &DriverRuntime, mute: bool) {
++    let host = runtime.host();
++    if host.is_null() {
++        return;
++    }
++    // SAFETY: Initialize's host interface remains live for the plug-in lifetime; its first
++    // field matches AudioServerPlugInHostInterface.PropertiesChanged in the macOS SDK.
++    let Some(callback) = (unsafe { &*host.cast::<HostPrefix>() }).changed else {
++        return;
++    };
++    let selectors = if mute {
++        vec![code(b"bcvl")]
++    } else {
++        vec![code(b"lcsv"), code(b"lcdv")]
++    };
++    let addresses: Vec<_> = selectors
++        .into_iter()
++        .map(|selector| AudioObjectPropertyAddress {
++            mSelector: selector,
++            mScope: code(b"glob"),
++            mElement: 0,
++        })
++        .collect();
++    let device_selectors = if mute {
++        vec![code(b"mute")]
++    } else {
++        vec![code(b"volm"), code(b"vold")]
++    };
++    let aliases: Vec<_> = device_selectors
++        .into_iter()
++        .map(|selector| AudioObjectPropertyAddress {
++            mSelector: selector,
++            mScope: code(b"outp"),
++            mElement: 0,
++        })
++        .collect();
++    // SAFETY: control-thread-only calls; both slices and the host outlive each notification.
++    unsafe {
++        callback(
++            host,
++            if mute { MUTE } else { VOLUME },
++            addresses.len() as u32,
++            addresses.as_ptr(),
++        );
++        callback(host, DEVICE, aliases.len() as u32, aliases.as_ptr());
++    }
++}
+--- a/src/raw/runtime.rs
++++ b/src/raw/runtime.rs
+@@ -64,6 +64,9 @@
+     /// loop. Allocated here, off the realtime path; `DoIOOperation`
+     /// reads and writes it lock-free.
+     ring: DeviceRing,
++    controls: super::output_controls::OutputControls,
++    io_clients: Mutex<Vec<u32>>,
++    host_ticks_per_period: f64,
+ }
+ 
+ impl DriverRuntime {
+@@ -97,6 +100,12 @@
+             host: AtomicPtr::new(core::ptr::null_mut()),
+             clock: DeviceClock::new(),
+             ring: DeviceRing::new(capacity_frames, channels),
++            controls: super::output_controls::OutputControls::new(spec.name()),
++            io_clients: Mutex::new(Vec::new()),
++            host_ticks_per_period: super::platform::host_ticks_per_period(
++                spec.sample_rate(),
++                spec.sample_rate(),
++            ),
+         }
+     }
+ 
+@@ -155,6 +164,20 @@
+     #[must_use]
+     pub fn ring(&self) -> &DeviceRing {
+         &self.ring
++    }
++
++    pub(crate) fn output_controls(&self) -> &super::output_controls::OutputControls {
++        &self.controls
++    }
++
++    pub(crate) fn host_ticks_per_period(&self) -> f64 {
++        self.host_ticks_per_period
++    }
++
++    pub(crate) fn io_clients(&self) -> std::sync::MutexGuard<'_, Vec<u32>> {
++        self.io_clients
++            .lock()
++            .unwrap_or_else(|poison| poison.into_inner())
+     }
+ }
+ 
+@@ -274,7 +297,7 @@
+             .with_output(StreamSpec::output(format))
+         }
+ 
+-        fn process_io(&mut self, _rt: &RealtimeContext, _buffer: &mut IoBuffer<'_>) {}
++        fn process_io(&self, _rt: &RealtimeContext, _buffer: &mut IoBuffer<'_>) {}
+     }
+ 
+     fn runtime() -> DriverRuntime {
+--- a/src/raw/vtable.rs
++++ b/src/raw/vtable.rs
+@@ -53,13 +53,13 @@
+     // The framework exposes a single static device declared by the
+     // driver, so it never creates or destroys devices on HAL
+     // request.
+-    CreateDevice: None,
+-    DestroyDevice: None,
++    CreateDevice: Some(entry::create_device),
++    DestroyDevice: Some(entry::destroy_device),
+     AddDeviceClient: Some(entry::add_device_client),
+     RemoveDeviceClient: Some(entry::remove_device_client),
+     // Deferred configuration changes are not yet modelled.
+-    PerformDeviceConfigurationChange: None,
+-    AbortDeviceConfigurationChange: None,
++    PerformDeviceConfigurationChange: Some(entry::perform_device_configuration_change),
++    AbortDeviceConfigurationChange: Some(entry::abort_device_configuration_change),
+ 
+     HasProperty: Some(entry::has_property),
+     IsPropertySettable: Some(entry::is_property_settable),
+@@ -127,13 +127,13 @@
+     }
+ 
+     #[test]
+-    fn deferred_slots_are_none() {
++    fn unsupported_operations_have_callable_slots() {
+         let vtable = driver_interface();
+         // Static-device plug-in: no HAL-driven device lifecycle.
+-        assert!(vtable.CreateDevice.is_none());
+-        assert!(vtable.DestroyDevice.is_none());
+-        assert!(vtable.PerformDeviceConfigurationChange.is_none());
+-        assert!(vtable.AbortDeviceConfigurationChange.is_none());
++        assert!(vtable.CreateDevice.is_some());
++        assert!(vtable.DestroyDevice.is_some());
++        assert!(vtable.PerformDeviceConfigurationChange.is_some());
++        assert!(vtable.AbortDeviceConfigurationChange.is_some());
+     }
+ 
+     #[test]
+--- a/tests/raw_lifecycle.rs
++++ b/tests/raw_lifecycle.rs
+@@ -89,7 +89,7 @@
+         .with_output(StreamSpec::output(format))
+     }
+ 
+-    fn process_io(&mut self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
++    fn process_io(&self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
+         let n = buffer.output.len().min(buffer.input.len());
+         buffer.output[..n].copy_from_slice(&buffer.input[..n]);
+         buffer.output[n..].fill(0.0);
+@@ -112,6 +112,7 @@
+     AudioServerPlugInIOCycleInfo {
+         mInputTime: ts,
+         mOutputTime: ts,
++        ..Default::default()
+     }
+ }
+ 
+@@ -158,16 +159,21 @@
+     // null host ref is explicitly permitted by `Initialize`.
+     let initialized = unsafe { initialize(driver_ref, core::ptr::null_mut()) };
+     assert_eq!(initialized, 0, "Initialize failed");
+-    // SAFETY: live driver ref; a null client-info pointer is
+-    // permitted by `AddDeviceClient`.
+-    let client_added = unsafe { add_client(driver_ref, DEVICE_ID, core::ptr::null()) };
++    let client = tympan_aspl::raw::abi::AudioServerPlugInClientInfo {
++        mClientID: CLIENT_ID,
++        mProcessID: 1,
++        mIsNativeEndian: 1,
++        mBundleID: core::ptr::null(),
++    };
++    // SAFETY: live driver ref and readable client record matching the SDK contract.
++    let client_added = unsafe { add_client(driver_ref, DEVICE_ID, &client) };
+     assert_eq!(client_added, 0, "AddDeviceClient failed");
+     // SAFETY: live driver ref.
+     let io_started = unsafe { start_io(driver_ref, DEVICE_ID, CLIENT_ID) };
+     assert_eq!(io_started, 0, "StartIO failed");
+ 
+     // `GetZeroTimeStamp` — the IO clock callback. Driven outside the
+-    // alloc guard: it locks the device state, which is not part of
++    // alloc guard to separate clock setup from
+     // the `DoIOOperation` data path.
+     let mut sample_time: Float64 = -1.0;
+     let mut host_time: UInt64 = 0;
+@@ -254,7 +260,7 @@
+                 write_status[iter] = do_io(
+                     driver_ref,
+                     DEVICE_ID,
+-                    STREAM_ID,
++                    4,
+                     CLIENT_ID,
+                     write_op,
+                     FRAMES as UInt32,
+@@ -339,8 +345,8 @@
+     // SAFETY: live driver ref.
+     let io_stopped = unsafe { stop_io(driver_ref, DEVICE_ID, CLIENT_ID) };
+     assert_eq!(io_stopped, 0, "StopIO failed");
+-    // SAFETY: live driver ref; null client info is permitted.
+-    let client_removed = unsafe { remove_client(driver_ref, DEVICE_ID, core::ptr::null()) };
++    // SAFETY: live driver ref and the same readable client record.
++    let client_removed = unsafe { remove_client(driver_ref, DEVICE_ID, &client) };
+     assert_eq!(client_removed, 0, "RemoveDeviceClient failed");
+     // Mirror the HAL's final `Release`: the count returns to zero
+     // and the driver object is freed.
+--- a/tests/realtime_safety.rs
++++ b/tests/realtime_safety.rs
+@@ -42,7 +42,7 @@
+             .with_output(StreamSpec::output(format))
+     }
+ 
+-    fn process_io(&mut self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
++    fn process_io(&self, _rt: &RealtimeContext, buffer: &mut IoBuffer<'_>) {
+         let n = buffer.output.len().min(buffer.input.len());
+         buffer.output[..n].copy_from_slice(&buffer.input[..n]);
+         buffer.output[n..].fill(0.0);
+@@ -94,13 +94,12 @@
+ }
+ 
+ #[test]
+-fn lifecycle_transitions_are_allocation_free() {
+-    // The whole `initialize → start → stop` lifecycle is composed of
+-    // atomic CAS operations on the framework side; none of it should
+-    // allocate either.
++fn prepared_start_stop_are_allocation_free() {
++    // Control-thread initialization may prepare platform mutex storage. Once
++    // prepared, the no-contention start/stop dispatch remains allocation-free.
+     let driver: Arc<dyn AnyDriver> = Arc::new(DriverInstance::<Loopback>::new());
++    driver.initialize().unwrap();
+     assert_no_alloc(|| {
+-        driver.initialize().unwrap();
+         driver.start_io().unwrap();
+         driver.stop_io().unwrap();
+     });

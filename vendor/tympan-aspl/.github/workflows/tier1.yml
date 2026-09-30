@@ -1,0 +1,95 @@
+name: Tier 1
+
+# Static and unit verification per
+# docs/decisions/0001-ci-verification-strategy.md § Tier 1.
+# Runs on every pull request and every push to main. Target
+# wall-clock budget: < 7 minutes (timeout-minutes is a safety net).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tier1-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: short
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  tier1:
+    name: Build / test / lint / doc (macos-15)
+    runs-on: macos-15
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          # `cache-bin: false` keeps the cache away from
+          # `${CARGO_HOME}/bin` — caching it can shadow the
+          # toolchain's `cargo` with a stale binary (see the Tier 2
+          # cache-key bump). The `-v2` suffix abandons any cache
+          # saved before that footgun was closed off.
+          shared-key: tier1-v2
+          cache-bin: false
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: cargo build --release --all-targets
+        run: cargo build --workspace --release --all-targets
+
+      - name: cargo test --all-targets
+        run: cargo test --workspace --all-targets
+
+      - name: cargo test --doc
+        run: cargo test --workspace --doc
+
+      - name: cargo doc --no-deps --document-private-items
+        run: cargo doc --workspace --no-deps --document-private-items
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      - name: No `static mut` in src/
+        # Enforces the "No global state" development principle in
+        # CLAUDE.md. `git grep` exits 0 when a match is found; we
+        # invert that and fail loudly.
+        shell: bash
+        run: |
+          if git grep -nE 'static[[:space:]]+mut' -- 'src/*.rs' 'src/**/*.rs'; then
+            echo "::error::\`static mut\` found in src/ — see CLAUDE.md (No global state)."
+            exit 1
+          fi
+
+  deny:
+    # Supply-chain hygiene per ADR 0001 § Tier 1. The framework has
+    # one non-path dependency today; the check is mostly a regression
+    # guard against a future crate with a known advisory, an
+    # incompatible licence, a wildcard version spec, or an unknown
+    # source.
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: cargo-deny
+        uses: EmbarkStudios/cargo-deny-action@v2

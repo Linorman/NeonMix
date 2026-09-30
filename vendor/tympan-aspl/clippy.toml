@@ -1,0 +1,67 @@
+# Realtime-safety lints.
+#
+# Lists the heap- or kernel-bound types and methods that must never
+# appear in code reachable from the `IOProc` realtime callback, per
+# CLAUDE.md § Prohibitions 1 and 2 and docs/testing.md § Realtime
+# safety enforcement in CI.
+#
+# Scope is controlled at module level rather than crate-wide: these
+# lints are `allow` everywhere in `src/` *except* `src/realtime/`,
+# where the module's own `mod.rs` re-enables them with
+# `#![deny(...)]`. That keeps the non-realtime code paths
+# (initialisation, plug-in lifecycle setup, bundle generation,
+# tests) free to allocate while pinning the realtime modules to a
+# strict allow-list.
+#
+# Note: heap-allocating *constructors* (`Box::new`, `Vec::new`)
+# are not listed here because the realtime modules themselves
+# pre-allocate inside `channel()`, `Refcount::new()`, etc.; the
+# guarantee is that the *consumer* paths (`try_push`, `try_pop`,
+# `incr`, `decr`, …) are allocation-free, and that property is
+# pinned by the global `assert_no_alloc` guard in
+# `tests/realtime_safety.rs`. The lints below catch the other
+# half — types and calls that, by their nature, *cannot* appear in
+# a realtime path regardless of where they are constructed.
+
+disallowed-types = [
+    # Blocking synchronisation primitives. The realtime path is
+    # lock-free by construction (`realtime::ring`, atomic refcount,
+    # atomic state cell); a `Mutex` / `RwLock` field appearing in a
+    # `realtime` module is almost certainly a bug.
+    { path = "std::sync::Mutex", reason = "realtime path must be lock-free; use realtime::ring or atomics" },
+    { path = "std::sync::RwLock", reason = "realtime path must be lock-free; use realtime::ring or atomics" },
+    { path = "std::sync::Condvar", reason = "blocks the thread; never valid on the realtime path" },
+    { path = "std::sync::Barrier", reason = "blocks the thread; never valid on the realtime path" },
+    # `parking_lot` and `tokio` lock types — none currently in the
+    # dependency tree, but listed so a future transitive addition
+    # cannot leak in unnoticed.
+    { path = "parking_lot::Mutex", reason = "realtime path must be lock-free" },
+    { path = "parking_lot::RwLock", reason = "realtime path must be lock-free" },
+    { path = "tokio::sync::Mutex", reason = "realtime path must be lock-free and async-free" },
+]
+
+disallowed-methods = [
+    # Blocking calls that put the realtime thread to sleep — fatal
+    # to glitch-free audio. The realtime thread must yield to the
+    # audio engine, never to the scheduler.
+    { path = "std::thread::sleep", reason = "blocks the realtime thread; never valid on the realtime path" },
+    { path = "std::thread::park", reason = "blocks the realtime thread; never valid on the realtime path" },
+    { path = "std::thread::park_timeout", reason = "blocks the realtime thread; never valid on the realtime path" },
+    # System-call I/O — file, network, stdout, stderr. Every one of
+    # these traverses the kernel and is unbounded.
+    { path = "std::fs::File::open", reason = "blocking syscall; never valid on the realtime path" },
+    { path = "std::fs::File::create", reason = "blocking syscall; never valid on the realtime path" },
+    { path = "std::fs::read", reason = "blocking syscall; never valid on the realtime path" },
+    { path = "std::fs::write", reason = "blocking syscall; never valid on the realtime path" },
+    { path = "std::io::stdout", reason = "uses a lock; never valid on the realtime path — use realtime::log" },
+    { path = "std::io::stderr", reason = "uses a lock; never valid on the realtime path — use realtime::log" },
+    # `println!` / `eprintln!` cannot be listed by path (they are
+    # macros); the `std::io::stdout` / `stderr` entries above catch
+    # their expansion target, which is enough for clippy.
+    # Channel constructors that allocate or block — the realtime
+    # path must use `realtime::ring::channel` instead, which
+    # allocates exactly once at construction time and is
+    # heap-touch-free thereafter.
+    { path = "std::sync::mpsc::channel", reason = "uses an unbounded queue; the realtime path uses realtime::ring instead" },
+    { path = "std::sync::mpsc::sync_channel", reason = "uses an internal Mutex; the realtime path uses realtime::ring instead" },
+]
