@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 
 
-def download(url: str, path: Path, expected: str | None = None) -> str:
+def download(url: str, path: Path, expected: str | None = None, *, max_time: int = 180) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_name(path.name + '.part')
     if path.exists():
@@ -20,7 +20,7 @@ def download(url: str, path: Path, expected: str | None = None) -> str:
             return digest
     print('Downloading', url, flush=True)
     command = ['curl', '--http1.1', '--fail', '--location', '--silent', '--show-error',
-               '--retry', '3', '--retry-all-errors', '--max-time', '180',
+               '--retry', '3', '--retry-all-errors', '--max-time', str(max_time),
                '--continue-at', '-', '--output', str(partial), url]
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode and (result.returncode == 33 or '416' in result.stderr):

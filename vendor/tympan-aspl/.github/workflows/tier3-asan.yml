@@ -1,0 +1,97 @@
+name: Tier 3 — AddressSanitizer
+
+# AddressSanitizer companion to Tier 3, per
+# docs/decisions/0001-ci-verification-strategy.md § Tier 3.
+#
+# aspl's Tier 3 proper (`tier3.yml`) is a `coreaudiod` HAL-load
+# check — it is `coreaudiod` loading a bundle, not our own process,
+# so there is nothing for a sanitizer to instrument there. This
+# companion workflow instead re-runs the *in-process* harnesses
+# under AddressSanitizer: `raw_lifecycle` (which drives the
+# hand-written `raw` ABI layer — the factory's `Box` into/from raw,
+# the CFPlugIn refcount, the `DriverObject` recovery, the device
+# ring — through the actual vtable), `realtime_safety`, and the
+# `raw`-module unit tests. That is where a use-after-free,
+# double-free, or out-of-bounds access in the unsafe FFI layer would
+# show up.
+#
+# Runs on a daily schedule (one hour after the regular Tier 3 cron)
+# and on manual dispatch — never on a pull request. Per ADR 0001
+# this tier is non-blocking: a failure on `main` is a signal to
+# investigate, not a revert.
+
+on:
+  schedule:
+    # 08:00 UTC daily — one hour after the regular Tier 3 (07:00) so
+    # the cache is warm and the two macOS jobs do not contend.
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tier3-asan-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+  CARGO_INCREMENTAL: 0
+  # AddressSanitizer on the Rust compiler. Paired with nightly's
+  # `-Z build-std` below, which rebuilds the standard library
+  # against the sanitizer — the recommended setup, so ASan sees
+  # allocations made inside `std` too.
+  RUSTFLAGS: "-Zsanitizer=address"
+  # Abort loudly on the first finding so the CI step fails;
+  # `detect_stack_use_after_return` widens the detection surface.
+  ASAN_OPTIONS: "halt_on_error=1:abort_on_error=1:detect_stack_use_after_return=1"
+
+jobs:
+  tier3-asan:
+    name: In-process harnesses under ASan (macos-15, nightly)
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust nightly with rust-src
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: aarch64-apple-darwin
+          components: rust-src
+
+      - name: Cache cargo (separate key — ASan-built std)
+        uses: Swatinem/rust-cache@v2
+        with:
+          # A distinct key from the Tier 1/2/3 caches: this job's
+          # artefacts are built against the sanitizer runtime and
+          # must not be restored into, or saved over, a normal
+          # build.
+          shared-key: tier3-asan
+          cache-bin: false
+
+      - name: raw_lifecycle harness under ASan
+        # The headline target: the hand-written `raw` ABI layer
+        # driven end-to-end through the vtable.
+        run: >
+          cargo +nightly test -Z build-std
+          --target aarch64-apple-darwin
+          --test raw_lifecycle -- --nocapture
+
+      - name: realtime_safety harness under ASan
+        run: >
+          cargo +nightly test -Z build-std
+          --target aarch64-apple-darwin
+          --test realtime_safety -- --nocapture
+
+      - name: raw-layer unit tests under ASan
+        # The `raw` module's own unit tests — `abi`, `runtime`,
+        # `ring`, `entry`, `vtable`, `marshal` — exercise the unsafe
+        # FFI surface directly.
+        run: >
+          cargo +nightly test -Z build-std
+          --target aarch64-apple-darwin
+          --lib raw:: -- --nocapture

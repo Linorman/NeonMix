@@ -1,0 +1,23 @@
+[package]
+name = "neonmix-media"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+neonmix-core.workspace = true
+neonmix-control = { path = "../control" }
+gstreamer = { version = "=0.23.7", features = ["v1_24"] }
+gstreamer-app = { version = "=0.23.5", features = ["v1_24"] }
+gstreamer-rtp = { version = "=0.23.5", features = ["v1_24"] }
+sha2 = "0.10"
+rustls-pemfile = "2"
+serde.workspace = true
+thiserror.workspace = true
+uuid = { version = "1", features = ["v4"] }
+[target.'cfg(target_os = "macos")'.dependencies]
+libc = "0.2"
+[lints]
+workspace = true
+[dev-dependencies]
+rcgen = { version = "0.14", default-features = false, features = ["ring", "pem"] }

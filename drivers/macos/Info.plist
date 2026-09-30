@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>CFBundleIdentifier</key><string>com.neonmix.audio.driver</string>
+  <key>CFBundleName</key><string>NeonMix</string>
+  <key>CFBundleExecutable</key><string>NeonMixHAL</string>
+  <key>CFBundleVersion</key><string>0.1.0</string>
+  <key>CFBundleShortVersionString</key><string>0.1.0</string>
+  <key>CFBundlePackageType</key><string>BNDL</string>
+  <key>CFPlugInDynamicRegistration</key><string>NO</string>
+  <key>CFPlugInFactories</key>
+  <dict><key>955877DA-3204-43D7-B113-591CDEB05C6A</key><string>NeonMixHalFactory</string></dict>
+  <key>CFPlugInTypes</key>
+  <dict><key>443ABAB8-E7B3-491A-B985-BEB9187030DB</key>
+    <array><string>955877DA-3204-43D7-B113-591CDEB05C6A</string></array>
+  </dict>
+</dict>
+</plist>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B99E8F73-C282-4D52-AF05-AC7B20F252F5}</ProjectGuid>
+    <RootNamespace>NeonMixAudio</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR><KMDF_VERSION_MINOR>33</KMDF_VERSION_MINOR>
+    <NeonMixRoot Condition="'$(NeonMixRoot)'==''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\..\'))</NeonMixRoot>
+    <Configuration Condition="'$(Configuration)'==''">Release</Configuration><Platform Condition="'$(Platform)'==''">x64</Platform>
+    <SignMode>Off</SignMode><SupportsPackaging>true</SupportsPackaging>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Driver</ConfigurationType><DriverType>KMDF</DriverType>
+    <DriverTargetPlatform>Windows Driver</DriverTargetPlatform><TargetVersion>Windows10</TargetVersion>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Release'">false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <TargetName>NeonMixAudio</TargetName>
+    <OutDir>$(NeonMixRoot)\target\windows-driver\$(Configuration)\</OutDir>
+    <IntDir>$(NeonMixRoot)\target\windows-driver\obj\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)Source\Inc;$(MSBuildThisFileDirectory)Source\Main;$(MSBuildThisFileDirectory)Source\Filters;$(MSBuildThisFileDirectory)Source\Utilities;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_USE_WAVERT_;_USE_IPortClsRuntimePower;_NEW_DELETE_OPERATORS_;PC_IMPLEMENTATION;UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling><RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <WarningLevel>Level4</WarningLevel><BufferSecurityCheck>true</BufferSecurityCheck>
+      <AdditionalOptions>/guard:cf %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link><AdditionalDependencies>portcls.lib;ksguid.lib;stdunk.lib;%(AdditionalDependencies)</AdditionalDependencies><AdditionalOptions>/guard:cf %(AdditionalOptions)</AdditionalOptions><GenerateDebugInformation>true</GenerateDebugInformation></Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Filters\speakertopo.cpp" />
+    <ClCompile Include="Source\Main\NewDelete.cpp" />
+    <ClCompile Include="Source\Main\adapter.cpp" />
+    <ClCompile Include="Source\Main\basetopo.cpp" />
+    <ClCompile Include="Source\Main\common.cpp" />
+    <ClCompile Include="Source\Main\mintopo.cpp" />
+    <ClCompile Include="Source\Main\minwavert.cpp" />
+    <ClCompile Include="Source\Main\minwavertstream.cpp" />
+    <ClCompile Include="Source\Utilities\hw.cpp" />
+    <ClCompile Include="Source\Utilities\kshelper.cpp" />
+    <ResourceCompile Include="Source\Main\NeonMixAudio.rc" />
+    <Inf Include="Source\Main\NeonMixAudio.inx" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="NeonMixArchitectureGate" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(Platform)'!='x64'" Text="NeonMix E06 Windows supports x64 only." />
+  </Target>
+</Project>

@@ -1,0 +1,95 @@
+name: Tier 3 — ThreadSanitizer
+
+# ThreadSanitizer companion to Tier 3, per
+# docs/decisions/0001-ci-verification-strategy.md § Tier 3.
+#
+# aspl's Tier 3 proper (`tier3.yml`) is a `coreaudiod` HAL-load
+# check — `coreaudiod` loading a bundle in a separate process, with
+# nothing for an in-process sanitizer to instrument. This companion
+# workflow instead re-runs the realtime concurrency primitives'
+# tests under ThreadSanitizer. The headline target is
+# `realtime::ring`'s `cross_thread_push_pop_preserves_order`, which
+# spawns a producer and a consumer thread and shuttles 100,000
+# values across the SPSC ring — exactly the configuration where a
+# missing Acquire / Release on `head` or `tail` would surface.
+#
+# The `realtime::state` lifecycle CAS, the `realtime::refcount`
+# CFPlugIn refcount, and the off-thread `realtime::log` drainer
+# share the same Acquire/Release discipline and are picked up by
+# this run as well.
+#
+# Runs on a daily schedule (09:00 UTC — one hour after the
+# ASan companion at 08:00, so the two macOS-15 jobs do not contend
+# for cache or runner capacity) and on manual dispatch — never on a
+# pull request. Per ADR 0001 this tier is non-blocking: a failure
+# on `main` is a signal to investigate, not a revert.
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tier3-tsan-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+  CARGO_INCREMENTAL: 0
+  # ThreadSanitizer on the Rust compiler. Paired with nightly's
+  # `-Z build-std` below, which rebuilds the standard library
+  # against the sanitizer — required so TSan sees the synchronisation
+  # primitives inside `std::sync` and `std::thread` rather than
+  # treating their internals as opaque.
+  RUSTFLAGS: "-Zsanitizer=thread"
+  # Abort loudly on the first finding. `halt_on_error=1` makes the
+  # step fail rather than continue past a race; `second_deadlock_stack=1`
+  # captures the second thread's stack on a deadlock detection,
+  # which is what the ring buffer test would surface.
+  TSAN_OPTIONS: "halt_on_error=1:abort_on_error=1:second_deadlock_stack=1"
+
+jobs:
+  tier3-tsan:
+    name: Realtime concurrency primitives under TSan (macos-15, nightly)
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust nightly with rust-src
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: aarch64-apple-darwin
+          components: rust-src
+
+      - name: Cache cargo (separate key — TSan-built std)
+        uses: Swatinem/rust-cache@v2
+        with:
+          # A distinct key from the Tier 1/2/3/ASan caches: this
+          # job's artefacts are built against the TSan runtime and
+          # must not be restored into, or saved over, a normal
+          # build (or an ASan build — the two sanitizer runtimes
+          # are mutually incompatible).
+          shared-key: tier3-tsan
+          cache-bin: false
+
+      - name: realtime module unit tests under TSan
+        # The headline target: `cross_thread_push_pop_preserves_order`
+        # in `realtime::ring` exchanges 100k values between a
+        # producer thread and a consumer thread through the SPSC
+        # ring. TSan instrumenting the load / store on `head` and
+        # `tail` is exactly where a missing Acquire / Release
+        # ordering would surface. The `realtime::state` lifecycle
+        # CAS, the `realtime::refcount` CFPlugIn refcount, and the
+        # off-thread `realtime::log` drainer share the same
+        # Acquire/Release discipline and are picked up by this run.
+        run: >
+          cargo +nightly test -Z build-std
+          --target aarch64-apple-darwin
+          --lib realtime:: -- --nocapture

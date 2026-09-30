@@ -1,4 +1,4 @@
-name: E00-E01
+name: E00-E04 (native media on macOS)
 on:
   push:
   pull_request:
@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025, macos-15]
+        os: [macos-15]
     runs-on: ${{ matrix.os }}
     env:
       CARGO_HOME: ${{ github.workspace }}/.local/cargo
@@ -41,6 +41,9 @@ jobs:
       - name: Pinned Rust toolchain
         shell: bash
         run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt --component clippy
+      - name: Project-local GStreamer runtime (macOS media only)
+        if: runner.os == 'macOS'
+        run: tools/dev python3 tools/prepare_gstreamer.py
       - name: Verify on Unix
         if: runner.os != 'Windows'
         run: tools/dev python3 tools/check.py
@@ -58,6 +61,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e00-e01-${{ matrix.os }}
+          name: neonmix-${{ matrix.os }}
           path: artifacts/
           retention-days: 30

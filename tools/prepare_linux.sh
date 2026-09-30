@@ -20,7 +20,8 @@ for file in root.rglob('*.pc'):
     file.write_text(text)
 PY
 if [ -n "${GITHUB_ENV:-}" ]; then
-  echo "PKG_CONFIG_PATH=$NEONMIX_NATIVE/root/usr/lib/x86_64-linux-gnu/pkgconfig:$NEONMIX_NATIVE/root/usr/share/pkgconfig" >> "$GITHUB_ENV"
-  echo "LIBRARY_PATH=$NEONMIX_NATIVE/root/usr/lib/x86_64-linux-gnu" >> "$GITHUB_ENV"
-  echo "LD_LIBRARY_PATH=$NEONMIX_NATIVE/root/usr/lib/x86_64-linux-gnu" >> "$GITHUB_ENV"
+  NEONMIX_MULTIARCH=$(cc -dumpmachine)
+  echo "PKG_CONFIG_PATH=$NEONMIX_NATIVE/root/usr/lib/$NEONMIX_MULTIARCH/pkgconfig:$NEONMIX_NATIVE/root/usr/share/pkgconfig" >> "$GITHUB_ENV"
+  echo "LIBRARY_PATH=$NEONMIX_NATIVE/root/usr/lib/$NEONMIX_MULTIARCH" >> "$GITHUB_ENV"
+  echo "LD_LIBRARY_PATH=$NEONMIX_NATIVE/root/usr/lib/$NEONMIX_MULTIARCH" >> "$GITHUB_ENV"
 fi

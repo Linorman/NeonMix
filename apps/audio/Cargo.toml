@@ -6,13 +6,16 @@ rust-version.workspace = true
 license.workspace = true
 [dependencies]
 neonmix-core.workspace = true
+neonmix-output-binding = { path = "../../crates/output-binding" }
 neonmix-io.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 clap.workspace = true
+tokio = { version = "1", features = ["rt", "macros", "signal", "time"] }
 [target.'cfg(target_os = "windows")'.dependencies]
 neonmix-windows = { path = "../../adapters/windows" }
 [target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
 neonmix-linux = { path = "../../adapters/linux" }
 [target.'cfg(target_os = "macos")'.dependencies]
 neonmix-macos = { path = "../../adapters/macos" }
