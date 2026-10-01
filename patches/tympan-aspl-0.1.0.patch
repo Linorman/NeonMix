@@ -1,3 +1,13 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -39,6 +39,7 @@
+ 
+ [features]
+ default = []
++trace-properties = []
+ 
+ [lib]
+ name = "tympan_aspl"
 --- a/src/dispatch.rs
 +++ b/src/dispatch.rs
 @@ -252,6 +252,10 @@
@@ -11,6 +21,38 @@
          // The framework does not model boxes yet.
          S::PLUGIN_BOX_LIST => PropertyValue::ObjectList(vec![]),
          _ => return Err(OsStatus::UNKNOWN_PROPERTY),
+@@ -282,6 +286,16 @@
+         // The device is always alive once the plug-in exposes it.
+         S::DEVICE_IS_ALIVE => PropertyValue::U32(1),
+         S::DEVICE_IS_RUNNING => PropertyValue::U32(u32::from(state.running)),
++        S::DEVICE_IS_HIDDEN | S::DEVICE_CLOCK_DOMAIN => PropertyValue::U32(0),
++        S::DEVICE_RELATED_DEVICES => PropertyValue::ObjectList(vec![map.device_id()]),
++        S::DEVICE_CAN_BE_DEFAULT => PropertyValue::U32(u32::from(match address.scope {
++            crate::PropertyScope::INPUT => spec.input().is_some(),
++            crate::PropertyScope::OUTPUT => spec.output().is_some(),
++            _ => false,
++        })),
++        S::DEVICE_CAN_BE_SYSTEM_DEFAULT => PropertyValue::U32(u32::from(
++            address.scope == crate::PropertyScope::OUTPUT && spec.output().is_some(),
++        )),
+         S::DEVICE_STREAMS => PropertyValue::ObjectList(map.device_streams(address.scope)),
+         S::DEVICE_NOMINAL_SAMPLE_RATE => PropertyValue::F64(state.sample_rate),
+         // A fixed-rate virtual device offers exactly its nominal
+@@ -311,6 +325,14 @@
+         // A stream is a leaf of the object tree.
+         S::OWNED_OBJECTS => PropertyValue::ObjectList(vec![]),
+         S::STREAM_DIRECTION => PropertyValue::U32(direction.as_property_value()),
++        S::STREAM_IS_ACTIVE => PropertyValue::U32(1),
++        S::DEVICE_LATENCY => PropertyValue::U32(0),
++        S::STREAM_AVAILABLE_VIRTUAL_FORMATS | S::STREAM_AVAILABLE_PHYSICAL_FORMATS => {
++            PropertyValue::RangedFormats(vec![(
++                stream.format(),
++                ValueRange::point(stream.format().sample_rate()),
++            )])
++        }
+         S::STREAM_TERMINAL_TYPE => PropertyValue::U32(TERMINAL_TYPE_UNKNOWN),
+         S::STREAM_STARTING_CHANNEL => PropertyValue::U32(stream.starting_channel()),
+         // The framework negotiates one fixed format, so the virtual
 --- a/src/driver.rs
 +++ b/src/driver.rs
 @@ -18,7 +18,8 @@
@@ -595,7 +637,28 @@
  /// }
 --- a/src/property.rs
 +++ b/src/property.rs
-@@ -317,6 +317,8 @@
+@@ -111,6 +111,20 @@
+     pub const STREAM_PHYSICAL_FORMAT: Self = Self::new(*b"pft ");
+     /// `kAudioStreamPropertyAvailableVirtualFormats` (`'sfma'`).
+     pub const STREAM_AVAILABLE_VIRTUAL_FORMATS: Self = Self::new(*b"sfma");
++    /// `kAudioStreamPropertyAvailablePhysicalFormats`.
++    pub const STREAM_AVAILABLE_PHYSICAL_FORMATS: Self = Self::new(*b"pfta");
++    /// `kAudioStreamPropertyIsActive`.
++    pub const STREAM_IS_ACTIVE: Self = Self::new(*b"sact");
++    /// `kAudioDevicePropertyClockDomain`.
++    pub const DEVICE_CLOCK_DOMAIN: Self = Self::new(*b"clkd");
++    /// `kAudioDevicePropertyDeviceCanBeDefaultDevice`.
++    pub const DEVICE_CAN_BE_DEFAULT: Self = Self::new(*b"dflt");
++    /// `kAudioDevicePropertyDeviceCanBeDefaultSystemDevice`.
++    pub const DEVICE_CAN_BE_SYSTEM_DEFAULT: Self = Self::new(*b"sflt");
++    /// `kAudioDevicePropertyIsHidden`.
++    pub const DEVICE_IS_HIDDEN: Self = Self::new(*b"hidn");
++    /// `kAudioDevicePropertyRelatedDevices`.
++    pub const DEVICE_RELATED_DEVICES: Self = Self::new(*b"akin");
+ }
+ 
+ impl From<FourCharCode> for PropertySelector {
+@@ -317,6 +331,8 @@
      /// A 64-bit float — `kAudioDevicePropertyNominalSampleRate` and
      /// other scalar rates.
      F64(f64),
@@ -604,7 +667,18 @@
      /// A UTF-8 string, marshalled to a `CFStringRef` at the FFI
      /// boundary — device names, manufacturer strings, UIDs.
      Text(alloc::string::String),
-@@ -351,6 +353,7 @@
+@@ -326,6 +342,10 @@
+     /// A stream format, marshalled to an `AudioStreamBasicDescription`
+     /// at the FFI boundary.
+     Format(crate::format::StreamFormat),
++    /// AudioStreamRangedDescription entries: one ASBD and one sample-rate range.
++    RangedFormats(Vec<(crate::format::StreamFormat, ValueRange)>),
++    /// AudioServerPlugInCustomPropertyInfo triples: selector, data type, qualifier type.
++    CustomProperties(Vec<[u32; 3]>),
+     /// A list of [`ValueRange`]s, marshalled to an `AudioValueRange`
+     /// array — `kAudioDevicePropertyAvailableNominalSampleRates` and
+     /// similar.
+@@ -351,11 +371,16 @@
          match self {
              Self::U32(_) | Self::ObjectId(_) => core::mem::size_of::<u32>(),
              Self::F64(_) => core::mem::size_of::<f64>(),
@@ -612,6 +686,24 @@
              // A CFString property's value *is* a `CFStringRef` — a
              // single pointer — no matter how long the string is.
              Self::Text(_) => core::mem::size_of::<*const ()>(),
+             Self::ObjectList(ids) => ids.len() * core::mem::size_of::<u32>(),
+             Self::Format(_) => crate::format::ASBD_SIZE,
++            Self::RangedFormats(formats) => {
++                formats.len() * (crate::format::ASBD_SIZE + ValueRange::SIZE)
++            }
++            Self::CustomProperties(properties) => properties.len() * 12,
+             Self::RangeList(ranges) => ranges.len() * ValueRange::SIZE,
+         }
+     }
+@@ -368,6 +393,8 @@
+         match self {
+             Self::ObjectList(ids) => ids.is_empty(),
+             Self::RangeList(ranges) => ranges.is_empty(),
++            Self::RangedFormats(formats) => formats.is_empty(),
++            Self::CustomProperties(properties) => properties.is_empty(),
+             _ => false,
+         }
+     }
 --- a/src/raw/abi.rs
 +++ b/src/raw/abi.rs
 @@ -145,8 +145,12 @@
@@ -887,7 +979,31 @@
  
 --- a/src/raw/entry.rs
 +++ b/src/raw/entry.rs
-@@ -335,22 +335,116 @@
+@@ -250,6 +250,12 @@
+     let Some(object) = (unsafe { DriverObject::from_ref(this.cast()) }) else {
+         return OsStatus::BAD_OBJECT.as_i32();
+     };
++    super::trace::record(
++        c"query_interface",
++        1,
++        0,
++        u32::from(in_uuid_bytes == ASPL_DRIVER_INTERFACE_UUID),
++    );
+     if in_uuid_bytes != IUNKNOWN_UUID && in_uuid_bytes != ASPL_DRIVER_INTERFACE_UUID {
+         if !out_interface.is_null() {
+             // Safety: caller guarantees `out_interface` is writable.
+@@ -323,7 +329,9 @@
+     };
+     let runtime = object.runtime();
+     runtime.set_host(host);
+-    guard(|| OsStatus::from(runtime.driver().initialize())).as_i32()
++    let status = guard(|| OsStatus::from(runtime.driver().initialize())).as_i32();
++    super::trace::record(c"initialize", 1, 0, status as u32);
++    status
+ }
+ 
+ /// `StartIO` — runs the user driver's `start_io`, anchors the
+@@ -335,22 +343,116 @@
  /// driver ref.
  pub unsafe extern "C" fn start_io(
      driver: AudioServerPlugInDriverRef,
@@ -1006,7 +1122,7 @@
  }
  
  /// `StopIO` — runs the user driver's `stop_io`, halts the device
-@@ -362,18 +456,34 @@
+@@ -362,18 +464,34 @@
  /// driver ref.
  pub unsafe extern "C" fn stop_io(
      driver: AudioServerPlugInDriverRef,
@@ -1043,7 +1159,7 @@
      }
      status.as_i32()
  }
-@@ -395,7 +505,7 @@
+@@ -395,7 +513,7 @@
  /// must each be a valid writable pointer (or null).
  pub unsafe extern "C" fn get_zero_time_stamp(
      driver: AudioServerPlugInDriverRef,
@@ -1052,7 +1168,7 @@
      _client_id: UInt32,
      out_sample_time: *mut crate::raw::abi::Float64,
      out_host_time: *mut crate::raw::abi::UInt64,
-@@ -406,11 +516,14 @@
+@@ -406,11 +524,14 @@
          return OsStatus::BAD_OBJECT.as_i32();
      };
      let runtime = object.runtime();
@@ -1069,7 +1185,7 @@
      let now = platform::host_time_now();
  
      let Some(timestamp) = runtime
-@@ -520,8 +633,8 @@
+@@ -520,8 +641,8 @@
  #[allow(clippy::too_many_arguments)] // one parameter per C ABI argument
  pub unsafe extern "C" fn do_io_operation(
      driver: AudioServerPlugInDriverRef,
@@ -1080,7 +1196,7 @@
      _client_id: UInt32,
      operation_id: UInt32,
      io_buffer_frame_size: UInt32,
-@@ -541,6 +654,17 @@
+@@ -541,6 +662,17 @@
      }
  
      let runtime = object.runtime();
@@ -1098,7 +1214,7 @@
      let ring = runtime.ring();
      let channels = ring.channels();
      let sample_count = io_buffer_frame_size as usize * channels;
-@@ -549,6 +673,9 @@
+@@ -549,6 +681,9 @@
          // it rather than allocating on the realtime thread.
          return OsStatus::UNSPECIFIED.as_i32();
      }
@@ -1108,7 +1224,7 @@
  
      // The cycle's timestamp: `ReadInput` is keyed to the input
      // timeline, `WriteMix` to the output timeline.
-@@ -578,6 +705,7 @@
+@@ -578,6 +713,7 @@
              // client's output samples and is readable.
              let client = unsafe { in_samples(io_main_buffer, sample_count) };
              let mut io = IoBuffer::new(timestamp, operation, client, scratch);
@@ -1116,7 +1232,7 @@
              let result = runtime.driver().process_io(&rt, &mut io);
              if result.is_ok() {
                  ring.write_from(sample_time, io.output);
-@@ -648,8 +776,7 @@
+@@ -648,8 +784,7 @@
  }
  
  /// `AddDeviceClient` — a process opened one of the plug-in's
@@ -1126,7 +1242,7 @@
  ///
  /// # Safety
  ///
-@@ -657,19 +784,25 @@
+@@ -657,19 +792,25 @@
  /// driver ref.
  pub unsafe extern "C" fn add_device_client(
      driver: AudioServerPlugInDriverRef,
@@ -1160,7 +1276,7 @@
  ///
  /// # Safety
  ///
-@@ -677,13 +810,29 @@
+@@ -677,13 +818,29 @@
  /// driver ref.
  pub unsafe extern "C" fn remove_device_client(
      driver: AudioServerPlugInDriverRef,
@@ -1195,17 +1311,18 @@
      }
  }
  
-@@ -708,6 +857,9 @@
+@@ -708,6 +865,10 @@
      };
      let runtime = object.runtime();
      let address = marshal::address_from_raw(raw_address);
++    super::trace::record(c"has_property", object_id, raw_address.mSelector, 0);
 +    if let Some(value) = super::output_controls::get(runtime, object_id, &address, None) {
 +        return Boolean::from(value.is_ok());
 +    }
      let has = dispatch::get_property_data(
          runtime.objects(),
          runtime.info(),
-@@ -742,6 +894,18 @@
+@@ -742,6 +903,18 @@
      };
      let runtime = object.runtime();
      let address = marshal::address_from_raw(raw_address);
@@ -1224,10 +1341,11 @@
      match dispatch::is_property_settable(
          runtime.objects(),
          runtime.info(),
-@@ -786,6 +950,18 @@
+@@ -786,6 +959,19 @@
      };
      let runtime = object.runtime();
      let address = marshal::address_from_raw(raw_address);
++    super::trace::record(c"property_size", object_id, raw_address.mSelector, 0);
 +    if let Some(result) = super::output_controls::get(runtime, object_id, &address, None) {
 +        return match result {
 +            Ok(value) => {
@@ -1243,7 +1361,7 @@
      match dispatch::property_data_size(
          runtime.objects(),
          runtime.info(),
-@@ -820,8 +996,8 @@
+@@ -820,8 +1006,8 @@
      object_id: AudioObjectID,
      _client_pid: crate::raw::abi::pid_t,
      address: *const AudioObjectPropertyAddress,
@@ -1254,7 +1372,7 @@
      data_size: UInt32,
      out_data_size: *mut UInt32,
      out_data: *mut c_void,
-@@ -834,13 +1010,70 @@
+@@ -834,13 +1020,71 @@
      };
      let runtime = object.runtime();
      let address = marshal::address_from_raw(raw_address);
@@ -1266,6 +1384,7 @@
 -        &address,
 -    ) {
 +    let selector = address.selector.0.as_u32();
++    super::trace::record(c"get_property", object_id, selector, data_size);
 +    if object_id == runtime.objects().plugin_id().as_u32()
 +        && selector == u32::from_be_bytes(*b"uidd")
 +        && address.scope == crate::PropertyScope::GLOBAL
@@ -1332,12 +1451,12 @@
          Ok(value) => value,
          Err(status) => return status.as_i32(),
      };
-@@ -899,6 +1132,32 @@
+@@ -899,6 +1143,32 @@
      // Safety: the HAL guarantees `data` covers `data_size` readable
      // bytes.
      let buffer = unsafe { in_slice(data, data_size) };
 +    if object_id == runtime.objects().device_id().as_u32()
-+        && raw_address.mSelector == u32::from_be_bytes(*b"lnam")
++        && raw_address.mSelector == u32::from_be_bytes(*b"nmna")
 +        && raw_address.mScope == u32::from_be_bytes(*b"glob")
 +        && raw_address.mElement == 0
 +    {
@@ -1365,7 +1484,7 @@
      let mut state = runtime.state();
      let result = dispatch::set_property_data(
          runtime.objects(),
-@@ -938,7 +1197,7 @@
+@@ -938,7 +1208,7 @@
                  .with_output(StreamSpec::output(format))
          }
  
@@ -1374,7 +1493,7 @@
              // A real loopback: copy the operation's input straight
              // to its output, so `DoIOOperation` round-trips audio
              // through the device ring.
-@@ -1346,16 +1605,26 @@
+@@ -1346,16 +1616,26 @@
      #[test]
      fn add_and_remove_device_client_succeed() {
          let fixture = Fixture::new();
@@ -1417,9 +1536,37 @@
          PropertyValue::ObjectList(ids) => {
              for (i, id) in ids.iter().enumerate() {
                  let off = i * 4;
+@@ -241,7 +244,27 @@
+                 buf[off + 8..off + 16].copy_from_slice(&range.max.to_ne_bytes());
+             }
+         }
++        PropertyValue::RangedFormats(formats) => {
++            for (i, (format, range)) in formats.iter().enumerate() {
++                let off = i * (crate::format::ASBD_SIZE + ValueRange::SIZE);
++                write_asbd(
++                    &format_to_asbd(format),
++                    &mut buf[off..off + crate::format::ASBD_SIZE],
++                );
++                let off = off + crate::format::ASBD_SIZE;
++                buf[off..off + 8].copy_from_slice(&range.min.to_ne_bytes());
++                buf[off + 8..off + 16].copy_from_slice(&range.max.to_ne_bytes());
++            }
++        }
+         PropertyValue::Text(_) => return Err(OsStatus::UNSPECIFIED),
++        PropertyValue::CustomProperties(properties) => {
++            for (i, property) in properties.iter().enumerate() {
++                for (field, value) in property.iter().enumerate() {
++                    let off = i * 12 + field * 4;
++                    buf[off..off + 4].copy_from_slice(&value.to_ne_bytes());
++                }
++            }
++        }
+     }
+     Ok(needed)
+ }
 --- a/src/raw/mod.rs
 +++ b/src/raw/mod.rs
-@@ -39,6 +39,7 @@
+@@ -39,9 +39,11 @@
  pub mod clock;
  pub mod entry;
  pub mod marshal;
@@ -1427,7 +1574,19 @@
  pub mod platform;
  pub mod ring;
  pub mod runtime;
-@@ -131,7 +132,7 @@
++pub(crate) mod trace;
+ pub mod vtable;
+ 
+ /// Minimal CoreFoundation FFI for the text-property `CFStringRef`
+@@ -100,6 +102,7 @@
+     // re-checked; the allocator is the HAL's and we do not allocate
+     // through it.
+     let _ = (allocator, requested_type_uuid);
++    trace::record(c"factory", 1, 0, 0);
+ 
+     let runtime = DriverRuntime::new(create());
+     let object = Box::new(DriverObject::new(vtable::driver_interface(), runtime));
+@@ -131,7 +134,7 @@
              DeviceSpec::new("com.tympan.test.raw", "Raw Factory", Self::MANUFACTURER)
          }
  
@@ -1438,7 +1597,7 @@
      fn create() -> Arc<dyn AnyDriver> {
 --- a/src/raw/output_controls.rs
 +++ b/src/raw/output_controls.rs
-@@ -0,0 +1,316 @@
+@@ -0,0 +1,324 @@
 +//! NeonMix local extension: master output volume/Mute objects and legacy device aliases.
 +use super::{
 +    abi::{AudioObjectPropertyAddress, AudioServerPlugInHostRef},
@@ -1513,13 +1672,16 @@
 +    let main = address.element.is_main();
 +    let value = if id == DEVICE && main {
 +        match selector {
-+            v if v == code(b"lnam") && global => PropertyValue::Text(
++            v if (v == code(b"lnam") || v == code(b"nmna")) && global => PropertyValue::Text(
 +                control
 +                    .name
 +                    .lock()
 +                    .unwrap_or_else(|p| p.into_inner())
 +                    .clone(),
 +            ),
++            v if v == code(b"cust") && global => {
++                PropertyValue::CustomProperties(vec![[code(b"nmna"), code(b"cfst"), 0]])
++            }
 +            v if v == code(b"ctrl") => PropertyValue::ObjectList(if global || output {
 +                vec![AudioObjectId(VOLUME), AudioObjectId(MUTE)]
 +            } else {
@@ -1601,7 +1763,7 @@
 +        value.map(|_| {
 +            let selector = address.selector.0.as_u32();
 +            (id == DEVICE
-+                && [code(b"volm"), code(b"vold"), code(b"mute"), code(b"lnam")].contains(&selector))
++                && [code(b"volm"), code(b"vold"), code(b"mute"), code(b"nmna")].contains(&selector))
 +                || (id == VOLUME && [code(b"lcsv"), code(b"lcdv")].contains(&selector))
 +                || (id == MUTE && selector == code(b"bcvl"))
 +        })
@@ -1702,9 +1864,14 @@
 +        mScope: code(b"glob"),
 +        mElement: 0,
 +    };
++    let custom = AudioObjectPropertyAddress {
++        mSelector: code(b"nmna"),
++        ..address
++    };
++    let addresses = [address, custom];
 +    // SAFETY: control-thread notification with live host and correctly sized address.
 +    unsafe {
-+        callback(host, DEVICE, 1, &address);
++        callback(host, DEVICE, addresses.len() as u32, addresses.as_ptr());
 +    }
 +}
 +
@@ -1810,6 +1977,37 @@
      }
  
      fn runtime() -> DriverRuntime {
+--- a/src/raw/trace.rs
++++ b/src/raw/trace.rs
+@@ -0,0 +1,28 @@
++//! Opt-in, bounded control-property diagnostics. Never called by data/clock callbacks.
++#[cfg(all(target_os = "macos", feature = "trace-properties"))]
++pub(crate) fn record(event: &core::ffi::CStr, object: u32, selector: u32, value: u32) {
++    use core::sync::atomic::{AtomicU32, Ordering};
++    static BUDGET: AtomicU32 = AtomicU32::new(96);
++    if BUDGET
++        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_sub(1))
++        .is_err()
++    {
++        return;
++    }
++    extern "C" {
++        fn syslog(priority: i32, format: *const core::ffi::c_char, ...);
++    }
++    // SAFETY: fixed printf format matches the borrowed C string and UInt32 arguments.
++    unsafe {
++        syslog(
++            5,
++            c"NeonMix HAL %s object=%u selector=0x%08x value=%u".as_ptr(),
++            event.as_ptr(),
++            object,
++            selector,
++            value,
++        );
++    }
++}
++#[cfg(not(all(target_os = "macos", feature = "trace-properties")))]
++pub(crate) fn record(_event: &core::ffi::CStr, _object: u32, _selector: u32, _value: u32) {}
 --- a/src/raw/vtable.rs
 +++ b/src/raw/vtable.rs
 @@ -53,13 +53,13 @@

@@ -184,13 +184,22 @@ try:
     replica = wait(lambda: next((r for r in reversed(sender_stats('a')) if r['control_subscriptions'] >= 2 and r['control_connected']), None), 'snapshot then resubscribe', timeout=15)
     assert replica['control_snapshots'] >= 2
     report['checks']['snapshot_resubscribe'] = replica
-    # Real filesystem failure: same directory prevents opening the temporary file.
+    # Block the destination rename, independently of temporary-file naming.
     old = state()
-    (lab / 'state.tmp').mkdir()
-    status, error = command({'type': 'output_mix', 'gain_db': -6.0, 'muted': None})
-    assert status == 503 and error['error'] == 'busy'
-    assert state()['output'] == old['output'] and state()['revision'] == old['revision']
-    (lab / 'state.tmp').rmdir()
+    saved_path = lab / 'state-original.json'
+    state_path = lab / 'state.json'
+    persisted = state_path.read_bytes()
+    state_path.rename(saved_path)
+    try:
+        state_path.mkdir()
+        status, error = command({'type': 'output_mix', 'gain_db': -6.0, 'muted': None})
+        assert status == 503 and error['error'] == 'busy'
+        assert state()['output'] == old['output'] and state()['revision'] == old['revision']
+    finally:
+        if state_path.is_dir():
+            state_path.rmdir()
+        saved_path.rename(state_path)
+    assert state_path.read_bytes() == persisted
     report['checks']['real_persistence_failure_is_atomic'] = True
     revision = state()['revision']
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:

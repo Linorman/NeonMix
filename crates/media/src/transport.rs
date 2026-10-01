@@ -355,6 +355,7 @@ pub struct ReceiveStats {
     pub pcm_sink_dropped: u64,
 }
 pub struct Receiver {
+    pcm_queue_trace: Arc<crate::queue_trace::QueueTrace>,
     wire_to_authenticated_max_ns: Arc<std::sync::atomic::AtomicU64>,
     authenticated_to_jitter_max_ns: Arc<std::sync::atomic::AtomicU64>,
     last_pcm_pts_ns: u64,
@@ -492,6 +493,21 @@ impl Receiver {
                 .field("layout", "interleaved")
                 .build(),
         ));
+        let pcm_queue_trace = Arc::new(crate::queue_trace::QueueTrace::new());
+        let tagging = pcm_queue_trace.clone();
+        let gate = endpoint.gate.clone();
+        pcm.static_pad("sink")
+            .ok_or_else(|| native("PCM sink pad"))?
+            .add_probe(gst::PadProbeType::BUFFER, move |_, info| {
+                let Some(buffer) = info.buffer_mut() else {
+                    return gst::PadProbeReturn::Drop;
+                };
+                if tagging.tag(buffer.make_mut()).is_err() {
+                    gate.revoke();
+                    return gst::PadProbeReturn::Drop;
+                }
+                gst::PadProbeReturn::Ok
+            });
         endpoint
             .pipeline
             .add_many([
@@ -696,6 +712,7 @@ impl Receiver {
             .set_state(gst::State::Playing)
             .map_err(native)?;
         Ok(Self {
+            pcm_queue_trace,
             wire_to_authenticated_max_ns,
             authenticated_to_jitter_max_ns,
             last_pcm_pts_ns: 0,
@@ -754,6 +771,7 @@ impl Receiver {
                 continue;
             }
             let buffer = sample.buffer().ok_or(MediaError::InvalidPacket)?;
+            self.pcm_queue_trace.observe(buffer)?;
             let map = buffer.map_readable().map_err(native)?;
             if map.len() % 8 != 0 || map.len() > 5760 * 8 {
                 return Err(MediaError::InvalidPacket);
@@ -888,7 +906,7 @@ impl Receiver {
             pcm_peak: self.pcm_peak,
             silent_pcm_frames: self.silent_pcm_frames,
             queue_drops: self.queue_drops,
-            pcm_sink_dropped: self.pcm.property::<u64>("dropped"),
+            pcm_sink_dropped: self.pcm_queue_trace.dropped(),
         }
     }
     pub fn authenticated_packets(&self) -> u64 {
@@ -925,6 +943,7 @@ impl Receiver {
 }
 
 pub struct Sender {
+    audio_queue_trace: Arc<crate::queue_trace::QueueTrace>,
     endpoint: Endpoint,
     audio: AppSrc,
     encoder: gst::Element,
@@ -971,6 +990,25 @@ impl Sender {
                 .field("layout", "interleaved")
                 .build(),
         ));
+        let audio_queue_trace = Arc::new(crate::queue_trace::QueueTrace::new());
+        let observing = audio_queue_trace.clone();
+        let gate = endpoint.gate.clone();
+        audio
+            .static_pad("src")
+            .ok_or_else(|| native("audio source pad"))?
+            .add_probe(gst::PadProbeType::BUFFER, move |_, info| {
+                if info
+                    .buffer()
+                    .is_none_or(|buffer| observing.observe_contiguous(buffer).is_err())
+                {
+                    // The encoder/payloader need not preserve appsrc's DISCONT
+                    // flag. Close before encoding after a real queue gap, so the
+                    // normalized RTP clock cannot compress missing source time.
+                    gate.revoke();
+                    return gst::PadProbeReturn::Drop;
+                }
+                gst::PadProbeReturn::Ok
+            });
         let convert = gst::ElementFactory::make("audioconvert")
             .build()
             .map_err(native)?;
@@ -1078,6 +1116,7 @@ impl Sender {
             .set_state(gst::State::Playing)
             .map_err(native)?;
         Ok(Self {
+            audio_queue_trace,
             endpoint,
             audio,
             encoder,
@@ -1131,6 +1170,7 @@ impl Sender {
             neonmix_core::clock::frames_to_ns(position, 48000),
         ));
         b.set_duration(gst::ClockTime::from_mseconds(10));
+        self.audio_queue_trace.tag(b)?;
         self.audio.push_buffer(buffer).map_err(native)?;
         Ok(())
     }
@@ -1156,7 +1196,7 @@ impl Sender {
         self.feedback_reports
     }
     pub fn audio_queue_dropped(&self) -> u64 {
-        self.audio.property::<u64>("dropped")
+        self.audio_queue_trace.dropped()
     }
     pub fn audio_queue_buffers(&self) -> u64 {
         self.audio.property::<u64>("current-level-buffers")

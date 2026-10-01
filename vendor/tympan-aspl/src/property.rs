@@ -344,6 +344,8 @@ pub enum PropertyValue {
     Format(crate::format::StreamFormat),
     /// AudioStreamRangedDescription entries: one ASBD and one sample-rate range.
     RangedFormats(Vec<(crate::format::StreamFormat, ValueRange)>),
+    /// AudioServerPlugInCustomPropertyInfo triples: selector, data type, qualifier type.
+    CustomProperties(Vec<[u32; 3]>),
     /// A list of [`ValueRange`]s, marshalled to an `AudioValueRange`
     /// array — `kAudioDevicePropertyAvailableNominalSampleRates` and
     /// similar.
@@ -378,6 +380,7 @@ impl PropertyValue {
             Self::RangedFormats(formats) => {
                 formats.len() * (crate::format::ASBD_SIZE + ValueRange::SIZE)
             }
+            Self::CustomProperties(properties) => properties.len() * 12,
             Self::RangeList(ranges) => ranges.len() * ValueRange::SIZE,
         }
     }
@@ -391,6 +394,7 @@ impl PropertyValue {
             Self::ObjectList(ids) => ids.is_empty(),
             Self::RangeList(ranges) => ranges.is_empty(),
             Self::RangedFormats(formats) => formats.is_empty(),
+            Self::CustomProperties(properties) => properties.is_empty(),
             _ => false,
         }
     }

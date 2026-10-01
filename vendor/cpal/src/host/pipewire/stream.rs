@@ -440,6 +440,17 @@ fn remote_props() -> Option<PropertiesBox> {
     Some(props)
 }
 
+fn context_props() -> Option<PropertiesBox> {
+    // A realtime main-loop callback still depends on PipeWire's data loop to
+    // deliver/return its buffers. The plain client.conf does not load module-rt.
+    // Use the distro's realtime client policy, respecting an explicit override.
+    #[cfg(feature = "realtime")]
+    if std::env::var_os("PIPEWIRE_CONFIG_NAME").is_none() {
+        return Some(pw::properties::properties! { "config.name" => "client-rt.conf" });
+    }
+    None
+}
+
 /// Holds the metadata proxy and its listener alive for the duration of the stream, so that
 /// default-device changes are delivered via `error_callback`.
 struct MetadataObjects {
@@ -623,7 +634,7 @@ where
     } = params;
 
     let mainloop = MainLoopRc::new(None)?;
-    let context = ContextRc::new(&mainloop, None)?;
+    let context = ContextRc::new(&mainloop, context_props())?;
     let core = context.connect_rc(remote_props())?;
 
     let error_callback: ErrorCallbackArc = Arc::new(Mutex::new(error_callback));
@@ -885,7 +896,7 @@ where
     } = params;
 
     let mainloop = MainLoopRc::new(None)?;
-    let context = ContextRc::new(&mainloop, None)?;
+    let context = ContextRc::new(&mainloop, context_props())?;
     let core = context.connect_rc(remote_props())?;
 
     let error_callback: ErrorCallbackArc = Arc::new(Mutex::new(error_callback));

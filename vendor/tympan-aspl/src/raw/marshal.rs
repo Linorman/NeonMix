@@ -257,6 +257,14 @@ pub fn write_property_value(value: &PropertyValue, buf: &mut [u8]) -> Result<usi
             }
         }
         PropertyValue::Text(_) => return Err(OsStatus::UNSPECIFIED),
+        PropertyValue::CustomProperties(properties) => {
+            for (i, property) in properties.iter().enumerate() {
+                for (field, value) in property.iter().enumerate() {
+                    let off = i * 12 + field * 4;
+                    buf[off..off + 4].copy_from_slice(&value.to_ne_bytes());
+                }
+            }
+        }
     }
     Ok(needed)
 }

@@ -11,5 +11,5 @@ cpal.workspace = true
 [lints]
 workspace = true
 [target.'cfg(target_os = "linux")'.dependencies]
-cpal = { workspace = true, features = ["pipewire"] }
+cpal = { workspace = true, features = ["pipewire", "realtime-dbus"] }
 pipewire = "=0.10.0"

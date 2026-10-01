@@ -143,11 +143,13 @@ def active_session():
 try:
     # Existing tests may own this global device. Report the conflict before changing it.
     busy = []
-    for line in subprocess.check_output(['ps', '-axo', 'pid=,command='], text=True).splitlines():
+    for line in subprocess.check_output(['ps', '-ww', '-axo', 'pid=,command='], text=True).splitlines():
         fields = line.strip().split(None, 1)
-        if len(fields) != 2 or str(ROOT / 'target/release/neonmix-') not in fields[1]:
+        if len(fields) != 2:
             continue
         argv = shlex.split(fields[1])
+        if not argv or Path(argv[0]).name not in ('neonmix-hub', 'neonmix-audio'):
+            continue
         if len(argv) > 1 and argv[1] in ('play', 'capture') and '--device' in argv and argv[argv.index('--device') + 1] == DEVICE:
             busy.append(int(fields[0]))
         if len(argv) > 1 and argv[1] == 'serve' and '--config' in argv:
@@ -156,7 +158,7 @@ try:
                 busy.append(int(fields[0]))
     if busy:
         report['blocked_by_device_owners'] = busy
-        raise RuntimeError(f'BlackHole is in use by other NeonMix probes: {busy}')
+        raise RuntimeError(f'{DEVICE} is in use by other NeonMix probes: {busy}')
     binding = subprocess.run([str(hub_bin), 'virtual-output', '--provider', args.provider], capture_output=True, text=True, check=True)
     report['binding'] = json.loads(binding.stdout)
     assert report['binding']['external_driver'] == (args.provider == 'blackhole') and report['binding']['device']['id'] == DEVICE

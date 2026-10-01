@@ -1,0 +1,78 @@
+diff --git a/src/host/pipewire/rt_promote.rs b/src/host/pipewire/rt_promote.rs
+index 3fa0a52..c0fadad 100644
+--- a/src/host/pipewire/rt_promote.rs
++++ b/src/host/pipewire/rt_promote.rs
+@@ -24,6 +24,10 @@ impl RtPromoter {
+     /// Must be called on the thread that will run the audio callbacks: `get_current_thread_info`
+     /// captures the calling thread's identity, to promote later from the background thread.
+     pub(crate) fn spawn(error_callback: ErrorCallbackArc, rate: SampleRate) -> Option<Self> {
++        // The callback runs on this main-loop thread. Capture its native TID
++        // while alive; the promotion helper is joined before UserData is freed.
++        // SAFETY: gettid has no pointer arguments and only reads caller identity.
++        let callback_tid = unsafe { libc::syscall(libc::SYS_gettid) as libc::pid_t };
+         let thread_info = match audio_thread_priority::get_current_thread_info() {
+             Ok(info) => info,
+             Err(e) => {
+@@ -46,6 +50,22 @@ impl RtPromoter {
+                 }
+                 let frames = pending_frames_bg.swap(0, Ordering::Relaxed);
+                 if frames != 0 {
++                    // Honor an existing RLIMIT_RTPRIO/CAP_SYS_NICE grant before
++                    // asking RTKit. Headless sessions may lack a polkit session
++                    // even when the administrator granted audio scheduling.
++                    let params = libc::sched_param { sched_priority: 10 };
++                    // SAFETY: callback_tid remains live until this helper joins;
++                    // params is initialized and the kernel enforces permission.
++                    let direct = unsafe {
++                        libc::sched_setscheduler(
++                            callback_tid,
++                            libc::SCHED_RR | libc::SCHED_RESET_ON_FORK,
++                            &params,
++                        )
++                    };
++                    if direct == 0 {
++                        continue;
++                    }
+                     if let Err(e) = audio_thread_priority::promote_thread_to_real_time(
+                         thread_info,
+                         frames,
+diff --git a/src/host/pipewire/stream.rs b/src/host/pipewire/stream.rs
+index 243562f..4c35ec0 100644
+--- a/src/host/pipewire/stream.rs
++++ b/src/host/pipewire/stream.rs
+@@ -440,6 +440,17 @@ fn remote_props() -> Option<PropertiesBox> {
+     Some(props)
+ }
+ 
++fn context_props() -> Option<PropertiesBox> {
++    // A realtime main-loop callback still depends on PipeWire's data loop to
++    // deliver/return its buffers. The plain client.conf does not load module-rt.
++    // Use the distro's realtime client policy, respecting an explicit override.
++    #[cfg(feature = "realtime")]
++    if std::env::var_os("PIPEWIRE_CONFIG_NAME").is_none() {
++        return Some(pw::properties::properties! { "config.name" => "client-rt.conf" });
++    }
++    None
++}
++
+ /// Holds the metadata proxy and its listener alive for the duration of the stream, so that
+ /// default-device changes are delivered via `error_callback`.
+ struct MetadataObjects {
+@@ -623,7 +634,7 @@ where
+     } = params;
+ 
+     let mainloop = MainLoopRc::new(None)?;
+-    let context = ContextRc::new(&mainloop, None)?;
++    let context = ContextRc::new(&mainloop, context_props())?;
+     let core = context.connect_rc(remote_props())?;
+ 
+     let error_callback: ErrorCallbackArc = Arc::new(Mutex::new(error_callback));
+@@ -885,7 +896,7 @@ where
+     } = params;
+ 
+     let mainloop = MainLoopRc::new(None)?;
+-    let context = ContextRc::new(&mainloop, None)?;
++    let context = ContextRc::new(&mainloop, context_props())?;
+     let core = context.connect_rc(remote_props())?;
+ 
+     let error_callback: ErrorCallbackArc = Arc::new(Mutex::new(error_callback));

@@ -18,7 +18,20 @@ use std::{
 struct Events {
     mainloop: pw::main_loop::MainLoopRc,
     error: Rc<RefCell<Option<String>>>,
-    bound: Rc<Cell<bool>>,
+    ready: Rc<Readiness>,
+}
+struct Readiness {
+    bound: Cell<bool>,
+    synced: Cell<bool>,
+    announced: Cell<bool>,
+    response: mpsc::Sender<Result<(), String>>,
+}
+impl Readiness {
+    fn announce(&self) {
+        if self.bound.get() && self.synced.get() && !self.announced.replace(true) {
+            let _ = self.response.send(Ok(()));
+        }
+    }
 }
 unsafe extern "C" fn removed(data: *mut c_void) {
     // SAFETY: boxed Events outlives the registered hook; invoked on the owning loop.
@@ -28,7 +41,19 @@ unsafe extern "C" fn removed(data: *mut c_void) {
 }
 unsafe extern "C" fn bound(data: *mut c_void, _id: u32) {
     // SAFETY: same boxed callback state and main-loop contract as removed.
-    unsafe { &*(data.cast::<Events>()) }.bound.set(true);
+    let events = unsafe { &*(data.cast::<Events>()) };
+    events.ready.bound.set(true);
+    events.ready.announce();
+}
+unsafe extern "C" fn bound_props(
+    data: *mut c_void,
+    id: u32,
+    _props: *const pw::spa::sys::spa_dict,
+) {
+    // SAFETY: the same stable callback state as the legacy bound event; properties are not borrowed.
+    unsafe {
+        bound(data, id);
+    }
 }
 unsafe extern "C" fn error(
     data: *mut c_void,
@@ -48,13 +73,13 @@ unsafe extern "C" fn error(
     events.mainloop.quit();
 }
 static PROXY_EVENTS: pw::sys::pw_proxy_events = pw::sys::pw_proxy_events {
-    version: 0,
+    version: 1,
     destroy: None,
     bound: Some(bound),
     removed: Some(removed),
     done: None,
     error: Some(error),
-    bound_props: None,
+    bound_props: Some(bound_props),
 };
 
 struct OwnedNode {
@@ -186,7 +211,12 @@ pub(super) fn run(
         let context = pw::context::ContextRc::new(&mainloop, None)?;
         let core = context.connect_rc(None)?;
         let errors = Rc::new(RefCell::new(None));
-        let bound = Rc::new(Cell::new(false));
+        let readiness = Rc::new(Readiness {
+            bound: Cell::new(false),
+            synced: Cell::new(false),
+            announced: Cell::new(false),
+            response: ready,
+        });
         let errors_clone = errors.clone();
         let loop_clone = mainloop.clone();
         let _error = core
@@ -196,28 +226,56 @@ pub(super) fn run(
                 loop_clone.quit();
             })
             .register();
+        // WirePlumber 0.4 can retain the exported adapter's ports while losing
+        // its linkable activation state on restart. Retire this export when the
+        // observed manager disappears; the owner's bounded retry recreates it
+        // with the same logical node.name and persisted display name.
+        let manager_id = Rc::new(Cell::new(None));
+        let seen_manager = manager_id.clone();
+        let removed_manager = manager_id;
+        let manager_errors = errors.clone();
+        let manager_loop = mainloop.clone();
+        let registry = core.get_registry_rc()?;
+        let _manager = registry
+            .add_listener_local()
+            .global(move |global| {
+                if global.type_ == pw::types::ObjectType::Client
+                    && global
+                        .props
+                        .as_ref()
+                        .is_some_and(|props| props.get("application.name") == Some("WirePlumber"))
+                {
+                    seen_manager.set(Some(global.id));
+                }
+            })
+            .global_remove(move |id| {
+                if removed_manager.get() == Some(id) {
+                    *manager_errors.borrow_mut() =
+                        Some("observed WirePlumber session manager was removed".into());
+                    manager_loop.quit();
+                }
+            })
+            .register();
         let node = Rc::new(OwnedNode::new(
             &context,
             &core,
             Events {
                 mainloop: mainloop.clone(),
                 error: errors.clone(),
-                bound: bound.clone(),
+                ready: readiness.clone(),
             },
             &name,
         )?);
         let pending = core.sync(0)?;
-        let loop_ready = mainloop.clone();
+        let loop_ready = readiness.clone();
         let _ready = core
             .add_listener_local()
             .done(move |id, seq| {
                 if id == pw::core::PW_ID_CORE && seq == pending {
-                    if bound.get() {
-                        let _ = ready.send(Ok(()));
-                    } else {
-                        let _ = ready.send(Err("virtual node was not bound after export".into()));
-                        loop_ready.quit();
-                    }
+                    // Export initialization can enqueue its remote binding after
+                    // this roundtrip. Either ordering must wait for both facts.
+                    loop_ready.synced.set(true);
+                    loop_ready.announce();
                 }
             })
             .register();

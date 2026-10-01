@@ -291,3 +291,147 @@ fn buffering_silence_does_not_consume_the_resume_fade() {
     );
     assert!((frames[239][0] - 0.02).abs() < 0.0001);
 }
+
+#[test]
+fn live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse() {
+    let (mut mixer, mut control, mut inputs, stats) = Mixer::new(Instant::now()).unwrap();
+    let mut config = MixerConfig {
+        master_db: -6.0206,
+        ..MixerConfig::default()
+    };
+    config.lanes[0] = LaneMix {
+        stream_id: 42,
+        epoch: 1,
+        ..LaneMix::default()
+    };
+    control.apply(config).unwrap();
+    let mut frames = [[0.0; 2]; 480];
+    let mut position = 0;
+    for _ in 0..8 {
+        assert!(inputs[0].push(block(42, 1, position, [0.2, 0.4])));
+        position += 480;
+    }
+    let mut feed = |mixer: &mut Mixer, inputs: &mut Vec<neonmix_core::queue::BlockProducer>| {
+        for _ in 0..15 {
+            mixer.render_block(&mut frames);
+            assert!(inputs[0].push(block(42, 1, position, [0.2, 0.4])));
+            position += 480;
+        }
+    };
+    feed(&mut mixer, &mut inputs);
+    let lane = stats.lane_meters[0].snapshot();
+    assert_eq!(lane.stream_id, 42);
+    assert!((lane.peak - 0.4).abs() < 0.001);
+    assert!((lane.rms - 0.1f32.sqrt()).abs() < 0.001);
+    let output = stats.output_meter.snapshot();
+    assert!((output.peak - 0.2).abs() < 0.001);
+    assert!((output.rms - 0.1f32.sqrt() / 2.0).abs() < 0.001);
+    assert_eq!(stats.lane_meters[1].snapshot().peak, 0.0);
+
+    // Room mute belongs after the lane meters; the lane still consumes PCM.
+    config.muted = true;
+    control.apply(config).unwrap();
+    feed(&mut mixer, &mut inputs);
+    assert!(stats.lane_meters[0].snapshot().peak > 0.39);
+    assert_eq!(stats.output_meter.snapshot().peak, 0.0);
+    assert_eq!(stats.output_meter.snapshot().rms, 0.0);
+
+    config.muted = false;
+    config.lanes[0].muted = true;
+    control.apply(config).unwrap();
+    feed(&mut mixer, &mut inputs);
+    assert_eq!(stats.lane_meters[0].snapshot().peak, 0.0);
+    assert_eq!(stats.lane_meters[0].snapshot().rms, 0.0);
+    config.lanes[0].muted = false;
+    control.apply(config).unwrap();
+    feed(&mut mixer, &mut inputs);
+    assert!(stats.lane_meters[0].snapshot().peak > 0.39);
+
+    config.lanes[1] = LaneMix {
+        stream_id: 7,
+        epoch: 1,
+        solo: true,
+        ..LaneMix::default()
+    };
+    control.apply(config).unwrap();
+    feed(&mut mixer, &mut inputs);
+    assert_eq!(stats.lane_meters[0].snapshot().peak, 0.0);
+    config.lanes[1] = LaneMix::default();
+    control.apply(config).unwrap();
+    feed(&mut mixer, &mut inputs);
+    assert!(stats.lane_meters[0].snapshot().peak > 0.39);
+
+    // Exhausting the PCM reservoir clears the latest window, rather than
+    // leaving a historical maximum lit while the same stream is buffering.
+    for _ in 0..30 {
+        mixer.render_block(&mut [[0.0; 2]; 480]);
+    }
+    assert_eq!(stats.lane_meters[0].snapshot().stream_id, 42);
+    assert_eq!(stats.lane_meters[0].snapshot().peak, 0.0);
+    assert_eq!(stats.lane_meters[0].snapshot().rms, 0.0);
+    assert_eq!(stats.output_meter.snapshot().peak, 0.0);
+    feed(&mut mixer, &mut inputs);
+    assert!(stats.lane_meters[0].snapshot().peak > 0.39);
+
+    // A new occupant starts with zero immediately, before a window completes.
+    config.lanes[0].stream_id = 99;
+    control.apply(config).unwrap();
+    mixer.next_frame();
+    let reused = stats.lane_meters[0].snapshot();
+    assert_eq!(reused.stream_id, 99);
+    assert_eq!(reused.peak, 0.0);
+    assert_eq!(reused.rms, 0.0);
+    for _ in 0..30 {
+        mixer.render_block(&mut [[0.0; 2]; 480]);
+    }
+    assert_eq!(stats.lane_meters[0].snapshot().peak, 0.0);
+    assert_eq!(stats.output_meter.snapshot().peak, 0.0);
+}
+
+#[test]
+fn live_output_meter_and_limiter_gain_recover_after_overload() {
+    let (mut mixer, mut control, mut inputs, stats) = Mixer::new(Instant::now()).unwrap();
+    let mut config = MixerConfig {
+        master_db: 0.0,
+        ..MixerConfig::default()
+    };
+    config.lanes[0] = LaneMix {
+        stream_id: 1,
+        epoch: 1,
+        ..LaneMix::default()
+    };
+    control.apply(config).unwrap();
+    let mut position = 0;
+    for _ in 0..8 {
+        assert!(inputs[0].push(block(1, 1, position, [2.0; 2])));
+        position += 480;
+    }
+    let mut frames = [[0.0; 2]; 480];
+    for _ in 0..15 {
+        mixer.render_block(&mut frames);
+        assert!(inputs[0].push(block(1, 1, position, [2.0; 2])));
+        position += 480;
+    }
+    assert!(stats.lane_meters[0].snapshot().peak > 1.99);
+    assert!((stats.output_meter.snapshot().peak - 0.98).abs() < 0.001);
+    assert!(f32::from_bits(stats.limiter_gain_bits.load(Relaxed) as u32) < 0.5);
+    let limited = stats.limited_frames.load(Relaxed);
+    config.lanes[0].muted = true;
+    control.apply(config).unwrap();
+    for _ in 0..100 {
+        mixer.render_block(&mut frames);
+        assert!(inputs[0].push(block(1, 1, position, [2.0; 2])));
+        position += 480;
+    }
+    assert_eq!(stats.output_meter.snapshot().peak, 0.0);
+    assert_eq!(stats.output_meter.snapshot().rms, 0.0);
+    assert!(f32::from_bits(stats.limiter_gain_bits.load(Relaxed) as u32) > 0.999);
+    assert!(stats.limited_frames.load(Relaxed) >= limited);
+    mixer.discard_backlog();
+    assert_eq!(stats.lane_meters[0].snapshot().peak, 0.0);
+    assert_eq!(stats.output_meter.snapshot().peak, 0.0);
+    assert_eq!(
+        f32::from_bits(stats.limiter_gain_bits.load(Relaxed) as u32),
+        1.0
+    );
+}

@@ -18,6 +18,7 @@ class DeviceControls:
             raise RuntimeError('Core Audio controls require macOS')
         self.ca = C.CDLL('/System/Library/Frameworks/CoreAudio.framework/CoreAudio')
         cf = C.CDLL('/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation')
+        self.cf = cf
         query = [C.c_uint32, C.POINTER(Address), C.c_uint32, C.c_void_p]
         self.ca.AudioObjectGetPropertyDataSize.argtypes = query + [C.POINTER(C.c_uint32)]
         self.ca.AudioObjectGetPropertyData.argtypes = query + [C.POINTER(C.c_uint32), C.c_void_p]
@@ -28,6 +29,8 @@ class DeviceControls:
         cf.CFStringGetCString.restype = C.c_bool
         cf.CFRelease.argtypes = [C.c_void_p]
         cf.CFRelease.restype = None
+        cf.CFStringCreateWithBytes.argtypes = [C.c_void_p, C.c_void_p, C.c_long, C.c_uint32, C.c_ubyte]
+        cf.CFStringCreateWithBytes.restype = C.c_void_p
         address = Address(fourcc('dev#'), fourcc('glob'), 0)
         size = C.c_uint32()
         self.check(self.ca.AudioObjectGetPropertyDataSize(1, C.byref(address), 0, None, C.byref(size)))
@@ -59,6 +62,28 @@ class DeviceControls:
 
     def muted(self):
         return self.read(self.device, 'mute', 'outp', C.c_uint32)
+
+    def name(self):
+        value = self.read(self.device, 'lnam', 'glob', C.c_void_p)
+        try:
+            buffer = C.create_string_buffer(4096)
+            if not self.cf.CFStringGetCString(value, buffer, len(buffer), 0x08000100):
+                raise RuntimeError('Device name is not bounded UTF-8')
+            return buffer.value.decode('utf-8')
+        finally:
+            self.cf.CFRelease(value)
+
+    def set_owned_name(self, name):
+        data = name.encode('utf-8')
+        if not data or len(data) > 256 or any(ord(c) < 32 for c in name):
+            raise ValueError('Invalid owned device name')
+        reference = self.cf.CFStringCreateWithBytes(None, data, len(data), 0x08000100, 0)
+        if not reference:
+            raise RuntimeError('Could not create owned device name')
+        try:
+            self.write(self.device, 'nmna', 'glob', C.c_void_p(reference))
+        finally:
+            self.cf.CFRelease(reference)
 
     def set_muted(self, muted):
         address = Address(fourcc('mute'), fourcc('outp'), 0)

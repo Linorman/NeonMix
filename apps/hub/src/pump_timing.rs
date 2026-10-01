@@ -1,6 +1,6 @@
 //! Bounded wall/CPU timing on non-realtime media workers. A long loop alone
 //! cannot distinguish codec work, a blocked native call and a late wakeup.
-#![allow(unsafe_code)] // Read only the current thread's CPU clock on macOS.
+#![allow(unsafe_code)] // Read only the current thread's CPU clock on macOS/Linux.
 use serde::Serialize;
 use std::time::Instant;
 
@@ -99,7 +99,7 @@ impl Timing {
 }
 
 fn thread_cpu_ns() -> Option<u64> {
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     {
         let mut ts = libc::timespec {
             tv_sec: 0,
@@ -115,7 +115,7 @@ fn thread_cpu_ns() -> Option<u64> {
                 .saturating_add(ts.tv_nsec as u64),
         )
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
     {
         None
     }

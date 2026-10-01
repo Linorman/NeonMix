@@ -14,6 +14,7 @@ parser.add_argument('--mode', choices=['virtual-device', 'loopback'], default='v
 parser.add_argument('--release', action='store_true')
 parser.add_argument('--binary', type=Path, help='Explicit test binary (for cross-built native runtime probes)')
 parser.add_argument('--rate', type=int, choices=[44100, 48000, 96000])
+parser.add_argument('--capture-rate', type=int, choices=[44100, 48000, 96000], help='Capture format when the loopback engine rate differs from the output rate')
 parser.add_argument('--frequency', type=float, default=437.0)
 parser.add_argument('--channel', choices=['both','left','right','anti-phase'], default='both')
 parser.add_argument('--expect-silence', action='store_true')
@@ -22,11 +23,13 @@ binary = ROOT / 'target' / ('release' if args.release else 'debug') / ('neonmix-
 if args.binary:
     binary = args.binary.resolve()
 rate_args = ['--rate', str(args.rate)] if args.rate else []
+capture_rate = args.capture_rate if args.capture_rate is not None else args.rate
+capture_rate_args = ['--rate', str(capture_rate)] if capture_rate else []
 folder = ROOT / 'artifacts' / 'virtual-probe'
 folder.mkdir(parents=True, exist_ok=True)
 with (folder / 'capture.jsonl').open('w') as capture_out, (folder / 'capture.stderr').open('w') as capture_err:
     capture = subprocess.Popen([str(binary), 'capture', '--device', args.capture_device or args.device, '--mode', args.mode,
-                                '--seconds', '5', *rate_args], stdout=capture_out, stderr=capture_err)
+                                '--seconds', '5', *capture_rate_args], stdout=capture_out, stderr=capture_err)
     try:
         time.sleep(0.5)
         with (folder / 'output.jsonl').open('w') as output_out, (folder / 'output.stderr').open('w') as output_err:
@@ -57,6 +60,7 @@ within_budget = (complete is not None and output_stats is not None and
 passed = (signal_matches and within_budget and native_clock_advances and result == 0 and output.returncode == 0
           and complete is not None and complete['errors'] == 0 and output_stats['errors'] == 0)
 report = {'passed': passed, 'capture_exit_code': result, 'output_exit_code': output.returncode,
+          'requested_output_rate': args.rate, 'requested_capture_rate': capture_rate,
           'expected_signal': 'silence' if args.expect_silence else 'tone', 'signal_matches': signal_matches, 'callbacks_within_budget': within_budget,
           'scope': 'virtual-device digital bridge, not analog latency or end-to-end networking', 'stats': complete, 'measurement': measurement,
           'expected_frequency_hz': args.frequency, 'frequency_matches': frequency_matches, 'native_clock_advances': native_clock_advances, 'output_stats': output_stats, 'clock': clock}

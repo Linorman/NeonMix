@@ -74,8 +74,10 @@ int main(int argc, char **argv) {
     Float64 sample = -1; UInt64 hostTime = 0, seed = 0;
     require((*driver)->GetZeroTimeStamp(driver, 2, 1, &sample, &hostTime, &seed) == 0 && seed > 0, "running clock");
     UInt64 firstSeed = seed;
+    AudioServerPlugInCustomPropertyInfo custom = {0};
+    require(get(driver, 2, kAudioObjectPropertyCustomPropertyInfoList, kAudioObjectPropertyScopeGlobal, sizeof(custom), &custom) == 0 && custom.mSelector == 'nmna' && custom.mPropertyDataType == kAudioServerPlugInCustomPropertyDataTypeCFString && custom.mQualifierDataType == 0, "custom name marshaling descriptor");
     CFStringRef name = CFSTR("NeonMix — bundle probe");
-    require(set(driver, 2, kAudioObjectPropertyName, kAudioObjectPropertyScopeGlobal, sizeof(name), &name) == 0, "rename");
+    require(set(driver, 2, 'nmna', kAudioObjectPropertyScopeGlobal, sizeof(name), &name) == 0, "rename");
     CFStringRef readName = NULL;
     require(get(driver, 2, kAudioObjectPropertyName, kAudioObjectPropertyScopeGlobal, sizeof(readName), &readName) == 0 && CFEqual(name, readName), "name readback"); CFRelease(readName);
     Float32 gain = 0.5;

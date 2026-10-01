@@ -1,9 +1,12 @@
 mod binding;
+mod connection;
 mod control_client;
 mod framer;
+mod identity;
 mod media_log;
 mod media_wait;
 mod media_worker;
+mod pairing_api;
 mod probe;
 mod pump_timing;
 mod qos;
@@ -20,16 +23,64 @@ use std::{
 };
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 #[derive(Parser)]
-#[command(
-    version,
-    about = "NeonMix authenticated Sender/Hub laboratory (E02–E04)"
-)]
+#[command(version, about = "NeonMix discovered and authenticated Sender/Hub")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
 }
 #[derive(Subcommand)]
 enum Command {
+    /// Configure a Hub with native platform secrets and stable identity.
+    Setup {
+        #[arg(long)]
+        directory: PathBuf,
+        #[arg(long)]
+        output: String,
+        #[arg(long)]
+        name: String,
+    },
+    /// Stream untrusted DNS-SD candidates and removal events.
+    Discover {
+        #[arg(long, default_value_t = 5)]
+        seconds: u32,
+    },
+    /// Create an out-of-band, single-use invitation (administrator only).
+    Invite {
+        #[arg(long)]
+        credential: PathBuf,
+        #[arg(long)]
+        hub: Option<String>,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 120)]
+        seconds: u32,
+    },
+    CancelInvite {
+        #[arg(long)]
+        credential: PathBuf,
+        #[arg(long)]
+        hub: Option<String>,
+        #[arg(long)]
+        invitation_id: uuid::Uuid,
+    },
+    Pair {
+        #[arg(long)]
+        invite: PathBuf,
+        #[arg(long)]
+        credential: PathBuf,
+        #[arg(long)]
+        name: String,
+        /// Diagnostic address override; default uses DNS-SD and the invite's identity.
+        #[arg(long)]
+        hub: Option<String>,
+    },
+    Forget {
+        #[arg(long)]
+        credential: PathBuf,
+    },
+    VaultProbe,
+
+    /// Explicit plaintext laboratory provisioning; product credentials use setup.
     Init {
         #[arg(long = "host")]
         hosts: Vec<String>,
@@ -41,14 +92,15 @@ enum Command {
     Serve {
         #[arg(long)]
         config: PathBuf,
-        #[arg(long, default_value = "127.0.0.1:7443")]
-        listen: SocketAddr,
+        /// Product profiles share on 0.0.0.0:7443; laboratory profiles use loopback.
+        #[arg(long)]
+        listen: Option<SocketAddr>,
     },
     Send {
         #[arg(long)]
         credential: PathBuf,
-        #[arg(long, default_value = "https://localhost:7443")]
-        hub: String,
+        #[arg(long)]
+        hub: Option<String>,
         #[arg(long, default_value_t = 10)]
         seconds: u32,
         #[arg(long)]
@@ -68,22 +120,29 @@ enum Command {
     Snapshot {
         #[arg(long)]
         credential: PathBuf,
-        #[arg(long, default_value = "https://localhost:7443")]
-        hub: String,
+        #[arg(long)]
+        hub: Option<String>,
+    },
+    /// Authenticated viewer identity and role, without any credential material.
+    Me {
+        #[arg(long)]
+        credential: PathBuf,
+        #[arg(long)]
+        hub: Option<String>,
     },
     Watch {
         #[arg(long)]
         credential: PathBuf,
-        #[arg(long, default_value = "https://localhost:7443")]
-        hub: String,
+        #[arg(long)]
+        hub: Option<String>,
         #[arg(long, default_value_t = 30)]
         seconds: u32,
     },
     Control {
         #[arg(long)]
         credential: PathBuf,
-        #[arg(long, default_value = "https://localhost:7443")]
-        hub: String,
+        #[arg(long)]
+        hub: Option<String>,
         #[arg(long)]
         command: PathBuf,
     },
@@ -100,8 +159,8 @@ enum Command {
     Diagnostics {
         #[arg(long)]
         credential: PathBuf,
-        #[arg(long, default_value = "https://localhost:7443")]
-        hub: String,
+        #[arg(long)]
+        hub: Option<String>,
     },
     Probe {
         #[arg(long, default_value_t = 5)]
@@ -129,8 +188,8 @@ enum OutputCommand {
         directory: PathBuf,
         #[arg(long)]
         credential: PathBuf,
-        #[arg(long, default_value = "https://localhost:7443")]
-        hub: String,
+        #[arg(long)]
+        hub: Option<String>,
         #[arg(long, default_value = "neonmix")]
         provider: virtual_output::Provider,
         #[arg(long)]
@@ -178,6 +237,8 @@ pub struct Provisioned {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ServerConfig {
     #[serde(default)]
+    pub room_name: Option<String>,
+    #[serde(default)]
     pub state_path: Option<PathBuf>,
     pub output: String,
     pub pem: String,
@@ -187,6 +248,10 @@ pub struct ServerConfig {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Credential {
+    #[serde(skip)]
+    pub route: Option<neonmix_identity::discovery::Endpoint>,
+    #[serde(default)]
+    pub hub_id: Option<uuid::Uuid>,
     pub token: String,
     pub certificate: String,
 }
@@ -227,19 +292,9 @@ fn certificate_for_hosts(mut hosts: Vec<String>) -> Result<(String, String, Stri
     Ok((format!("{cert_pem}{key}"), cert_pem, key))
 }
 fn write_secret(path: &Path, bytes: &[u8]) -> Result<()> {
-    let mut options = std::fs::OpenOptions::new();
-    options.write(true).create_new(true);
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::OpenOptionsExt;
-        options.mode(0o600);
-    }
-    use std::io::Write;
-    let mut f = options.open(path)?;
-    f.write_all(bytes)?;
-    f.sync_all()?;
-    Ok(())
+    Ok(neonmix_identity::files::write_new(path, bytes)?)
 }
+
 fn init(directory: &Path, output: String, hosts: Vec<String>) -> Result<()> {
     if output.is_empty() {
         return Err("output ID is required".into());
@@ -263,6 +318,7 @@ fn init(directory: &Path, output: String, hosts: Vec<String>) -> Result<()> {
     })
     .collect();
     let config = ServerConfig {
+        room_name: None,
         state_path: Some(directory.canonicalize()?.join("state.json")),
         output,
         pem,
@@ -278,6 +334,8 @@ fn init(directory: &Path, output: String, hosts: Vec<String>) -> Result<()> {
         write_secret(
             &directory.join(format!("{}.json", device.name)),
             &serde_json::to_vec_pretty(&Credential {
+                hub_id: None,
+                route: None,
                 token: device.token,
                 certificate: certificate.clone(),
             })?,
@@ -292,12 +350,28 @@ async fn main() {
     let _ = rustls::crypto::ring::default_provider().install_default();
     let result: Result<()> = async {
         match Cli::parse().command {
+            Command::Setup {directory,output,name} => identity::setup(&directory,output,name),
+            Command::Discover {seconds} => {
+                tokio::task::spawn_blocking(move || {
+                    let candidates=neonmix_identity::discovery::browse(seconds,|event,candidate|emit(serde_json::json!({"event":event,"candidate":candidate,"trusted":false})))?;
+                    emit(serde_json::json!({"event":"discovery_complete","candidates":candidates}))
+                }).await?
+            },
+            Command::Invite {credential,hub,out,seconds}=>identity::invite(&credential,hub,&out,seconds).await,
+            Command::CancelInvite {credential,hub,invitation_id}=>identity::cancel(&credential,hub,invitation_id).await,
+            Command::Pair {invite,credential,name,hub}=>identity::pair(&invite,&credential,name,hub).await,
+            Command::Forget {credential}=>identity::forget(&credential),
+            Command::VaultProbe=>{neonmix_identity::vault::probe()?;emit(serde_json::json!({"event":"platform_vault_verified"}))},
             Command::Init {
                 directory,
                 output,
                 hosts,
             } => init(&directory, output, hosts),
-            Command::Serve { config, listen } => server::serve(read(&config)?, listen).await,
+            Command::Serve { config, listen } => {
+                let config=identity::config(&config)?;
+                let listen=listen.unwrap_or_else(||SocketAddr::from((if config.room_name.is_some() {[0,0,0,0]} else {[127,0,0,1]},7443)));
+                server::serve(config,listen).await
+            },
             Command::Send {
                 credential,
                 hub,
@@ -308,8 +382,10 @@ async fn main() {
                 output_binding,
                 frequency,
             } => {
+                let mut c=identity::credential(&credential)?;
+                let hub=identity::endpoint(&mut c,hub).await?;
                 sender::run(
-                    read(&credential)?,
+                    c,
                     &hub,
                     seconds,
                     sender::SendOptions {capture,virtual_output,provider:virtual_output_provider.unwrap_or(virtual_output::Provider::Neonmix),frequency,output_binding},
@@ -317,25 +393,29 @@ async fn main() {
                 .await
             }
             Command::Snapshot { credential, hub } => {
-                let c: Credential = read(&credential)?;
+                let mut c: Credential = identity::credential(&credential)?;
+                let hub=identity::endpoint(&mut c,hub).await?;
                 let client = sender::client(&c)?;
-                emit(
-                    client
-                        .get(format!("{hub}/v1/hub"))
-                        .bearer_auth(&c.token)
-                        .send()
-                        .await?
-                        .error_for_status()?
-                        .json::<serde_json::Value>()
-                        .await?,
-                )
+                let state:neonmix_control::Snapshot=client.get(format!("{hub}/v1/hub")).bearer_auth(&c.token).send().await?.error_for_status()?.json().await?;
+                identity::check_hub(&c,state.hub_id)?;
+                emit(state)
+            }
+            Command::Me { credential, hub } => {
+                let mut c = identity::credential(&credential)?;
+                let hub = identity::endpoint(&mut c, hub).await?;
+                let value: serde_json::Value = sender::client(&c)?
+                    .get(format!("{hub}/v1/me")).bearer_auth(&c.token)
+                    .send().await?.error_for_status()?.json().await?;
+                identity::check_hub(&c, serde_json::from_value(value["hub_id"].clone())?)?;
+                emit(value)
             }
             Command::VirtualOutput { provider } => {
                 emit(virtual_output::resolve(provider, backend()?.devices()?)?)
             }
             Command::Output {command}=>binding::execute(command).await,
             Command::Diagnostics { credential, hub } => {
-                let c: Credential = read(&credential)?;
+                let mut c: Credential = identity::credential(&credential)?;
+                let hub=identity::endpoint(&mut c,hub).await?;
                 let client = sender::client(&c)?;
                 emit(
                     client
@@ -350,7 +430,9 @@ async fn main() {
             }
             Command::Watch {credential,hub,seconds}=>{
                 if !(1..=86400).contains(&seconds) {return Err("seconds must be 1..86400".into());}
-                let mut subscription=control_client::subscribe(read(&credential)?,hub)?;
+                let mut c=identity::credential(&credential)?;
+                let hub=identity::endpoint(&mut c,hub).await?;
+                let mut subscription=control_client::subscribe(c,hub)?;
                 let until=tokio::time::Instant::now()+std::time::Duration::from_secs(u64::from(seconds));
                 loop {tokio::select!{
                     _=tokio::time::sleep_until(until)=>break,
@@ -368,7 +450,8 @@ async fn main() {
                 hub,
                 command,
             } => {
-                let c: Credential = read(&credential)?;
+                let mut c: Credential = identity::credential(&credential)?;
+                let hub=identity::endpoint(&mut c,hub).await?;
                 let client = sender::client(&c)?;
                 let body: neonmix_control::Command = read(&command)?;
                 let response = client

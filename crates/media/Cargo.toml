@@ -17,6 +17,9 @@ thiserror.workspace = true
 uuid = { version = "1", features = ["v4"] }
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "0.2"
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
+dbus = { version = "0.9", features = ["vendored"] }
 [lints]
 workspace = true
 [dev-dependencies]

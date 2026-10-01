@@ -18,7 +18,13 @@ cp drivers/macos/Info.plist "$BUNDLE/Contents/Info.plist"
 cp target/release/libneonmix_hal.dylib "$BUNDLE/Contents/MacOS/NeonMixHAL"
 cp vendor/tympan-aspl/LICENSE-MIT "$BUNDLE/Contents/Resources/TYMPAN-LICENSE-MIT"
 cp vendor/tympan-aspl/LICENSE-APACHE "$BUNDLE/Contents/Resources/TYMPAN-LICENSE-APACHE"
-codesign --force --sign - "$BUNDLE"
+SIGN_IDENTITY=${NEONMIX_HAL_SIGN_IDENTITY:--}
+if [ "$SIGN_IDENTITY" = - ]; then
+  codesign --force --sign - "$BUNDLE"
+else
+  # Release signing uses an existing identity; never imports keys or modifies trust.
+  codesign --force --timestamp --sign "$SIGN_IDENTITY" "$BUNDLE"
+fi
 codesign --verify --strict "$BUNDLE"
 lipo -verify_arch arm64 "$BUNDLE/Contents/MacOS/NeonMixHAL"
 plutil -lint "$BUNDLE/Contents/Info.plist"

@@ -1,7 +1,8 @@
+use crate::connection::{AddressAcceptor, Connection};
 use crate::{Result, ServerConfig, emit};
 use axum::{
     Json, Router,
-    extract::{ConnectInfo, Query, State, WebSocketUpgrade, ws::Message},
+    extract::{Query, State, WebSocketUpgrade, ws::Message},
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
     routing::{get, post},
@@ -10,7 +11,7 @@ use neonmix_control::{
     Authority, Command, ControlError, Principal, Session, SessionStatus, Snapshot,
 };
 use neonmix_core::{
-    mixer::{LANES, LaneMix, Mixer, MixerConfig, MixerControl, MixerStats},
+    mixer::{LANES, LaneMix, METER_WINDOW_FRAMES, Mixer, MixerConfig, MixerControl, MixerStats},
     queue::BlockProducer,
 };
 use neonmix_media::{ReceiveStats, Receiver, certificate_fingerprint};
@@ -44,14 +45,14 @@ impl Resources {
     fn prepare(
         &mut self,
         state: &Snapshot,
-        remote: Option<SocketAddr>,
+        remote: Option<Connection>,
     ) -> std::result::Result<(), ControlError> {
         self.prepare_with_commit(state, remote, || Ok(()))
     }
     fn prepare_with_commit(
         &mut self,
         state: &Snapshot,
-        remote: Option<SocketAddr>,
+        remote: Option<Connection>,
         before_commit: impl FnOnce() -> std::result::Result<(), ControlError>,
     ) -> std::result::Result<(), ControlError> {
         self.prepare_with_factory(
@@ -64,7 +65,7 @@ impl Resources {
     fn prepare_with_factory(
         &mut self,
         state: &Snapshot,
-        remote: Option<SocketAddr>,
+        remote: Option<Connection>,
         before_commit: impl FnOnce() -> std::result::Result<(), ControlError>,
         prepare_media: impl FnOnce(
             Receiver,
@@ -86,19 +87,9 @@ impl Resources {
                 .iter()
                 .position(|l| l.session.is_none() && l.producer.is_some())
                 .ok_or(ControlError::QuotaExceeded)?;
-            let remote = SocketAddr::new(
-                remote.ok_or(ControlError::InvalidArgument)?.ip(),
-                s.offer.udp_port,
-            );
-            let socket = UdpSocket::bind(if remote.is_ipv4() {
-                "0.0.0.0:0"
-            } else {
-                "[::]:0"
-            })
-            .map_err(|_| ControlError::Busy)?;
-            socket.connect(remote).map_err(|_| ControlError::Busy)?;
-            socket
-                .set_nonblocking(true)
+            let socket = remote
+                .ok_or(ControlError::InvalidArgument)?
+                .media_socket(s.offer.udp_port)
                 .map_err(|_| ControlError::Busy)?;
             let receiver =
                 Receiver::new(s.clone(), &self.pem, self.origin).map_err(|_| ControlError::Busy)?;
@@ -167,18 +158,23 @@ impl Resources {
         Ok(())
     }
 }
-struct Engine {
+pub(super) struct Engine {
+    pub(super) pairings: neonmix_identity::pairing::Book<Principal>,
+    pub(super) pair_window: Instant,
+    pub(super) pair_attempts: u32,
+    pub(super) room_name: String,
+    pub(super) certificate: String,
     event_slots: Arc<tokio::sync::Semaphore>,
     output_stats: Arc<neonmix_core::stats::AudioStats>,
-    authority: Authority,
+    pub(super) authority: Authority,
     resources: Resources,
     errors: Vec<String>,
-    state_path: Option<std::path::PathBuf>,
+    pub(super) state_path: Option<std::path::PathBuf>,
 }
 fn persist(engine: &Engine) -> std::result::Result<(), ControlError> {
     persist_saved(engine.state_path.as_ref(), &engine.authority.persistent())
 }
-fn persist_saved(
+pub(super) fn persist_saved(
     path: Option<&std::path::PathBuf>,
     saved: &neonmix_control::PersistentState,
 ) -> std::result::Result<(), ControlError> {
@@ -186,22 +182,9 @@ fn persist_saved(
         return Ok(());
     };
     let bytes = serde_json::to_vec_pretty(saved).map_err(|_| ControlError::Busy)?;
-    let temporary = path.with_extension("tmp");
-    let mut options = std::fs::OpenOptions::new();
-    options.write(true).create(true).truncate(true);
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::OpenOptionsExt;
-        options.mode(0o600);
-    }
-    use std::io::Write;
-    let mut file = options.open(&temporary).map_err(|_| ControlError::Busy)?;
-    file.write_all(&bytes).map_err(|_| ControlError::Busy)?;
-    file.sync_all().map_err(|_| ControlError::Busy)?;
-    drop(file);
-    std::fs::rename(temporary, path).map_err(|_| ControlError::Busy)
+    neonmix_identity::files::replace(path, &bytes).map_err(|_| ControlError::Busy)
 }
-type Shared = Arc<Mutex<Engine>>;
+pub(super) type Shared = Arc<Mutex<Engine>>;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct StartResponse {
     #[serde(default)]
@@ -211,7 +194,7 @@ pub struct StartResponse {
     pub media_port: Option<u16>,
     pub hub_certificate_sha256: String,
 }
-struct ApiError(ControlError);
+pub(super) struct ApiError(pub(super) ControlError);
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let status = match self.0 {
@@ -237,13 +220,26 @@ impl From<ControlError> for ApiError {
         Self(value)
     }
 }
-fn authenticate(engine: &Engine, headers: &HeaderMap) -> std::result::Result<Principal, ApiError> {
+pub(super) fn authenticate(
+    engine: &Engine,
+    headers: &HeaderMap,
+) -> std::result::Result<Principal, ApiError> {
     let token = headers
         .get("authorization")
         .and_then(|h| h.to_str().ok())
         .and_then(|h| h.strip_prefix("Bearer "))
         .ok_or(ControlError::Unauthenticated)?;
     Ok(engine.authority.authenticate(token)?)
+}
+async fn me(
+    State(shared): State<Shared>,
+    headers: HeaderMap,
+) -> std::result::Result<Json<serde_json::Value>, ApiError> {
+    let engine = shared.lock().map_err(|_| ControlError::Busy)?;
+    let principal = authenticate(&engine, &headers)?;
+    Ok(Json(
+        serde_json::json!({"hub_id":engine.authority.current().hub_id,"room_name":engine.room_name,"device_id":principal.device_id(),"role":engine.authority.current().devices.get(&principal.device_id()).map(|device|device.role)}),
+    ))
 }
 async fn snapshot(
     State(shared): State<Shared>,
@@ -282,7 +278,7 @@ async fn outputs(
 }
 async fn command(
     State(shared): State<Shared>,
-    ConnectInfo(remote): ConnectInfo<SocketAddr>,
+    axum::Extension(remote): axum::Extension<Connection>,
     headers: HeaderMap,
     Json(command): Json<Command>,
 ) -> std::result::Result<Json<StartResponse>, ApiError> {
@@ -439,8 +435,38 @@ async fn diagnostics(
         })
         .collect();
     let stats = &engine.resources.stats;
+    let output_available = engine.authority.current().output.available;
+    let lane_meters: Vec<_> = lane_stream_ids
+        .iter()
+        .zip(&stats.lane_meters)
+        .map(|(expected, meter)| {
+            let measured = meter.snapshot();
+            let stream_id = expected.unwrap_or(0);
+            // Control state can advance before the output callback applies it.
+            // Never attach the previous occupant's samples to a new stream.
+            let valid = output_available && stream_id != 0 && measured.stream_id == stream_id;
+            serde_json::json!({
+                "stream_id": stream_id,
+                "peak": if valid { measured.peak } else { 0.0 },
+                "rms": if valid { measured.rms } else { 0.0 },
+            })
+        })
+        .collect();
+    let output_meter = stats.output_meter.snapshot();
+    let meters = serde_json::json!({
+        "window_frames": METER_WINDOW_FRAMES,
+        "sample_rate": 48000,
+        "lanes": lane_meters,
+        "output": {
+            "peak": if output_available { output_meter.peak } else { 0.0 },
+            "rms": if output_available { output_meter.rms } else { 0.0 },
+        },
+        "limiter_gain": if output_available {
+            f32::from_bits(stats.limiter_gain_bits.load(Relaxed) as u32)
+        } else { 1.0 },
+    });
     Ok(Json(
-        serde_json::json!({"receivers":receivers,"media_workers":media_workers,"lane_stream_ids":lane_stream_ids,"packet_budget_drops":budget_drops,"pcm_queue_age_max_ns":stats.pcm_queue_age_max_ns.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"fifo_frames":stats.fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"sinc_delay_frames":stats.sinc_delay_frames.load(Relaxed),"output_stats":engine.output_stats.snapshot(),"output_frames":stats.output_frames.load(Relaxed),"limited_frames":stats.limited_frames.load(Relaxed),"underrun_frames":stats.underrun_frames.load(Relaxed),"last_underrun_output_frame":stats.last_underrun_output_frame.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_fifo_frames":stats.last_underrun_fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_needed_frames":stats.last_underrun_needed_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_source_end":stats.last_underrun_source_end.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"underrun_frames_by_lane":stats.underrun_frames_by_lane.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"filtered_queues":stats.filtered_queue_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"queues":stats.queue_frames.iter().map(|a| a.load(Relaxed)).collect::<Vec<_>>(),"drift_ppm":stats.drift_ppm_milli.iter().map(|a| a.load(Relaxed) as i64 as f64 / 1000.0).collect::<Vec<_>>(),"errors":engine.errors}),
+        serde_json::json!({"meters":meters,"receivers":receivers,"media_workers":media_workers,"lane_stream_ids":lane_stream_ids,"packet_budget_drops":budget_drops,"pcm_queue_age_max_ns":stats.pcm_queue_age_max_ns.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"fifo_frames":stats.fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"sinc_delay_frames":stats.sinc_delay_frames.load(Relaxed),"output_stats":engine.output_stats.snapshot(),"output_frames":stats.output_frames.load(Relaxed),"limited_frames":stats.limited_frames.load(Relaxed),"underrun_frames":stats.underrun_frames.load(Relaxed),"last_underrun_output_frame":stats.last_underrun_output_frame.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_fifo_frames":stats.last_underrun_fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_needed_frames":stats.last_underrun_needed_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_source_end":stats.last_underrun_source_end.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"underrun_frames_by_lane":stats.underrun_frames_by_lane.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"filtered_queues":stats.filtered_queue_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"queues":stats.queue_frames.iter().map(|a| a.load(Relaxed)).collect::<Vec<_>>(),"drift_ppm":stats.drift_ppm_milli.iter().map(|a| a.load(Relaxed) as i64 as f64 / 1000.0).collect::<Vec<_>>(),"errors":engine.errors}),
     ))
 }
 fn worker(shared: Shared, stopped: Arc<AtomicBool>) {
@@ -542,7 +568,11 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
             &config.output,
             neonmix_io::OpenOptions {
                 sample_rate: None,
-                period_frames: Some(256),
+                period_frames: if cfg!(target_os = "linux") {
+                    None
+                } else {
+                    Some(256)
+                },
             },
             source,
         )
@@ -557,7 +587,19 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
             session: None,
         })
         .collect();
+    let room_name = config
+        .room_name
+        .clone()
+        .unwrap_or_else(|| "NeonMix Lab".into());
+    let hub_id = authority.current().hub_id;
+    let discovery_fingerprint = certificate_fingerprint(&config.certificate)?;
+    let discovery_listen = listen;
     let shared = Arc::new(Mutex::new(Engine {
+        pairings: Default::default(),
+        pair_window: Instant::now(),
+        pair_attempts: 0,
+        room_name: room_name.clone(),
+        certificate: config.certificate.clone(),
         event_slots: Arc::new(tokio::sync::Semaphore::new(8)),
         output_stats: output.as_ref().map(|o| o.stats.clone()).unwrap_or_default(),
         authority,
@@ -576,6 +618,11 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
     let worker_shared = shared.clone();
     let worker_stop = stopped.clone();
     let app = Router::new()
+        .route("/v1/identity", get(crate::pairing_api::identity))
+        .route("/v1/pairing/invitations", post(crate::pairing_api::open))
+        .route("/v1/pairing/cancel", post(crate::pairing_api::cancel))
+        .route("/v1/pairing/complete", post(crate::pairing_api::complete))
+        .route("/v1/me", get(me))
         .route("/v1/hub", get(snapshot))
         .route("/v1/devices", get(devices))
         .route("/v1/streams", get(streams))
@@ -597,22 +644,50 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
             .with_single_cert(certs, key)?;
     tls_config.alpn_protocols = vec![b"h2".to_vec(), b"http/1.1".to_vec()];
     let tls = axum_server::tls_rustls::RustlsConfig::from_config(Arc::new(tls_config));
+    let listener = std::net::TcpListener::bind(listen)?;
+    listener.set_nonblocking(true)?;
+    let actual_listen = listener.local_addr()?;
+    let mut advertised = discovery_listen;
+    advertised.set_port(actual_listen.port());
+    let _publisher = neonmix_identity::discovery::Publisher::new(
+        hub_id,
+        &room_name,
+        advertised,
+        &discovery_fingerprint,
+    )?;
     let handle = axum_server::Handle::new();
     let shutdown = handle.clone();
     emit(
-        serde_json::json!({"event":"hub_started","listen":listen,"output":output.as_ref().map(|o|&o.info),"lanes":LANES}),
+        serde_json::json!({"event":"hub_started","listen":actual_listen,"hub_id":hub_id,"room_name":room_name,"output":output.as_ref().map(|o|&o.info),"lanes":LANES}),
     )?;
     let worker = std::thread::spawn(move || worker(worker_shared, worker_stop));
-    let server = axum_server::bind_rustls(listen, tls)
+    let acceptor = axum_server::tls_rustls::RustlsAcceptor::new(tls).acceptor(AddressAcceptor);
+    let server = axum_server::from_tcp(listener)
+        .acceptor(acceptor)
         .handle(handle)
-        .serve(app.into_make_service_with_connect_info::<SocketAddr>());
+        .serve(app.into_make_service());
     tokio::pin!(server);
     let mut monitor = tokio::time::interval(Duration::from_millis(100));
+    let stop_signal = async {
+        #[cfg(unix)]
+        {
+            let mut terminated =
+                tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+            tokio::select! {
+                result = tokio::signal::ctrl_c() => result,
+                _ = terminated.recv() => Ok(()),
+            }
+        }
+        #[cfg(not(unix))]
+        tokio::signal::ctrl_c().await
+    };
+    tokio::pin!(stop_signal);
+    let mut stop_requested = false;
     let mut retry_output = Instant::now();
     let result = loop {
         tokio::select! {
             result = &mut server => break result.map_err(Into::into),
-            _ = tokio::signal::ctrl_c() => { shutdown.graceful_shutdown(Some(Duration::from_secs(1))); },
+            _ = &mut stop_signal, if !stop_requested => { stop_requested = true; shutdown.graceful_shutdown(Some(Duration::from_secs(1))); },
             _ = monitor.tick() => {
                 if let Some(position)=output.as_ref().and_then(|o|o.latest_position())&& let Ok(mut engine)=shared.lock()&& engine.resources.output_epoch!=position.epoch {engine.resources.output_epoch=position.epoch;let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}
                 if output.as_ref().is_some_and(|o|o.stats.snapshot().errors>0) {
@@ -626,7 +701,7 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
                     if Instant::now()>=retry_output {
                         retry_output=Instant::now()+Duration::from_secs(1);
                         let source=crate::recoverable::RecoverableMixer {mixer:Some(mixer),returned:returned_to.clone()};
-                        if let Ok(running)=crate::backend().and_then(|b|b.open_output(&output_id,neonmix_io::OpenOptions {sample_rate:None,period_frames:Some(256)},source))
+                        if let Ok(running)=crate::backend().and_then(|b|b.open_output(&output_id,neonmix_io::OpenOptions {sample_rate:None,period_frames:if cfg!(target_os = "linux") {None} else {Some(256)}},source))
                             && running.play().is_ok() {if let Ok(mut engine)=shared.lock() {engine.output_stats=running.stats.clone();let _=engine.authority.set_output_available(true);let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}output=Some(running);emit(serde_json::json!({"event":"output_reopened","device":output_id}))?;}
                     } else {let _=returned_to.try_send(mixer);}
                 }
@@ -732,7 +807,10 @@ mod transaction_tests {
         let mut persisted = false;
         let result = resources.prepare_with_factory(
             &snapshot,
-            Some("127.0.0.1:54321".parse().unwrap()),
+            Some(Connection {
+                remote: "127.0.0.1:54321".parse().unwrap(),
+                local: "127.0.0.1:0".parse().unwrap(),
+            }),
             || {
                 persisted = true;
                 Ok(())
@@ -750,7 +828,10 @@ mod transaction_tests {
         assert_eq!(
             resources.prepare_with_commit(
                 &snapshot,
-                Some("127.0.0.1:54321".parse().unwrap()),
+                Some(Connection {
+                    remote: "127.0.0.1:54321".parse().unwrap(),
+                    local: "127.0.0.1:0".parse().unwrap()
+                }),
                 || Err(ControlError::Busy)
             ),
             Err(ControlError::Busy)
@@ -809,5 +890,229 @@ mod subscription_tests {
             .expect("revoked slow subscriber kept its slot indefinitely");
         assert!(started.elapsed() >= Duration::from_secs(2));
         assert!(slots.try_acquire().is_ok());
+    }
+}
+
+#[cfg(test)]
+mod pairing_tests {
+    use super::*;
+    use neonmix_identity::pairing::{Checked, Request};
+    fn shared() -> (Shared, Principal, String, Mixer) {
+        let token = neonmix_identity::secret();
+        let mut authority = Authority::new("test-output".into(), "admin".into(), &token).unwrap();
+        let member = neonmix_identity::secret();
+        authority
+            .add_device("member".into(), neonmix_control::Role::Member, &member)
+            .unwrap();
+        let issuer = authority.authenticate(&token).unwrap();
+        let (mixer, control, inputs, stats) = Mixer::new(Instant::now()).unwrap();
+        let (pem, certificate, _) = crate::certificate().unwrap();
+        (
+            Arc::new(Mutex::new(Engine {
+                pairings: Default::default(),
+                pair_window: Instant::now(),
+                pair_attempts: 0,
+                room_name: "test".into(),
+                certificate,
+                event_slots: Arc::new(tokio::sync::Semaphore::new(8)),
+                output_stats: Default::default(),
+                authority,
+                resources: Resources {
+                    lanes: inputs
+                        .into_iter()
+                        .map(|producer| Lane {
+                            producer: Some(producer),
+                            media: None,
+                            session: None,
+                        })
+                        .collect(),
+                    control,
+                    stats,
+                    origin: Instant::now(),
+                    pem,
+                    output_epoch: 1,
+                },
+                errors: Vec::new(),
+                state_path: None,
+            })),
+            issuer,
+            member,
+            mixer,
+        )
+    }
+    fn headers(token: &str) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert("authorization", format!("Bearer {token}").parse().unwrap());
+        headers
+    }
+    async fn completion(
+        shared: Shared,
+        secret: &str,
+        request: Request,
+    ) -> (StatusCode, serde_json::Value) {
+        let response = crate::pairing_api::complete(State(shared), headers(secret), Json(request))
+            .await
+            .into_response();
+        let status = response.status();
+        let bytes = axum::body::to_bytes(response.into_body(), 16384)
+            .await
+            .unwrap();
+        (status, serde_json::from_slice(&bytes).unwrap())
+    }
+    #[tokio::test]
+    async fn durable_registration_retry_revocation_and_member_permissions() {
+        let (shared, issuer, member, _mixer) = shared();
+        let secret = neonmix_identity::secret();
+        let (id, grant) = shared
+            .lock()
+            .unwrap()
+            .pairings
+            .open(issuer, 30, Instant::now())
+            .unwrap();
+        let request = Request {
+            invitation_id: id,
+            request_id: Uuid::new_v4(),
+            name: "paired".into(),
+            token_sha256: neonmix_identity::digest(&secret),
+        };
+        assert_eq!(
+            completion(shared.clone(), "wrong", request.clone()).await.0,
+            StatusCode::UNAUTHORIZED
+        );
+        let (status, done) = completion(shared.clone(), &grant, request.clone()).await;
+        assert_eq!(status, StatusCode::OK);
+        let (_, again) = completion(shared.clone(), &grant, request.clone()).await;
+        assert_eq!(done, again);
+        let id: Uuid = serde_json::from_value(done["device_id"].clone()).unwrap();
+        let mut changed = request.clone();
+        changed.request_id = Uuid::new_v4();
+        assert_eq!(
+            completion(shared.clone(), &grant, changed).await.0,
+            StatusCode::CONFLICT
+        );
+        {
+            let mut engine = shared.lock().unwrap();
+            let principal = engine.authority.authenticate(&secret).unwrap();
+            assert_eq!(
+                engine.authority.current().devices[&principal.device_id()].role,
+                neonmix_control::Role::Member
+            );
+            let revision = engine.authority.current().revision;
+            engine
+                .authority
+                .execute(
+                    issuer,
+                    Command {
+                        request_id: Uuid::new_v4(),
+                        expected_revision: revision,
+                        operation: neonmix_control::Operation::Revoke { device_id: id },
+                    },
+                    |_| Ok(()),
+                )
+                .unwrap();
+            assert!(engine.authority.authenticate(&secret).is_err());
+        }
+        assert_eq!(
+            completion(shared.clone(), &grant, request).await.0,
+            StatusCode::UNAUTHORIZED
+        );
+        let result = crate::pairing_api::cancel(
+            State(shared),
+            headers(&member),
+            Json(crate::pairing_api::Cancel {
+                invitation_id: Uuid::new_v4(),
+            }),
+        )
+        .await;
+        assert!(matches!(
+            result,
+            Err(ApiError(ControlError::PermissionDenied))
+        ));
+    }
+    #[tokio::test]
+    async fn persistence_failure_leaves_grant_retryable_and_identity_unregistered() {
+        let (shared, issuer, _, _mixer) = shared();
+        let now = Instant::now();
+        let token = neonmix_identity::secret();
+        let (id, grant) = shared
+            .lock()
+            .unwrap()
+            .pairings
+            .open(issuer, 30, now)
+            .unwrap();
+        let request = Request {
+            invitation_id: id,
+            request_id: Uuid::new_v4(),
+            name: "disk-fail".into(),
+            token_sha256: neonmix_identity::digest(&token),
+        };
+        shared.lock().unwrap().state_path = Some(std::path::PathBuf::from(
+            ".local/tmp/nonexistent-pairing-parent/state.json",
+        ));
+        assert_eq!(
+            completion(shared.clone(), &grant, request.clone()).await.0,
+            StatusCode::SERVICE_UNAVAILABLE
+        );
+        {
+            let mut engine = shared.lock().unwrap();
+            assert!(engine.authority.authenticate(&token).is_err());
+            assert!(matches!(
+                engine.pairings.check(&grant, &request, now),
+                Ok(Checked::New(_))
+            ));
+            engine.state_path = None;
+        }
+        assert_eq!(completion(shared, &grant, request).await.0, StatusCode::OK);
+    }
+    #[tokio::test]
+    async fn administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded() {
+        let (shared, issuer, _, _mixer) = shared();
+        let (id, grant) = shared
+            .lock()
+            .unwrap()
+            .pairings
+            .open(issuer, 30, Instant::now())
+            .unwrap();
+        let request = Request {
+            invitation_id: id,
+            request_id: Uuid::new_v4(),
+            name: "paired".into(),
+            token_sha256: neonmix_identity::digest(&neonmix_identity::secret()),
+        };
+        {
+            let mut engine = shared.lock().unwrap();
+            engine
+                .authority
+                .add_device(
+                    "other admin".into(),
+                    neonmix_control::Role::Admin,
+                    &neonmix_identity::secret(),
+                )
+                .unwrap();
+            let revision = engine.authority.current().revision;
+            engine
+                .authority
+                .execute(
+                    issuer,
+                    Command {
+                        request_id: Uuid::new_v4(),
+                        expected_revision: revision,
+                        operation: neonmix_control::Operation::Revoke {
+                            device_id: issuer.device_id(),
+                        },
+                    },
+                    |_| Ok(()),
+                )
+                .unwrap();
+        }
+        assert_eq!(
+            completion(shared.clone(), &grant, request.clone()).await.0,
+            StatusCode::UNAUTHORIZED
+        );
+        shared.lock().unwrap().pair_attempts = 32;
+        assert_eq!(
+            completion(shared, &grant, request).await.0,
+            StatusCode::TOO_MANY_REQUESTS
+        );
     }
 }
