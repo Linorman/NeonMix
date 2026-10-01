@@ -10,6 +10,7 @@ pub struct ThreadPrioritySnapshot {
     pub policy: Option<i32>,
     pub base_priority: Option<i32>,
     pub error: Option<i32>,
+    pub nice: Option<i32>,
 }
 
 /// !Send/!Sync: configuration and restoration belong to the same worker.
@@ -20,6 +21,8 @@ pub struct ThreadPriority {
     snapshot: ThreadPrioritySnapshot,
     #[cfg(target_os = "macos")]
     previous: Option<(i32, libc::sched_param)>,
+    #[cfg(target_os = "linux")]
+    previous_nice: Option<i32>,
     _thread: PhantomData<Rc<()>>,
 }
 impl ThreadPriority {
@@ -28,6 +31,8 @@ impl ThreadPriority {
             snapshot: ThreadPrioritySnapshot::default(),
             #[cfg(target_os = "macos")]
             previous: None,
+            #[cfg(target_os = "linux")]
+            previous_nice: None,
             _thread: PhantomData,
         };
         #[cfg(target_os = "macos")]
@@ -61,7 +66,32 @@ impl ThreadPriority {
             guard.previous = Some((policy, previous));
             guard.snapshot = current();
         }
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(target_os = "linux")]
+        {
+            let before = linux_nice();
+            match before {
+                Ok(before) => {
+                    let wanted = before.min(-10);
+                    // Linux nice is per-thread. Prefer an existing RLIMIT_NICE
+                    // grant, then the desktop's RTKit broker; keep SCHED_OTHER.
+                    // SAFETY: who=0 addresses only the calling thread, and nice
+                    // is in range because it comes from getpriority or -10.
+                    let configured = unsafe { libc::setpriority(libc::PRIO_PROCESS, 0, wanted) }
+                        == 0
+                        || linux_rtkit_nice(wanted);
+                    if configured {
+                        guard.previous_nice = Some(before);
+                    }
+                    guard.snapshot = linux_current();
+                    guard.snapshot.configured = configured && guard.snapshot.nice == Some(wanted);
+                    if !guard.snapshot.configured && guard.snapshot.error.is_none() {
+                        guard.snapshot.error = Some(libc::EPERM);
+                    }
+                }
+                Err(error) => guard.snapshot.error = Some(error),
+            }
+        }
+        #[cfg(not(any(target_os = "macos", target_os = "linux")))]
         {
             guard.snapshot.configured = true;
         }
@@ -77,6 +107,12 @@ impl Drop for ThreadPriority {
         if let Some((policy, params)) = self.previous.take() {
             // SAFETY: this !Send guard is dropped on its configuring thread.
             let _ = unsafe { libc::pthread_setschedparam(libc::pthread_self(), policy, &params) };
+        }
+        #[cfg(target_os = "linux")]
+        if let Some(previous) = self.previous_nice.take() {
+            // SAFETY: restoring a less privileged nice value on this !Send
+            // guard's own thread needs no privilege and cannot change another.
+            let _ = unsafe { libc::setpriority(libc::PRIO_PROCESS, 0, previous) };
         }
     }
 }
@@ -102,6 +138,80 @@ fn current() -> ThreadPrioritySnapshot {
         policy: (status == 0).then_some(info.pth_policy),
         base_priority: (status == 0).then_some(info.pth_priority),
         error: (status != 0).then_some(status),
+        nice: None,
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn linux_nice() -> Result<i32, i32> {
+    // SAFETY: errno is thread-local; -1 is also a valid nice value.
+    unsafe {
+        *libc::__errno_location() = 0;
+        let nice = libc::getpriority(libc::PRIO_PROCESS, 0);
+        let error = *libc::__errno_location();
+        if error == 0 { Ok(nice) } else { Err(error) }
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn linux_current() -> ThreadPrioritySnapshot {
+    let mut params = libc::sched_param { sched_priority: 0 };
+    // SAFETY: current-thread queries with a valid writable output structure.
+    let policy = unsafe { libc::sched_getscheduler(0) };
+    // SAFETY: query this thread into the initialized, writable sched_param.
+    let status = unsafe { libc::sched_getparam(0, &mut params) };
+    let nice = linux_nice();
+    ThreadPrioritySnapshot {
+        policy: (policy >= 0).then_some(policy),
+        base_priority: (status == 0).then_some(params.sched_priority),
+        nice: nice.as_ref().ok().copied(),
+        error: nice.err(),
+        configured: false,
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn linux_rtkit_nice(priority: i32) -> bool {
+    let Ok(connection) = dbus::blocking::Connection::new_system() else {
+        return false;
+    };
+    let proxy = connection.with_proxy(
+        "org.freedesktop.RealtimeKit1",
+        "/org/freedesktop/RealtimeKit1",
+        std::time::Duration::from_secs(1),
+    );
+    // SAFETY: Linux gettid has no pointer arguments or side effects.
+    let tid = unsafe { libc::syscall(libc::SYS_gettid) } as u64;
+    let result: Result<(), _> = proxy.method_call(
+        "org.freedesktop.RealtimeKit1",
+        "MakeThreadHighPriority",
+        (tid, priority),
+    );
+    result.is_ok()
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod linux_tests {
+    use super::*;
+    #[test]
+    fn nice_guard_reports_real_permission_and_restores_the_thread() {
+        std::thread::spawn(|| {
+            let before = linux_current();
+            let guard = ThreadPriority::enter();
+            let live = guard.snapshot();
+            assert_eq!(live.policy, before.policy);
+            assert_eq!(live.nice, linux_nice().ok());
+            if live.configured {
+                assert!(live.nice.unwrap() <= -10);
+            } else {
+                assert!(live.error.is_some());
+                assert_eq!(live.nice, before.nice);
+            }
+            drop(guard);
+            assert_eq!(linux_current().nice, before.nice);
+        })
+        .join()
+        .unwrap();
     }
 }
 

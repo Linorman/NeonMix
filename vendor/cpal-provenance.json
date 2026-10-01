@@ -5,5 +5,17 @@
   "license": "Apache-2.0",
   "patch": "patches/cpal-0.18.2-native-position.patch",
   "patch_sha256": "dfc9c6a98540df04d98b438b9e93e72d7b7e0244e8495dcfd56bd56419220f37",
-  "revision": "neonmix-native-io-3"
+  "revision": "neonmix-native-io-3",
+  "additional_patches": [
+    {
+      "path": "patches/cpal-0.18.2-linux-scheduling.patch",
+      "sha256": "86a2518f9f5fa760b4b54316060d6d74556072ca75142b75d917f7a0820046cb",
+      "revision": "neonmix-linux-scheduling-1"
+    },
+    {
+      "path": "patches/cpal-0.18.2-windows-capture-start.patch",
+      "sha256": "7e9a3e578c9e98510f7eca0d20ec27ecefc2218a5ce73686b365682d2bdf236e",
+      "revision": "neonmix-windows-capture-start-mmcss-1"
+    }
+  ]
 }

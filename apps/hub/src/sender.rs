@@ -8,7 +8,7 @@ use neonmix_core::{
 use neonmix_media::Sender;
 use std::{
     collections::VecDeque,
-    net::{SocketAddr, UdpSocket},
+    net::UdpSocket,
     time::{Duration, Instant},
 };
 use uuid::Uuid;
@@ -24,14 +24,20 @@ pub struct SendOptions {
 }
 
 pub fn client(credential: &Credential) -> Result<reqwest::Client> {
-    Ok(reqwest::Client::builder()
-        .tls_built_in_root_certs(false)
-        .add_root_certificate(reqwest::Certificate::from_pem(
-            credential.certificate.as_bytes(),
-        )?)
-        .min_tls_version(reqwest::tls::Version::TLS_1_3)
-        .timeout(Duration::from_secs(5))
-        .build()?)
+    let mut builder = reqwest::Client::builder()
+        .https_only(true)
+        .no_proxy()
+        .redirect(reqwest::redirect::Policy::none())
+        .use_preconfigured_tls(neonmix_identity::trust::tls(&credential.certificate)?)
+        .timeout(Duration::from_secs(5));
+    if let Some(route) = &credential.route {
+        let url = reqwest::Url::parse(&route.url)?;
+        builder = builder.resolve(
+            url.host_str().ok_or("missing discovery host")?,
+            route.address,
+        );
+    }
+    Ok(builder.build()?)
 }
 pub async fn run(
     credential: Credential,
@@ -71,6 +77,7 @@ pub async fn run(
         .remote_addr()
         .ok_or("authenticated Hub address missing")?;
     let snapshot: Snapshot = response.json().await?;
+    crate::identity::check_hub(&credential, snapshot.hub_id)?;
     if bound
         .as_ref()
         .is_some_and(|binding| binding.hub_id != snapshot.hub_id)
@@ -140,7 +147,11 @@ pub async fn run(
                 capture_kind,
                 neonmix_io::OpenOptions {
                     sample_rate: None,
-                    period_frames: Some(480),
+                    period_frames: if cfg!(target_os = "linux") {
+                        None
+                    } else {
+                        Some(480)
+                    },
                 },
                 1,
             )
@@ -195,6 +206,7 @@ pub async fn run(
                 .error_for_status()?
                 .json()
                 .await?;
+            crate::identity::check_hub(&credential, snapshot.hub_id)?;
             if bound
                 .as_ref()
                 .is_some_and(|binding| binding.hub_id != snapshot.hub_id)
@@ -207,6 +219,14 @@ pub async fn run(
         }
         break response.error_for_status()?.json().await?;
     };
+    if let Some(id) = credential.hub_id
+        && response.hub_id != Some(id)
+    {
+        if let Some(session) = &response.session {
+            stop_session(&client, &credential, hub, session.id).await;
+        }
+        return Err("paired Hub identity changed during session negotiation".into());
+    }
     let session = response.session.ok_or("missing accepted session")?;
     if bound
         .as_ref()
@@ -215,10 +235,11 @@ pub async fn run(
         stop_session(&client, &credential, hub, session.id).await;
         return Err("session negotiation did not confirm the bound Hub identity".into());
     }
-    socket.connect(SocketAddr::new(
-        remote.ip(),
-        response.media_port.ok_or("missing media port")?,
-    ))?;
+    socket.connect({
+        let mut address = remote;
+        address.set_port(response.media_port.ok_or("missing media port")?);
+        address
+    })?;
     let mut sender = Sender::new(&session, &pem, &response.hub_certificate_sha256)?;
     let mut media_wait = crate::media_wait::MediaWait::new(socket)?;
     let wake = media_wait.waker();

@@ -8,6 +8,7 @@ license.workspace = true
 neonmix-core.workspace = true
 neonmix-io.workspace = true
 neonmix-output-binding = { path = "../../crates/output-binding" }
+neonmix-identity = { path = "../../crates/identity" }
 neonmix-control = { path = "../../crates/control" }
 neonmix-media = { path = "../../crates/media" }
 serde.workspace = true
@@ -34,6 +35,7 @@ objc2-foundation = { version = "=0.3.2", default-features = false, features = ["
 [target.'cfg(target_os = "windows")'.dependencies]
 neonmix-windows = { path = "../../adapters/windows" }
 [target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
 neonmix-linux = { path = "../../adapters/linux" }
 [lints]
 workspace = true

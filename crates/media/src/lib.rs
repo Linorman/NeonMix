@@ -1,5 +1,6 @@
 //! Authenticated native media adapter. GStreamer owns codec, the one jitter
 //! buffer, DTLS-SRTP and replay protection. Rust owns authorization and quotas.
+mod queue_trace;
 mod scheduling;
 mod thread_priority;
 pub use scheduling::SchedulingSnapshot;

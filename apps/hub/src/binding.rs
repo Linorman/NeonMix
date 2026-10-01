@@ -25,7 +25,8 @@ pub async fn execute(command: OutputCommand) -> Result<()> {
             device,
             name,
         } => {
-            let credential = crate::read(&credential)?;
+            let mut credential = crate::identity::credential(&credential)?;
+            let hub = crate::identity::endpoint(&mut credential, hub).await?;
             let snapshot: neonmix_control::Snapshot = crate::sender::client(&credential)?
                 .get(format!("{hub}/v1/hub"))
                 .bearer_auth(&credential.token)
@@ -34,6 +35,7 @@ pub async fn execute(command: OutputCommand) -> Result<()> {
                 .error_for_status()?
                 .json()
                 .await?;
+            crate::identity::check_hub(&credential, snapshot.hub_id)?;
             let device = match device {
                 Some(id) => {
                     crate::virtual_output::resolve_id(provider, &id, crate::backend()?.devices()?)?

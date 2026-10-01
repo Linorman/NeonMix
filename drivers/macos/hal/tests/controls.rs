@@ -315,7 +315,7 @@ fn name_changes_keep_uid_clock_and_audio_and_reject_control_characters() {
     let before = f.get(2, b"uid ", b"glob");
     let name = cf::create_string("NeonMix — 客厅");
     let pointer = name as usize;
-    assert_eq!(f.set(2, b"lnam", b"glob", &pointer.to_ne_bytes()), 0);
+    assert_eq!(f.set(2, b"nmna", b"glob", &pointer.to_ne_bytes()), 0);
     // SAFETY: created CFString is owned by this test and setter has copied the text.
     unsafe { cf::release(name) };
     let got = f.get(2, b"lnam", b"glob");
@@ -339,7 +339,7 @@ fn name_changes_keep_uid_clock_and_audio_and_reject_control_characters() {
     for text in ["", "  ", "bad\0name", "bad\nname"] {
         let invalid = cf::create_string(text);
         let pointer = invalid as usize;
-        assert_ne!(f.set(2, b"lnam", b"glob", &pointer.to_ne_bytes()), 0);
+        assert_ne!(f.set(2, b"nmna", b"glob", &pointer.to_ne_bytes()), 0);
         // SAFETY: the rejected input remains owned by this test.
         unsafe { cf::release(invalid) };
     }

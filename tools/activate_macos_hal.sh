@@ -7,7 +7,13 @@ if [ "$(uname -s)" != Darwin ] || [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 check_idle() {
-  if /bin/ps -axo pid=,command= | /usr/bin/awk '/neonmix-(hub|audio) (serve|send|capture|play)/ {print $1; found=1} END {exit(found?0:1)}'; then
+  # Inspect executable identity, not an argv substring or one build directory.
+  # -ww prevents ps from truncating archived executable paths.
+  if /bin/ps -ww -axo pid=,comm= | /usr/bin/awk '
+      { path=$0; sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "", path);
+        n=split(path,parts,"/");
+        if (parts[n] ~ /^neonmix-(hub|audio)$/) {print $1; found=1} }
+      END {exit(found?0:1)}'; then
     echo 'NeonMix audio processes are still running; service restart was deferred' >&2
     exit 1
   fi

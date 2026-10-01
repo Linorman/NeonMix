@@ -260,6 +260,9 @@ struct RunContext {
 
     // Owned here so the worker thread closes it on exit in a self-join case.
     pending_scheduled_event: Foundation::HANDLE,
+    // Loopback can begin at a nonzero device position. Track Start explicitly
+    // instead of using device_position == 0 to recognize its first packet.
+    capture_first_packet: bool,
 }
 
 impl Drop for RunContext {
@@ -350,6 +353,7 @@ impl Stream {
             pending_device_changed,
             default_device_flow,
             pending_scheduled_event,
+            capture_first_packet: true,
         };
 
         // The latch is released just before the `Stream` is returned so the worker cannot fire any
@@ -422,6 +426,7 @@ impl Stream {
             pending_device_changed,
             default_device_flow,
             pending_scheduled_event,
+            capture_first_packet: true,
         };
 
         // The latch is released just before the `Stream` is returned so the worker cannot fire any
@@ -547,6 +552,7 @@ fn process_commands(run_context: &mut RunContext) -> Result<bool, Error> {
                         .Start()
                         .context("Failed to start audio client")?;
                     run_context.stream.playing = true;
+                    run_context.capture_first_packet = true;
                 }
             },
             Command::PauseStream => unsafe {
@@ -614,12 +620,16 @@ fn run_input(
     error_callback: &ErrorCallbackArc,
 ) {
     #[cfg(feature = "realtime")]
-    if let Err(err) = boost_current_thread_priority(
+    let _priority_guard = match boost_current_thread_priority(
         run_ctxt.stream.period_frames,
         run_ctxt.stream.config.sample_rate,
     ) {
-        emit_error(error_callback, err);
-    }
+        Ok(guard) => guard,
+        Err(err) => {
+            emit_error(error_callback, err);
+            return;
+        }
+    };
 
     let stream = &run_ctxt.stream;
     let scratch_len = if stream.sample_format == SampleFormat::I24 {
@@ -646,6 +656,7 @@ fn run_input(
             data_callback,
             error_callback,
             &mut scratch_buffer,
+            &mut run_ctxt.capture_first_packet,
         ) {
             emit_error(error_callback, err);
             break;
@@ -659,12 +670,16 @@ fn run_output(
     error_callback: &ErrorCallbackArc,
 ) {
     #[cfg(feature = "realtime")]
-    if let Err(err) = boost_current_thread_priority(
+    let _priority_guard = match boost_current_thread_priority(
         run_ctxt.stream.period_frames,
         run_ctxt.stream.config.sample_rate,
     ) {
-        emit_error(error_callback, err);
-    }
+        Ok(guard) => guard,
+        Err(err) => {
+            emit_error(error_callback, err);
+            return;
+        }
+    };
 
     // The clock frequency is constant for the stream's lifetime.
     let clock_frequency = match unsafe { run_ctxt.stream.audio_clock.GetFrequency() }
@@ -713,18 +728,44 @@ fn run_output(
 
 /// Attempts to elevate the current thread to real-time or high-priority scheduling.
 #[cfg(feature = "realtime")]
-fn boost_current_thread_priority(
-    period_frames: FrameCount,
-    sample_rate: SampleRate,
-) -> Result<(), Error> {
-    match audio_thread_priority::promote_current_thread_to_real_time(period_frames, sample_rate) {
-        Ok(_) => Ok(()),
-        Err(_) => unsafe {
-            let thread_handle = Threading::GetCurrentThread();
-            Threading::SetThreadPriority(thread_handle, Threading::THREAD_PRIORITY_TIME_CRITICAL)
-                .context("Failed to promote audio thread to real-time priority")
-        },
+struct AudioPriorityGuard(Foundation::HANDLE);
+
+#[cfg(feature = "realtime")]
+impl Drop for AudioPriorityGuard {
+    fn drop(&mut self) {
+        // SAFETY: the private guard stays on the worker that registered this
+        // MMCSS handle, and that worker has finished using the audio client.
+        unsafe {
+            let _ = Threading::AvRevertMmThreadCharacteristics(self.0);
+        }
     }
+}
+
+#[cfg(feature = "realtime")]
+fn boost_current_thread_priority(
+    _period_frames: FrameCount,
+    _sample_rate: SampleRate,
+) -> Result<AudioPriorityGuard, Error> {
+    let denied = |error: windows::core::Error| {
+        Error::with_message(
+            ErrorKind::RealtimeDenied,
+            format!("MMCSS Pro Audio: {error}"),
+        )
+    };
+    let mut task_index = 0;
+    // SAFETY: the static task name is NUL-terminated; the writable index lives
+    // through the call, which registers only the calling audio worker.
+    let handle = unsafe {
+        Threading::AvSetMmThreadCharacteristicsW(windows::core::w!("Pro Audio"), &mut task_index)
+    }
+    .map_err(denied)?;
+    let guard = AudioPriorityGuard(handle);
+    // SAFETY: handle belongs to this worker's live MMCSS registration. The
+    // scheduling budget remains managed by MMCSS instead of a process-wide
+    // realtime priority class or a global timer-resolution change.
+    unsafe { Threading::AvSetMmThreadPriority(handle, Threading::AVRT_PRIORITY_HIGH) }
+        .map_err(denied)?;
+    Ok(guard)
 }
 
 // WASAPI never rebinds the IAudioClient, so report what's actually true instead of DeviceChanged.
@@ -788,6 +829,7 @@ fn process_input(
     data_callback: &mut dyn FnMut(&Data, &InputCallbackInfo),
     error_callback: &ErrorCallbackArc,
     scratch_buffer: &mut [i32],
+    first_packet: &mut bool,
 ) -> Result<(), Error> {
     unsafe {
         // Get the available data in the shared buffer.
@@ -816,12 +858,11 @@ fn process_input(
                 Ok(_) => (),
             }
 
+            if frames_available == 0 {
+                continue;
+            }
             let flags = flags.assume_init();
-            // The discontinuity flag is undefined on the first GetBuffer after Start,
-            // where device_position is still 0.
-            if device_position != 0
-                && flags & Audio::AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY.0 as u32 != 0
-            {
+            if capture_packet_is_xrun(first_packet, flags) {
                 let _ = try_emit_error(error_callback, ErrorKind::Xrun.into());
             }
 
@@ -862,6 +903,31 @@ fn process_input(
     }
 }
 
+fn capture_packet_is_xrun(first_packet: &mut bool, flags: u32) -> bool {
+    let initial = mem::replace(first_packet, false);
+    // The initial packet after Start has no previous packet to compare with.
+    // A transition flag here is not evidence of lost in-session samples.
+    !initial && flags & Audio::AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY.0 as u32 != 0
+}
+
+#[cfg(test)]
+mod capture_packet_tests {
+    use super::*;
+
+    #[test]
+    fn initial_and_resumed_packets_do_not_report_transition_as_xrun() {
+        let discontinuity = Audio::AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY.0 as u32;
+        let mut first = true;
+        assert!(!capture_packet_is_xrun(&mut first, discontinuity));
+        assert!(!capture_packet_is_xrun(&mut first, 0));
+        assert!(capture_packet_is_xrun(&mut first, discontinuity));
+        // process_commands sets this on each successful Start, including resume.
+        first = true;
+        assert!(!capture_packet_is_xrun(&mut first, discontinuity));
+        assert!(capture_packet_is_xrun(&mut first, discontinuity));
+    }
+}
+
 // The loop for writing output data.
 fn process_output(
     stream: &StreamInner,
@@ -889,7 +955,8 @@ fn process_output(
         let len = byte_count / stream.sample_format.sample_size();
         let mut data = Data::from_parts(data, len, stream.sample_format);
         let sample_rate = stream.config.sample_rate;
-        let (timestamp, position) = output_timestamp(stream, sample_rate, clock_frequency, *frames_written)?;
+        let (timestamp, position) =
+            output_timestamp(stream, sample_rate, clock_frequency, *frames_written)?;
         let info = OutputCallbackInfo::with_native_frame_position(timestamp, position);
         data_callback(&mut data, &info);
 
@@ -980,6 +1047,7 @@ fn output_timestamp(
     let buffered = Duration::from_nanos(buffered_nanos);
 
     let playback = callback + (buffered + stream.stream_latency);
-    let frame_position = i64::try_from(position as u128 * sample_rate as u128 / clock_frequency as u128).ok();
+    let frame_position =
+        i64::try_from(position as u128 * sample_rate as u128 / clock_frequency as u128).ok();
     Ok((OutputStreamTimestamp { callback, playback }, frame_position))
 }

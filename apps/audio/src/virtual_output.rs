@@ -196,19 +196,31 @@ pub fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::{Read, Seek};
+
+    fn owner_metadata(owner: &mut OwnerLock) -> Vec<u8> {
+        // Windows locks reject reads through another handle. Read through the
+        // owning handle so the assertion also exercises mandatory file locks.
+        owner._file.rewind().unwrap();
+        let mut bytes = Vec::new();
+        owner._file.read_to_end(&mut bytes).unwrap();
+        bytes
+    }
+
     #[test]
     fn rejected_second_owner_preserves_live_lock_and_drop_releases_it() {
         let directory = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../.local/tmp")
             .join(format!("e06-lock-{}", std::process::id()));
-        let owner = OwnerLock::acquire(&directory).unwrap();
-        let before = fs::read(directory.join("virtual-output.lock")).unwrap();
+        let mut owner = OwnerLock::acquire(&directory).unwrap();
+        let before = owner_metadata(&mut owner);
         assert!(OwnerLock::acquire(&directory).is_err());
+        assert_eq!(owner_metadata(&mut owner), before);
+        drop(owner);
         assert_eq!(
             fs::read(directory.join("virtual-output.lock")).unwrap(),
             before
         );
-        drop(owner);
         drop(OwnerLock::acquire(&directory).unwrap());
         fs::remove_dir_all(directory).unwrap();
     }

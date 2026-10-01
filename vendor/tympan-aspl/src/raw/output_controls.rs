@@ -72,13 +72,16 @@ pub(crate) fn get(
     let main = address.element.is_main();
     let value = if id == DEVICE && main {
         match selector {
-            v if v == code(b"lnam") && global => PropertyValue::Text(
+            v if (v == code(b"lnam") || v == code(b"nmna")) && global => PropertyValue::Text(
                 control
                     .name
                     .lock()
                     .unwrap_or_else(|p| p.into_inner())
                     .clone(),
             ),
+            v if v == code(b"cust") && global => {
+                PropertyValue::CustomProperties(vec![[code(b"nmna"), code(b"cfst"), 0]])
+            }
             v if v == code(b"ctrl") => PropertyValue::ObjectList(if global || output {
                 vec![AudioObjectId(VOLUME), AudioObjectId(MUTE)]
             } else {
@@ -160,7 +163,7 @@ pub(crate) fn settable(
         value.map(|_| {
             let selector = address.selector.0.as_u32();
             (id == DEVICE
-                && [code(b"volm"), code(b"vold"), code(b"mute"), code(b"lnam")].contains(&selector))
+                && [code(b"volm"), code(b"vold"), code(b"mute"), code(b"nmna")].contains(&selector))
                 || (id == VOLUME && [code(b"lcsv"), code(b"lcdv")].contains(&selector))
                 || (id == MUTE && selector == code(b"bcvl"))
         })
@@ -261,9 +264,14 @@ pub(crate) fn set_name(runtime: &DriverRuntime, value: String) {
         mScope: code(b"glob"),
         mElement: 0,
     };
+    let custom = AudioObjectPropertyAddress {
+        mSelector: code(b"nmna"),
+        ..address
+    };
+    let addresses = [address, custom];
     // SAFETY: control-thread notification with live host and correctly sized address.
     unsafe {
-        callback(host, DEVICE, 1, &address);
+        callback(host, DEVICE, addresses.len() as u32, addresses.as_ptr());
     }
 }
 

@@ -1,4 +1,4 @@
-//! Control-thread naming of the owned NeonMix HAL device, never a third-party driver.
+//! Control-thread naming through the owned HAL's declared CFString custom property.
 #![allow(unsafe_code)]
 use neonmix_core::AudioError;
 use std::ffi::c_void;
@@ -88,7 +88,9 @@ pub fn set_virtual_output_name(name: &str) -> Result<(), AudioError> {
             return Err(AudioError::Backend("could not create output name".into()));
         }
         let address = Address {
-            selector: u32::from_be_bytes(*b"lnam"),
+            // Core Audio owns the read-only standard Name property. The owned
+            // driver advertises this CFString custom setter through 'cust'.
+            selector: u32::from_be_bytes(*b"nmna"),
             scope: u32::from_be_bytes(*b"glob"),
             element: 0,
         };

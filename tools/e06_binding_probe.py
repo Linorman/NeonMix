@@ -26,7 +26,7 @@ binary,audio=ROOT/'target/release/neonmix-hub',ROOT/'target/release/neonmix-audi
 out=ROOT/'artifacts/e06-binding'/time.strftime('%Y%m%d-%H%M%S');out.mkdir(parents=True)
 lab=Path(tempfile.mkdtemp(prefix='e06-binding-probe-',dir=ROOT/'.local/tmp'))
 directory=lab/'output';children=[];handles=[]
-controls=DeviceControls(DEVICE.removeprefix('coreaudio:'));original={'rate':controls.rate(),'volume':controls.volume(),'mute':controls.muted()}
+controls=DeviceControls(DEVICE.removeprefix('coreaudio:'));original={'rate':controls.rate(),'volume':controls.volume(),'mute':controls.muted(),'name':controls.name()}
 report={'passed':False,'scope':('macOS persistent output binding and real BlackHole Sender; not HAL system loading' if args.provider=='blackhole' else 'macOS persistent output binding and installed NeonMix HAL Sender'), 'provider':args.provider,
         'binary_sha256':hashlib.sha256(binary.read_bytes()).hexdigest()}
 
@@ -79,7 +79,8 @@ try:
     assert renamed['output_id']==first['output_id'] and renamed['hub_id']==first['hub_id'] and renamed['device_id']==first['device_id']
     if args.provider=='neonmix':
         output('sync-name')
-        report['native_name_sync']=True
+        wait(controls.name,lambda value:value==renamed['display_name'])
+        report['native_name_sync']={'requested':renamed['display_name'],'actual':controls.name()}
     output('rename','--expected-revision',first['revision'],'--name','Conflict',expected=1)
     time.sleep(1)
     after=api('/v1/diagnostics');assert sending.poll() is None
@@ -130,6 +131,7 @@ finally:
     for child in reversed(children):stop(child)
     for handle in handles:handle.close()
     controls.set_rate(original['rate']);controls.set_volume(original['volume']);controls.set_muted(original['mute'])
+    if args.provider=='neonmix' and controls.name()!=original['name']:controls.set_owned_name(original['name'])
     shutil.rmtree(lab)
     (out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({'passed':report['passed'],'error':report.get('error'),'evidence':str(out)}),flush=True)

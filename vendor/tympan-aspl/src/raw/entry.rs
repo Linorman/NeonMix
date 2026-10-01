@@ -1144,7 +1144,7 @@ pub unsafe extern "C" fn set_property_data(
     // bytes.
     let buffer = unsafe { in_slice(data, data_size) };
     if object_id == runtime.objects().device_id().as_u32()
-        && raw_address.mSelector == u32::from_be_bytes(*b"lnam")
+        && raw_address.mSelector == u32::from_be_bytes(*b"nmna")
         && raw_address.mScope == u32::from_be_bytes(*b"glob")
         && raw_address.mElement == 0
     {

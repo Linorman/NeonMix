@@ -90,7 +90,7 @@ if sys.platform == 'darwin':
         hal_binary = hal_bundle / 'Contents/MacOS/NeonMixHAL'
         report['files_sha256']['NeonMixHAL.driver/Contents/MacOS/NeonMixHAL'] = hashlib.sha256(hal_binary.read_bytes()).hexdigest()
         macos_symbols(hal_binary, OUT / 'NeonMixHAL.dSYM')
-for name in ['neonmix-audio', 'neonmix-desktop'] + (['neonmix-hub'] if sys.platform == 'darwin' else []):
+for name in ['neonmix-audio', 'neonmix-desktop', 'neonmix-background'] + (['neonmix-hub'] if sys.platform == 'darwin' else []):
     binary = name + ('.exe' if sys.platform == 'win32' else '')
     source = ROOT / 'target/release' / binary
     shutil.copy2(source, OUT / binary)

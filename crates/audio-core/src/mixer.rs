@@ -10,10 +10,14 @@ use rtrb::{Consumer, Producer, RingBuffer};
 use rubato::{
     Resampler, SincFixedOut, SincInterpolationParameters, SincInterpolationType, WindowFunction,
 };
+use serde::Serialize;
 use std::{
     sync::{
         Arc,
-        atomic::{AtomicU64, Ordering::Relaxed},
+        atomic::{
+            AtomicU64,
+            Ordering::{Relaxed, SeqCst},
+        },
     },
     time::Instant,
 };
@@ -28,6 +32,82 @@ const MIN_RESERVE_FRAMES: usize = MAX_BLOCK_FRAMES * 6;
 pub const TARGET_WATER_FRAMES: usize = MAX_BLOCK_FRAMES * 7;
 pub const MAX_WATER_FRAMES: usize = FIFO + PCM_QUEUE_BLOCKS * MAX_BLOCK_FRAMES;
 const GAIN_RAMP_FRAMES: usize = 240; // 5 ms at 48 kHz, independent of gain level.
+/// Latest complete 50 ms window on the internal 48 kHz sample clock.
+pub const METER_WINDOW_FRAMES: usize = 2400;
+
+#[derive(Clone, Copy, Debug, Default, Serialize)]
+pub struct MeterSnapshot {
+    pub stream_id: u64,
+    /// Maximum absolute sample across both channels, linear full scale.
+    pub peak: f32,
+    /// Root mean square across both channels, linear full scale.
+    pub rms: f32,
+}
+
+/// A bounded, allocation-free publication from the single audio writer. The
+/// sequence also protects stream identity when a control update reuses a lane.
+#[derive(Default)]
+pub struct MeterStats {
+    sequence: AtomicU64,
+    stream_id: AtomicU64,
+    levels: AtomicU64,
+}
+impl MeterStats {
+    fn publish(&self, stream_id: u64, peak: f32, rms: f32) {
+        self.sequence.fetch_add(1, SeqCst);
+        self.stream_id.store(stream_id, SeqCst);
+        self.levels.store(
+            u64::from(peak.to_bits()) | (u64::from(rms.to_bits()) << 32),
+            SeqCst,
+        );
+        self.sequence.fetch_add(1, SeqCst);
+    }
+    /// Called off the audio thread. Contention returns silence rather than
+    /// spinning without a bound or combining one stream's identity and levels.
+    pub fn snapshot(&self) -> MeterSnapshot {
+        for _ in 0..3 {
+            let before = self.sequence.load(SeqCst);
+            if before & 1 != 0 {
+                continue;
+            }
+            let stream_id = self.stream_id.load(SeqCst);
+            let levels = self.levels.load(SeqCst);
+            if before == self.sequence.load(SeqCst) {
+                return MeterSnapshot {
+                    stream_id,
+                    peak: f32::from_bits(levels as u32),
+                    rms: f32::from_bits((levels >> 32) as u32),
+                };
+            }
+        }
+        MeterSnapshot::default()
+    }
+}
+
+#[derive(Clone, Copy, Default)]
+struct MeterWindow {
+    frames: usize,
+    peak: f32,
+    squares: f64,
+}
+impl MeterWindow {
+    fn observe(&mut self, frame: [f32; 2]) {
+        let left = finite(frame[0]);
+        let right = finite(frame[1]);
+        self.frames += 1;
+        self.peak = self.peak.max(left.abs()).max(right.abs());
+        self.squares += f64::from(left).powi(2) + f64::from(right).powi(2);
+    }
+    fn publish(&mut self, stats: &MeterStats, stream_id: u64) {
+        let rms = if self.frames == 0 {
+            0.0
+        } else {
+            (self.squares / (2 * self.frames) as f64).sqrt() as f32
+        };
+        stats.publish(stream_id, self.peak, rms);
+        *self = Self::default();
+    }
+}
 
 struct GainRamp {
     value: f32,
@@ -136,6 +216,12 @@ impl MixerControl {
 }
 #[derive(Default)]
 pub struct MixerStats {
+    /// Post lane gain/Mute/Solo, before room master and limiter.
+    pub lane_meters: [MeterStats; LANES],
+    /// Actual rendered samples after master and limiter, before device conversion.
+    pub output_meter: MeterStats,
+    /// Minimum linear limiter gain in the latest complete meter window.
+    pub limiter_gain_bits: AtomicU64,
     pub output_frames: AtomicU64,
     pub limited_frames: AtomicU64,
     pub underrun_frames: AtomicU64,
@@ -429,6 +515,9 @@ pub struct Mixer {
     now_ns: u64,
     master: GainRamp,
     limiter: f32,
+    lane_meter_windows: [MeterWindow; LANES],
+    output_meter_window: MeterWindow,
+    meter_limiter_min: f32,
 }
 pub type MixerParts = (Mixer, MixerControl, Vec<BlockProducer>, Arc<MixerStats>);
 impl Mixer {
@@ -442,6 +531,9 @@ impl Mixer {
         }
         let (p, c) = RingBuffer::new(8);
         let stats = Arc::new(MixerStats::default());
+        stats
+            .limiter_gain_bits
+            .store(u64::from(1.0f32.to_bits()), Relaxed);
         stats.sinc_delay_frames.store(
             lanes.first().map_or(0, |l| l.resampler.output_delay()) as u64,
             Relaxed,
@@ -457,6 +549,9 @@ impl Mixer {
                 now_ns: 0,
                 master: GainRamp::new(db_gain(-12.0)),
                 limiter: 1.0,
+                lane_meter_windows: [MeterWindow::default(); LANES],
+                output_meter_window: MeterWindow::default(),
+                meter_limiter_min: 1.0,
             },
             MixerControl { commands: p },
             inputs,
@@ -487,10 +582,20 @@ impl Mixer {
         }
         self.master.restart_from_zero();
         self.limiter = 1.0;
+        self.lane_meter_windows.fill(MeterWindow::default());
+        self.output_meter_window = MeterWindow::default();
+        self.meter_limiter_min = 1.0;
+        for (lane, meter) in self.lanes.iter().zip(&self.stats.lane_meters) {
+            meter.publish(lane.config.stream_id, 0.0, 0.0);
+        }
+        self.stats.output_meter.publish(0, 0.0, 0.0);
+        self.stats
+            .limiter_gain_bits
+            .store(u64::from(1.0f32.to_bits()), Relaxed);
     }
     fn apply(&mut self, config: MixerConfig) {
         let solo = config.lanes.iter().any(|l| l.stream_id != 0 && l.solo);
-        for (lane, next) in self.lanes.iter_mut().zip(config.lanes) {
+        for (index, (lane, next)) in self.lanes.iter_mut().zip(config.lanes).enumerate() {
             let tail = lane.last_rendered;
             let removed = lane.config.stream_id != 0 && next.stream_id == 0;
             if lane.config.stream_id != next.stream_id
@@ -498,6 +603,8 @@ impl Mixer {
                 || self.config.output_epoch != config.output_epoch
             {
                 lane.reset();
+                self.lane_meter_windows[index] = MeterWindow::default();
+                self.stats.lane_meters[index].publish(next.stream_id, 0.0, 0.0);
             }
             if removed {
                 lane.retire_tail = tail;
@@ -536,6 +643,9 @@ impl StereoSource for Mixer {
         let mut sum = [0.0f32; 2];
         for (i, lane) in self.lanes.iter_mut().enumerate() {
             let f = lane.next(now_ns, self.output, i, &self.stats);
+            if lane.config.stream_id != 0 {
+                self.lane_meter_windows[i].observe(f);
+            }
             sum[0] += f[0];
             sum[1] += f[1];
         }
@@ -553,10 +663,25 @@ impl StereoSource for Mixer {
         }
         self.output = self.output.saturating_add(1);
         self.stats.output_frames.store(self.output, Relaxed);
-        [
+        let rendered = [
             finite(sum[0] * self.limiter).clamp(-0.98, 0.98),
             finite(sum[1] * self.limiter).clamp(-0.98, 0.98),
-        ]
+        ];
+        self.output_meter_window.observe(rendered);
+        self.meter_limiter_min = self.meter_limiter_min.min(self.limiter);
+        if self.output_meter_window.frames == METER_WINDOW_FRAMES {
+            for (index, lane) in self.lanes.iter().enumerate() {
+                self.lane_meter_windows[index]
+                    .publish(&self.stats.lane_meters[index], lane.config.stream_id);
+            }
+            self.output_meter_window
+                .publish(&self.stats.output_meter, 0);
+            self.stats
+                .limiter_gain_bits
+                .store(u64::from(self.meter_limiter_min.to_bits()), Relaxed);
+            self.meter_limiter_min = 1.0;
+        }
+        rendered
     }
 }
 fn db_gain(db: f32) -> f32 {
