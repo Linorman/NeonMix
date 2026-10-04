@@ -1,0 +1,84 @@
+name: macOS installer
+
+on:
+  push:
+    branches: [installer-macos]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_HOME: ${{ github.workspace }}/.local/cargo
+  RUSTUP_HOME: ${{ github.workspace }}/.local/rustup
+  CARGO_TARGET_DIR: ${{ github.workspace }}/target
+  UV_CACHE_DIR: ${{ github.workspace }}/.local/uv
+  MACOSX_DEPLOYMENT_TARGET: '14.6'
+
+jobs:
+  installer:
+    name: NeonMix macOS arm64 DMG
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Project-local environment
+        run: |
+          mkdir -p .local/tmp artifacts/installers
+          for name in TMPDIR TMP TEMP; do
+            echo "$name=$GITHUB_WORKSPACE/.local/tmp" >> "$GITHUB_ENV"
+          done
+      - name: Apple Silicon and SDK gate
+        run: |
+          test "$(uname -m)" = arm64
+          export DEVELOPER_DIR=/Applications/Xcode_16.4.app/Contents/Developer
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+          test "$(xcrun --show-sdk-version)" = 15.5
+      - name: Pinned Rust
+        run: rustup toolchain install 1.95.0 --profile minimal
+      # Checksum-locked GStreamer runtime/devel packages and UxPlay sources.
+      - name: Cache native downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            .local/gstreamer/versions/*/downloads
+            .local/airplay/downloads
+          key: macos-native-${{ hashFiles('tools/prepare_gstreamer.py', 'tools/prepare_airplay.py') }}
+      - name: GStreamer runtime
+        run: tools/dev python3 tools/prepare_gstreamer.py
+      - name: Release workspace
+        run: tools/dev cargo build --release --workspace --locked
+      - name: AirPlay worker
+        run: tools/dev python3 tools/prepare_airplay.py
+      - name: Assemble app and DMG
+        run: tools/dev python3 tools/package_macos.py --skip-build
+      - name: Smoke test the packaged app
+        run: |
+          dmg=$(ls artifacts/installers/NeonMix-*-macos-arm64.dmg)
+          mount=$(mktemp -d)
+          hdiutil attach -nobrowse -readonly -mountpoint "$mount" "$dmg"
+          trap 'hdiutil detach "$mount"' EXIT
+          app="$mount/NeonMix.app"
+          codesign --verify --deep --strict "$app"
+          contents="$app/Contents"
+          export GST_PLUGIN_SYSTEM_PATH_1_0="$contents/Resources/plugins"
+          export GST_PLUGIN_SCANNER="$contents/Helpers/gst-plugin-scanner"
+          export GST_PLUGIN_SCANNER_1_0="$GST_PLUGIN_SCANNER"
+          export GST_PLUGIN_PATH_1_0= GST_PLUGIN_PATH=
+          export GST_REGISTRY="$RUNNER_TEMP/installed-registry.bin"
+          # Only bundled libraries may load: no project prefix on any search path.
+          unset DYLD_FALLBACK_LIBRARY_PATH DYLD_LIBRARY_PATH
+          runtime=$("$contents/MacOS/bin/neonmix-hub" runtime)
+          echo "$runtime" | grep -q opusenc || { echo "hub runtime failed: $runtime"; exit 1; }
+          export GST_PLUGIN_SYSTEM_PATH_1_0="$contents/Resources/airplay/plugins"
+          export GST_REGISTRY="$RUNNER_TEMP/installed-airplay-registry.bin"
+          worker=$(echo -n | "$contents/MacOS/bin/neonmix-airplay-worker" 2>&1 || true)
+          echo "$worker" | grep -q '"type":"fatal"' || { echo "worker did not start: $worker"; exit 1; }
+          "$contents/MacOS/bin/neonmix-desktop" --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neonmix-macos-arm64-installer
+          path: |
+            artifacts/installers/NeonMix-*-macos-arm64.dmg
+            artifacts/installers/NeonMix-*-macos-arm64.json
+          retention-days: 30

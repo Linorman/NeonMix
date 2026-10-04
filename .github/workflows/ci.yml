@@ -1,8 +1,6 @@
 name: E00-E04 (native media on macOS)
+# Manual only; packaging runs in macos-installer.yml / windows-installer.yml.
 on:
-  push:
-    branches-ignore: ['codex/windows-*']
-  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
