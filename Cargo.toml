@@ -9,6 +9,7 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
 license = "LicenseRef-Proprietary"
+repository = "https://github.com/Linorman/NeonMix"
 
 [workspace.dependencies]
 neonmix-core = { path = "crates/audio-core" }

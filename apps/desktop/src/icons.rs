@@ -9,6 +9,7 @@ pub enum Icon {
     Sender,
     Devices,
     Pulse,
+    Info,
     Search,
     Check,
     AirPlay,
@@ -59,6 +60,11 @@ pub fn paint(painter: &Painter, rect: Rect, icon: Icon, color: Color32) {
                 p(15.0, 7.0),
             ];
             painter.add(eframe::egui::Shape::line(points.to_vec(), stroke));
+        }
+        Icon::Info => {
+            painter.circle_stroke(p(8.0, 8.0), 6.4 * u, stroke);
+            painter.line_segment([p(8.0, 7.2), p(8.0, 11.4)], stroke);
+            painter.circle_filled(p(8.0, 4.9), 0.95 * u, color);
         }
         Icon::Search => {
             painter.circle_stroke(p(7.0, 7.0), 4.4 * u, stroke);
