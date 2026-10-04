@@ -1,9 +1,7 @@
 name: Windows native acceptance
 
+# Manual only; packaging runs in windows-installer.yml.
 on:
-  push:
-    branches: [main, 'codex/windows-*']
-  pull_request:
   workflow_dispatch:
     inputs:
       scope:
