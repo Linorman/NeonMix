@@ -94,6 +94,12 @@ jobs:
           $version = & "$target\bin\neonmix-desktop.exe" --version
           Write-Host $version
           # Informational: the hosted runner may lack a usable OpenGL context.
+          $log = Join-Path $env:RUNNER_TEMP 'desktop-direct.log'
+          $direct = Start-Process -PassThru -FilePath "$target\bin\neonmix-desktop.exe" -ArgumentList '--state-dir', (Join-Path $env:RUNNER_TEMP 'direct-state') -RedirectStandardError $log -RedirectStandardOutput "$log.out"
+          Start-Sleep -Seconds 15
+          Write-Host ("direct desktop: exited=" + $direct.HasExited + $(if ($direct.HasExited) { " code=" + $direct.ExitCode } else { '' }))
+          Write-Host ((Get-Content $log, "$log.out" -ErrorAction SilentlyContinue | Select-Object -First 20) -join "`n")
+          Get-Process neonmix-* -ErrorAction SilentlyContinue | Stop-Process -Force
           Start-Process -FilePath "$target\NeonMix.exe"
           Start-Sleep -Seconds 20
           Write-Host ('processes: ' + ((Get-Process neonmix-* -ErrorAction SilentlyContinue | ForEach-Object Name) -join ', '))
