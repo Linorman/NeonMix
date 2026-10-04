@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 84, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 70, in main
+    probe.main()
+    ~~~~~~~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 130, in main
+    assert app.process.wait(timeout=10)==0
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 1279, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 2076, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['/Volumes/projects-mac/NeonMix/tools/dev', '/Volumes/projects-mac/NeonMix/.local/acceptance-source/e00-e07-20261001/target/release/neonmix-desktop', '--state-dir', '/Volumes/projects-mac/NeonMix/.local/tmp/e07-ui-b449a8abb872']' timed out after 10 seconds

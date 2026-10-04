@@ -1,0 +1,114 @@
+{
+  "scenario": "mix",
+  "platform": "Linux",
+  "os_version": "6.14.0-27-generic",
+  "architecture": "aarch64",
+  "build_profile": "release",
+  "sources": 0,
+  "native_sources": 4,
+  "output_device": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real PipeWire output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "8d9cd78b0b907d5ef37f634ce697e2128e3e1f823ce4b2050ffc24cda59169eb",
+    "neonmix-airplay-worker": "b0aa5ce7d1194e5e3476a3eae852da5ef144972d76df36fda39ff54d7a196a84"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": 60.0,
+  "airplay_frequencies_hz": [],
+  "native_frequencies_hz": [
+    809,
+    946,
+    1083,
+    1220
+  ],
+  "passed": true,
+  "scenarios": {
+    "independent_native_tones_render_with_requested_mix": true,
+    "dynamic_unique_lanes_and_shared_output": true,
+    "full_room_native_start_rejected_without_reservation_leak": true,
+    "steady_digital_timing_quality": true,
+    "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+  },
+  "isolation_checks": [],
+  "native_streams": 4,
+  "steady": {
+    "output_rms": 0.005654108710587025,
+    "active": 4,
+    "lane_rms": [],
+    "native_lane_rms": [
+      0.011191025376319885,
+      0.011326732113957405,
+      0.011343938298523426,
+      0.011227055452764034
+    ]
+  },
+  "steady_continuity": {
+    "output_frames": 2880512,
+    "global_timed_late_frames_before": 0,
+    "global_timed_late_frames_after": 0,
+    "global_timed_late_frames_delta": 0,
+    "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+    "lanes": [
+      {
+        "kind": "native",
+        "source_index": 1,
+        "lane": 0,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 2,
+        "lane": 1,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 3,
+        "lane": 2,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 4,
+        "lane": 3,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      }
+    ]
+  },
+  "continuity_claim": "Steady digital counters must remain continuous; this is not analog or Apple-device audio verification",
+  "global_disable": {
+    "receivers": [
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      }
+    ],
+    "reserved": 0,
+    "owned_worker_count": 0
+  },
+  "status_reads": {
+    "readers": 0,
+    "successful": 0,
+    "errors": 0
+  },
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

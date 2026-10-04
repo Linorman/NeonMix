@@ -1,0 +1,11 @@
+{
+  "owned_processes_stopped": true,
+  "private_daemon_pids": [
+    68365,
+    68366,
+    68371
+  ],
+  "temporary_credentials_removed": true,
+  "global_scheduling_or_audio_config_modified": false,
+  "only_child_process_rlimits_used": true
+}

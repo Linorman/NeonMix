@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-02",
+  "platform": "macOS",
+  "default_playback_mode": "low_latency",
+  "headroom_ns": 120000000,
+  "tests": {
+    "targeted": 49,
+    "audio_core_passed": 39,
+    "audio_core_ignored": 4,
+    "airplay_ipc": 12
+  },
+  "verification": {
+    "clippy_warnings_denied": true,
+    "screenshot_feature_clippy": true,
+    "release_build": true,
+    "worker_protocol_probe": true,
+    "decoder_pcm_alac_aac": true,
+    "active_source_search_and_member_permissions": true,
+    "screenshots": [
+      "devices-active-1100.png",
+      "devices-active-600.png",
+      "devices-disconnected-1100.png",
+      "devices-disconnected-600.png",
+      "devices-revoked-1100.png",
+      "devices-revoked-600.png",
+      "hub-active-1100.png"
+    ]
+  },
+  "reports": {
+    "low-latency-alac": {
+      "passed": true,
+      "timing": {
+        "latency_advance_ns": 1819898215,
+        "protocol_lead_ns": 1937551382,
+        "playout_lead_ns": 117653167,
+        "output_latency_ns": 5312500
+      },
+      "timed_late_frames": 0
+    },
+    "low-latency-prefetch-alac": {
+      "passed": true,
+      "timing": {
+        "latency_advance_ns": 1804393090,
+        "protocol_lead_ns": 1940852631,
+        "playout_lead_ns": 136459541,
+        "output_latency_ns": 5312500
+      },
+      "timed_late_frames": 0
+    },
+    "synchronized-alac": {
+      "passed": true,
+      "timing": {
+        "latency_advance_ns": 0,
+        "protocol_lead_ns": 1938113204,
+        "playout_lead_ns": 1938113204,
+        "output_latency_ns": 5312500
+      },
+      "timed_late_frames": 0
+    }
+  },
+  "source_sha256": {
+    "crates/airplay-adapter/src/control.rs": "f6145b1b14eead322b8f98ff70af82ae069771cca6cf8f32185e041dc4b37985",
+    "crates/airplay-adapter/src/ingress.rs": "73a1a3a03285fb85e5e7d987e6de4e98a2765eda38f35289caa26b78dd121b68",
+    "crates/airplay-adapter/tests/ingress.rs": "076bc79fbbc33ea08a75aae3a0b12ee4aec42d10db55da41334401cc2912b657",
+    "apps/hub/src/airplay.rs": "58227953971f88c90ac9ae7906f1eae48c8a60ea38f2538ecadec6baace31147",
+    "apps/desktop/src/pages.rs": "c8660486546b4da280d9f175baa1a96a1a961baee30155f623a047e69f211361",
+    "apps/desktop/src/main.rs": "b9fe24175047c7280f5254e14c7fc50e97542b03ee294262a0e24f1c2aa85092",
+    "apps/airplay-worker/main.cpp": "1f52c0fa3c7d475dc3c2cad7c3beee9566291c1ae0e24e4fab9b99075744a7d3",
+    "crates/desktop-service/src/daemon.rs": "4b17532cce5c4ee800328f12232db9114699619c81fdb92d9085277db01fdc56",
+    "tools/airplay_mixer_probe.py": "c7c0b1d27de7555935a3befbb4d116e91cf28868cab2b6f8260ff7fc97662ec8",
+    "tools/airplay_manual_session.py": "5240f559181cc114cc5286c3678c2250f4a5a5d7315ed1efa0dbdd67fb0354f6"
+  },
+  "binary_sha256": {
+    "neonmix-hub": "47315d879096b2374c723b16c4e467ded9c1f9f436e20fa42e59cd2fa083effc",
+    "neonmix-airplay-worker": "0946e49a4977b1eb18716348fb2e7ec618d8046597b9551cff8ab7bb6cdee9c2",
+    "neonmix-desktop": "bb902a8cdc986a80c0d5189d8997bcb8157ac9954012bee788bf3f23904404eb"
+  },
+  "limits": [
+    "synthetic encrypted source; no new Apple-device or analog latency result",
+    "30-second stable interval is not a long soak",
+    "initial verification preserved the parallel pairing fixture; user-requested replacement subsequently completed, see replacement.json",
+    "temporary fixtures/processes and fixture Keychain entries removed by each mixer probe"
+  ],
+  "replacement_evidence": "replacement.json"
+}

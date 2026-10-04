@@ -1,0 +1,13 @@
+{
+  "version": "1.28.7",
+  "source": "https://gstreamer.freedesktop.org/data/pkg/osx/1.28.7/gstreamer-1.0-1.28.7-universal.pkg",
+  "sha256": "529fdf4a4027d942e59b5b3564f6400adaa008f63ce5f3fed4ffe35d73911994",
+  "prefix": "/Volumes/projects-mac/NeonMix/.local/gstreamer/versions/1.28.7/prefix",
+  "libraries": {
+    "glib": "2.82.4",
+    "opus": "1.5.2",
+    "libsrtp": "2.8.0",
+    "openssl": "3.5.0"
+  },
+  "installation": "project-local extraction; no installer scripts run"
+}

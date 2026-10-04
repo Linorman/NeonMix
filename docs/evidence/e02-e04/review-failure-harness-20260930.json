@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "scope": "intentional 200 ms SIGSTOP of owned Sender; validates failure telemetry and cleanup, not stability",
+  "evidence": "artifacts/hub-soak/20260930-130218",
+  "failure": {
+    "audio_queue_dropped": 0,
+    "backlog_at_loop_start_ns": 200532000,
+    "current_loop_elapsed_ns": 111792,
+    "elapsed_ns": 4690641375,
+    "encoded_media_packets": 447,
+    "event": "sender_failure",
+    "generated_audio_blocks": 450,
+    "last_loop_gap_ns": 210432042,
+    "last_source_push_ns": 58458,
+    "max_loop_gap_ns": 210432042,
+    "max_source_backlog_ns": 190618458,
+    "native_scheduling": {
+      "configured": 4,
+      "entered": 4,
+      "failed": 0
+    },
+    "queue_drops": 0,
+    "reason": "synthetic source deadline exceeded (190 ms); fresh media context required",
+    "sent_packets": 447
+  },
+  "test_stdout": "{\"elapsed_seconds\": 0.0, \"output_frames\": 145408, \"underrun_frames\": 0, \"rss_kib\": 41424}\n{\n  \"passed\": false,\n  \"evidence\": \"/Volumes/projects-mac/NeonMix/artifacts/hub-soak/20260930-130218\",\n  \"error\": \"RuntimeError('sender-a exited early: 1')\"\n}\n",
+  "test_stderr": ""
+}

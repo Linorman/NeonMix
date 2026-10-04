@@ -1,0 +1,1057 @@
+{
+  "stable_ids": {
+    "passed": true
+  },
+  "selected_device": {
+    "device": {
+      "id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+      "name": "Speakers (High Definition Audio Device)",
+      "backend": "wasapi",
+      "input": null,
+      "output": {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 480,
+        "period_max_frames": 480
+      },
+      "supported_input": [],
+      "supported_output": [
+        {
+          "sample_rate": 44100,
+          "channels": 2,
+          "sample_type": "u8",
+          "period_min_frames": 441,
+          "period_max_frames": 441
+        },
+        {
+          "sample_rate": 44100,
+          "channels": 2,
+          "sample_type": "i16",
+          "period_min_frames": 441,
+          "period_max_frames": 441
+        },
+        {
+          "sample_rate": 44100,
+          "channels": 2,
+          "sample_type": "i24",
+          "period_min_frames": 441,
+          "period_max_frames": 441
+        },
+        {
+          "sample_rate": 44100,
+          "channels": 2,
+          "sample_type": "i32",
+          "period_min_frames": 441,
+          "period_max_frames": 441
+        },
+        {
+          "sample_rate": 44100,
+          "channels": 2,
+          "sample_type": "i64",
+          "period_min_frames": 441,
+          "period_max_frames": 441
+        },
+        {
+          "sample_rate": 44100,
+          "channels": 2,
+          "sample_type": "f32",
+          "period_min_frames": 441,
+          "period_max_frames": 441
+        },
+        {
+          "sample_rate": 44100,
+          "channels": 2,
+          "sample_type": "f64",
+          "period_min_frames": 441,
+          "period_max_frames": 441
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u8",
+          "period_min_frames": 480,
+          "period_max_frames": 480
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i16",
+          "period_min_frames": 480,
+          "period_max_frames": 480
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i24",
+          "period_min_frames": 480,
+          "period_max_frames": 480
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i32",
+          "period_min_frames": 480,
+          "period_max_frames": 480
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i64",
+          "period_min_frames": 480,
+          "period_max_frames": 480
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "f32",
+          "period_min_frames": 480,
+          "period_max_frames": 480
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "f64",
+          "period_min_frames": 480,
+          "period_max_frames": 480
+        },
+        {
+          "sample_rate": 96000,
+          "channels": 2,
+          "sample_type": "u8",
+          "period_min_frames": 960,
+          "period_max_frames": 960
+        },
+        {
+          "sample_rate": 96000,
+          "channels": 2,
+          "sample_type": "i16",
+          "period_min_frames": 960,
+          "period_max_frames": 960
+        },
+        {
+          "sample_rate": 96000,
+          "channels": 2,
+          "sample_type": "i24",
+          "period_min_frames": 960,
+          "period_max_frames": 960
+        },
+        {
+          "sample_rate": 96000,
+          "channels": 2,
+          "sample_type": "i32",
+          "period_min_frames": 960,
+          "period_max_frames": 960
+        },
+        {
+          "sample_rate": 96000,
+          "channels": 2,
+          "sample_type": "i64",
+          "period_min_frames": 960,
+          "period_max_frames": 960
+        },
+        {
+          "sample_rate": 96000,
+          "channels": 2,
+          "sample_type": "f32",
+          "period_min_frames": 960,
+          "period_max_frames": 960
+        },
+        {
+          "sample_rate": 96000,
+          "channels": 2,
+          "sample_type": "f64",
+          "period_min_frames": 960,
+          "period_max_frames": 960
+        }
+      ]
+    },
+    "scope": "virtual HDA endpoint in ARM64 Windows VM; no analog measurement"
+  },
+  "simulate_44100": {
+    "passed": true,
+    "result": {
+      "callbacks": 238,
+      "event": "simulation_complete",
+      "frames": 96000,
+      "input_rate": 44100,
+      "output_rate": 48000,
+      "peak": 0.06309205293655396,
+      "periods": [
+        1,
+        127,
+        256,
+        441,
+        480,
+        511,
+        1024
+      ],
+      "positive_zero_crossings": 2000,
+      "resampler_delay_frames": 69,
+      "rms": 0.04461524668667248
+    }
+  },
+  "simulate_48000": {
+    "passed": true,
+    "result": {
+      "callbacks": 238,
+      "event": "simulation_complete",
+      "frames": 96000,
+      "input_rate": 48000,
+      "output_rate": 48000,
+      "peak": 0.06309572607278824,
+      "periods": [
+        1,
+        127,
+        256,
+        441,
+        480,
+        511,
+        1024
+      ],
+      "positive_zero_crossings": 2000,
+      "resampler_delay_frames": 0,
+      "rms": 0.04461541468992563
+    }
+  },
+  "simulate_96000": {
+    "passed": true,
+    "result": {
+      "callbacks": 238,
+      "event": "simulation_complete",
+      "frames": 96000,
+      "input_rate": 96000,
+      "output_rate": 48000,
+      "peak": 0.06296326220035553,
+      "periods": [
+        1,
+        127,
+        256,
+        441,
+        480,
+        511,
+        1024
+      ],
+      "positive_zero_crossings": 2000,
+      "resampler_delay_frames": 32,
+      "rms": 0.04461578978198137
+    }
+  },
+  "rejected-period-44100-127": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 127 outside 441..441\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-44100-256": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 256 outside 441..441\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-44100-511": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 511 outside 441..441\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-44100-1024": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 1024 outside 441..441\",\"version\":\"0.1.0\"}"
+  },
+  "output-44100-441": {
+    "passed": true,
+    "exit_code": 0,
+    "opened": {
+      "actual_period_frames": 441,
+      "backend": "wasapi",
+      "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 44100
+      },
+      "requested_period_frames": 441,
+      "resampler_delay_frames": 58,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "final": {
+      "clock": {
+        "callback_frames": 441,
+        "clock_timestamp_ns": 3773399738100,
+        "device_timestamp_ns": 3773435452386,
+        "epoch": 1,
+        "epoch_exhausted": false,
+        "internal_frames": 99253,
+        "native_device_frame_position": 91189,
+        "native_internal_frames": 99253,
+        "native_stream_frames": 91189,
+        "presented_frames": 91189,
+        "reset": false,
+        "sample_rate": 44100,
+        "submitted_frames": 93205
+      },
+      "event": "output_complete",
+      "info": {
+        "actual_period_frames": 441,
+        "backend": "wasapi",
+        "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+        "format": {
+          "channel_layout": "stereo",
+          "sample_rate": 44100
+        },
+        "requested_period_frames": 441,
+        "resampler_delay_frames": 58,
+        "sample_type": "f32",
+        "stream_epoch": 1
+      },
+      "stats": {
+        "callback_max_ns": 491083,
+        "callback_over_budget": 0,
+        "callbacks": 210,
+        "clock_epoch": 1,
+        "discontinuities": 0,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 93205,
+        "last_arrival_ns": 2195519542,
+        "last_device_ns": 3773435452386,
+        "last_error": 0,
+        "native_device_frame_position": 91189,
+        "native_internal_frames": 99253,
+        "native_stream_frames": 91189,
+        "no_data_intervals": 0,
+        "peak": 0.0,
+        "period_max": 1036,
+        "period_min": 441,
+        "presented_frames": 91189,
+        "silent_frames": 93205,
+        "stale_frames": 0,
+        "submitted_frames": 93205
+      }
+    }
+  },
+  "bridge-44100": {
+    "passed": false,
+    "capture_exit_code": 0,
+    "output_exit_code": 0,
+    "requested_output_rate": 44100,
+    "requested_capture_rate": 48000,
+    "expected_signal": "tone",
+    "signal_matches": false,
+    "callbacks_within_budget": true,
+    "scope": "virtual-device digital bridge, not analog latency or end-to-end networking",
+    "stats": {
+      "callback_max_ns": 76334,
+      "callback_over_budget": 0,
+      "callbacks": 315,
+      "clock_epoch": 1,
+      "discontinuities": 1,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 151200,
+      "last_arrival_ns": 3567226292,
+      "last_device_ns": 3777135573100,
+      "last_error": 0,
+      "native_device_frame_position": null,
+      "native_internal_frames": null,
+      "native_stream_frames": null,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 480,
+      "period_min": 480,
+      "presented_frames": 0,
+      "silent_frames": 151200,
+      "stale_frames": 0,
+      "submitted_frames": 0
+    },
+    "measurement": {
+      "analyzed_frames": 151200,
+      "estimated_frequency_hz": null,
+      "peak": 0.0,
+      "positive_zero_crossings": 0,
+      "rms": 0.0
+    },
+    "expected_frequency_hz": 437.0,
+    "frequency_matches": false,
+    "native_clock_advances": true,
+    "output_stats": {
+      "callback_max_ns": 964875,
+      "callback_over_budget": 0,
+      "callbacks": 315,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 139510,
+      "last_arrival_ns": 3043631083,
+      "last_device_ns": 3777164816790,
+      "last_error": 0,
+      "native_device_frame_position": 137420,
+      "native_internal_frames": 149572,
+      "native_stream_frames": 137420,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 1036,
+      "period_min": 441,
+      "presented_frames": 137421,
+      "silent_frames": 642,
+      "stale_frames": 0,
+      "submitted_frames": 139510
+    },
+    "clock": {
+      "callback_frames": 441,
+      "clock_timestamp_ns": 3777127424500,
+      "device_timestamp_ns": 3777164816790,
+      "epoch": 1,
+      "epoch_exhausted": false,
+      "internal_frames": 149573,
+      "native_device_frame_position": 137420,
+      "native_internal_frames": 149572,
+      "native_stream_frames": 137420,
+      "presented_frames": 137421,
+      "reset": false,
+      "sample_rate": 44100,
+      "submitted_frames": 139510
+    },
+    "probe_exit_code": 1
+  },
+  "rejected-period-48000-127": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 127 outside 480..480\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-48000-256": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 256 outside 480..480\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-48000-511": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 511 outside 480..480\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-48000-1024": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 1024 outside 480..480\",\"version\":\"0.1.0\"}"
+  },
+  "output-48000-480": {
+    "passed": true,
+    "exit_code": 0,
+    "opened": {
+      "actual_period_frames": 480,
+      "backend": "wasapi",
+      "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 48000
+      },
+      "requested_period_frames": 480,
+      "resampler_delay_frames": 0,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "final": {
+      "clock": {
+        "callback_frames": 480,
+        "clock_timestamp_ns": 3780796840200,
+        "device_timestamp_ns": 3780831319367,
+        "epoch": 1,
+        "epoch_exhausted": false,
+        "internal_frames": 100201,
+        "native_device_frame_position": 100201,
+        "native_internal_frames": 100201,
+        "native_stream_frames": 100201,
+        "presented_frames": 100201,
+        "reset": false,
+        "sample_rate": 48000,
+        "submitted_frames": 102336
+      },
+      "event": "output_complete",
+      "info": {
+        "actual_period_frames": 480,
+        "backend": "wasapi",
+        "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+        "format": {
+          "channel_layout": "stereo",
+          "sample_rate": 48000
+        },
+        "requested_period_frames": 480,
+        "resampler_delay_frames": 0,
+        "sample_type": "f32",
+        "stream_epoch": 1
+      },
+      "stats": {
+        "callback_max_ns": 75125,
+        "callback_over_budget": 0,
+        "callbacks": 212,
+        "clock_epoch": 1,
+        "discontinuities": 0,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 102336,
+        "last_arrival_ns": 2047188125,
+        "last_device_ns": 3780831319367,
+        "last_error": 0,
+        "native_device_frame_position": 100201,
+        "native_internal_frames": 100201,
+        "native_stream_frames": 100201,
+        "no_data_intervals": 0,
+        "peak": 0.0,
+        "period_max": 1056,
+        "period_min": 480,
+        "presented_frames": 100201,
+        "silent_frames": 102336,
+        "stale_frames": 0,
+        "submitted_frames": 102336
+      }
+    }
+  },
+  "bridge-48000": {
+    "passed": false,
+    "capture_exit_code": 0,
+    "output_exit_code": 0,
+    "requested_output_rate": 48000,
+    "requested_capture_rate": 48000,
+    "expected_signal": "tone",
+    "signal_matches": false,
+    "callbacks_within_budget": true,
+    "scope": "virtual-device digital bridge, not analog latency or end-to-end networking",
+    "stats": {
+      "callback_max_ns": 45416,
+      "callback_over_budget": 0,
+      "callbacks": 315,
+      "clock_epoch": 1,
+      "discontinuities": 1,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 151200,
+      "last_arrival_ns": 3569425208,
+      "last_device_ns": 3784508616700,
+      "last_error": 0,
+      "native_device_frame_position": null,
+      "native_internal_frames": null,
+      "native_stream_frames": null,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 480,
+      "period_min": 480,
+      "presented_frames": 0,
+      "silent_frames": 151200,
+      "stale_frames": 0,
+      "submitted_frames": 0
+    },
+    "measurement": {
+      "analyzed_frames": 151200,
+      "estimated_frequency_hz": null,
+      "peak": 0.0,
+      "positive_zero_crossings": 0,
+      "rms": 0.0
+    },
+    "expected_frequency_hz": 437.0,
+    "frequency_matches": false,
+    "native_clock_advances": true,
+    "output_stats": {
+      "callback_max_ns": 167000,
+      "callback_over_budget": 0,
+      "callbacks": 315,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 151776,
+      "last_arrival_ns": 3037275625,
+      "last_device_ns": 3784536318667,
+      "last_error": 0,
+      "native_device_frame_position": 149569,
+      "native_internal_frames": 149569,
+      "native_stream_frames": 149569,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 1056,
+      "period_min": 480,
+      "presented_frames": 149569,
+      "silent_frames": 724,
+      "stale_frames": 0,
+      "submitted_frames": 151776
+    },
+    "clock": {
+      "callback_frames": 480,
+      "clock_timestamp_ns": 3784500339500,
+      "device_timestamp_ns": 3784536318667,
+      "epoch": 1,
+      "epoch_exhausted": false,
+      "internal_frames": 149569,
+      "native_device_frame_position": 149569,
+      "native_internal_frames": 149569,
+      "native_stream_frames": 149569,
+      "presented_frames": 149569,
+      "reset": false,
+      "sample_rate": 48000,
+      "submitted_frames": 151776
+    },
+    "probe_exit_code": 1
+  },
+  "rejected-period-96000-127": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 127 outside 960..960\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-96000-256": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 256 outside 960..960\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-96000-511": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 511 outside 960..960\",\"version\":\"0.1.0\"}"
+  },
+  "rejected-period-96000-1024": {
+    "passed": true,
+    "expected_rejection": true,
+    "exit_code": 1,
+    "stderr": "{\"event\":\"error\",\"message\":\"unsupported audio format: period 1024 outside 960..960\",\"version\":\"0.1.0\"}"
+  },
+  "output-96000-960": {
+    "passed": true,
+    "exit_code": 0,
+    "opened": {
+      "actual_period_frames": 960,
+      "backend": "wasapi",
+      "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 96000
+      },
+      "requested_period_frames": 960,
+      "resampler_delay_frames": 128,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "final": {
+      "clock": {
+        "callback_frames": 960,
+        "clock_timestamp_ns": 3788164383400,
+        "device_timestamp_ns": 3788210883400,
+        "epoch": 1,
+        "epoch_exhausted": false,
+        "internal_frames": 99687,
+        "native_device_frame_position": 199374,
+        "native_internal_frames": 99687,
+        "native_stream_frames": 199374,
+        "presented_frames": 199374,
+        "reset": false,
+        "sample_rate": 96000,
+        "submitted_frames": 204798
+      },
+      "event": "output_complete",
+      "info": {
+        "actual_period_frames": 960,
+        "backend": "wasapi",
+        "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+        "format": {
+          "channel_layout": "stereo",
+          "sample_rate": 96000
+        },
+        "requested_period_frames": 960,
+        "resampler_delay_frames": 128,
+        "sample_type": "f32",
+        "stream_epoch": 1
+      },
+      "stats": {
+        "callback_max_ns": 1449292,
+        "callback_over_budget": 0,
+        "callbacks": 212,
+        "clock_epoch": 1,
+        "discontinuities": 0,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 204798,
+        "last_arrival_ns": 2046396958,
+        "last_device_ns": 3788210883400,
+        "last_error": 0,
+        "native_device_frame_position": 199374,
+        "native_internal_frames": 99687,
+        "native_stream_frames": 199374,
+        "no_data_intervals": 0,
+        "peak": 0.0,
+        "period_max": 2238,
+        "period_min": 960,
+        "presented_frames": 199374,
+        "silent_frames": 204798,
+        "stale_frames": 0,
+        "submitted_frames": 204798
+      }
+    }
+  },
+  "bridge-96000": {
+    "passed": false,
+    "capture_exit_code": 0,
+    "output_exit_code": 0,
+    "requested_output_rate": 96000,
+    "requested_capture_rate": 48000,
+    "expected_signal": "tone",
+    "signal_matches": false,
+    "callbacks_within_budget": true,
+    "scope": "virtual-device digital bridge, not analog latency or end-to-end networking",
+    "stats": {
+      "callback_max_ns": 68000,
+      "callback_over_budget": 0,
+      "callbacks": 315,
+      "clock_epoch": 1,
+      "discontinuities": 1,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 151200,
+      "last_arrival_ns": 3556231083,
+      "last_device_ns": 3791885794700,
+      "last_error": 0,
+      "native_device_frame_position": null,
+      "native_internal_frames": null,
+      "native_stream_frames": null,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 480,
+      "period_min": 480,
+      "presented_frames": 0,
+      "silent_frames": 151200,
+      "stale_frames": 0,
+      "submitted_frames": 0
+    },
+    "measurement": {
+      "analyzed_frames": 151200,
+      "estimated_frequency_hz": null,
+      "peak": 0.0,
+      "positive_zero_crossings": 0,
+      "rms": 0.0
+    },
+    "expected_frequency_hz": 437.0,
+    "frequency_matches": false,
+    "native_clock_advances": true,
+    "output_stats": {
+      "callback_max_ns": 1769042,
+      "callback_over_budget": 0,
+      "callbacks": 315,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 303678,
+      "last_arrival_ns": 3032670750,
+      "last_device_ns": 3791914809667,
+      "last_error": 0,
+      "native_device_frame_position": 298112,
+      "native_internal_frames": 149056,
+      "native_stream_frames": 298112,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 2238,
+      "period_min": 960,
+      "presented_frames": 298112,
+      "silent_frames": 1680,
+      "stale_frames": 0,
+      "submitted_frames": 303678
+    },
+    "clock": {
+      "callback_frames": 960,
+      "clock_timestamp_ns": 3791866830500,
+      "device_timestamp_ns": 3791914809667,
+      "epoch": 1,
+      "epoch_exhausted": false,
+      "internal_frames": 149056,
+      "native_device_frame_position": 298112,
+      "native_internal_frames": 149056,
+      "native_stream_frames": 298112,
+      "presented_frames": 298112,
+      "reset": false,
+      "sample_rate": 96000,
+      "submitted_frames": 303678
+    },
+    "probe_exit_code": 1
+  },
+  "pause_resume": {
+    "passed": false,
+    "resumed_headers": [],
+    "final": null
+  },
+  "idle_capture": {
+    "passed": true,
+    "final": {
+      "event": "capture_complete",
+      "measurement": {
+        "analyzed_frames": 0,
+        "estimated_frequency_hz": null,
+        "peak": 0.0,
+        "positive_zero_crossings": 0,
+        "rms": 0.0
+      },
+      "stats": {
+        "callback_max_ns": 0,
+        "callback_over_budget": 0,
+        "callbacks": 0,
+        "clock_epoch": 0,
+        "discontinuities": 0,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 0,
+        "last_arrival_ns": 0,
+        "last_device_ns": 0,
+        "last_error": 0,
+        "native_device_frame_position": null,
+        "native_internal_frames": null,
+        "native_stream_frames": null,
+        "no_data_intervals": 2,
+        "peak": 0.0,
+        "period_max": 0,
+        "period_min": 0,
+        "presented_frames": 0,
+        "silent_frames": 0,
+        "stale_frames": 0,
+        "submitted_frames": 0
+      }
+    }
+  },
+  "watch": {
+    "passed": true,
+    "events": [
+      {
+        "event": "added",
+        "device": {
+          "id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+          "name": "Speakers (High Definition Audio Device)",
+          "backend": "wasapi",
+          "input": null,
+          "output": {
+            "sample_rate": 48000,
+            "channels": 2,
+            "sample_type": "f32",
+            "period_min_frames": 480,
+            "period_max_frames": 480
+          },
+          "supported_input": [],
+          "supported_output": [
+            {
+              "sample_rate": 44100,
+              "channels": 2,
+              "sample_type": "u8",
+              "period_min_frames": 441,
+              "period_max_frames": 441
+            },
+            {
+              "sample_rate": 44100,
+              "channels": 2,
+              "sample_type": "i16",
+              "period_min_frames": 441,
+              "period_max_frames": 441
+            },
+            {
+              "sample_rate": 44100,
+              "channels": 2,
+              "sample_type": "i24",
+              "period_min_frames": 441,
+              "period_max_frames": 441
+            },
+            {
+              "sample_rate": 44100,
+              "channels": 2,
+              "sample_type": "i32",
+              "period_min_frames": 441,
+              "period_max_frames": 441
+            },
+            {
+              "sample_rate": 44100,
+              "channels": 2,
+              "sample_type": "i64",
+              "period_min_frames": 441,
+              "period_max_frames": 441
+            },
+            {
+              "sample_rate": 44100,
+              "channels": 2,
+              "sample_type": "f32",
+              "period_min_frames": 441,
+              "period_max_frames": 441
+            },
+            {
+              "sample_rate": 44100,
+              "channels": 2,
+              "sample_type": "f64",
+              "period_min_frames": 441,
+              "period_max_frames": 441
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "u8",
+              "period_min_frames": 480,
+              "period_max_frames": 480
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "i16",
+              "period_min_frames": 480,
+              "period_max_frames": 480
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "i24",
+              "period_min_frames": 480,
+              "period_max_frames": 480
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "i32",
+              "period_min_frames": 480,
+              "period_max_frames": 480
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "i64",
+              "period_min_frames": 480,
+              "period_max_frames": 480
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "f32",
+              "period_min_frames": 480,
+              "period_max_frames": 480
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "f64",
+              "period_min_frames": 480,
+              "period_max_frames": 480
+            },
+            {
+              "sample_rate": 96000,
+              "channels": 2,
+              "sample_type": "u8",
+              "period_min_frames": 960,
+              "period_max_frames": 960
+            },
+            {
+              "sample_rate": 96000,
+              "channels": 2,
+              "sample_type": "i16",
+              "period_min_frames": 960,
+              "period_max_frames": 960
+            },
+            {
+              "sample_rate": 96000,
+              "channels": 2,
+              "sample_type": "i24",
+              "period_min_frames": 960,
+              "period_max_frames": 960
+            },
+            {
+              "sample_rate": 96000,
+              "channels": 2,
+              "sample_type": "i32",
+              "period_min_frames": 960,
+              "period_max_frames": 960
+            },
+            {
+              "sample_rate": 96000,
+              "channels": 2,
+              "sample_type": "i64",
+              "period_min_frames": 960,
+              "period_max_frames": 960
+            },
+            {
+              "sample_rate": 96000,
+              "channels": 2,
+              "sample_type": "f32",
+              "period_min_frames": 960,
+              "period_max_frames": 960
+            },
+            {
+              "sample_rate": 96000,
+              "channels": 2,
+              "sample_type": "f64",
+              "period_min_frames": 960,
+              "period_max_frames": 960
+            }
+          ]
+        }
+      },
+      {
+        "event": "added",
+        "device": {
+          "id": "wasapi:{0.0.1.00000000}.{7a5bb5cb-6466-4a16-9dd9-c0b455413f65}",
+          "name": "Microphone (High Definition Audio Device)",
+          "backend": "wasapi",
+          "input": {
+            "sample_rate": 48000,
+            "channels": 2,
+            "sample_type": "f32",
+            "period_min_frames": 488,
+            "period_max_frames": 488
+          },
+          "output": null,
+          "supported_input": [
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "u8",
+              "period_min_frames": 488,
+              "period_max_frames": 488
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "i16",
+              "period_min_frames": 488,
+              "period_max_frames": 488
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "i24",
+              "period_min_frames": 488,
+              "period_max_frames": 488
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "i32",
+              "period_min_frames": 488,
+              "period_max_frames": 488
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "f32",
+              "period_min_frames": 488,
+              "period_max_frames": 488
+            },
+            {
+              "sample_rate": 48000,
+              "channels": 2,
+              "sample_type": "f64",
+              "period_min_frames": 488,
+              "period_max_frames": 488
+            }
+          ],
+          "supported_output": []
+        }
+      }
+    ]
+  }
+}

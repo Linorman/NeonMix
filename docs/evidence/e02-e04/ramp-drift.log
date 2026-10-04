@@ -1,0 +1,19 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2.61s
+     Running tests/drift_stability.rs (target/release/deps/drift_stability-430423d6f86df5b9)
+
+running 3 tests
+{"injected_ppm":-2000,"seconds":300,"max_water":3840,"dropped_frames":0,"underrun_frames":2880,"resets":0}
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ok
+{"injected_ppm":-500,"duration_seconds":600,"commanded_ppm":-253.77,"min_queue_frames":2733,"max_queue_frames":3656,"frequency_hz":437.1,"rms":0.002815027114216089,"underrun_frames":0}
+{"injected_ppm":-1000,"seconds":300,"max_water":3840,"dropped_frames":0,"underrun_frames":0,"resets":0}
+{"injected_ppm":1000,"seconds":300,"max_water":4258,"dropped_frames":0,"underrun_frames":0,"resets":0}
+{"injected_ppm":-100,"duration_seconds":600,"commanded_ppm":4.636,"min_queue_frames":2880,"max_queue_frames":3656,"frequency_hz":437.1,"rms":0.0028150361681726775,"underrun_frames":0}
+{"injected_ppm":2000,"seconds":300,"max_water":7140,"dropped_frames":1920,"underrun_frames":0,"resets":4}
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ok
+{"injected_ppm":100,"duration_seconds":600,"commanded_ppm":-4.626,"min_queue_frames":3293,"max_queue_frames":3840,"frequency_hz":437,"rms":0.0028150321052194346,"underrun_frames":0}
+{"injected_ppm":500,"duration_seconds":600,"commanded_ppm":253.39,"min_queue_frames":3167,"max_queue_frames":3931,"frequency_hz":437,"rms":0.002815033534661029,"underrun_frames":0}
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.75s
+

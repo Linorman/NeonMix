@@ -1,0 +1,17 @@
+{
+  "source_files": {
+    "apps/airplay-worker/main.cpp": "fb11ebe13a670485ed569361820e62d4231cd11178cfaa126ea9618aa3e8a758",
+    "apps/airplay-worker/CMakeLists.txt": "5ba7e3dbcc4c954da66c10b0dded03404ca1520ff19392d9860e062cd640a2d5",
+    "crates/airplay-ipc/src/local_windows.rs": "394c170fa9e941c251620857f7d5905c562991a50037375b57cd8441dc33da7c",
+    "apps/hub/src/server.rs": "be364ff931dbfcbc88417f4214fa85abf2f8df00f76c36ad533bddb7fccdda34",
+    "apps/hub/src/identity.rs": "ba50dbffd2b9e3a40038eafa8b461e8567d2ab9cf5e86b53b2ba609d489a2487",
+    "tools/credential_store_probe.py": "abb1e38603ff92b1415e6d8bc36478c576e77fee4cbd0f9cc9091095e8110392"
+  },
+  "binaries": {
+    "neonmix-airplay-worker.exe": "976942397748bff2de2d45463a293e0803dcf5db59f2f1899692d33bbd4f238e",
+    "neonmix-audio.exe": "72f7039b284d07daa153ac9d39e777cef8c8d8fcb25ce57b934871afe60e1274",
+    "neonmix-background.exe": "c3105df2d76c4c1b8a99ac12db38d14a0504876074b1fbb194ed38c31b5c9790",
+    "neonmix-desktop.exe": "1de8cfb79f60731385050453421576aabf9719794015e4c9cf7d1c6b1532fa25",
+    "neonmix-hub.exe": "1a0be49ebe3693a5740b78f1734687235345edd43b052a21c2eedfe94c552a2f"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "receiver_ready": true,
+  "receiver_enabled": true,
+  "playback_mode": "low_latency",
+  "receiver_identity_and_trust_preserved": true,
+  "previous_hub_sha256": "ac2ebecbc842f609d66923997049d2110b9d2f8047794a4b845ad1aefe3ec252",
+  "installed_hub_sha256": "4d1c1ed97447951fc0b3e637924d72ae8dd6e4478ebdc202adbd4ae7deeab571",
+  "output_frames_advancing": true,
+  "actual_iphone_spotify_retest": "pending"
+}

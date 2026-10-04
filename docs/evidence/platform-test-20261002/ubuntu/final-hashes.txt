@@ -1,0 +1,6 @@
+3903595b3e6d949ca8fda367cc6aa1cc1cd9cea153d65e5028fb9669b18f2b66  /home/parallels/NeonMix/.local/platform-test-20261002/workspace/target/release/neonmix-hub
+69472fecde738f377e5db64e40864c5a5b57d4088ade044937623279b005ed3b  /home/parallels/NeonMix/.local/platform-test-20261002/workspace/target/release/neonmix-desktop
+0a9c08a6afdfe57babf425b7538cfea99287f7da02f09d219e10312726f8737d  /home/parallels/NeonMix/.local/platform-test-20261002/workspace/target/release/neonmix-background
+e22c58968f599dffd2001c6d0d1a39a68b969e786db770d9243ef3950c374f22  /home/parallels/NeonMix/.local/platform-test-20261002/workspace/target/release/neonmix-audio
+6e222e5e5395f9b25237e18f6095db7d221281da0c17e8ba0903ae6fd0ecab69  /home/parallels/NeonMix/.local/platform-test-20261002/workspace/target/release/neonmix-airplay-worker
+5ba7e3dbcc4c954da66c10b0dded03404ca1520ff19392d9860e062cd640a2d5  /home/parallels/NeonMix/.local/platform-test-20261002/workspace/apps/airplay-worker/CMakeLists.txt

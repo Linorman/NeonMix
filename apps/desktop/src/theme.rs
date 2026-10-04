@@ -4,43 +4,58 @@ use eframe::egui::{
 };
 use std::sync::Arc;
 
-// Surfaces, darkest to lightest. Blue-gray console palette carried from E00/E01.
-pub const BG: Color32 = Color32::from_rgb(0x0c, 0x12, 0x18);
-pub const SIDEBAR: Color32 = Color32::from_rgb(0x10, 0x17, 0x1e);
-pub const SURFACE: Color32 = Color32::from_rgb(0x14, 0x1d, 0x25);
-pub const RAISED: Color32 = Color32::from_rgb(0x1a, 0x25, 0x2f);
-pub const HOVER: Color32 = Color32::from_rgb(0x21, 0x2f, 0x3b);
-pub const INPUT: Color32 = Color32::from_rgb(0x0a, 0x0f, 0x14);
-pub const BORDER: Color32 = Color32::from_rgb(0x1e, 0x2a, 0x34);
-pub const BORDER_STRONG: Color32 = Color32::from_rgb(0x2c, 0x3d, 0x4b);
+// Surfaces, darkest to lightest. "Neon Console": near-black blue so the
+// source colours and live signal carry the page.
+pub const BG_DEEP: Color32 = Color32::from_rgb(0x05, 0x08, 0x0d);
+pub const BG: Color32 = Color32::from_rgb(0x09, 0x0e, 0x15);
+pub const SIDEBAR: Color32 = Color32::from_rgb(0x07, 0x0b, 0x11);
+pub const SURFACE: Color32 = Color32::from_rgb(0x0e, 0x15, 0x1f);
+pub const RAISED: Color32 = Color32::from_rgb(0x14, 0x20, 0x2e);
+pub const HOVER: Color32 = Color32::from_rgb(0x1a, 0x29, 0x39);
+pub const INPUT: Color32 = Color32::from_rgb(0x04, 0x07, 0x0b);
+pub const BORDER: Color32 = Color32::from_rgb(0x18, 0x24, 0x34);
+pub const BORDER_STRONG: Color32 = Color32::from_rgb(0x25, 0x36, 0x4a);
+/// 1px highlight along the top edge of raised surfaces.
+pub const EDGE_LIGHT: Color32 = Color32::from_rgba_premultiplied(13, 13, 13, 13);
 
-pub const TEXT: Color32 = Color32::from_rgb(0xe8, 0xef, 0xf4);
-pub const TEXT_2: Color32 = Color32::from_rgb(0xa9, 0xbb, 0xc8);
-pub const TEXT_3: Color32 = Color32::from_rgb(0x7b, 0x8f, 0x9f);
+pub const TEXT: Color32 = Color32::from_rgb(0xea, 0xf2, 0xf8);
+pub const TEXT_2: Color32 = Color32::from_rgb(0xa5, 0xb8, 0xc8);
+pub const TEXT_3: Color32 = Color32::from_rgb(0x7a, 0x90, 0xa6);
 
-pub const ACCENT: Color32 = Color32::from_rgb(0x6c, 0xc6, 0xea);
-pub const ACCENT_HOVER: Color32 = Color32::from_rgb(0x8a, 0xd4, 0xf0);
-pub const ACCENT_PRESS: Color32 = Color32::from_rgb(0x52, 0xae, 0xd4);
-pub const ON_ACCENT: Color32 = Color32::from_rgb(0x07, 0x1d, 0x28);
+// Focus, selection and the primary action only.
+pub const ACCENT: Color32 = Color32::from_rgb(0x38, 0xe1, 0xff);
+pub const ACCENT_HOVER: Color32 = Color32::from_rgb(0x7b, 0xeb, 0xff);
+pub const ACCENT_PRESS: Color32 = Color32::from_rgb(0x22, 0xc3, 0xe0);
+pub const ON_ACCENT: Color32 = Color32::from_rgb(0x02, 0x1a, 0x22);
 
-pub const SUCCESS: Color32 = Color32::from_rgb(0x62, 0xd2, 0x9c);
-pub const WARNING: Color32 = Color32::from_rgb(0xf0, 0xb8, 0x5c);
-pub const DANGER: Color32 = Color32::from_rgb(0xf2, 0x86, 0x80);
-pub const DANGER_HOVER: Color32 = Color32::from_rgb(0xf6, 0xa0, 0x9b);
-pub const ON_DANGER: Color32 = Color32::from_rgb(0x2a, 0x0b, 0x0a);
+// Where a sound comes from. Never reused for state.
+pub const SRC_NATIVE: Color32 = Color32::from_rgb(0x38, 0xe1, 0xff);
+pub const SRC_AIRPLAY: Color32 = Color32::from_rgb(0xa8, 0x8b, 0xff);
+pub const SRC_HUB: Color32 = Color32::from_rgb(0xe8, 0xfb, 0xff);
+pub const SRC_OUTPUT: Color32 = Color32::from_rgb(0xf2, 0xf6, 0xfa);
+/// Solo spotlight; distinct from the primary action.
+pub const SOLO: Color32 = Color32::from_rgb(0xff, 0xd3, 0x4d);
+
+pub const SUCCESS: Color32 = Color32::from_rgb(0x4e, 0xe3, 0x9a);
+pub const WARNING: Color32 = Color32::from_rgb(0xff, 0xb5, 0x47);
+pub const DANGER: Color32 = Color32::from_rgb(0xff, 0x6b, 0x6b);
+pub const DANGER_HOVER: Color32 = Color32::from_rgb(0xff, 0x8e, 0x8e);
+pub const ON_DANGER: Color32 = Color32::from_rgb(0x2a, 0x07, 0x07);
 
 // Meter zones: up to −18 dBFS nominal, −18…−6 caution, above −6 hot.
-pub const METER_LOW: Color32 = Color32::from_rgb(0x4f, 0xc9, 0x8a);
-pub const METER_MID: Color32 = Color32::from_rgb(0xe3, 0xc0, 0x5a);
-pub const METER_HIGH: Color32 = Color32::from_rgb(0xef, 0x6a, 0x63);
-pub const METER_TRACK: Color32 = Color32::from_rgb(0x0a, 0x10, 0x15);
+pub const METER_LOW: Color32 = Color32::from_rgb(0x3e, 0xe0, 0x8c);
+pub const METER_MID: Color32 = Color32::from_rgb(0xff, 0xd3, 0x4d);
+pub const METER_HIGH: Color32 = Color32::from_rgb(0xff, 0x5a, 0x5a);
+pub const METER_TRACK: Color32 = Color32::from_rgb(0x06, 0x0b, 0x11);
 
-pub const RADIUS: u8 = 12;
-pub const CONTROL_RADIUS: u8 = 8;
+pub const RADIUS: u8 = 14;
+pub const CONTROL_RADIUS: u8 = 9;
 pub const CONTROL_HEIGHT: f32 = 32.0;
 pub const COMPACT_HEIGHT: f32 = 28.0;
 
-pub const TITLE: f32 = 21.0;
+pub const TITLE: f32 = 22.0;
+/// Room master readout, the largest number in the app.
+pub const DISPLAY: f32 = 34.0;
 pub const SECTION: f32 = 15.0;
 pub const BODY: f32 = 14.0;
 pub const SMALL: f32 = 12.0;
@@ -63,7 +78,7 @@ pub fn install_style(ctx: &egui::Context) {
     v.panel_fill = BG;
     v.window_fill = SURFACE;
     v.window_stroke = Stroke::new(1.0, BORDER_STRONG);
-    v.window_corner_radius = CornerRadius::same(10);
+    v.window_corner_radius = CornerRadius::same(12);
     v.window_shadow = egui::Shadow {
         offset: [0, 8],
         blur: 24,

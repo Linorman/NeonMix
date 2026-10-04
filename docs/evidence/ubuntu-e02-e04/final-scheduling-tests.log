@@ -1,0 +1,90 @@
+   Compiling cpal v0.18.2 (/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/vendor/cpal)
+   Compiling neonmix-media v0.1.0 (/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/crates/media)
+   Compiling neonmix-io v0.1.0 (/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/crates/audio-io)
+   Compiling neonmix-hub v0.1.0 (/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/apps/hub)
+   Compiling neonmix-linux v0.1.0 (/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/adapters/linux)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.27s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-65f22b13b544e182)
+
+running 9 tests
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.01s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_io-49d4b0c04cf991d6)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/pipewire_buffer.rs (target/debug/deps/pipewire_buffer-c4f6217c83761742)
+
+running 2 tests
+test pipewire_buffer::tests::clamps_native_size_but_rejects_partial_frames_or_short_scratch ... ok
+test pipewire_buffer::tests::honors_offset_modulo_and_wrapped_chunks ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_linux-7dbb2d476e9ecb56)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_media-e0fa6444efea0bfd)
+
+running 4 tests
+test thread_priority::linux_tests::nice_guard_reports_real_permission_and_restores_the_thread ... ok
+test queue_trace::tests::real_appsink_capacity_loss_matches_private_buffer_sequence ... ok
+test queue_trace::tests::real_appsrc_capacity_loss_quarantines_following_audio ... ok
+test transport::duration_tests::authenticated_twenty_ms_opus_cannot_enter_a_ten_ms_stream ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running tests/protocol.rs (target/debug/deps/protocol-3e7ee8cbb74e3f0b)
+
+running 6 tests
+test authenticated_rtp_with_wrong_time_step_is_rejected ... ok
+test initial_reordering_across_timestamp_zero_preserves_forward_anchor ... ok
+test opus_packet_duration_matches_negotiated_clock_for_all_toc_modes ... ok
+test packet_quotas_and_feedback_congestion_pause_recovery ... ok
+test reordered_wrong_timestamp_does_not_poison_clock_or_consume_sequence ... ok
+test rtp_sequence_timestamp_wrap_duplicate_and_reorder ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/security.rs (target/debug/deps/security-c0ffc20c10399620)
+
+running 3 tests
+test replay_corruption_revocation_and_fresh_key_context_isolation ... ok
+test native_jitter_reorders_and_discards_late_packets_with_real_plc ... ok
+test negotiated_expiry_stops_both_decode_and_ingress ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.21s
+
+   Doc-tests neonmix_io
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_linux
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,121 @@
+{
+  "epoch": 1791051795.560628,
+  "reports": [
+    {
+      "report": "four-airplay.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_process_stopped": true,
+        "native_processes_stopped": true,
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "mix-3plus1.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_process_stopped": true,
+        "native_processes_stopped": true,
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "mix-2plus2.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_process_stopped": true,
+        "native_processes_stopped": true,
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "mix-1plus3.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_process_stopped": true,
+        "native_processes_stopped": true,
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "mix-0plus4.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_process_stopped": true,
+        "native_processes_stopped": true,
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "mix-control.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_process_stopped": true,
+        "native_processes_stopped": true,
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "management.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_process_stopped": true,
+        "native_processes_stopped": true,
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "single-pcm.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "single-alac.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "single-sync.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_files_removed": true
+      }
+    },
+    {
+      "report": "formal-ui.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_removed": true
+      }
+    },
+    {
+      "report": "background.json",
+      "passed": true,
+      "cleanup_flags": {
+        "fixture_removed": true
+      }
+    }
+  ],
+  "retained_native_pids": [
+    21316,
+    21325,
+    20461,
+    22227,
+    22236,
+    22245,
+    22961,
+    22970,
+    22979,
+    22988
+  ],
+  "remaining_native_pids": [],
+  "known_fixture_prefixes": [],
+  "remaining_lan_invites": [],
+  "original_user_rooms_operated": false,
+  "system_default_audio_route_changed": false,
+  "note": "Native probe restores its explicitly selected BlackHole original sample rate in finally."
+}

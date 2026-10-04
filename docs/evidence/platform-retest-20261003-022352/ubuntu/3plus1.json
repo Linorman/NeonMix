@@ -1,0 +1,953 @@
+{
+  "scenario": "mix",
+  "platform": "Linux",
+  "os_version": "6.14.0-27-generic",
+  "architecture": "aarch64",
+  "build_profile": "release",
+  "sources": 3,
+  "native_sources": 1,
+  "output_device": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real PipeWire output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "5211f8b7a6dcba8093029c0460ad440720952afee6e4e7387f968870c67f9124",
+    "neonmix-airplay-worker": "62f1fc16bbb43dafeb69c854fd7b2c7e1fc6df7660c4c8b9fe8465420242aeb0"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": 11,
+  "airplay_frequencies_hz": [
+    317,
+    439,
+    563
+  ],
+  "native_frequencies_hz": [
+    809
+  ],
+  "passed": true,
+  "scenarios": {
+    "explicit_idle_pairing_window_renews_without_worker_restart": true,
+    "same_source_simultaneous_cross_receiver_has_one_owner": true,
+    "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+    "independent_native_tones_render_with_requested_mix": true,
+    "dynamic_unique_lanes_and_shared_output": true,
+    "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+    "command_replay_idempotent_and_stale_session_rejected": true,
+    "full_room_native_start_rejected_without_reservation_leak": true,
+    "each_source_disconnect_preserves_other_sources": true,
+    "each_worker_crash_preserves_other_sources": true,
+    "paired_recovery_preserves_source_and_receiver_identity": true,
+    "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+  },
+  "isolation_checks": [
+    {
+      "cycle": 1,
+      "operation": "disconnect",
+      "source_index": 1,
+      "surviving_sources": 3,
+      "surviving_airplay_sources": 2,
+      "surviving_native_sources": 1,
+      "output_frames_advanced": 10240,
+      "unchanged_survivor_sessions": true,
+      "victim_lane_cleared": true,
+      "baseline": {
+        "output_frames": 14336,
+        "global_timed_late_frames_before": 365755,
+        "global_timed_late_frames_after": 376664,
+        "global_timed_late_frames_delta": 10909,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "fault_interval": {
+        "output_frames": 10240,
+        "global_timed_late_frames_before": 376664,
+        "global_timed_late_frames_after": 382860,
+        "global_timed_late_frames_delta": 6196,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovery_interval": {
+        "output_frames": 36864,
+        "global_timed_late_frames_before": 382860,
+        "global_timed_late_frames_after": 404510,
+        "global_timed_late_frames_delta": 21650,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 1,
+      "operation": "disconnect",
+      "source_index": 2,
+      "surviving_sources": 3,
+      "surviving_airplay_sources": 2,
+      "surviving_native_sources": 1,
+      "output_frames_advanced": 8192,
+      "unchanged_survivor_sessions": true,
+      "victim_lane_cleared": true,
+      "baseline": {
+        "output_frames": 15360,
+        "global_timed_late_frames_before": 404510,
+        "global_timed_late_frames_after": 416095,
+        "global_timed_late_frames_delta": 11585,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "fault_interval": {
+        "output_frames": 8192,
+        "global_timed_late_frames_before": 416095,
+        "global_timed_late_frames_after": 420220,
+        "global_timed_late_frames_delta": 4125,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovery_interval": {
+        "output_frames": 36864,
+        "global_timed_late_frames_before": 420220,
+        "global_timed_late_frames_after": 441637,
+        "global_timed_late_frames_delta": 21417,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 1,
+      "operation": "disconnect",
+      "source_index": 3,
+      "surviving_sources": 3,
+      "surviving_airplay_sources": 2,
+      "surviving_native_sources": 1,
+      "output_frames_advanced": 6144,
+      "unchanged_survivor_sessions": true,
+      "victim_lane_cleared": true,
+      "baseline": {
+        "output_frames": 15360,
+        "global_timed_late_frames_before": 442750,
+        "global_timed_late_frames_after": 452032,
+        "global_timed_late_frames_delta": 9282,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "fault_interval": {
+        "output_frames": 6144,
+        "global_timed_late_frames_before": 452032,
+        "global_timed_late_frames_after": 454501,
+        "global_timed_late_frames_delta": 2469,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovery_interval": {
+        "output_frames": 36864,
+        "global_timed_late_frames_before": 454501,
+        "global_timed_late_frames_after": 476138,
+        "global_timed_late_frames_delta": 21637,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 1,
+      "operation": "worker_crash",
+      "source_index": 1,
+      "surviving_sources": 3,
+      "surviving_airplay_sources": 2,
+      "surviving_native_sources": 1,
+      "output_frames_advanced": 7168,
+      "unchanged_survivor_sessions": true,
+      "victim_lane_cleared": true,
+      "baseline": {
+        "output_frames": 14336,
+        "global_timed_late_frames_before": 476138,
+        "global_timed_late_frames_after": 482981,
+        "global_timed_late_frames_delta": 6843,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "fault_interval": {
+        "output_frames": 7168,
+        "global_timed_late_frames_before": 482981,
+        "global_timed_late_frames_after": 484164,
+        "global_timed_late_frames_delta": 1183,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovery_interval": {
+        "output_frames": 30720,
+        "global_timed_late_frames_before": 484164,
+        "global_timed_late_frames_after": 496174,
+        "global_timed_late_frames_delta": 12010,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 1,
+      "operation": "worker_crash",
+      "source_index": 2,
+      "surviving_sources": 3,
+      "surviving_airplay_sources": 2,
+      "surviving_native_sources": 1,
+      "output_frames_advanced": 10240,
+      "unchanged_survivor_sessions": true,
+      "victim_lane_cleared": true,
+      "baseline": {
+        "output_frames": 14336,
+        "global_timed_late_frames_before": 497721,
+        "global_timed_late_frames_after": 500299,
+        "global_timed_late_frames_delta": 2578,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "fault_interval": {
+        "output_frames": 10240,
+        "global_timed_late_frames_before": 500299,
+        "global_timed_late_frames_after": 502485,
+        "global_timed_late_frames_delta": 2186,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovery_interval": {
+        "output_frames": 31744,
+        "global_timed_late_frames_before": 502485,
+        "global_timed_late_frames_after": 519566,
+        "global_timed_late_frames_delta": 17081,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 1,
+      "operation": "worker_crash",
+      "source_index": 3,
+      "surviving_sources": 3,
+      "surviving_airplay_sources": 2,
+      "surviving_native_sources": 1,
+      "output_frames_advanced": 7168,
+      "unchanged_survivor_sessions": true,
+      "victim_lane_cleared": true,
+      "baseline": {
+        "output_frames": 15360,
+        "global_timed_late_frames_before": 519566,
+        "global_timed_late_frames_after": 529534,
+        "global_timed_late_frames_delta": 9968,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "fault_interval": {
+        "output_frames": 7168,
+        "global_timed_late_frames_before": 529534,
+        "global_timed_late_frames_after": 532046,
+        "global_timed_late_frames_delta": 2512,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovery_interval": {
+        "output_frames": 33792,
+        "global_timed_late_frames_before": 532046,
+        "global_timed_late_frames_after": 545149,
+        "global_timed_late_frames_delta": 13103,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      }
+    }
+  ],
+  "native_streams": 1,
+  "visibility_scope": "Hub discovery owner state only; Apple picker/cache visibility untested",
+  "steady": {
+    "output_rms": 0.01971953734755516,
+    "active": 4,
+    "lane_rms": [
+      0.04098263382911682,
+      0.046381495893001556,
+      0.03923767805099487
+    ],
+    "native_lane_rms": [
+      0.011186704970896244
+    ]
+  },
+  "steady_continuity": {
+    "output_frames": 528384,
+    "global_timed_late_frames_before": 21976,
+    "global_timed_late_frames_after": 365755,
+    "global_timed_late_frames_delta": 343779,
+    "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+    "lanes": [
+      {
+        "kind": "airplay",
+        "source_index": 1,
+        "lane": 1,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0,
+        "late_packets_before": 0,
+        "late_packets_after": 0,
+        "late_packets_delta": 0,
+        "counter_reset": false
+      },
+      {
+        "kind": "airplay",
+        "source_index": 2,
+        "lane": 2,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0,
+        "late_packets_before": 0,
+        "late_packets_after": 0,
+        "late_packets_delta": 0,
+        "counter_reset": false
+      },
+      {
+        "kind": "airplay",
+        "source_index": 3,
+        "lane": 3,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0,
+        "late_packets_before": 0,
+        "late_packets_after": 0,
+        "late_packets_delta": 0,
+        "counter_reset": false
+      },
+      {
+        "kind": "native",
+        "source_index": 1,
+        "lane": 0,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      }
+    ]
+  },
+  "continuity_claim": "Session/stream identity and nonzero meters only; underrun and late deltas are reported, not proof of gap-free audio",
+  "global_disable": {
+    "receivers": [
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      },
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      },
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      }
+    ],
+    "reserved": 0,
+    "owned_worker_count": 0
+  },
+  "status_reads": {
+    "readers": 0,
+    "successful": 0,
+    "errors": 0
+  },
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

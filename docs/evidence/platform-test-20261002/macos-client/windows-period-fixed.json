@@ -1,0 +1,29 @@
+{
+  "target": "windows",
+  "endpoint": "https://192.168.100.186:17443",
+  "client_binary_sha256": "4d1c1ed97447951fc0b3e637924d72ae8dd6e4478ebdc202adbd4ae7deeab571",
+  "scope": "30-second macOS synthetic -36 dBFS native Sender over LAN",
+  "checks": {
+    "pair_exit_code": 0,
+    "snapshot_exit_code": 0,
+    "diagnostics_exit_code": 0,
+    "send_exit_code": 0
+  },
+  "functional_connection_passed": true,
+  "quality_at_10_seconds": {
+    "session_status": [
+      "playing"
+    ],
+    "underrun_frames": 0,
+    "output_errors": 0,
+    "output_available": true,
+    "output_peak": 0.004013742320239544,
+    "receiver_lost_packets": [
+      0
+    ],
+    "receiver_pcm_sink_dropped": [
+      0
+    ]
+  },
+  "quality_passed": true
+}

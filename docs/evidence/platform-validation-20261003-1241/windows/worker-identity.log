@@ -1,0 +1,139 @@
+{
+  "platform": "win32",
+  "checks": {
+    "v1": "same identity and signature",
+    "ring_v2": "same identity and signature",
+    "legacy_ring_v2": "same identity and signature",
+    "crlf_v2": "same identity and signature",
+    "missing": "clean rejection",
+    "empty": "clean rejection",
+    "truncated_pem": "clean rejection",
+    "truncated_der": "clean rejection",
+    "wrong_algorithm": "clean rejection",
+    "wrong_v2_public": "clean rejection",
+    "wrong_v2_seed": "clean rejection",
+    "wrong_version": "clean rejection",
+    "wrong_public_tag": "clean rejection",
+    "trailing_der": "clean rejection",
+    "trailing_pem": "clean rejection",
+    "encrypted_label": "clean rejection",
+    "oversized": "clean rejection"
+  },
+  "worker_startup": true,
+  "fixtures": "RFC 8032 section 7.1 test 1",
+  "probe_sha256": "892fafbaaa1cb8db289cb6e2120500fe6016608ca78cd76154279c7d9107723b",
+  "worker_sha256": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0",
+  "startup": {
+    "v1": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "ring_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "legacy_ring_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "crlf_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "missing": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "private key open failed"
+      ]
+    },
+    "empty": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "truncated_pem": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "truncated_der": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "wrong_algorithm": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "wrong_v2_public": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "wrong_v2_seed": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "wrong_version": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "wrong_public_tag": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "trailing_der": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "trailing_pem": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "encrypted_label": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    },
+    "oversized": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "receiver identity initialization failed"
+      ]
+    }
+  }
+}

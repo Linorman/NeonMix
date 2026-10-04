@@ -1,0 +1,63 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 1,
+    "seconds": 0.043
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 64.524
+  },
+  {
+    "name": "tests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "seconds": 171.568
+  },
+  {
+    "name": "release",
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 409.116
+  },
+  {
+    "name": "worker-build",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/build-worker.py"
+    ],
+    "exit_code": 0,
+    "seconds": 10.353
+  }
+]

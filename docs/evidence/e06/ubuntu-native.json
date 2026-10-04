@@ -1,0 +1,270 @@
+{
+  "passed": true,
+  "scope": "Ubuntu logged-in desktop PipeWire/WirePlumber session; no physical speaker claim",
+  "uid": 1000,
+  "binary_sha256": {
+    "neonmix-audio": "806983d26c3bf76876ddd9b3f2113f19f471c80d58a07869089b83290bed2937",
+    "neonmix-hub": "6a061fa96f972955729f108662ce33c22fd51800d7255f0850d7dbe478bca2eb"
+  },
+  "selected": {
+    "provider": "neonmix",
+    "external_driver": false,
+    "device": {
+      "id": "pipewire:neonmix.sink.default",
+      "name": "NeonMix",
+      "backend": "pipewire",
+      "input": {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      "output": {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      "supported_input": [
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i8",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u8",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i16",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u16",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i24",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u24",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i32",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u32",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "f32",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "f64",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        }
+      ],
+      "supported_output": [
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i8",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u8",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i16",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u16",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i24",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u24",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "i32",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "u32",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "f32",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        },
+        {
+          "sample_rate": 48000,
+          "channels": 2,
+          "sample_type": "f64",
+          "period_min_frames": 1024,
+          "period_max_frames": 2048
+        }
+      ]
+    }
+  },
+  "duplicate_owner_rejected": "{\"event\":\"error\",\"message\":\"Address already in use (os error 98)\",\"version\":\"0.1.0\"}\n",
+  "bridge": {
+    "passed": true,
+    "capture_exit_code": 0,
+    "output_exit_code": 0,
+    "expected_signal": "tone",
+    "signal_matches": true,
+    "callbacks_within_budget": true,
+    "scope": "virtual-device digital bridge, not analog latency or end-to-end networking",
+    "stats": {
+      "callback_max_ns": 141250,
+      "callback_over_budget": 0,
+      "callbacks": 234,
+      "clock_epoch": 1,
+      "discontinuities": 1,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 239616,
+      "last_arrival_ns": 4981941253,
+      "last_device_ns": 24796322090160,
+      "last_error": 0,
+      "native_device_frame_position": null,
+      "native_internal_frames": null,
+      "native_stream_frames": null,
+      "no_data_intervals": 0,
+      "peak": 0.0,
+      "period_max": 1024,
+      "period_min": 1024,
+      "presented_frames": 0,
+      "silent_frames": 95236,
+      "stale_frames": 0,
+      "submitted_frames": 0
+    },
+    "measurement": {
+      "analyzed_frames": 239616,
+      "estimated_frequency_hz": 436.9990292608515,
+      "peak": 0.015848932787775993,
+      "positive_zero_crossings": 1314,
+      "rms": 0.008694580998663185
+    },
+    "expected_frequency_hz": 437.0,
+    "frequency_matches": true,
+    "native_clock_advances": true,
+    "output_stats": {
+      "callback_max_ns": 355083,
+      "callback_over_budget": 0,
+      "callbacks": 142,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 145408,
+      "last_arrival_ns": 3024844626,
+      "last_device_ns": 24794871423516,
+      "last_error": 0,
+      "native_device_frame_position": 145408,
+      "native_internal_frames": 144384,
+      "native_stream_frames": 144384,
+      "no_data_intervals": 0,
+      "peak": 0.013982993550598621,
+      "period_max": 1024,
+      "period_min": 1024,
+      "presented_frames": 144384,
+      "silent_frames": 788,
+      "stale_frames": 0,
+      "submitted_frames": 145408
+    },
+    "clock": {
+      "callback_frames": 1024,
+      "clock_timestamp_ns": 24794871423516,
+      "device_timestamp_ns": 24794871423516,
+      "epoch": 1,
+      "epoch_exhausted": false,
+      "internal_frames": 144384,
+      "native_device_frame_position": 145408,
+      "native_internal_frames": 144384,
+      "native_stream_frames": 144384,
+      "presented_frames": 144384,
+      "reset": false,
+      "sample_rate": 48000,
+      "submitted_frames": 145408
+    }
+  },
+  "owner_stopped": [
+    {
+      "device_id": "pipewire:neonmix.sink.default",
+      "event": "virtual_output_ready"
+    },
+    {
+      "device_id": "pipewire:neonmix.sink.default",
+      "event": "virtual_output_stopped"
+    }
+  ],
+  "owner_stop_removes_node": true
+}

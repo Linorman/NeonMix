@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 69, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 54, in main
+    probe.main()
+    ~~~~~~~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 98, in main
+    app.press('创建房间');wait_for(lambda:ipc(state,'status')['hub_settings'])
+                          ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_background_probe.py", line 54, in wait_for
+    raise RuntimeError(f"probe condition timed out: {last}")
+RuntimeError: probe condition timed out: None

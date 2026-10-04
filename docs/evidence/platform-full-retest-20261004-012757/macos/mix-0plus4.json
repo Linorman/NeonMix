@@ -1,0 +1,255 @@
+{
+  "scenario": "mix",
+  "platform": "macOS",
+  "os_version": "27.0",
+  "architecture": "arm64",
+  "build_profile": "release",
+  "sources": 0,
+  "native_sources": 4,
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real CoreAudio output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "7176a5e18651a0b72816bf5738e1fee75c73c6a82e44fb08e3a3adb238795470",
+    "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": 60.0,
+  "airplay_frequencies_hz": [],
+  "native_frequencies_hz": [
+    809,
+    946,
+    1083,
+    1220
+  ],
+  "passed": true,
+  "scenarios": {
+    "independent_native_tones_render_with_requested_mix": true,
+    "dynamic_unique_lanes_and_shared_output": true,
+    "full_room_native_start_rejected_without_reservation_leak": true,
+    "steady_digital_timing_quality": true,
+    "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+  },
+  "isolation_checks": [],
+  "last_live_observation": {
+    "expected_sources": [],
+    "active": 4,
+    "sessions": [],
+    "output_rms": 0.005681265611201525,
+    "output_stats": {
+      "callback_max_ns": 432958,
+      "callback_over_budget": 0,
+      "callbacks": 11407,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 2920192,
+      "last_arrival_ns": 60873541041,
+      "last_device_ns": 537395208025124,
+      "last_error": 0,
+      "native_device_frame_position": 2919936,
+      "native_internal_frames": 2919936,
+      "native_stream_frames": 2919936,
+      "no_data_intervals": 0,
+      "peak": 0.015163218602538109,
+      "period_max": 256,
+      "period_min": 256,
+      "presented_frames": 2919681,
+      "silent_frames": 18325,
+      "stale_frames": 0,
+      "submitted_frames": 2920192
+    }
+  },
+  "native_streams": 4,
+  "steady": {
+    "output_rms": 0.005691009573638439,
+    "active": 4,
+    "lane_rms": [],
+    "native_lane_rms": [
+      0.011224020272493362,
+      0.011231010779738426,
+      0.011246335692703724,
+      0.011208083480596542
+    ]
+  },
+  "steady_continuity": {
+    "timed_late_frames_by_lane_delta": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "last_timed_late": {
+      "last_timed_late_stream_id": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_timed_late_epoch": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_timed_late_output_frame": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_timed_late_target_ns": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_timed_late_presentation_ns": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "output_frames": 2880768,
+    "global_timed_late_frames_before": 0,
+    "global_timed_late_frames_after": 0,
+    "global_timed_late_frames_delta": 0,
+    "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+    "lanes": [
+      {
+        "kind": "native",
+        "source_index": 1,
+        "lane": 0,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 2,
+        "lane": 1,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 3,
+        "lane": 2,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 4,
+        "lane": 3,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      }
+    ]
+  },
+  "continuity_claim": "Steady digital counters must remain continuous; this is not analog or Apple-device audio verification",
+  "global_disable": {
+    "receivers": [
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      }
+    ],
+    "reserved": 0,
+    "owned_worker_count": 0
+  },
+  "status_reads": {
+    "readers": 0,
+    "successful": 0,
+    "errors": 0
+  },
+  "source_pacing": [],
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

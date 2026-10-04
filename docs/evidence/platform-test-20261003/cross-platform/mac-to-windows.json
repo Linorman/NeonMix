@@ -1,0 +1,560 @@
+{
+  "target": "windows",
+  "endpoint": "https://192.168.100.186:17445",
+  "requested_seconds": 60,
+  "client_binary_sha256": "1f4e87ad5bb187b1b7e2ee2932605986d0e7da31f4e2e912b7cb74c6b33ee7c6",
+  "scope": "macOS native CLI synthetic 437 Hz / -36 dBFS Sender; not Apple AirPlay",
+  "samples": [
+    {
+      "elapsed_seconds": 2.005,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 4722336,
+      "output_peak": 0.0040088254027068615,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 4.054,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 4820256,
+      "output_peak": 0.00399381946772337,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 6.092,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 4917696,
+      "output_peak": 0.004007783252745867,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 8.13,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5015616,
+      "output_peak": 0.004001723136752844,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 10.172,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5114016,
+      "output_peak": 0.003997268155217171,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 12.214,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5211936,
+      "output_peak": 0.004016851540654898,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 14.256,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5309856,
+      "output_peak": 0.0040197730995714664,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 16.295,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5407776,
+      "output_peak": 0.004023879766464233,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 18.334,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5506176,
+      "output_peak": 0.003997910767793655,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 20.384,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5604096,
+      "output_peak": 0.003999543376266956,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 22.421,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5701536,
+      "output_peak": 0.0040172492153942585,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 24.46,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5799456,
+      "output_peak": 0.004026627633720636,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 26.498,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5897376,
+      "output_peak": 0.004025612026453018,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 28.536,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 5995296,
+      "output_peak": 0.004025215283036232,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 30.576,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6093216,
+      "output_peak": 0.0040212455205619335,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 32.612,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6190656,
+      "output_peak": 0.004032215569168329,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 34.65,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6288576,
+      "output_peak": 0.0040087406523525715,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 36.692,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6386496,
+      "output_peak": 0.00401064520701766,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 38.731,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6484896,
+      "output_peak": 0.004002263303846121,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 40.78,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6582816,
+      "output_peak": 0.0040134950540959835,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 42.82,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6680736,
+      "output_peak": 0.004015868529677391,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 44.86,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6778656,
+      "output_peak": 0.004015643615275621,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 46.899,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6876576,
+      "output_peak": 0.003994518890976906,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 48.935,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 6974496,
+      "output_peak": 0.00401823315769434,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 50.977,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 7072416,
+      "output_peak": 0.004027199000120163,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 53.018,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 7170336,
+      "output_peak": 0.00400910247117281,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 55.058,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 7268736,
+      "output_peak": 0.004009617026895285,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 57.11,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 7366656,
+      "output_peak": 0.0040266490541398525,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 59.151,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 7464576,
+      "output_peak": 0.003994524944573641,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    }
+  ],
+  "query_failures": [],
+  "passed": true,
+  "pair_exit_code": 0,
+  "send_exit_code": 0,
+  "sampling_summary": {
+    "active_sample_count": 29,
+    "max_lost_packets": 0,
+    "max_pcm_sink_dropped": 0,
+    "max_underrun_frames": 0,
+    "max_output_errors": 0,
+    "last_active_sample": {
+      "elapsed_seconds": 59.151,
+      "session_status": [
+        "playing"
+      ],
+      "output_available": true,
+      "output_frames": 7464576,
+      "output_peak": 0.003994524944573641,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 0,
+      "lost_packets": [
+        0
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,942 @@
+   Compiling unicode-ident v1.0.26
+   Compiling cfg-if v1.0.5
+   Compiling libc v0.2.189
+   Compiling memchr v2.8.3
+   Compiling proc-macro2 v1.0.107
+   Compiling winnow v1.0.4
+   Compiling quote v1.0.47
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling serde_core v1.0.229
+   Compiling log v0.4.34
+   Compiling bitflags v2.13.2
+   Compiling once_cell v1.21.4
+   Compiling pin-project-lite v0.2.17
+   Compiling futures-core v0.3.34
+   Compiling toml v1.1.6+spec-1.1.0
+   Compiling linux-raw-sys v0.12.1
+   Compiling system-deps v7.0.8
+   Compiling num-traits v0.2.19
+   Compiling rustix v1.1.5
+   Compiling libloading v0.8.9
+   Compiling itoa v1.0.18
+   Compiling num-integer v0.1.47
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+   Compiling futures-sink v0.3.34
+   Compiling slab v0.4.12
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling indexmap v2.14.2
+   Compiling smallvec v1.16.2
+   Compiling rubato v0.16.2
+   Compiling rtrb v0.3.2
+   Compiling thiserror v2.0.21
+   Compiling toml_edit v0.25.15+spec-1.1.0
+   Compiling typenum v1.20.1
+   Compiling proc-macro-crate v3.5.0
+   Compiling futures-io v0.3.34
+   Compiling generic-array v0.14.7
+   Compiling zmij v1.0.23
+   Compiling getrandom v0.2.17
+   Compiling anstyle v1.0.14
+   Compiling serde_json v1.0.151
+   Compiling serde v1.0.229
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling cpufeatures v0.2.17
+   Compiling digest v0.10.7
+   Compiling fastrand v2.5.0
+   Compiling getrandom v0.4.3
+   Compiling socket2 v0.6.5
+   Compiling neonmix-core v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/audio-core)
+   Compiling uuid v1.26.1
+   Compiling futures-macro v0.3.34
+   Compiling mio v1.2.3
+   Compiling errno v0.3.14
+   Compiling futures-task v0.3.34
+   Compiling signal-hook-registry v1.4.8
+   Compiling zeroize v1.9.0
+   Compiling bytes v1.12.1
+   Compiling rustls-pki-types v1.15.1
+   Compiling futures-util v0.3.34
+   Compiling tracing-attributes v0.1.31
+   Compiling tracing-core v0.1.36
+   Compiling crossbeam-utils v0.8.23
+   Compiling nom v7.1.3
+   Compiling enumflags2_derive v0.7.12
+   Compiling tracing v0.1.44
+   Compiling annotate-snippets v0.11.5
+   Compiling clang-sys v1.9.1
+   Compiling cexpr v0.6.0
+   Compiling untrusted v0.9.0
+   Compiling ring v0.17.14
+   Compiling tokio-macros v2.7.2
+   Compiling endi v1.1.1
+   Compiling libdbus-sys v0.2.7
+   Compiling zerocopy v0.8.59
+   Compiling bindgen v0.72.1
+   Compiling tokio v1.53.1
+   Compiling polling v3.11.0
+   Compiling scopeguard v1.2.0
+   Compiling parking v2.2.1
+   Compiling lock_api v0.4.14
+   Compiling atomic-waker v1.1.2
+   Compiling base64 v0.23.1
+   Compiling sha2 v0.10.9
+   Compiling dlib v0.5.3
+   Compiling synstructure v0.14.0
+   Compiling rustls-webpki v0.103.15
+   Compiling libspa v0.10.1
+   Compiling zvariant_utils v2.1.0
+   Compiling subtle v2.6.1
+   Compiling zerofrom-derive v0.1.8
+   Compiling rustls v0.23.45
+   Compiling wayland-sys v0.31.11
+   Compiling libspa-sys v0.10.1
+   Compiling pipewire-sys v0.10.1
+   Compiling event-listener v5.4.2
+   Compiling enumflags2 v0.7.12
+   Compiling concurrent-queue v2.5.0
+   Compiling nom v8.0.0
+   Compiling powerfmt v0.2.0
+   Compiling deranged v0.5.8
+   Compiling time-core v0.1.9
+   Compiling cookie-factory v0.3.3
+   Compiling num-conv v0.2.2
+   Compiling time v0.3.55
+   Compiling event-listener-strategy v0.5.4
+   Compiling zerofrom v0.1.8
+   Compiling zvariant_derive v4.2.0
+   Compiling yoke-derive v0.8.3
+   Compiling alsa-sys v0.4.0
+   Compiling futures-lite v2.6.1
+   Compiling dbus v0.6.5
+   Compiling rustls-pemfile v2.2.0
+   Compiling futures-channel v0.3.34
+   Compiling static_assertions v1.1.0
+   Compiling stable_deref_trait v1.2.1
+   Compiling downcast-rs v1.2.1
+   Compiling scoped-tls v1.0.1
+   Compiling wayland-backend v0.3.17
+   Compiling pipewire v0.10.0
+   Compiling yoke v0.8.3
+   Compiling audio_thread_priority v0.35.1
+   Compiling alsa v0.11.0
+   Compiling yasna v0.6.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling pem v4.0.0
+   Compiling glib-sys v0.20.10
+   Compiling quick-xml v0.41.0
+   Compiling dasp_sample v0.11.0
+   Compiling cpal v0.18.2 (/home/parallels/NeonMix/.local/t03u/vendor/cpal)
+   Compiling rcgen v0.14.10
+   Compiling neonmix-control v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/control)
+   Compiling wayland-scanner v0.31.11
+   Compiling zerovec-derive v0.11.6
+   Compiling gobject-sys v0.20.10
+   Compiling async-task v4.7.1
+   Compiling percent-encoding v2.3.2
+   Compiling utf8parse v0.2.2
+   Compiling zerovec v0.11.8
+   Compiling anstyle-parse v1.0.0
+   Compiling wayland-client v0.31.15
+   Compiling getrandom v0.3.4
+   Compiling async-channel v2.5.0
+   Compiling spin v0.9.9
+   Compiling displaydoc v0.2.7
+   Compiling colorchoice v1.0.5
+   Compiling anstyle-query v1.1.5
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling flume v0.12.0
+   Compiling anstream v1.0.0
+   Compiling async-io v2.6.0
+   Compiling neonmix-io v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/audio-io)
+   Compiling async-lock v3.4.2
+   Compiling piper v0.2.5
+   Compiling socket-pktinfo v0.4.1
+   Compiling if-addrs v0.15.0
+   Compiling base64 v0.22.1
+   Compiling strsim v0.11.1
+   Compiling clap_lex v1.1.1
+   Compiling stats_alloc v0.1.10
+   Compiling clap_builder v4.6.7
+   Compiling blocking v1.7.0
+   Compiling neonmix-airplay-ipc v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/airplay-ipc)
+   Compiling sha1 v0.10.7
+   Compiling clap_derive v4.6.7
+   Compiling gstreamer-sys v0.23.6
+   Compiling mdns-sd v0.21.4
+   Compiling mdns-sd v0.21.4 (/home/parallels/NeonMix/.local/t03u/vendor/mdns-sd-scoped)
+   Compiling clap v4.6.7
+   Compiling tinystr v0.8.4
+   Compiling async-executor v1.14.0
+   Compiling zvariant v4.2.0
+   Compiling async-broadcast v0.7.2
+   Compiling http v1.5.0
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+   Compiling bytemuck_derive v1.12.1
+   Compiling ordered-stream v0.2.0
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling hex v0.4.3
+   Compiling zbus_names v3.0.0
+   Compiling icu_locale_core v2.3.0
+   Compiling bytemuck v1.25.2
+   Compiling memoffset v0.9.1
+   Compiling zerotrie v0.2.5
+   Compiling wayland-protocols v0.32.13
+   Compiling potential_utf v0.1.6
+   Compiling quick-xml v0.30.0
+   Compiling rand_core v0.6.4
+   Compiling gio-sys v0.20.10
+   Compiling gstreamer-base-sys v0.23.6
+   Compiling utf8_iter v1.0.4
+   Compiling paste v1.0.15
+   Compiling zbus_xml v4.0.0
+   Compiling icu_collections v2.3.0
+   Compiling rand_chacha v0.3.1
+   Compiling nix v0.29.0
+   Compiling icu_provider v2.3.1
+   Compiling neonmix-identity v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/identity)
+   Compiling neonmix-airplay-adapter v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/airplay-adapter)
+   Compiling thiserror-impl v1.0.69
+   Compiling thiserror v1.0.69
+   Compiling rand v0.8.8
+   Compiling icu_normalizer_data v2.3.0
+   Compiling zbus-lockstep v0.4.4
+   Compiling icu_properties_data v2.3.0
+   Compiling khronos_api v3.1.0
+   Compiling async-fs v2.2.0
+   Compiling zbus_macros v4.4.0
+   Compiling futures-executor v0.3.34
+   Compiling glib-macros v0.20.12
+   Compiling ahash v0.8.12
+   Compiling xdg-home v1.3.0
+   Compiling rustix v0.38.44
+   Compiling either v1.18.0
+   Compiling simd-adler32 v0.3.10
+   Compiling xml-rs v0.8.29
+   Compiling httparse v1.10.1
+   Compiling gl_generator v0.14.0
+   Compiling itertools v0.14.0
+   Compiling option-operations v0.5.0
+   Compiling icu_properties v2.3.0
+   Compiling zbus v4.4.0
+   Compiling zbus-lockstep-macros v0.4.4
+   Compiling icu_normalizer v2.3.0
+   Compiling glib v0.20.12
+   Compiling http-body v1.1.0
+   Compiling form_urlencoded v1.2.2
+   Compiling zvariant_utils v4.2.0
+   Compiling num-rational v0.4.2
+   Compiling x11-dl v2.21.0
+   Compiling adler2 v2.0.1
+   Compiling xcursor v0.3.11
+   Compiling xkeysym v0.2.1
+   Compiling linux-raw-sys v0.4.15
+   Compiling cursor-icon v1.2.0
+   Compiling muldiv v1.0.1
+   Compiling parking_lot_core v0.9.12
+   Compiling crc32fast v1.5.2
+   Compiling wayland-csd-frame v0.3.0
+   Compiling zvariant_derive v5.15.0
+   Compiling wayland-cursor v0.31.14
+   Compiling idna_adapter v1.2.2
+   Compiling wayland-protocols-wlr v0.3.12
+   Compiling gstreamer v0.23.7
+   Compiling atspi-common v0.6.0
+   Compiling gstreamer-rtp-sys v0.23.5
+   Compiling gstreamer-app-sys v0.23.5
+   Compiling memmap2 v0.9.11
+   Compiling accesskit v0.17.1
+   Compiling tower-service v0.3.3
+   Compiling calloop v0.13.0
+   Compiling idna v1.1.0
+   Compiling miniz_oxide v0.9.1
+   Compiling tokio-util v0.7.19
+   Compiling gethostname v1.1.0
+   Compiling dpi v0.1.2
+   Compiling arrayvec v0.7.8
+   Compiling foldhash v0.1.5
+   Compiling x11rb-protocol v0.13.2
+   Compiling atomic_refcell v0.1.14
+   Compiling smithay-client-toolkit v0.19.2
+   Compiling ttf-parser v0.25.1
+   Compiling try-lock v0.2.5
+   Compiling as-raw-xcb-connection v1.0.1
+   Compiling fnv v1.0.7
+   Compiling h2 v0.4.19
+   Compiling owned_ttf_parser v0.25.1
+   Compiling want v0.3.1
+   Compiling hashbrown v0.15.5
+   Compiling immutable-chunkmap v2.1.4
+   Compiling gstreamer-base v0.23.6
+   Compiling flate2 v1.1.10
+   Compiling parking_lot v0.12.5
+   Compiling url v2.5.8
+   Compiling calloop-wayland-source v0.3.0
+   Compiling atspi-proxies v0.6.0
+   Compiling miniz_oxide v0.8.9
+   Compiling fdeflate v0.3.7
+   Compiling neonmix-desktop-service v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/desktop-service)
+   Compiling emath v0.31.1
+   Compiling winit v0.30.13
+   Compiling zcheapstr v1.1.0
+   Compiling neonmix-output-binding v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/output-binding)
+   Compiling x11rb v0.13.2
+   Compiling httpdate v1.0.3
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling raw-window-handle v0.6.2
+   Compiling ab_glyph v0.2.32
+   Compiling hyper v1.11.1
+   Compiling atspi-connection v0.6.0
+   Compiling zvariant v5.15.0
+   Compiling ecolor v0.31.1
+   Compiling png v0.18.1
+   Compiling gstreamer-app v0.23.5
+   Compiling gstreamer-rtp v0.23.5
+   Compiling accesskit_consumer v0.26.0
+   Compiling xkbcommon-dl v0.4.2
+   Compiling glutin_glx_sys v0.6.1
+   Compiling glutin_egl_sys v0.7.1
+   Compiling wayland-protocols-plasma v0.3.12
+   Compiling neonmix-linux v0.1.0 (/home/parallels/NeonMix/.local/t03u/adapters/linux)
+   Compiling rand_core v0.9.5
+   Compiling tokio-rustls v0.26.6
+   Compiling calloop v0.14.4
+   Compiling dbus v0.9.12
+   Compiling tympan-aspl v0.1.0 (/home/parallels/NeonMix/.local/t03u/vendor/tympan-aspl)
+   Compiling webpki-roots v1.0.9
+   Compiling sync_wrapper v1.0.2
+   Compiling epaint_default_fonts v0.31.1
+   Compiling nohash-hasher v0.2.0
+   Compiling tower-layer v0.3.3
+warning: function `set_name` is never used
+   --> vendor/tympan-aspl/src/raw/output_controls.rs:248:15
+    |
+248 | pub(crate) fn set_name(runtime: &DriverRuntime, value: String) {
+    |               ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling pxfm v0.1.30
+warning: `tympan-aspl` (lib) generated 1 warning
+   Compiling profiling v1.0.18
+   Compiling smithay-client-toolkit v0.20.0
+   Compiling smol_str v0.2.2
+   Compiling ipnet v2.12.2
+   Compiling hyper-util v0.1.21
+   Compiling moxcms v0.8.1
+   Compiling epaint v0.31.1
+   Compiling calloop-wayland-source v0.4.1
+   Compiling rand_chacha v0.9.0
+   Compiling accesskit_atspi_common v0.10.1
+   Compiling zbus_names v4.3.4
+   Compiling atspi v0.22.0
+   Compiling wayland-protocols-misc v0.3.12
+   Compiling wayland-protocols-experimental v20250721.0.1
+   Compiling async-signal v0.2.14
+   Compiling glutin v0.32.3
+   Compiling rustversion v1.0.23
+   Compiling byteorder-lite v0.1.0
+   Compiling async-process v2.5.0
+   Compiling image v0.25.10
+   Compiling zbus_macros v5.19.0
+   Compiling accesskit_unix v0.13.1
+   Compiling rand v0.9.5
+   Compiling egui v0.31.1
+   Compiling neonmix-media v0.1.0 (/home/parallels/NeonMix/.local/t03u/crates/media)
+   Compiling neonmix-hal v0.1.0 (/home/parallels/NeonMix/.local/t03u/drivers/macos/hal)
+   Compiling tower v0.5.3
+   Compiling http-body-util v0.1.5
+   Compiling glutin-winit v0.5.0
+   Compiling async-recursion v1.1.1
+   Compiling fs-err v3.3.1
+   Compiling ryu v1.0.23
+   Compiling muda v0.21.0
+   Compiling data-encoding v2.11.1
+   Compiling serde_urlencoded v0.7.1
+   Compiling tungstenite v0.29.0
+   Compiling zbus v5.19.0
+   Compiling accesskit_winit v0.23.1
+   Compiling arboard v3.6.1
+   Compiling smithay-clipboard v0.7.3
+   Compiling webpki-roots v0.26.11
+   Compiling webbrowser v1.2.4
+   Compiling crossbeam-channel v0.5.17
+   Compiling task-local v0.1.1
+   Compiling keyboard-types v0.8.3
+   Compiling web-time v1.1.0
+   Compiling pastey v0.2.3
+   Compiling mime v0.3.17
+   Compiling tray-icon v0.26.0
+   Compiling glow v0.16.0
+   Compiling litrs v1.0.0
+   Compiling document-features v0.2.12
+   Compiling egui_glow v0.31.1
+   Compiling axum-core v0.5.6
+   Compiling egui-winit v0.31.1
+   Compiling ksni v0.3.6
+   Compiling tokio-tungstenite v0.29.0
+   Compiling arc-swap v1.9.2
+   Compiling tower-http v0.6.11
+   Compiling hyper-rustls v0.27.10
+   Compiling serde_path_to_error v0.1.20
+   Compiling matchit v0.8.4
+   Compiling axum v0.8.9
+   Compiling neonmix-hub v0.1.0 (/home/parallels/NeonMix/.local/t03u/apps/hub)
+   Compiling reqwest v0.12.28
+   Compiling axum-server v0.7.3
+   Compiling eframe v0.31.1
+   Compiling neonmix-macos v0.1.0 (/home/parallels/NeonMix/.local/t03u/adapters/macos)
+   Compiling neonmix-windows v0.1.0 (/home/parallels/NeonMix/.local/t03u/adapters/windows)
+   Compiling neonmix-desktop v0.1.0 (/home/parallels/NeonMix/.local/t03u/apps/desktop)
+   Compiling neonmix-audio v0.1.0 (/home/parallels/NeonMix/.local/t03u/apps/audio)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3m 17s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_airplay_adapter-57365aea67f41ddd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ingress.rs (target/debug/deps/ingress-1e82e5fd6c692f2c)
+
+running 7 tests
+test already_applied_protocol_gain_is_not_multiplied_twice_and_late_packet_drops ... ok
+test four_second_and_byte_limits_hold_for_large_and_tiny_packets ... ok
+test full_short_queue_never_invalidates_already_released_pcm ... ok
+test low_latency_keeps_bounds_rejects_late_packets_and_preserves_short_deadlines ... ok
+test low_latency_removes_protocol_prefetch_without_modulating_packet_timing ... ok
+test old_epoch_duplicates_clock_jump_and_bad_payload_fail_closed ... ok
+test unix_mapping_preserves_source_domain_and_release_obeys_device_budget ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_airplay_ipc-6c158414ad6c64c2)
+
+running 13 tests
+test tests::control_rejects_overlong_unterminated_and_extra_json ... ok
+test tests::control_v2_requires_event_provenance ... ok
+test tests::control_writer_never_writes_partial_oversized_message ... ok
+test tests::explicit_layout_preserves_original_rate_and_unix_time ... ok
+test tests::rejects_non_finite_samples_and_untrusted_gain ... ok
+test tests::rejects_unbounded_and_inconsistent_lengths_before_payload_read ... ok
+test tests::rejects_unknown_wire_formats_and_reserved_bits ... ok
+test tests::revoke_and_hub_granted_epochs_reject_in_flight_pcm ... ok
+test tests::sample_rate_change_requires_hub_granted_context ... ok
+test tests::sequence_gaps_allowed_but_duplicate_reverse_or_flag_reset_rejected ... ok
+test tests::stream_reads_partial_frames_and_distinguishes_truncation_from_eof ... ok
+test tests::transport_observations_reject_secrets_impossible_lengths_and_unknown_outcomes ... ok
+test tests::typed_admission_requires_request_correlation_and_known_fields ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_audio-5aa227bb5ad12b02)
+
+running 5 tests
+test measurement::tests::measures_received_tone_and_does_not_invent_one_for_silence ... ok
+test measurement::tests::never_counts_a_gap_as_continuous_source_time ... ok
+test measurement::tests::source_restart_does_not_count_intervening_silence_as_tone_time ... ok
+test virtual_output::tests::owner_rejects_symlinked_state_and_public_lock_without_overwriting_it ... ok
+test virtual_output::tests::rejected_second_owner_preserves_live_lock_and_drop_releases_it ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/cli.rs (target/debug/deps/cli-35330956caef960d)
+
+running 3 tests
+test invalid_format_fails_without_claiming_success ... ok
+test offline_probe_returns_parseable_metrics ... ok
+test unsupported_platform_sink_fails_explicitly ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+
+     Running tests/output_reopen.rs (target/debug/deps/output_reopen-f6c7ca596c1e7c0f)
+
+running 1 test
+test same_process_reopen_rebuilds_output_clock ... ignored, requires explicit NEONMIX_TEST_OUTPUT_DEVICE and physical native audio hardware
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_control-42bff92eb477bada)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/authority.rs (target/debug/deps/authority-a51df8b7b8f88d50)
+
+running 11 tests
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test member_cannot_solo_or_change_others_and_master ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/transactions.rs (target/debug/deps/transactions-8e9367448c1c74c4)
+
+running 2 tests
+test failed_preparation_aborts_only_the_candidate_and_keeps_health_updates ... ok
+test staged_command_excludes_durable_writers_and_preserves_live_output_loss ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_core-6567213df38bcaef)
+
+running 2 tests
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/audio_contract.rs (target/debug/deps/audio_contract-05b4a96082c84b86)
+
+running 18 tests
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test malicious_pcm_is_sanitized ... ok
+test mute_advances_signal_position ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test silence_is_data_but_idle_is_not ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.79s
+
+     Running tests/drift_stability.rs (target/debug/deps/drift_stability-74b6e0a04227859c)
+
+running 3 tests
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ignored, Run with --release --ignored: four accelerated 600-second drift cases
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ignored, Release-only accelerated 300-second delivery-stall regression
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ignored, Release-only accelerated over-limit drift degradation
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mixer.rs (target/debug/deps/mixer-66b0d21ef3d5cb29)
+
+running 8 tests
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.29s
+
+     Running tests/mixer_realtime.rs (target/debug/deps/mixer_realtime-22c14ff136e38cf3)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.17s
+
+     Running tests/presentation_resample.rs (target/debug/deps/presentation_resample-d6ee31fceed04599)
+
+running 2 tests
+test callback_hooks_include_pending_frames_and_retained_sinc_lookahead ... ok
+test converter_impulse_tracks_source_time_without_adding_output_delay_twice ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/realtime.rs (target/debug/deps/realtime-667e3cb7362f8e03)
+
+running 1 test
+test steady_state_capture_and_sinc_output_do_not_allocate_or_free ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.64s
+
+     Running tests/timed_mixer.rs (target/debug/deps/timed_mixer-7be99ecac6cffd9e)
+
+running 7 tests
+test callback_mid_block_selects_source_offset_and_epoch_flush_rejects_stale ... ok
+test muted_and_solo_lanes_consume_elapsed_audio_without_replay ... ok
+test new_epoch_flushes_a_future_head_already_held_by_output ... ok
+test single_block_waits_until_target_without_native_start_water ... ok
+test solo_exclusion_consumes_timed_input_instead_of_replaying_it_later ... ok
+test starvation_recovery_waits_for_future_pts_and_skips_elapsed_audio ... ok
+test timed_audio_recovers_after_a_track_gap_without_an_epoch_change ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+
+     Running tests/timed_multi_source.rs (target/debug/deps/timed_multi_source-7dba1d532bd07b42)
+
+running 3 tests
+test flushing_a_held_future_head_and_stale_packets_does_not_restart_other_lane ... ok
+test four_distinct_streams_mix_with_independent_gain_mute_and_solo ... ok
+test reusing_a_solo_lane_rejects_old_stream_and_keeps_other_stream_at_current_time ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/timed_quality.rs (target/debug/deps/timed_quality-25ef6fda56a3f79a)
+
+running 3 tests
+test callback_jitter_and_source_clock_error_do_not_create_pcm_spikes ... ok
+test fractional_src_preserves_upper_music_passband_after_clock_lock ... ok
+test timed_source_clock_error_keeps_long_term_presentation_phase_bounded ... ignored, Run release ignored: accelerated two-minute absolute phase tracking
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 11.40s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-81a03c6321b92a22)
+
+running 16 tests
+test pages::airplay::name_tests::alias_display_never_changes_session_control_identity ... ok
+test pages::airplay::name_tests::names_use_utf8_byte_bounds_and_success_does_not_erase_newer_drafts ... ok
+test pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes ... ok
+test tests::airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions ... ok
+test tests::cancel_modal_keeps_accesskit_focus_in_the_published_tree ... ok
+test tests::chinese_composition_preserves_draft_without_enter_submission ... ok
+test tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked ... ok
+test tests::fader_click_never_jumps_gain_and_double_click_resets_to_unity ... ok
+test tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later ... ok
+test tests::long_error_at_minimum_width_keeps_page_content_on_screen ... ok
+test tests::named_fields_publish_accessible_labels_without_exposing_password_text ... ok
+test tests::pages_handle_missing_loading_failed_and_stale_states ... ok
+test tests::palette_enter_during_ime_composition_does_not_run_an_action ... ok
+test tests::polling_does_not_lock_forms_and_stop_has_priority_over_pending_start ... ok
+test tests::restore_sends_the_inverse_change_against_a_fresh_revision ... ok
+test tests::stop_after_an_inflight_start_runs_last_and_keeps_the_stop_pending_until_ack ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-818c159ad7e2d571)
+
+running 4 tests
+test daemon::discovery_tests::discovery_empty_completion_clears_removed_candidates_and_supports_single_line_output ... ok
+test daemon::discovery_tests::discovery_incomplete_or_malformed_output_is_an_error ... ok
+test daemon::discovery_tests::discovery_returns_the_final_candidate_snapshot_instead_of_transient_events ... ok
+test daemon::discovery_tests::receiver_pins_only_survive_authenticated_control_replies ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/neonmix-background.rs (target/debug/deps/neonmix_background-29dbc816ae3c0acf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lifecycle.rs (target/debug/deps/lifecycle-4352c77dc48362dd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/redaction.rs (target/debug/deps/redaction-4394903e8ff26f56)
+
+running 5 tests
+test airplay_timing_export_preserves_numbers_and_excludes_device_identity ... ok
+test diagnostic_pin_and_nested_error_payloads_are_always_redacted ... ok
+test healthy_optional_error_stays_empty_and_secret_errors_are_removed ... ok
+test multi_receiver_aliases_and_profile_key_fields_never_enter_diagnostics ... ok
+test numeric_phase_diagnostics_survive_but_malformed_error_arrays_are_removed ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/windows_native_ipc.rs (target/debug/deps/windows_native_ipc-c4ed8b5a155f6906)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_hal-f841aefe49d83d3e)
+
+running 4 tests
+test tests::cfplugin_vtable_round_trips_mixed_audio_and_clock ... ok
+test tests::concurrent_wraparound_never_returns_torn_stereo_or_old_frames ... ok
+test tests::fixed_device_identity_and_format ... ok
+test tests::stale_frames_are_silent_after_wrap_and_restart ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/controls.rs (target/debug/deps/controls-460943fbcad41481)
+
+running 4 tests
+test device_volume_and_mute_apply_once_on_the_mixed_render_side ... ok
+test invalid_properties_and_io_lengths_do_not_change_volume ... ok
+test removing_a_running_client_retires_only_its_io_and_last_removal_stops_clock ... ok
+test stopping_one_client_preserves_other_clients_clock_and_audio ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/realtime.rs (target/debug/deps/realtime-ca3c4e5081fc28b9)
+
+running 1 test
+test hal_data_and_clock_callbacks_allocate_and_free_nothing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-b1bde802e218bf55)
+
+running 49 tests
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test identity::tests::failed_pending_commit_preserves_secret_request_and_recovery_metadata ... ok
+test identity::tests::forget_is_resumable_and_protects_admin_kind_and_device_aliases ... ok
+test identity::tests::legacy_and_mixed_formats_never_enter_laboratory_branch ... ok
+test identity::tests::setup_crash_helper ... ok
+test identity::tests::setup_force_exit_preserves_incomplete_identity_and_refuses_retry ... ok
+test identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test server::admission::tests::last_slot_competition_is_atomic_for_one_hundred_rounds ... ok
+test server::admission::tests::paused_active_claim_does_not_expire ... ok
+test server::admission::tests::reservations_exclude_duplicates_and_native_overcommit ... ok
+test server::airplay::api::tests::command_ids_require_canonical_uuid_spelling_before_deduplication ... ok
+test server::airplay::api::tests::committed_revoke_has_receipt_when_session_ends_and_mixer_queue_fills_during_save ... ok
+test server::airplay::api::tests::configuration_reserves_four_source_capacity_before_disk_write_and_clears_on_failure ... ok
+test server::airplay::api::tests::explicit_pair_window_rotates_running_idle_receiver_and_replay_does_not_reopen ... ok
+test server::airplay::api::tests::failed_pair_window_queue_does_not_reset_attempts_or_generation ... ok
+test server::airplay::api::tests::individual_disable_is_persistent_and_global_disable_preserves_configuration ... ok
+test server::airplay::api::tests::live_configuration_stops_only_removed_idle_entries_and_preserves_retained_claim ... ok
+test server::airplay::api::tests::member_snapshot_of_uninitialized_airplay_is_read_only ... ok
+test server::airplay::api::tests::metadata_edits_keep_receiver_identity_and_redact_cached_pairing_pins ... ok
+test server::airplay::api::tests::partial_identity_preparation_retains_disabled_recoverable_entries ... ok
+test server::airplay::api::tests::rename_success_followed_by_sync_error_is_acknowledged_as_committed ... ok
+test server::airplay::api::tests::repair_running_idle_receiver_discards_old_binding_and_opens_explicit_window ... ok
+test server::airplay::api::tests::snapshot_rechecks_role_after_waiting_for_profile_transaction ... ok
+test server::airplay::api::tests::stale_session_is_rejected_before_any_durable_change ... ok
+test server::airplay::tests::bounded_media_backpressure_preserves_burst_packets_and_stop_remains_independent ... ok
+test server::airplay::tests::existing_receiver_profiles_default_to_low_latency_and_keep_trust ... ok
+test server::airplay::tests::expired_or_disabled_pairing_window_never_returns_a_stale_pin ... ok
+test server::airplay::tests::fifth_pairing_challenge_can_finish_but_retry_does_not_renew_attempt_budget ... ok
+test server::airplay::tests::full_grant_preserves_all_hub_identity_fields ... ok
+test server::airplay::tests::idle_coreaudio_epoch_change_keeps_pin_window_but_active_media_is_revoked ... ok
+test server::airplay::tests::stop_and_disconnect_fail_closed_even_when_control_consumer_stalls ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::pairing_tests::cancelled_http_redemption_still_finishes_book_and_durable_authority ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test server::pairing_tests::pairing_save_releases_engine_and_keeps_book_until_concurrent_retry_and_cancel ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test server::transaction_tests::in_flight_native_start_owns_the_last_multi_source_slot ... ok
+test server::transaction_tests::native_external_preparation_failure_returns_the_reserved_lane_without_writing ... ok
+test server::transaction_tests::native_failed_disk_write_aborts_candidate_and_returns_lane ... ok
+test server::transaction_tests::native_ids_cannot_collide_with_reserved_airplay_context_before_prepare ... ok
+test server::transaction_tests::native_start_releases_engine_during_preparation_and_persistence ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+
+test result: ok. 49 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.42s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_identity-b4fc8254feb8d5d1)
+
+running 27 tests
+test airplay_profile::tests::capacity_counts_revocations_and_preserves_independent_preferences ... ok
+test airplay_profile::tests::corrupt_missing_secret_unknown_version_and_duplicate_identity_never_reset ... ok
+test airplay_profile::tests::crash_child_helper ... ok
+test airplay_profile::tests::killed_create_and_add_recover_the_same_identity_without_orphan_secrets ... ok
+test airplay_profile::tests::legacy_global_denial_becomes_recoverable_per_source_denial ... ok
+test airplay_profile::tests::migration_preserves_identity_trust_and_rollback_uses_current_revocations ... ok
+test airplay_profile::tests::missing_profile_with_existing_credentials_never_creates_a_new_identity ... ok
+test airplay_profile::tests::recovery_rejects_conflicts_and_never_replaces_a_published_missing_secret ... ok
+test discovery::tests::incompatible_or_incomplete_records_do_not_become_candidates ... ok
+test discovery::tests::names_are_distinct_candidates_and_all_usable_addresses_survive ... ok
+test files::tests::crashed_owner_releases_stable_lock ... ok
+test files::tests::directory_publish_does_not_replace_existing_target ... ok
+test files::tests::failed_replace_preserves_destination_and_cleans_its_own_temporary_file ... ok
+test files::tests::lock_child_helper ... ok
+test files::tests::private_directory_handle_survives_path_replaced_by_symlink ... ok
+test files::tests::private_replace_is_exclusive_and_removes_an_old_insecure_file_mode ... ok
+test files::tests::stable_lock_is_nonblocking_and_reusable ... ok
+test pairing::tests::expiration_cancellation_single_use_and_exact_retry ... ok
+test pairing::tests::quota_reclaims_expired_grants ... ok
+test profiles::tests::receiver_preserves_worker_encoded_public_keys ... ok
+test speaker::tests::service_pair_can_withdraw_and_republish_without_changing_identity ... ok
+test store::tests::complete_store_identity_isolates_same_uuid_and_reads_do_not_create ... ok
+test store::tests::cwd_child_helper ... ok
+test store::tests::rejects_corruption_version_unknown_fields_and_oversize_without_leaking ... ok
+test store::tests::rejects_links_nonfiles_and_wide_permissions ... ok
+test store::tests::round_trip_exclusive_and_idempotent ... ok
+test store::tests::store_resolution_survives_unrelated_working_directory ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running unittests src/bin/neonmix-airplay-profile.rs (target/debug/deps/neonmix_airplay_profile-7878fb31e8600532)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_io-30b2f1e286db2e06)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/pipewire_buffer.rs (target/debug/deps/pipewire_buffer-0df4fa1b28bfefbd)
+
+running 2 tests
+test pipewire_buffer::tests::clamps_native_size_but_rejects_partial_frames_or_short_scratch ... ok
+test pipewire_buffer::tests::honors_offset_modulo_and_wrapped_chunks ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_linux-6224b81633e7f5a4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_macos-1556a2389df22df1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_media-3c7c33da1b14444f)
+
+running 4 tests
+test queue_trace::tests::real_appsink_capacity_loss_matches_private_buffer_sequence ... ok
+test queue_trace::tests::real_appsrc_capacity_loss_quarantines_following_audio ... ok
+test thread_priority::linux_tests::nice_guard_reports_real_permission_and_restores_the_thread ... ok
+test transport::duration_tests::authenticated_twenty_ms_opus_cannot_enter_a_ten_ms_stream ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+
+     Running tests/protocol.rs (target/debug/deps/protocol-108313c271eb5972)
+
+running 6 tests
+test authenticated_rtp_with_wrong_time_step_is_rejected ... ok
+test initial_reordering_across_timestamp_zero_preserves_forward_anchor ... ok
+test opus_packet_duration_matches_negotiated_clock_for_all_toc_modes ... ok
+test packet_quotas_and_feedback_congestion_pause_recovery ... ok
+test reordered_wrong_timestamp_does_not_poison_clock_or_consume_sequence ... ok
+test rtp_sequence_timestamp_wrap_duplicate_and_reorder ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/security.rs (target/debug/deps/security-d66d227632763300)
+
+running 3 tests
+test native_jitter_reorders_and_discards_late_packets_with_real_plc ... ok
+test negotiated_expiry_stops_both_decode_and_ingress ... ok
+test replay_corruption_revocation_and_fresh_key_context_isolation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_output_binding-3af9df4e90fb66ea)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/persistence.rs (target/debug/deps/persistence-b35e9387e6349ac8)
+
+running 5 tests
+test concurrent_writers_use_revision_conflicts_and_never_publish_partial_json ... ok
+test corrupt_or_oversized_records_fail_closed_and_are_not_replaced ... ok
+test disable_enable_and_recreation_cannot_reauthorize_an_old_sender ... ok
+test losing_private_permissions_or_replacing_the_record_with_a_symlink_fails_closed ... ok
+test reopen_rename_and_repeated_add_preserve_identity ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_windows-32f9a5c2966f1f58)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_airplay_adapter
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_airplay_ipc
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_control
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_desktop_service
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_hal
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_identity
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_io
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_linux
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_macos
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_output_binding
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_windows
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

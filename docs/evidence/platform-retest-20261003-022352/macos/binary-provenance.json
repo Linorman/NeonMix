@@ -1,0 +1,11 @@
+{
+  "source_canonical_sha256": "3ef7d6f5ea47a98b671768030311a494bd95c317c1b032bbc38bd00c038b9c84",
+  "binary_sha256": {
+    "neonmix-audio": "4aec539c54273504842c9fb6570939126b68061d4b05fc46a2a909ca5169fa29",
+    "neonmix-desktop": "f28a5a9c6edc3a531dbc84eeba2bc179bba9308eebfb2a0b273855a882e728ad",
+    "neonmix-hub": "765b8761577c79fc1ac4ef3624d6f0b31d8a17bc256aef1b57d8067658dda36d",
+    "neonmix-airplay-worker": "5cfa7d8a2fb91c9ccc4ee0ff6f941682a28f6bbf50ee745b5c3ddf766b9de09e",
+    "neonmix-background": "56c67d848e4d204da2f27aa73212f475e6b3999d1c0f1575cc991ca339c48c8d"
+  },
+  "rpath_layout": "bin/../../.local/gstreamer points to isolated t04m SDK"
+}

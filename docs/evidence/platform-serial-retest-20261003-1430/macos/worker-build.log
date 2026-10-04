@@ -1,0 +1,41 @@
+patching file 'lib/crypto.c'
+patching file 'lib/crypto.h'
+patching file 'lib/dnssd.h'
+patching file 'lib/dnssdint.h'
+patching file 'lib/fairplay_playfair.c'
+patching file 'lib/http_handlers.h'
+patching file 'lib/http_request.c'
+patching file 'lib/http_response.c'
+patching file 'lib/http_response.h'
+patching file 'lib/httpd.c'
+patching file 'lib/httpd.h'
+patching file 'lib/pairing.c'
+patching file 'lib/raop.c'
+patching file 'lib/raop.h'
+patching file 'lib/raop_handlers.h'
+patching file 'lib/raop_ntp.c'
+patching file 'lib/raop_ntp.h'
+patching file 'lib/raop_rtp.c'
+patching file 'lib/stream.h'
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/build
+[ 36%] Built target plist
+[ 39%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/fairplay_playfair.c.o
+[ 41%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/http_request.c.o
+[ 43%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/crypto.c.o
+[ 45%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/httpd.c.o
+[ 47%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/http_response.c.o
+[ 50%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/raop_buffer.c.o
+[ 52%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/raop.c.o
+[ 54%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/pairing.c.o
+[ 56%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/raop_rtp.c.o
+[ 60%] Building C object CMakeFiles/protocol.dir/disabled_media.c.o
+[ 60%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/raop_ntp.c.o
+[ 63%] Building C object CMakeFiles/protocol.dir/speaker_profile.c.o
+[ 65%] Linking C static library libprotocol.a
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-worker.dir/main.cpp.o
+[100%] Linking CXX executable neonmix-airplay-worker
+[100%] Built target neonmix-airplay-worker
+/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/build/neonmix-airplay-worker

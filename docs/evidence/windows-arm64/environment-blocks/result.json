@@ -1,0 +1,26 @@
+{
+  "media": {
+    "exit_code": 101,
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--target",
+      "aarch64-pc-windows-gnullvm",
+      "-p",
+      "neonmix-media"
+    ]
+  },
+  "driver": {
+    "exit_code": 1,
+    "command": [
+      "powershell",
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "tools/build_windows_driver.ps1"
+    ]
+  }
+}

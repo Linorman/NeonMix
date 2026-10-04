@@ -1,0 +1,52 @@
+{
+  "platform": "macOS",
+  "passed": true,
+  "scope": "formal non-preview isolated desktop, actual AX interactions and real CoreAudio/Hub authority",
+  "scenarios": {
+    "formal_window_owned_background_and_ax_controls": true,
+    "five_page_navigation_chinese_clipboard_paste_and_draft_persistence": true,
+    "native_physical_output_popup_and_create_room_without_audio_start": true,
+    "native_popup_create_start_blackhole_and_authenticated_authority": true,
+    "native_mixer_mute_commits_and_unmutes_server": true,
+    "formal_normal_and_minimum_window_command_shortcuts": true,
+    "native_redacted_diagnostic_export": true,
+    "command_w_hides_tray_restores_hub_pid_retained": true,
+    "gui_crash_audio_continues_and_reopen_loads_saved_room": true,
+    "command_q_confirmation_escape_keeps_audio": true,
+    "confirmed_quit_ends_gui_background_and_hub": true
+  },
+  "limits": [
+    "not VoiceOver listening or genuine IME composition",
+    "explicit BlackHole digital output; no physical listening"
+  ],
+  "binary_sha256": {
+    "neonmix-desktop": "3cd5ea6b65b142a67df832fe3bb75b04d7a1a1e0532c1e7f35276b1eb7a20465",
+    "neonmix-background": "f38dfa098a32053c79b23d7170620cfcd32efe41bac139005f0259ec2401496d",
+    "neonmix-hub-real": "7176a5e18651a0b72816bf5738e1fee75c73c6a82e44fb08e3a3adb238795470"
+  },
+  "listen_port": 61409,
+  "fixture_adaptation": "GUI physical selector intentionally omits BlackHole; after native create, owned background hub_settings selects BlackHole before starting any audio; reopened UI loads that authoritative fixture.",
+  "shortcut_checks": [
+    {
+      "requested_content_width": 1100,
+      "requested_content_height": 760,
+      "actual_window_size": "1100,792",
+      "native_titlebar_height": 32,
+      "command_k_opens_palette": true,
+      "escape_closes_palette": true,
+      "command_2_navigates": true,
+      "palette_footer_within_window": true
+    },
+    {
+      "requested_content_width": 600,
+      "requested_content_height": 440,
+      "actual_window_size": "600,472",
+      "native_titlebar_height": 32,
+      "command_k_opens_palette": true,
+      "escape_closes_palette": true,
+      "command_2_navigates": true,
+      "palette_footer_within_window": true
+    }
+  ],
+  "fixture_removed": true
+}

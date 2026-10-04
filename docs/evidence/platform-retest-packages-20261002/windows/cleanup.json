@@ -1,0 +1,29 @@
+{
+  "verification_copy_removed": true,
+  "final_package_contains_runtime_data": false,
+  "final_package_contains_logs": false,
+  "kept_directory": "E:\\Desktop\\NeonMix-test\\packages\\NeonMix-windows-x64-20261002-tested-v1",
+  "kept_zip": "E:\\Desktop\\NeonMix-test\\packages\\NeonMix-windows-x64-20261002-tested-v1.zip",
+  "moved_harness_and_logs_into_evidence": [
+    "package.py",
+    "inspect-package.py",
+    "finalize-package.py",
+    "verify-package.py",
+    "package-source-manifest.json",
+    "package-build.log",
+    "package-deps.log",
+    "package-finalize.log",
+    "package-verify.log"
+  ],
+  "system_settings_changed": false,
+  "outside_test_root_files_deleted": false,
+  "remaining_package_validation_processes": [],
+  "other_project_neonmix_processes_observed": [
+    {
+      "ProcessId": 33236,
+      "Name": "neonmix-background.exe",
+      "ExecutablePath": "E:\\Desktop\\NeonMix-test\\target\\release\\neonmix-background.exe"
+    }
+  ],
+  "other_project_process_action": "Preserved: target/release background was not created by this package validation"
+}

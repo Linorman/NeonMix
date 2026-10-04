@@ -1,0 +1,75 @@
+--- before/apps/hub/src/airplay.rs
++++ after/apps/hub/src/airplay.rs
+@@ -120,6 +120,13 @@
+             let _ = command.try_send(Action::Stop);
+         }
+     }
++    pub(super) fn output_epoch_changed(&mut self) {
++        // An idle receiver has no submitted audio to revoke. A system route
++        // switch can rebuild CoreAudio before the source completes its PIN.
++        if self.status.active {
++            self.disconnect();
++        }
++    }
+     pub(super) fn disconnect(&mut self) {
+         if self.commands.is_none() {
+             return;
+@@ -227,11 +234,11 @@
+             engine.airplay.status.active = false;
+             engine.airplay.status.playback_allowed = false;
+             engine.resources.airplay_mix = None;
+-            if let Some(tx) = &engine.airplay.commands {
+-                if tx.try_send(Action::Revoke).is_err() {
+-                    engine.airplay.shutdown.store(true, Release);
+-                    return Err(ControlError::Busy.into());
+-                }
++            if let Some(tx) = &engine.airplay.commands
++                && tx.try_send(Action::Revoke).is_err()
++            {
++                engine.airplay.shutdown.store(true, Release);
++                return Err(ControlError::Busy.into());
+             }
+         }
+         AirplayAction::Mix {
+@@ -398,7 +405,7 @@
+     let mut input = child.0.stdin.take().ok_or("worker_stdin")?;
+     let output = child.0.stdout.take().ok_or("worker_stdout")?;
+     let startup = serde_json::json!({"media_address":listener.local_addr()?.to_string(),"ipc_token":token,
+-        "device_id":neonmix_identity::speaker::receiver_id(hub),"keyfile":keyfile,"name":name,"pin":pin,"rtsp_port":0,
++        "device_id":neonmix_identity::speaker::receiver_id(hub),"receiver_uuid":hub,"keyfile":keyfile,"name":name,"pin":pin,"rtsp_port":0,
+         "session_id":context.session_id,"stream_id":context.stream_id,"stream_epoch":context.stream_epoch,
+         "format_epoch":context.format_epoch,"mapping_id":context.mapping_id,
+         "protocol_trace":std::env::var("NEONMIX_AIRPLAY_TRACE").is_ok_and(|v|v=="1"),
+@@ -836,6 +843,17 @@
+         "stream_epoch":context.stream_epoch,"format_epoch":context.format_epoch,"mapping_id":context.mapping_id})
+ }
+ 
++fn speaker_name(room: &str) -> String {
++    let mut name = String::from("NeonMix — ");
++    for c in room.chars() {
++        if name.len() + c.len_utf8() > 50 {
++            break;
++        }
++        name.push(c);
++    }
++    name
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+@@ -901,14 +919,3 @@
+         assert_eq!(encoded["mapping_id"], 47);
+     }
+ }
+-
+-fn speaker_name(room: &str) -> String {
+-    let mut name = String::from("NeonMix — ");
+-    for c in room.chars() {
+-        if name.len() + c.len_utf8() > 80 {
+-            break;
+-        }
+-        name.push(c);
+-    }
+-    name
+-}

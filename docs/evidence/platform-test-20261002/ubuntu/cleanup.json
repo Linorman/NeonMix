@@ -1,0 +1,13 @@
+{
+  "active_owned_neonmix_processes": [],
+  "removed_owned_fixture_paths": [
+    "/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/ui",
+    "/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/gui",
+    "/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/tmp/bg",
+    "/home/parallels/NeonMix/.local/ui26",
+    "/home/parallels/NeonMix/.local/ap26",
+    "/home/parallels/NeonMix/.local/p26tmp"
+  ],
+  "system_configuration_changed": false,
+  "default_audio_route_changed": false
+}

@@ -1,0 +1,60 @@
+[
+  {
+    "name": "member-fmt",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "python3",
+      "-c",
+      "import json,subprocess;d=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version','1','--locked']));cmd=['cargo','fmt'];[cmd.extend(['-p',p['name']]) for p in d['packages'] if p['id'] in d['workspace_members']];raise SystemExit(subprocess.run(cmd+['--','--check']).returncode)"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791012693.318531,
+    "end_epoch": 1791012693.748649
+  },
+  {
+    "name": "workspace-tests",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791012693.748967,
+    "end_epoch": 1791012792.016295
+  },
+  {
+    "name": "strict-clippy",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791012792.0166621,
+    "end_epoch": 1791012806.4020941
+  },
+  {
+    "name": "release",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791012806.402393,
+    "end_epoch": 1791012882.4248981
+  }
+]

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "E:\Desktop\NeonMix-test\interactive-launch.py", line 27, in <module>
+    ok(a.CreateProcessAsUserW(primary,None,cmd,None,None,False,0x400,env,str(Path.cwd()),c.byref(si),c.byref(pi)))
+    ~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\NeonMix-test\interactive-launch.py", line 16, in ok
+    if not v:raise c.WinError(c.get_last_error())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 1314] 客户端没有所需的特权。

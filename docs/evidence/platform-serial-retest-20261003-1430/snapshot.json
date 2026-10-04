@@ -1,0 +1,9 @@
+{
+  "tag": "platform-serial-retest-20261003-1430",
+  "created_utc": "2026-10-03T06:29:56.269711+00:00",
+  "file_count": 519,
+  "canonical_manifest_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+  "archive_sha256": "f0cdbce09265121b1257d99c996585618fa75271b1d1adf5d15b0d5be3152c18",
+  "changed_from_previous": [],
+  "policy": "Ubuntu complete including cleanup, then macOS; no simultaneous compilation or runtime tests; Mac only as Ubuntu LAN sender within assigned window"
+}

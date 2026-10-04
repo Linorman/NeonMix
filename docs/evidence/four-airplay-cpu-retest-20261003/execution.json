@@ -1,0 +1,40 @@
+{
+  "command": [
+    "/Volumes/projects-mac/NeonMix/tools/dev",
+    "python3",
+    "tools/airplay_multi_source_probe.py",
+    "--output",
+    "coreaudio:BlackHole2ch_UID",
+    "--sources",
+    "4",
+    "--status-readers",
+    "4",
+    "--steady-seconds",
+    "30",
+    "--fault-cycles",
+    "3",
+    "--report",
+    "/Volumes/projects-mac/NeonMix/artifacts/four-airplay-cpu-retest-20261003/result.json"
+  ],
+  "start_epoch": 1791034638.037409,
+  "cpu_policy": "Start after 10 consecutive 1-second whole-machine samples <=80%; observe during test. User clarified test-induced utilization above 80% is normal, so utilization alone does not interrupt this run.",
+  "binaries": {
+    "neonmix-hub": "7176a5e18651a0b72816bf5738e1fee75c73c6a82e44fb08e3a3adb238795470",
+    "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+  },
+  "probe_sha256": "36e1278691e2c09d5804b4867ed85bf9680c228ca064efedafff9c28d86f2927",
+  "original_user_pids_before": {
+    "81271": true,
+    "98624": true,
+    "98625": true,
+    "98648": true
+  },
+  "exit_code": 0,
+  "end_epoch": 1791034710.759514,
+  "original_user_pids_after": {
+    "81271": true,
+    "98624": true,
+    "98625": true,
+    "98648": true
+  }
+}

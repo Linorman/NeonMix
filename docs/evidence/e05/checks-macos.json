@@ -1,0 +1,32 @@
+{
+  "recorded_at": "2026-09-30T19:11:27.293022+08:00",
+  "platform": "darwin",
+  "macos": "27.0",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "workspace_tests_passed": 93,
+  "existing_ignored_tests_not_run": 4,
+  "format_passed": true,
+  "clippy_identity_hub_all_targets_passed": true,
+  "release_hub_passed": true,
+  "functional_scenarios": 14,
+  "binary_sha256": "e182030816e6304bd147ef5df7bb6bd7c01992349e152b088d6da748ec0551bd",
+  "source_sha256": {
+    "Cargo.lock": "f97da3a8529666bdb9ba6900445cb2af5d76c938f387b7defb61a777794c5a5e",
+    "apps/hub/Cargo.toml": "761cb2e2f50fd8ae9d55987bda3b13767d93639c07a6ad3a34a91d97b4ce2c5a",
+    "apps/hub/src/binding.rs": "58168e4d0ebfcbe151db03beb6c19e24d737c8ac256f8103312c0f8ce286b1ba",
+    "apps/hub/src/control_client.rs": "3a01a25b1b10a1a35bd59975898b1b4b031014625a2504dd83da1fd9d39c7e30",
+    "apps/hub/src/identity.rs": "da655c4874274d85911df1140dcdd2a44de580400c32befe66d64ec780d52bdb",
+    "apps/hub/src/main.rs": "069f254a4c55f1cbb50f0c776f5190d890e0f77271c96eba34e7f3b70b5deb97",
+    "apps/hub/src/pairing_api.rs": "5189846771ff242af9f173dba5dd656e1e80c97b56cca2e5b2985486a1e0b382",
+    "apps/hub/src/sender.rs": "240c3531ae1c4e2f2f4c96abe9bcb6b44707f8cdad1506516e3044cbb955830e",
+    "apps/hub/src/server.rs": "ebd6156d941f80342b4fbf182dfe99c12491296514602d4dde560e16ea6143bf",
+    "crates/identity/Cargo.toml": "858f23bd95d98bb116e4892133dbe30a465b5c258e51a706ce7d4aded39dec20",
+    "crates/identity/src/discovery.rs": "211dac7e9dd403e7024c71280da829938796f9b0c89cebb96ac59fe41e550c70",
+    "crates/identity/src/lib.rs": "206a7cfa728ea406b1ccc629522786c5a4027646417b43d84a69a51ae3804d66",
+    "crates/identity/src/pairing.rs": "60367537c4aed4b827f8684dc1a64933210c6619dada17eab5ce9036b11269ad",
+    "crates/identity/src/trust.rs": "664ba78f983483bdba4e535e36dcb082d3de1ee642e34dcb27dcf7bb1503fdce",
+    "crates/identity/src/vault.rs": "80ce7b55b1eb941a8686bbe89dea61ad1f225e4b46ee5b7050e047f127d02592",
+    "tools/e05_probe.py": "a98eb976c703d2aeb3718808cf871c79df06dd11ab83c7ff7d0d52eece0b5f85"
+  },
+  "runtime_evidence_matches_binary": true
+}

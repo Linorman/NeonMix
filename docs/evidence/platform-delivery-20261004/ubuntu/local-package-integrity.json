@@ -1,0 +1,11 @@
+{
+  "at": 1791047220.2070441,
+  "archive": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-Ubuntu-ARM64-20261004.tar.gz",
+  "bytes": 126364060,
+  "sha256": "cba300f0886f033068ca90c9f8e9264352aa1566bf71f0aa81afb31b9d3ddd66",
+  "manifest_files_checked": 1113,
+  "members": 1114,
+  "mismatches": [],
+  "no_runtime_state": true,
+  "source_snapshot_matches": true
+}

@@ -1,0 +1,40 @@
+Exception in thread Thread-1 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python313\Lib\threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1615, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd2 in position 0: invalid continuation byte
+Exception in thread Thread-3 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python313\Lib\threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1615, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd2 in position 0: invalid continuation byte
+Exception in thread Thread-5 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python313\Lib\threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1615, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd2 in position 0: invalid continuation byte
+{"platform": "Windows", "scenarios": {"private_namedpipe_and_state": true, "file_profiles_reference_dedicated_secret_entries": true, "explicit_physical_output_low_level_test_tone": true, "authenticated_viewer_role_and_real_snapshot": true, "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true, "repeat_invitation_after_cancel_uses_ephemeral_file": true, "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true, "diagnostics_redacted_with_real_meters": true, "strict_numeric_whitelist_private_diagnostic_export": true, "media_process_crash_reported_without_unbounded_restart": true, "settings_revision_and_explicit_graceful_stop": true, "explicit_background_shutdown_ends_audio_process": true}, "limits": {"ipc_bytes": 262144, "command_timeout_seconds": 25, "explicit_restart_after_failure": true}, "build_profile": "release", "listen_port": 7443, "binary_sha256": {"neonmix-background.exe": "d280772c33f601a754f9b783008e588f9adb7e2ad67b5cd074bb76b2b3bdf297", "neonmix-audio.exe": "76b2ba9b0cb923781cb9b2d04f332a6b71d9c8086bb2f6c8643bcba47b4076f3", "neonmix-hub.exe": "16a2e673412e0463d046cac0255bdd6722922fda2e492747016d717e41814933"}, "passed": true, "fixture_removed": true}

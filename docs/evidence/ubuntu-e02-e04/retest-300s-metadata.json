@@ -1,0 +1,15 @@
+{
+  "snapshot": "/Volumes/projects-mac/NeonMix/.local/e02-e04-retest-20260930-205626",
+  "evidence_directory": "/Volumes/projects-mac/NeonMix/artifacts/ubuntu-retest-300s/20260930-205626",
+  "started_at": "20260930-205626",
+  "macos_binaries": {
+    "neonmix-hub": "a631296869a4f3ec5afb5aecc0370fb40056a1ccc621b2beb4798053afbb19a7",
+    "neonmix-audio": "6fa6d07f8c0480f9311d7490c56ee40eb8001ee5a278e76ec2c37281a714908b"
+  },
+  "linux_workspace": "/home/parallels/NeonMix/.local/e02-e04-20260930/workspace",
+  "requested_seconds": 300,
+  "hub_platform": "linux",
+  "archived_snapshot": "/Volumes/projects-mac/NeonMix/artifacts/ubuntu-retest-300s/20260930-205626/snapshot",
+  "passed": false,
+  "cleanup_verified": true
+}

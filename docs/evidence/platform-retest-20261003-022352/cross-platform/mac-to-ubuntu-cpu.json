@@ -1,0 +1,28 @@
+{
+  "command": [
+    "tools/dev",
+    "python3",
+    "artifacts/platform-retest-20261003-022352/lan_probe.py",
+    "--target",
+    "ubuntu",
+    "--endpoint",
+    "https://192.168.100.112:7443",
+    "--binary",
+    "artifacts/platform-retest-20261003-022352/cross-client/target/release/neonmix-hub",
+    "--seconds",
+    "60",
+    "--label",
+    "mac-to-ubuntu"
+  ],
+  "start_unix_seconds": 1790966305.443279,
+  "end_unix_seconds": 1790966367.989074,
+  "wait_seconds": 0.0010030269622802734,
+  "samples": 62,
+  "aggregate_cpu_avg_percent": 35.73125806451613,
+  "aggregate_cpu_p95_percent": 53.993,
+  "aggregate_cpu_max_percent": 71.512,
+  "minimum_idle_percent": 28.488,
+  "aborted_for_cpu": false,
+  "cpu_condition_satisfied": true,
+  "exit_code": 0
+}

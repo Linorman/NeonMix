@@ -1,0 +1,48 @@
+{
+  "platform": "macOS",
+  "os_build": "26A5416b",
+  "source": "actual macOS system Sound output selector, same-host receiver",
+  "discovered": true,
+  "connected": false,
+  "audio_played": false,
+  "video_av_sync": "not measured",
+  "passed": false,
+  "pin_ui_results": [
+    "AX -1719"
+  ],
+  "protocol_events": [
+    {
+      "method": "GET",
+      "route": "info",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "pair_pin_start",
+      "status": 200
+    }
+  ],
+  "playback_allowed": true,
+  "receiver_error": null,
+  "ingress": {
+    "accepted_packets": 0,
+    "clock_resets": 0,
+    "future_packets": 0,
+    "identity_rejections": 0,
+    "last_mapping_id": 0,
+    "last_presentation_time_ns": 0,
+    "last_source_rate": 0,
+    "last_source_sample_position": 0,
+    "last_uncertainty_ns": 0,
+    "late_packets": 0,
+    "malformed_packets": 0,
+    "output_latency_ns": 5312500,
+    "overflow_packets": 0,
+    "pending_bytes": 0,
+    "pending_frames": 0,
+    "released_packets": 0,
+    "timeline_rejections": 0
+  },
+  "fixture_keychain_cleanup": true,
+  "fixture_files_removed": true
+}

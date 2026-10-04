@@ -1,0 +1,22 @@
+[
+  {
+    "event": "hub_started",
+    "hub_id": "9a9917bb-6d4a-4ce3-88cb-007160152a1c",
+    "lanes": 16,
+    "listen": "127.0.0.1:10161",
+    "output": {
+      "actual_period_frames": 480,
+      "backend": "wasapi",
+      "device_id": "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 48000
+      },
+      "requested_period_frames": null,
+      "resampler_delay_frames": 0,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "room_name": "NeonMix Lab"
+  }
+]

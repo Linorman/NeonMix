@@ -1,0 +1,58 @@
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.42s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-b733d79c502e0f0f)
+
+running 13 tests
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test virtual_output::tests::binding_requires_exact_provider_uid_and_both_sides ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_media-4d2be4d5630fc680)
+
+running 4 tests
+test thread_priority::tests::media_worker_uses_timesharing_and_restores_its_base_priority ... ok
+test queue_trace::tests::real_appsink_capacity_loss_matches_private_buffer_sequence ... ok
+test queue_trace::tests::real_appsrc_capacity_loss_quarantines_following_audio ... ok
+test transport::duration_tests::authenticated_twenty_ms_opus_cannot_enter_a_ten_ms_stream ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+
+     Running tests/protocol.rs (target/debug/deps/protocol-29e16ad1c57d06bf)
+
+running 6 tests
+test authenticated_rtp_with_wrong_time_step_is_rejected ... ok
+test opus_packet_duration_matches_negotiated_clock_for_all_toc_modes ... ok
+test initial_reordering_across_timestamp_zero_preserves_forward_anchor ... ok
+test packet_quotas_and_feedback_congestion_pause_recovery ... ok
+test rtp_sequence_timestamp_wrap_duplicate_and_reorder ... ok
+test reordered_wrong_timestamp_does_not_poison_clock_or_consume_sequence ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/security.rs (target/debug/deps/security-6a1de83b7cc38584)
+
+running 3 tests
+test replay_corruption_revocation_and_fresh_key_context_isolation ... ok
+test native_jitter_reorders_and_discards_late_packets_with_real_plc ... ok
+test negotiated_expiry_stops_both_decode_and_ingress ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.08s
+
+   Doc-tests neonmix_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

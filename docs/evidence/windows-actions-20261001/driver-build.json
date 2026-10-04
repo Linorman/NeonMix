@@ -1,0 +1,35 @@
+{
+  "configuration": "Release",
+  "files": [
+    {
+      "sha256": "237682668ef33ddb311435200895b67217eba99bcbeb79077451b1c51226d67f",
+      "name": "build.binlog"
+    },
+    {
+      "sha256": "507cee67cffb838349ee0e6209debd40686f81d5d1073088ab80c5fd8a17c5eb",
+      "name": "LICENSE-MS-PL"
+    },
+    {
+      "sha256": "a8880bcc03013a4ac2bc1a6fc7b90b5b3934d8d7fce4a33dbff0e63f9655fce5",
+      "name": "neonmixaudio.cat"
+    },
+    {
+      "sha256": "49d44bbb63373820a269f7b96b45f875cdbe11ac7c28ff8fcc35c4f4206a57a9",
+      "name": "NeonMixAudio.inf"
+    },
+    {
+      "sha256": "73303fa0704ac96fae9a205d2e619fc2f2af9cc5f2d2345255e1f1a600260b1a",
+      "name": "NeonMixAudio.pdb"
+    },
+    {
+      "sha256": "c4095a3e9eb281456d8bd85ef9550c12a697312536c7076fe3002a66f197bf04",
+      "name": "NeonMixAudio.sys"
+    },
+    {
+      "sha256": "c425a6faac3a350c68f54e3af6e1596c3eb4a18abd8229406823f7b5178cc45b",
+      "name": "toolchain.json"
+    }
+  ],
+  "architecture": "x64",
+  "signed": false
+}

@@ -1,0 +1,38 @@
+{
+  "samples": 108,
+  "transitions": [
+    {
+      "utc": "2026-10-03T18:04:37.128363+00:00",
+      "elapsed_seconds": 0.00025630000163801014,
+      "statuses": [
+        "playing"
+      ],
+      "receivers": 1,
+      "errors": [],
+      "query_exits": [
+        0,
+        0
+      ],
+      "media_worker_count": 1
+    },
+    {
+      "utc": "2026-10-03T18:05:13.633114+00:00",
+      "elapsed_seconds": 36.505012200002966,
+      "statuses": [
+        "user_stopped"
+      ],
+      "receivers": 0,
+      "errors": [],
+      "query_exits": [
+        0,
+        0
+      ],
+      "media_worker_count": 0
+    }
+  ],
+  "terminal_snapshot_statuses": [
+    "user_stopped"
+  ],
+  "hub_exit_before_explicit_stop": null,
+  "source": "original snapshot and diagnostics before explicit room cleanup"
+}

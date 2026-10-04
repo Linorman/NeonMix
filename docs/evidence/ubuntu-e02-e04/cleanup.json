@@ -1,0 +1,12 @@
+{
+  "owned_sink_pid": 33696,
+  "private_session_pid": 33619,
+  "private_daemon_pids": [
+    33626,
+    33627,
+    33635
+  ],
+  "owned_processes_stopped": true,
+  "temporary_credentials_removed": true,
+  "system_audio_session_modified": false
+}

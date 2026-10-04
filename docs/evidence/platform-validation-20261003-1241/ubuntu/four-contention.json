@@ -1,0 +1,339 @@
+{
+  "scenario": "mix",
+  "platform": "Linux",
+  "os_version": "6.14.0-27-generic",
+  "architecture": "aarch64",
+  "build_profile": "release",
+  "sources": 4,
+  "native_sources": 0,
+  "output_device": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real PipeWire output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "8d9cd78b0b907d5ef37f634ce697e2128e3e1f823ce4b2050ffc24cda59169eb",
+    "neonmix-airplay-worker": "b0aa5ce7d1194e5e3476a3eae852da5ef144972d76df36fda39ff54d7a196a84"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 2,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": 30.0,
+  "airplay_frequencies_hz": [
+    317,
+    439,
+    563,
+    701
+  ],
+  "native_frequencies_hz": [],
+  "passed": false,
+  "scenarios": {
+    "explicit_idle_pairing_window_renews_without_worker_restart": true,
+    "same_source_simultaneous_cross_receiver_has_one_owner": true,
+    "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+    "dynamic_unique_lanes_and_shared_output": true,
+    "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+    "command_replay_idempotent_and_stale_session_rejected": true,
+    "full_room_native_start_rejected_without_reservation_leak": true
+  },
+  "isolation_checks": [],
+  "native_streams": 0,
+  "visibility_scope": "Hub discovery owner state only; Apple picker/cache visibility untested",
+  "steady": {
+    "output_rms": 0.027986494824290276,
+    "active": 4,
+    "lane_rms": [
+      0.05663537234067917,
+      0.05646844208240509,
+      0.05656338110566139,
+      0.056542813777923584
+    ],
+    "native_lane_rms": []
+  },
+  "steady_continuity": {
+    "output_frames": 1438720,
+    "global_timed_late_frames_before": 0,
+    "global_timed_late_frames_after": 3441,
+    "global_timed_late_frames_delta": 3441,
+    "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+    "lanes": [
+      {
+        "kind": "airplay",
+        "source_index": 1,
+        "lane": 0,
+        "underrun_frames_before": 1611,
+        "underrun_frames_after": 1611,
+        "underrun_frames_delta": 0,
+        "late_packets_before": 0,
+        "late_packets_after": 0,
+        "late_packets_delta": 0,
+        "counter_reset": false
+      },
+      {
+        "kind": "airplay",
+        "source_index": 2,
+        "lane": 1,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0,
+        "late_packets_before": 0,
+        "late_packets_after": 0,
+        "late_packets_delta": 0,
+        "counter_reset": false
+      },
+      {
+        "kind": "airplay",
+        "source_index": 3,
+        "lane": 2,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0,
+        "late_packets_before": 0,
+        "late_packets_after": 0,
+        "late_packets_delta": 0,
+        "counter_reset": false
+      },
+      {
+        "kind": "airplay",
+        "source_index": 4,
+        "lane": 3,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0,
+        "late_packets_before": 0,
+        "late_packets_after": 0,
+        "late_packets_delta": 0,
+        "counter_reset": false
+      }
+    ]
+  },
+  "continuity_claim": "Steady digital counters must remain continuous; this is not analog or Apple-device audio verification",
+  "failure_phase": "steady digital timing quality",
+  "failure_type": "AssertionError",
+  "source_protocol": [
+    {
+      "source_index": 1,
+      "stage": "sending",
+      "last_response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      },
+      "thread_errors": []
+    },
+    {
+      "source_index": 2,
+      "stage": "sending",
+      "last_response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      },
+      "thread_errors": []
+    },
+    {
+      "source_index": 3,
+      "stage": "sending",
+      "last_response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      },
+      "thread_errors": []
+    },
+    {
+      "source_index": 4,
+      "stage": "sending",
+      "last_response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      },
+      "thread_errors": []
+    }
+  ],
+  "failure": "steady Mixer skipped timed PCM",
+  "failure_airplay_http_status": 200,
+  "failure_receivers": [
+    {
+      "enabled": true,
+      "ready": true,
+      "active": true,
+      "error": null,
+      "failure_stage": null,
+      "received_blocks": 3989,
+      "released_blocks": 3981,
+      "rejected_blocks": 0,
+      "queued_blocks": 7,
+      "ingress": {
+        "accepted_packets": 3989,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 33418918917,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4296367967,
+        "last_uncertainty_ns": 8865105,
+        "late_packets": 0,
+        "latency_advance_ns": 1718139970,
+        "malformed_packets": 0,
+        "output_latency_ns": 106666666,
+        "overflow_packets": 0,
+        "pending_bytes": 31488,
+        "pending_frames": 3065,
+        "playout_lead_ns": 228637193,
+        "protocol_lead_ns": 1946777163,
+        "released_packets": 3981,
+        "timeline_rejections": 0
+      },
+      "admission_denials": {}
+    },
+    {
+      "enabled": true,
+      "ready": true,
+      "active": true,
+      "error": null,
+      "failure_stage": null,
+      "received_blocks": 3931,
+      "released_blocks": 3923,
+      "rejected_blocks": 0,
+      "queued_blocks": 7,
+      "ingress": {
+        "accepted_packets": 3931,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 33482086209,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4296350367,
+        "last_uncertainty_ns": 8948302,
+        "late_packets": 0,
+        "latency_advance_ns": 1720513035,
+        "malformed_packets": 0,
+        "output_latency_ns": 106666666,
+        "overflow_packets": 0,
+        "pending_bytes": 31488,
+        "pending_frames": 3065,
+        "playout_lead_ns": 227361860,
+        "protocol_lead_ns": 1947874895,
+        "released_packets": 3923,
+        "timeline_rejections": 0
+      },
+      "admission_denials": {
+        "source_already_active": 1
+      }
+    },
+    {
+      "enabled": true,
+      "ready": true,
+      "active": true,
+      "error": null,
+      "failure_stage": null,
+      "received_blocks": 3875,
+      "released_blocks": 3868,
+      "rejected_blocks": 0,
+      "queued_blocks": 6,
+      "ingress": {
+        "accepted_packets": 3875,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 33424346251,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4296328191,
+        "last_uncertainty_ns": 8716372,
+        "late_packets": 0,
+        "latency_advance_ns": 1719662684,
+        "malformed_packets": 0,
+        "output_latency_ns": 106666666,
+        "overflow_packets": 0,
+        "pending_bytes": 27552,
+        "pending_frames": 2681,
+        "playout_lead_ns": 226681777,
+        "protocol_lead_ns": 1946344461,
+        "released_packets": 3868,
+        "timeline_rejections": 0
+      },
+      "admission_denials": {}
+    },
+    {
+      "enabled": true,
+      "ready": true,
+      "active": true,
+      "error": null,
+      "failure_stage": null,
+      "received_blocks": 3808,
+      "released_blocks": 3800,
+      "rejected_blocks": 0,
+      "queued_blocks": 7,
+      "ingress": {
+        "accepted_packets": 3808,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 33479237667,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4296307071,
+        "last_uncertainty_ns": 8890473,
+        "late_packets": 0,
+        "latency_advance_ns": 1721112126,
+        "malformed_packets": 0,
+        "output_latency_ns": 106666666,
+        "overflow_packets": 0,
+        "pending_bytes": 31488,
+        "pending_frames": 3065,
+        "playout_lead_ns": 225541443,
+        "protocol_lead_ns": 1946653569,
+        "released_packets": 3800,
+        "timeline_rejections": 0
+      },
+      "admission_denials": {}
+    }
+  ],
+  "failure_capacity": {
+    "active": 4,
+    "available": 0,
+    "limit": 4,
+    "reserved": 0
+  },
+  "failure_output": {
+    "output_frames": 1595392,
+    "timed_late_frames": 3441,
+    "lane_rms": [
+      0.05631120502948761,
+      0.05652286484837532,
+      0.05644380673766136,
+      0.056542206555604935,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "status_reads": {
+    "readers": 4,
+    "successful": 16193,
+    "errors": 0
+  },
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

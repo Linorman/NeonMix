@@ -1,0 +1,396 @@
+{
+  "at_unix_ns": 1790774075861517331,
+  "changes": [
+    {
+      "pid": 58129,
+      "tid": 58131,
+      "name": "pw-data-loop",
+      "before": {
+        "policy": 1073741824,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 2,
+        "priority": 20,
+        "nice": 0
+      }
+    },
+    {
+      "pid": 58163,
+      "tid": 58170,
+      "name": "pw-data-loop",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 2,
+        "priority": 20,
+        "nice": 0
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58205,
+      "name": "pw_out",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 2,
+        "priority": 10,
+        "nice": 0
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58206,
+      "name": "pw-data-loop",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 2,
+        "priority": 20,
+        "nice": 0
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58213,
+      "name": "dtlsenc0:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58214,
+      "name": "rtcp_in:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58215,
+      "name": "timer",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58216,
+      "name": "jitter:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58217,
+      "name": "wire_in:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58218,
+      "name": "media-0",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58219,
+      "name": "GstSystemClock",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58233,
+      "name": "dtlsenc1:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58234,
+      "name": "rtcp_in:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58235,
+      "name": "timer",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58236,
+      "name": "jitter:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58237,
+      "name": "wire_in:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58198,
+      "tid": 58238,
+      "name": "media-1",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58228,
+      "tid": 58228,
+      "name": "neonmix-hub",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58228,
+      "tid": 58240,
+      "name": "dtlsenc0:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58228,
+      "tid": 58241,
+      "name": "GstSystemClock",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58228,
+      "tid": 58242,
+      "name": "wire_in:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58228,
+      "tid": 58243,
+      "name": "rtcp_in:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58228,
+      "tid": 58244,
+      "name": "audio:src",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58228,
+      "tid": 58245,
+      "name": "media-diagnosti",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    },
+    {
+      "pid": 58254,
+      "tid": 58257,
+      "name": "pw_in",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 2,
+        "priority": 10,
+        "nice": 0
+      }
+    },
+    {
+      "pid": 58254,
+      "tid": 58258,
+      "name": "pw-data-loop",
+      "before": {
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      "after": {
+        "policy": 2,
+        "priority": 20,
+        "nice": 0
+      }
+    }
+  ],
+  "scope": "temporary owned test processes only; no global configuration changes"
+}

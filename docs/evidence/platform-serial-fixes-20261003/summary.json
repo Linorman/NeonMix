@@ -1,0 +1,1066 @@
+{
+  "tests": {
+    "passed": 236,
+    "failed": 0,
+    "ignored": 5
+  },
+  "build_checks": [
+    {
+      "name": "member-fmt",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/tools/dev",
+        "python3",
+        "-c",
+        "import json,subprocess;d=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version','1','--locked']));cmd=['cargo','fmt'];[cmd.extend(['-p',p['name']]) for p in d['packages'] if p['id'] in d['workspace_members']];raise SystemExit(subprocess.run(cmd+['--','--check']).returncode)"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791012693.318531,
+      "end_epoch": 1791012693.748649
+    },
+    {
+      "name": "workspace-tests",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/tools/dev",
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791012693.748967,
+      "end_epoch": 1791012792.016295
+    },
+    {
+      "name": "strict-clippy",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/tools/dev",
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791012792.0166621,
+      "end_epoch": 1791012806.4020941
+    },
+    {
+      "name": "release",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/tools/dev",
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791012806.402393,
+      "end_epoch": 1791012882.4248981
+    }
+  ],
+  "matrix": [
+    {
+      "name": "four-airplay",
+      "passed": false,
+      "completed_recoveries": 0,
+      "recorded_quality_windows": 0,
+      "aggregate_timed_late_delta_sum": 0,
+      "surviving_underrun_delta_sum": 0,
+      "ingress_late_delta_sum": 0,
+      "failure_phase": "independent receiver pairing and encrypted PCM",
+      "wait_timeout": null,
+      "status_reads": {
+        "readers": 4,
+        "successful": 17951,
+        "errors": 0
+      },
+      "source_pacing": null
+    },
+    {
+      "name": "mix-3plus1",
+      "passed": true,
+      "completed_recoveries": 6,
+      "recorded_quality_windows": 19,
+      "aggregate_timed_late_delta_sum": 0,
+      "surviving_underrun_delta_sum": 0,
+      "ingress_late_delta_sum": 0,
+      "failure_phase": null,
+      "wait_timeout": null,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "source_pacing": [
+        {
+          "source_index": 1,
+          "sent_packets": 3553,
+          "max_schedule_lag_ns": 7022332,
+          "max_send_gap_ns": 13233875
+        },
+        {
+          "source_index": 2,
+          "sent_packets": 3458,
+          "max_schedule_lag_ns": 9535768,
+          "max_send_gap_ns": 14551125
+        },
+        {
+          "source_index": 3,
+          "sent_packets": 3410,
+          "max_schedule_lag_ns": 8369057,
+          "max_send_gap_ns": 14053583
+        }
+      ]
+    },
+    {
+      "name": "mix-2plus2",
+      "passed": true,
+      "completed_recoveries": 8,
+      "recorded_quality_windows": 25,
+      "aggregate_timed_late_delta_sum": 0,
+      "surviving_underrun_delta_sum": 0,
+      "ingress_late_delta_sum": 0,
+      "failure_phase": null,
+      "wait_timeout": null,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "source_pacing": [
+        {
+          "source_index": 1,
+          "sent_packets": 2970,
+          "max_schedule_lag_ns": 29669390,
+          "max_send_gap_ns": 35967375
+        },
+        {
+          "source_index": 2,
+          "sent_packets": 2908,
+          "max_schedule_lag_ns": 41217816,
+          "max_send_gap_ns": 44234333
+        }
+      ]
+    },
+    {
+      "name": "mix-1plus3",
+      "passed": true,
+      "completed_recoveries": 2,
+      "recorded_quality_windows": 7,
+      "aggregate_timed_late_delta_sum": 0,
+      "surviving_underrun_delta_sum": 0,
+      "ingress_late_delta_sum": 0,
+      "failure_phase": null,
+      "wait_timeout": null,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "source_pacing": [
+        {
+          "source_index": 1,
+          "sent_packets": 2073,
+          "max_schedule_lag_ns": 9894268,
+          "max_send_gap_ns": 16440875
+        }
+      ]
+    },
+    {
+      "name": "mix-0plus4",
+      "passed": true,
+      "completed_recoveries": 0,
+      "recorded_quality_windows": 1,
+      "aggregate_timed_late_delta_sum": 0,
+      "surviving_underrun_delta_sum": 0,
+      "ingress_late_delta_sum": 0,
+      "failure_phase": null,
+      "wait_timeout": null,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "source_pacing": []
+    },
+    {
+      "name": "four-airplay-diagnostic-retest",
+      "passed": false,
+      "completed_recoveries": 6,
+      "recorded_quality_windows": 21,
+      "aggregate_timed_late_delta_sum": 0,
+      "surviving_underrun_delta_sum": 0,
+      "ingress_late_delta_sum": 0,
+      "failure_phase": "cycle 1 worker_crash source 3 recovery PCM",
+      "wait_timeout": "paired source restored alongside survivors",
+      "status_reads": {
+        "readers": 4,
+        "successful": 20339,
+        "errors": 0
+      },
+      "source_pacing": [
+        {
+          "source_index": 1,
+          "sent_packets": 6893,
+          "max_schedule_lag_ns": 42976107,
+          "max_send_gap_ns": 49285125
+        },
+        {
+          "source_index": 2,
+          "sent_packets": 6863,
+          "max_schedule_lag_ns": 54530410,
+          "max_send_gap_ns": 61131458
+        },
+        {
+          "source_index": 3,
+          "sent_packets": 6774,
+          "max_schedule_lag_ns": 64010204,
+          "max_send_gap_ns": 65055500
+        },
+        {
+          "source_index": 4,
+          "sent_packets": 6794,
+          "max_schedule_lag_ns": 77321174,
+          "max_send_gap_ns": 83978667
+        }
+      ]
+    }
+  ],
+  "native_dual": {
+    "platform": "darwin",
+    "device": "coreaudio:BlackHole2ch_UID",
+    "binary_sha256": "7176a5e18651a0b72816bf5738e1fee75c73c6a82e44fb08e3a3adb238795470",
+    "passed": true,
+    "checks": {
+      "unauthenticated": 401,
+      "dual_soak": {
+        "event": "capture_complete",
+        "measurement": {
+          "analyzed_frames": 2879744,
+          "estimated_frequency_hz": 450.2929033320033,
+          "peak": 0.008032233454287052,
+          "positive_zero_crossings": 27015,
+          "rms": 0.003980133513691196
+        },
+        "stats": {
+          "callback_max_ns": 6709,
+          "callback_over_budget": 0,
+          "callbacks": 11250,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 2880000,
+          "last_arrival_ns": 60078799917,
+          "last_device_ns": 500441652892792,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.007871796377003193,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 0,
+          "silent_frames": 0,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "dual_soak_diagnostics": {
+        "airplay": {
+          "multi_receiver": false,
+          "receivers": [
+            {
+              "active": false,
+              "admission_denials": {},
+              "discovery_state": "hidden",
+              "enabled": false,
+              "error": null,
+              "failure_stage": null,
+              "format": null,
+              "ingress": {
+                "accepted_packets": 0,
+                "clock_resets": 0,
+                "future_packets": 0,
+                "identity_rejections": 0,
+                "last_mapping_id": 0,
+                "last_presentation_time_ns": 0,
+                "last_source_rate": 0,
+                "last_source_sample_position": 0,
+                "last_uncertainty_ns": 0,
+                "late_packets": 0,
+                "latency_advance_ns": 0,
+                "malformed_packets": 0,
+                "output_latency_ns": 0,
+                "overflow_packets": 0,
+                "pending_bytes": 0,
+                "pending_frames": 0,
+                "playout_lead_ns": 0,
+                "protocol_lead_ns": 0,
+                "released_packets": 0,
+                "timeline_rejections": 0
+              },
+              "last_media_reset": null,
+              "max_control_ns": 0,
+              "max_loop_gap_ns": 0,
+              "max_pcm_ns": 0,
+              "media_resets": 0,
+              "mix": {
+                "gain_db": 0.0,
+                "muted": false,
+                "solo": false
+              },
+              "pairing_window_open": false,
+              "pairing_window_remaining_seconds": 0,
+              "playback_allowed": true,
+              "playback_mode": "low_latency",
+              "protocol_events": [],
+              "protocol_events_dropped": 0,
+              "queued_blocks": 0,
+              "ready": false,
+              "received_blocks": 0,
+              "rejected_blocks": 0,
+              "released_blocks": 0,
+              "revision": 1,
+              "source_id": null,
+              "source_name": null,
+              "source_revoked": false,
+              "visibility_reason": "disabled"
+            }
+          ],
+          "revision": 1
+        },
+        "drift_ppm": [
+          1.024,
+          -28.775,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "errors": [],
+        "fifo_frames": [
+          3392,
+          3322,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "filtered_queues": [
+          3407,
+          3366,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360,
+          3360
+        ],
+        "lane_stream_ids": [
+          3666363523241199,
+          954434447171031,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "last_timed_late_epoch": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_output_frame": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_presentation_ns": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_stream_id": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_target_ns": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_underrun_fifo_frames": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_underrun_needed_frames": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_underrun_output_frame": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_underrun_source_end": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "limited_frames": 0,
+        "media_workers": [
+          {
+            "max_loop_gap_ns": 17535083,
+            "max_pump_ns": 45708,
+            "max_report_ns": 64500,
+            "pump_timing": {
+              "feedback": {
+                "at_ns": 27056708125,
+                "cpu_ns": 41042,
+                "phase": "feedback",
+                "requested_wait_ns": null,
+                "wall_ns": 45166
+              },
+              "max_wait_lateness_ns": 230458,
+              "outgoing": {
+                "at_ns": 51115249416,
+                "cpu_ns": 49791,
+                "phase": "outgoing",
+                "requested_wait_ns": null,
+                "wall_ns": 54667
+              },
+              "receive": {
+                "at_ns": 37009118458,
+                "cpu_ns": 45000,
+                "phase": "receive",
+                "requested_wait_ns": null,
+                "wall_ns": 45125
+              },
+              "recent_slow": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ],
+              "report": {
+                "at_ns": 58934059958,
+                "cpu_ns": 57500,
+                "phase": "report",
+                "requested_wait_ns": null,
+                "wall_ns": 64750
+              },
+              "slow_count": 0,
+              "source": {
+                "at_ns": 59555914833,
+                "cpu_ns": 5708,
+                "phase": "source",
+                "requested_wait_ns": null,
+                "wall_ns": 45958
+              },
+              "wait": {
+                "at_ns": 20029166,
+                "cpu_ns": 7375,
+                "phase": "wait",
+                "requested_wait_ns": 19999875,
+                "wall_ns": 17521917
+              }
+            },
+            "receive_throttles": 0,
+            "scheduling": {
+              "base_priority": 47,
+              "configured": true,
+              "error": null,
+              "nice": null,
+              "policy": 1
+            }
+          },
+          {
+            "max_loop_gap_ns": 17879166,
+            "max_pump_ns": 27166,
+            "max_report_ns": 60042,
+            "pump_timing": {
+              "feedback": {
+                "at_ns": 23048035458,
+                "cpu_ns": 38292,
+                "phase": "feedback",
+                "requested_wait_ns": null,
+                "wall_ns": 44167
+              },
+              "max_wait_lateness_ns": 195792,
+              "outgoing": {
+                "at_ns": 813011708,
+                "cpu_ns": 14000,
+                "phase": "outgoing",
+                "requested_wait_ns": null,
+                "wall_ns": 196917
+              },
+              "receive": {
+                "at_ns": 812917791,
+                "cpu_ns": 28291,
+                "phase": "receive",
+                "requested_wait_ns": null,
+                "wall_ns": 92334
+              },
+              "recent_slow": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ],
+              "report": {
+                "at_ns": 58735116666,
+                "cpu_ns": 60375,
+                "phase": "report",
+                "requested_wait_ns": null,
+                "wall_ns": 60375
+              },
+              "slow_count": 0,
+              "source": {
+                "at_ns": 59333233750,
+                "cpu_ns": 15416,
+                "phase": "source",
+                "requested_wait_ns": null,
+                "wall_ns": 27333
+              },
+              "wait": {
+                "at_ns": 20032125,
+                "cpu_ns": 11208,
+                "phase": "wait",
+                "requested_wait_ns": 19999834,
+                "wall_ns": 17862666
+              }
+            },
+            "receive_throttles": 0,
+            "scheduling": {
+              "base_priority": 47,
+              "configured": true,
+              "error": null,
+              "nice": null,
+              "policy": 1
+            }
+          }
+        ],
+        "meters": {
+          "lanes": [
+            {
+              "peak": 0.01598980836570263,
+              "rms": 0.011244455352425575,
+              "stream_id": 3666363523241199
+            },
+            {
+              "peak": 0.016047801822423935,
+              "rms": 0.011182453483343124,
+              "stream_id": 954434447171031
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            },
+            {
+              "peak": 0.0,
+              "rms": 0.0,
+              "stream_id": 0
+            }
+          ],
+          "limiter_gain": 1.0,
+          "output": {
+            "peak": 0.007984253577888012,
+            "rms": 0.004000252578407526
+          },
+          "sample_rate": 48000,
+          "window_frames": 2400
+        },
+        "output_frames": 2936576,
+        "output_stats": {
+          "callback_max_ns": 198292,
+          "callback_over_budget": 0,
+          "callbacks": 11471,
+          "clock_epoch": 1,
+          "discontinuities": 0,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 2936576,
+          "last_arrival_ns": 61223344250,
+          "last_device_ns": 500441725642791,
+          "last_error": 0,
+          "native_device_frame_position": 2936320,
+          "native_internal_frames": 2936320,
+          "native_stream_frames": 2936320,
+          "no_data_intervals": 0,
+          "peak": 0.007759415078908205,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 2936065,
+          "silent_frames": 10659,
+          "stale_frames": 0,
+          "submitted_frames": 2936576
+        },
+        "packet_budget_drops": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pcm_queue_age_max_ns": [
+          12202417,
+          12886459,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "queues": [
+          3392,
+          3322,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "receivers": [
+          {
+            "authenticated": true,
+            "authenticated_to_jitter_max_ns": 41409000,
+            "jitter_capacity_exhausted": false,
+            "jitter_peak_packets": 6,
+            "jitter_queued_packets": 0,
+            "jitter_to_pcm_max_ns": 8863542,
+            "last_buffer_peak": 0.015899658203125,
+            "last_buffer_rms": 0.011095575601271555,
+            "last_loss_duration_ns": 0,
+            "last_pcm_pts_ns": 61064046000,
+            "last_pcm_timing_gap": null,
+            "last_source_position": 2929440,
+            "late_packets": 0,
+            "lost_packets": 0,
+            "native_scheduling": {
+              "configured": 4,
+              "entered": 4,
+              "failed": 0,
+              "max_base_priority": 47,
+              "min_base_priority": 47
+            },
+            "overflow_plc_packets": 0,
+            "packets": {
+              "duplicate": 0,
+              "highest_sequence": 22749,
+              "highest_timestamp": 116526994,
+              "invalid": 0,
+              "received": 6103,
+              "reordered": 0,
+              "timestamp_step_errors": 0
+            },
+            "pcm_frames": 2929440,
+            "pcm_peak": 0.016143798828125,
+            "pcm_sink_dropped": 0,
+            "pcm_timing_gap_count": 0,
+            "pcm_timing_gaps": [],
+            "pipeline_base_time_ns": 500380644255708,
+            "pipeline_clock_ns": 500441710135541,
+            "plc_samples": 0,
+            "queue_drops": 0,
+            "retimed_loss_events": 0,
+            "silent_pcm_frames": 1136,
+            "wire_to_authenticated_max_ns": 174000
+          },
+          {
+            "authenticated": true,
+            "authenticated_to_jitter_max_ns": 41746958,
+            "jitter_capacity_exhausted": false,
+            "jitter_peak_packets": 6,
+            "jitter_queued_packets": 0,
+            "jitter_to_pcm_max_ns": 160375,
+            "last_buffer_peak": 0.015869140625,
+            "last_buffer_rms": 0.011258510465602655,
+            "last_loss_duration_ns": 0,
+            "last_pcm_pts_ns": 60862869250,
+            "last_pcm_timing_gap": null,
+            "last_source_position": 2919840,
+            "late_packets": 0,
+            "lost_packets": 0,
+            "native_scheduling": {
+              "configured": 4,
+              "entered": 4,
+              "failed": 0,
+              "max_base_priority": 47,
+              "min_base_priority": 47
+            },
+            "overflow_plc_packets": 0,
+            "packets": {
+              "duplicate": 0,
+              "highest_sequence": 33978,
+              "highest_timestamp": 2922831604,
+              "invalid": 0,
+              "received": 6083,
+              "reordered": 0,
+              "timestamp_step_errors": 0
+            },
+            "pcm_frames": 2919840,
+            "pcm_peak": 0.01611328125,
+            "pcm_sink_dropped": 0,
+            "pcm_timing_gap_count": 0,
+            "pcm_timing_gaps": [],
+            "pipeline_base_time_ns": 500380844718666,
+            "pipeline_clock_ns": 500441710135541,
+            "plc_samples": 0,
+            "queue_drops": 0,
+            "retimed_loss_events": 0,
+            "silent_pcm_frames": 1358,
+            "wire_to_authenticated_max_ns": 1601208
+          }
+        ],
+        "sinc_delay_frames": 64,
+        "timed_drift_ppm": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "timed_late_frames": 0,
+        "timed_late_frames_by_lane": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "timed_phase_error_ns": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "underrun_frames": 0,
+        "underrun_frames_by_lane": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "single": {
+    "single-pcm": true,
+    "single-alac": true,
+    "single-sync": true
+  },
+  "limits": [
+    "Four-AirPlay initial and diagnostic attempts both failed; no complete 24-recovery pass",
+    "macOS only; no Ubuntu/Windows rerun",
+    "Synthetic AirPlay and CoreAudio/BlackHole digital results; no real Apple multi-device/analog/8h soak"
+  ]
+}

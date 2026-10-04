@@ -1,0 +1,45 @@
+{
+  "report_links_verified": true,
+  "mac_quality_windows": 125,
+  "mac_recovery_count": 40,
+  "windows_four_source_quality_failed": true,
+  "windows_failed_window": {
+    "phase": "recovery_interval",
+    "record": 1,
+    "timed_late_delta": 5,
+    "timed_late_by_lane_delta": [
+      0,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "underrun_delta": [
+      0,
+      0,
+      0
+    ],
+    "ingress_late_delta": [
+      0,
+      0,
+      0
+    ],
+    "counter_reset": false
+  },
+  "lan_passed": true,
+  "archives_preserved": {
+    "NeonMix-windows-x64-20261004-source322fda1b.zip": "46823171e47bf939c70cad966b522fbb61989587ed41cad20786480dd5dfdfd7",
+    "NeonMix-macos-arm64-20261004.zip": "96b379e1e7e42d175fc00a221a2e302280f7ed3c9df41c098072bb7bc1d5f2f1"
+  }
+}

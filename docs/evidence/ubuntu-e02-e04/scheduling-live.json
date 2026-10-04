@@ -1,0 +1,340 @@
+[
+  {
+    "pid": 63292,
+    "role": "sink",
+    "credentials": [
+      "Uid:\t1000\t1000\t1000\t1000",
+      "CapEff:\t0000000000000000"
+    ],
+    "limits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              unlimited            unlimited            seconds   \nMax file size             unlimited            unlimited            bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        0                    unlimited            bytes     \nMax resident set          unlimited            unlimited            bytes     \nMax processes             23186                23186                processes \nMax open files            1024                 1048576              files     \nMax locked memory         773926912            773926912            bytes     \nMax address space         unlimited            unlimited            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       23186                23186                signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         31                   31                   \nMax realtime priority     20                   20                   \nMax realtime timeout      200000               200000               us        \n",
+    "threads": [
+      {
+        "tid": 63292,
+        "name": "neonmix-audio",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63299,
+        "name": "pw-data-loop",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      }
+    ]
+  },
+  {
+    "pid": 63329,
+    "role": "serve",
+    "credentials": [
+      "Uid:\t1000\t1000\t1000\t1000",
+      "CapEff:\t0000000000000000"
+    ],
+    "limits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              unlimited            unlimited            seconds   \nMax file size             unlimited            unlimited            bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        0                    unlimited            bytes     \nMax resident set          unlimited            unlimited            bytes     \nMax processes             23186                23186                processes \nMax open files            1024                 1048576              files     \nMax locked memory         773926912            773926912            bytes     \nMax address space         unlimited            unlimited            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       23186                23186                signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         31                   31                   \nMax realtime priority     20                   20                   \nMax realtime timeout      200000               200000               us        \n",
+    "threads": [
+      {
+        "tid": 63329,
+        "name": "neonmix-hub",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63330,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63331,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63332,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63333,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63336,
+        "name": "pw_out",
+        "policy": 1073741826,
+        "priority": 10,
+        "nice": 0
+      },
+      {
+        "tid": 63337,
+        "name": "pw-data-loop",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63338,
+        "name": "cpal_rt_promote",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63339,
+        "name": "mDNS_daemon",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63340,
+        "name": "neonmix-hub",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63344,
+        "name": "pool-spawner",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63345,
+        "name": "dtlsenc0:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63346,
+        "name": "rtcp_in:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63347,
+        "name": "timer",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63348,
+        "name": "jitter:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63349,
+        "name": "wire_in:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63350,
+        "name": "media-0",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63351,
+        "name": "GstSystemClock",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63364,
+        "name": "dtlsenc1:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63365,
+        "name": "rtcp_in:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63366,
+        "name": "timer",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63367,
+        "name": "jitter:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63368,
+        "name": "wire_in:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63369,
+        "name": "media-1",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      }
+    ]
+  },
+  {
+    "pid": 63359,
+    "role": "send",
+    "credentials": [
+      "Uid:\t1000\t1000\t1000\t1000",
+      "CapEff:\t0000000000000000"
+    ],
+    "limits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              unlimited            unlimited            seconds   \nMax file size             unlimited            unlimited            bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        0                    unlimited            bytes     \nMax resident set          unlimited            unlimited            bytes     \nMax processes             23186                23186                processes \nMax open files            1024                 1048576              files     \nMax locked memory         773926912            773926912            bytes     \nMax address space         unlimited            unlimited            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       23186                23186                signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         31                   31                   \nMax realtime priority     20                   20                   \nMax realtime timeout      200000               200000               us        \n",
+    "threads": [
+      {
+        "tid": 63359,
+        "name": "neonmix-hub",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63360,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63361,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63362,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63363,
+        "name": "tokio-rt-worker",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63370,
+        "name": "pool-spawner",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63371,
+        "name": "dtlsenc0:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63372,
+        "name": "GstSystemClock",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63373,
+        "name": "wire_in:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63374,
+        "name": "audio:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63375,
+        "name": "rtcp_in:src",
+        "policy": 0,
+        "priority": 0,
+        "nice": -10
+      },
+      {
+        "tid": 63376,
+        "name": "media-diagnosti",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      }
+    ]
+  },
+  {
+    "pid": 63384,
+    "role": "capture",
+    "credentials": [
+      "Uid:\t1000\t1000\t1000\t1000",
+      "CapEff:\t0000000000000000"
+    ],
+    "limits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              unlimited            unlimited            seconds   \nMax file size             unlimited            unlimited            bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        0                    unlimited            bytes     \nMax resident set          unlimited            unlimited            bytes     \nMax processes             23186                23186                processes \nMax open files            1024                 1048576              files     \nMax locked memory         773926912            773926912            bytes     \nMax address space         unlimited            unlimited            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       23186                23186                signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         31                   31                   \nMax realtime priority     20                   20                   \nMax realtime timeout      200000               200000               us        \n",
+    "threads": [
+      {
+        "tid": 63384,
+        "name": "neonmix-audio",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63387,
+        "name": "pw_in",
+        "policy": 1073741826,
+        "priority": 10,
+        "nice": 0
+      },
+      {
+        "tid": 63388,
+        "name": "pw-data-loop",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      },
+      {
+        "tid": 63389,
+        "name": "cpal_rt_promote",
+        "policy": 0,
+        "priority": 0,
+        "nice": 0
+      }
+    ]
+  }
+]

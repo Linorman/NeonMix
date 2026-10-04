@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 158, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 93, in main
+    app.paste('房间名称','影音室 E07')
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 70, in paste
+    assert self.ax(script)==value
+           ~~~~~~~^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 28, in ax
+    if result.returncode:raise RuntimeError(result.stderr.strip())
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: 571:583: execution error: System Events got an error: Can’t set text field "房间名称" of group 1 of window 1 of application process "neonmix-desktop" to true. (-10006)

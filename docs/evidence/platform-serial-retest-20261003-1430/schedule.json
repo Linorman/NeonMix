@@ -1,0 +1,16 @@
+{
+  "rule": "Ubuntu complete and cleanup, then macOS complete and cleanup. No simultaneous build or tests.",
+  "old_round": "platform-validation-20261003-1241",
+  "old_round_interrupted": true,
+  "new_round_requires_fresh_commands_and_logs": true,
+  "binary_cache_reuse_requires_same_source_manifest": true,
+  "mac_baseline_processes_preserved": [
+    81271,
+    98624,
+    98625,
+    98648
+  ],
+  "ubuntu_start_allowed_after_mac_stop_confirmed": "2026-10-03T06:33:50.338695+00:00",
+  "windows": "previous round only, no new test in this requested rerun",
+  "mac_lan_sender": "only process required during dedicated Ubuntu cross-host window"
+}

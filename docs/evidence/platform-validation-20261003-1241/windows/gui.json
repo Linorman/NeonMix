@@ -1,0 +1,154 @@
+{
+  "scope": "Actual current snapshot Windows desktop launch; SSH session limitations recorded",
+  "binary_sha256": "0d1d4ee0eb6642c138817b95d605736b276fee0bfd60aef41a4ca24230c894ac",
+  "cases": {
+    "hub": {
+      "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "sender": {
+      "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "mixer": {
+      "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "devices": {
+      "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "diagnostics": {
+      "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "formal": {
+      "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": ""
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    }
+  }
+}

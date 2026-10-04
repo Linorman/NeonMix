@@ -133,7 +133,9 @@ impl NativeBackend {
         source: S,
     ) -> Result<RunningOutput, AudioError> {
         let device = self.find(id)?;
-        let supported = select_config(&device, false, options)?;
+        // WASAPI shared render can convert the client stream independently of
+        // the system mix rate. Loopback capture cannot use this negotiation.
+        let supported = select_config(&device, false, options, self.name == "wasapi")?;
         let format = AudioFormat::new(supported.sample_rate(), supported.channels())?;
         let mut source = RateConverter::new(source, 48_000, format.sample_rate)?;
         let delay = source.delay_frames();
@@ -306,7 +308,7 @@ impl NativeBackend {
             return Err(AudioError::InvalidArgument("Core Audio capture requires the input side of a virtual device; process taps are not the virtual-device bridge".into()));
         }
         let device = self.find(id)?;
-        let supported = select_config(&device, !loopback, options)?;
+        let supported = select_config(&device, !loopback, options, false)?;
         let format = AudioFormat::new(supported.sample_rate(), supported.channels())?;
         let stats = Arc::new(AudioStats::default());
         let (producer, consumer) = block_queue(neonmix_core::CAPTURE_QUEUE_BLOCKS, stats.clone())?;
@@ -428,6 +430,7 @@ fn select_config(
     device: &Device,
     input: bool,
     options: OpenOptions,
+    allow_default_rate_fallback: bool,
 ) -> Result<SupportedStreamConfig, AudioError> {
     if options.period_frames.is_some_and(|n| n == 0 || n > 8192) {
         return Err(AudioError::InvalidArgument(
@@ -440,8 +443,11 @@ fn select_config(
         device.default_output_config()
     }
     .map_err(native_error)?;
-    let selected = if let Some(rate) = options.sample_rate {
-        let ranges: Vec<_> = if input {
+    let need_ranges = options.sample_rate.is_some()
+        || (allow_default_rate_fallback
+            && AudioFormat::new(default.sample_rate(), default.channels()).is_err());
+    let ranges: Vec<_> = if need_ranges {
+        if input {
             device
                 .supported_input_configs()
                 .map_err(native_error)?
@@ -451,9 +457,21 @@ fn select_config(
                 .supported_output_configs()
                 .map_err(native_error)?
                 .collect()
-        };
+        }
+    } else {
+        Vec::new()
+    };
+    choose_config(default, &ranges, options, allow_default_rate_fallback)
+}
+fn choose_config(
+    default: SupportedStreamConfig,
+    ranges: &[cpal::SupportedStreamConfigRange],
+    options: OpenOptions,
+    allow_default_rate_fallback: bool,
+) -> Result<SupportedStreamConfig, AudioError> {
+    let at_rate = |rate| {
         ranges
-            .into_iter()
+            .iter()
             .filter(|r| {
                 r.channels() == default.channels()
                     && r.min_sample_rate() <= rate
@@ -461,9 +479,23 @@ fn select_config(
             })
             .find(|r| r.sample_format() == default.sample_format())
             .map(|r| r.with_sample_rate(rate))
+    };
+    let selected = if let Some(rate) = options.sample_rate {
+        at_rate(rate).ok_or_else(|| {
+            AudioError::UnsupportedFormat(format!("device does not support requested rate {rate}"))
+        })?
+    } else if allow_default_rate_fallback
+        && AudioFormat::new(default.sample_rate(), default.channels()).is_err()
+    {
+        // Prefer the internal rate and preserve endpoint/channels/sample type.
+        // No system format or default route is changed by shared-mode render.
+        [48_000, 96_000, 44_100]
+            .into_iter()
+            .find_map(at_rate)
             .ok_or_else(|| {
                 AudioError::UnsupportedFormat(format!(
-                    "device does not support requested rate {rate}"
+                    "output mix rate {}; no supported 44100, 48000 or 96000 client format",
+                    default.sample_rate()
                 ))
             })?
     } else {
@@ -499,6 +531,136 @@ fn stream_config(supported: SupportedStreamConfig, options: OpenOptions) -> cpal
             .period_frames
             .map_or(cpal::BufferSize::Default, cpal::BufferSize::Fixed),
         ..supported.config()
+    }
+}
+
+#[cfg(test)]
+mod config_tests {
+    use super::*;
+    fn default_at(rate: u32) -> SupportedStreamConfig {
+        SupportedStreamConfig::new(
+            2,
+            rate,
+            cpal::SupportedBufferSize::Range {
+                min: rate / 100,
+                max: rate / 100,
+            },
+            SampleFormat::F32,
+        )
+    }
+    fn range_at(rate: u32) -> cpal::SupportedStreamConfigRange {
+        cpal::SupportedStreamConfigRange::new(
+            2,
+            rate,
+            rate,
+            cpal::SupportedBufferSize::Range {
+                min: rate / 100,
+                max: rate / 100,
+            },
+            SampleFormat::F32,
+        )
+    }
+    #[test]
+    fn shared_render_negotiates_48k_without_changing_the_384k_mix() {
+        let mix = default_at(384_000);
+        let selected = choose_config(
+            mix,
+            &[range_at(96_000), range_at(48_000)],
+            OpenOptions::default(),
+            true,
+        )
+        .unwrap();
+        assert_eq!(selected.sample_rate(), 48_000);
+        assert_eq!(selected.channels(), 2);
+        assert_eq!(selected.sample_format(), SampleFormat::F32);
+        assert_eq!(format_info(selected).period_min_frames, Some(480));
+        assert_eq!(mix.sample_rate(), 384_000);
+        // The render endpoint's loopback capture must still use native policy.
+        assert!(choose_config(mix, &[range_at(48_000)], OpenOptions::default(), false).is_err());
+    }
+    #[test]
+    fn supported_defaults_and_explicit_requests_keep_their_rate() {
+        for rate in [44_100, 48_000, 96_000] {
+            assert_eq!(
+                choose_config(default_at(rate), &[], OpenOptions::default(), true)
+                    .unwrap()
+                    .sample_rate(),
+                rate
+            );
+        }
+        let options = OpenOptions {
+            sample_rate: Some(96_000),
+            period_frames: None,
+        };
+        assert_eq!(
+            choose_config(
+                default_at(384_000),
+                &[range_at(48_000), range_at(96_000)],
+                options,
+                true
+            )
+            .unwrap()
+            .sample_rate(),
+            96_000
+        );
+        let options = OpenOptions {
+            sample_rate: Some(44_100),
+            period_frames: None,
+        };
+        assert!(choose_config(default_at(384_000), &[range_at(48_000)], options, true).is_err());
+        let options = OpenOptions {
+            sample_rate: Some(384_000),
+            period_frames: None,
+        };
+        assert!(choose_config(default_at(384_000), &[range_at(384_000)], options, true).is_err());
+    }
+    #[test]
+    fn fallback_requires_a_matching_supported_format_and_period() {
+        assert!(choose_config(default_at(384_000), &[], OpenOptions::default(), true).is_err());
+        let different_channels = cpal::SupportedStreamConfigRange::new(
+            1,
+            48_000,
+            48_000,
+            cpal::SupportedBufferSize::Unknown,
+            SampleFormat::F32,
+        );
+        let different_type = cpal::SupportedStreamConfigRange::new(
+            2,
+            48_000,
+            48_000,
+            cpal::SupportedBufferSize::Unknown,
+            SampleFormat::I16,
+        );
+        assert!(
+            choose_config(
+                default_at(384_000),
+                &[different_channels, different_type],
+                OpenOptions::default(),
+                true
+            )
+            .is_err()
+        );
+        let options = OpenOptions {
+            sample_rate: None,
+            period_frames: Some(3840),
+        };
+        assert!(choose_config(default_at(384_000), &[range_at(48_000)], options, true).is_err());
+        let options = OpenOptions {
+            sample_rate: None,
+            period_frames: Some(480),
+        };
+        assert!(choose_config(default_at(384_000), &[range_at(48_000)], options, true).is_ok());
+        assert_eq!(
+            choose_config(
+                default_at(384_000),
+                &[range_at(44_100), range_at(96_000)],
+                OpenOptions::default(),
+                true
+            )
+            .unwrap()
+            .sample_rate(),
+            96_000
+        );
     }
 }
 fn native_error(error: cpal::Error) -> AudioError {

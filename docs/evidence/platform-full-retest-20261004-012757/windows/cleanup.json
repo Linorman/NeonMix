@@ -1,0 +1,12 @@
+{
+  "owned_processes_before_cleanup": [],
+  "stopped_gui_background_pids": [],
+  "remaining_owned_neonmix_processes": [],
+  "preserved_ambient_processes": [],
+  "removed_owned_fixture_paths": [
+    ".local\\windows-lan"
+  ],
+  "system_settings_changed": false,
+  "outside_authorized_root_deleted": false,
+  "preserved": "r06 fresh source/target/native worker/artifacts; all previous roots/packages/manual sessions"
+}

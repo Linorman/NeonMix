@@ -1,0 +1,121 @@
+{
+  "format": {
+    "command": [
+      "cargo",
+      "fmt",
+      "-p",
+      "neonmix-core",
+      "-p",
+      "neonmix-io",
+      "-p",
+      "neonmix-linux",
+      "-p",
+      "neonmix-audio",
+      "-p",
+      "neonmix-desktop",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.061
+  },
+  "core": {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "-p",
+      "neonmix-core",
+      "--lib",
+      "--test",
+      "audio_contract",
+      "--test",
+      "realtime",
+      "--offline",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 8.764,
+    "passed_test_count": 21
+  },
+  "io": {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "-p",
+      "neonmix-io",
+      "--test",
+      "pipewire_buffer",
+      "--offline",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 3.675,
+    "passed_test_count": 2
+  },
+  "audio": {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "-p",
+      "neonmix-audio",
+      "--bin",
+      "neonmix-audio",
+      "--test",
+      "cli",
+      "--offline",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 22.258,
+    "passed_test_count": 6
+  },
+  "desktop": {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "-p",
+      "neonmix-desktop",
+      "--offline",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 12.526,
+    "passed_test_count": 1
+  },
+  "clippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "--release",
+      "-p",
+      "neonmix-audio",
+      "-p",
+      "neonmix-desktop",
+      "--offline",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 18.503
+  },
+  "simulate": {
+    "command": [
+      "/home/parallels/NeonMix/target/release/neonmix-audio",
+      "simulate",
+      "--input-rate",
+      "44100",
+      "--output-rate",
+      "48000",
+      "--seconds",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 0.011
+  }
+}

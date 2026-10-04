@@ -1,0 +1,14 @@
+{
+  "exported_file_count": 82,
+  "sha256_mismatches": [],
+  "derived_files": [
+    "README.md",
+    "final-summary.json",
+    "lan-lifecycle-summary.json",
+    "lan-invite-metadata.json",
+    "harness-metadata-audit.json",
+    "export-audit-first-newline.json",
+    "export-newline-audit.json"
+  ],
+  "original_export_untouched": true
+}

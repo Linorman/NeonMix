@@ -1,0 +1,132 @@
+{
+  "platform": "Windows 11 AMD64",
+  "source_files": 516,
+  "source_mismatches": [],
+  "tests": {
+    "passed": 214,
+    "failed": 0,
+    "ignored": 5
+  },
+  "matrix": {
+    "mix-4plus0": {
+      "passed": true,
+      "recoveries": 16,
+      "status_reads": {
+        "readers": 4,
+        "successful": 16368,
+        "errors": 0
+      },
+      "survivor_lane_max_underrun_delta": 0,
+      "survivor_lane_max_late_packet_delta": 0,
+      "global_steady_timed_late_before": 0,
+      "global_steady_timed_late_delta": 0
+    },
+    "mix-3plus1": {
+      "passed": false,
+      "recoveries": 0,
+      "status_reads": {
+        "readers": 4,
+        "successful": 11261,
+        "errors": 0
+      },
+      "survivor_lane_max_underrun_delta": null,
+      "survivor_lane_max_late_packet_delta": null,
+      "global_steady_timed_late_before": null,
+      "global_steady_timed_late_delta": null,
+      "failure_phase": "full room rejects another native Start",
+      "failure_stage": [
+        "decoder_queue",
+        "decoder_queue",
+        "decoder_queue"
+      ],
+      "timed_late_frames": 7292
+    },
+    "mix-3plus1-retest": {
+      "passed": true,
+      "recoveries": 6,
+      "status_reads": {
+        "readers": 4,
+        "successful": 10775,
+        "errors": 0
+      },
+      "survivor_lane_max_underrun_delta": 0,
+      "survivor_lane_max_late_packet_delta": 0,
+      "global_steady_timed_late_before": 15,
+      "global_steady_timed_late_delta": 0
+    },
+    "mix-2plus2": {
+      "passed": true,
+      "recoveries": 4,
+      "status_reads": {
+        "readers": 4,
+        "successful": 9001,
+        "errors": 0
+      },
+      "survivor_lane_max_underrun_delta": 0,
+      "survivor_lane_max_late_packet_delta": 0,
+      "global_steady_timed_late_before": 1,
+      "global_steady_timed_late_delta": 0
+    },
+    "mix-1plus3": {
+      "passed": true,
+      "recoveries": 2,
+      "status_reads": {
+        "readers": 4,
+        "successful": 7946,
+        "errors": 0
+      },
+      "survivor_lane_max_underrun_delta": 0,
+      "survivor_lane_max_late_packet_delta": 0,
+      "global_steady_timed_late_before": 0,
+      "global_steady_timed_late_delta": 0
+    },
+    "mix-0plus4": {
+      "passed": true,
+      "recoveries": 0,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "survivor_lane_max_underrun_delta": 0,
+      "survivor_lane_max_late_packet_delta": 0,
+      "global_steady_timed_late_before": 0,
+      "global_steady_timed_late_delta": 0
+    }
+  },
+  "background_scenarios": 12,
+  "pipe_security_cases": 6,
+  "gui_visible_windows": 0,
+  "lan": {
+    "first": {
+      "samples_total": 381,
+      "samples_active": 30,
+      "cpu_average": 2.178933333333333,
+      "cpu_max": 5.292,
+      "max_mixer_underrun_frames": 480,
+      "max_rx": {
+        "lost_packets": 2,
+        "overflow_plc_packets": 2,
+        "late_packets": 0,
+        "pcm_sink_dropped": 0,
+        "queue_drops": 0,
+        "pcm_timing_gap_count": 0
+      }
+    },
+    "retest": {
+      "samples_total": 60,
+      "samples_active": 29,
+      "cpu_average": 2.525137931034483,
+      "cpu_max": 6.02,
+      "max_mixer_underrun_frames": 0,
+      "max_rx": {
+        "lost_packets": 0,
+        "overflow_plc_packets": 0,
+        "late_packets": 0,
+        "pcm_sink_dropped": 0,
+        "queue_drops": 0,
+        "pcm_timing_gap_count": 0
+      }
+    }
+  }
+}

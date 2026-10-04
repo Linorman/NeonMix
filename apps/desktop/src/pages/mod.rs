@@ -5,8 +5,10 @@ use super::*;
 
 mod about;
 mod airplay;
+mod console;
 mod devices;
 mod diagnostics;
+mod live;
 mod mixer;
 mod room;
 mod sender;

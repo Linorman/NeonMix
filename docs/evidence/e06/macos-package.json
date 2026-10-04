@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "scope": "macOS installer staging and extracted payload verification; no system installation",
+  "release_signed": false,
+  "notarization_executed": false,
+  "restart_required": true,
+  "package": "artifacts/macos/packages/NeonMixHAL-0.1.0-arm64-development.pkg",
+  "payload_ownership": "root:wheel",
+  "package_sha256": "0a17c4bfd45a6cd143859ceca420e0a11007761fa499aca4195a1c4cc1d46d71",
+  "source_binary_sha256": "447a28242cd8253e55f6f18812918a806030bec87e20d77595add732a5ed3e5b",
+  "payload_binary_sha256": "447a28242cd8253e55f6f18812918a806030bec87e20d77595add732a5ed3e5b",
+  "phase_warnings": {
+    "component": "write: Permission denied\nwrite: Permission denied\nwrite: Permission denied\nwrite: Permission denied"
+  }
+}

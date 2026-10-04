@@ -1,0 +1,93 @@
+{
+  "scope": "iPhone retry after identity-preserving stop/start; user reports no PIN UI and route returns to iPhone",
+  "status": {
+    "ready": true,
+    "active": false,
+    "revision": 3,
+    "error": null,
+    "failure_stage": null,
+    "pairing_window_open": true,
+    "pairing_window_remaining_seconds": 128,
+    "protocol_events": [
+      {
+        "body_bytes": 0,
+        "connection_id": 1,
+        "cseq_present": false,
+        "event": "open",
+        "method": "OTHER",
+        "outcome": "opened",
+        "protocol": "none",
+        "relative_ms": 203933,
+        "response_bytes": 0,
+        "route": "other",
+        "sent_bytes": 0,
+        "session_present": false,
+        "status": 0,
+        "type": "protocol_transport"
+      },
+      {
+        "at_worker_ms": 203941,
+        "method": "GET",
+        "route": "info",
+        "status": 200
+      },
+      {
+        "body_bytes": 70,
+        "connection_id": 1,
+        "cseq_present": true,
+        "event": "response",
+        "method": "GET",
+        "outcome": "complete",
+        "protocol": "RTSP/1.0",
+        "relative_ms": 203933,
+        "response_bytes": 440,
+        "route": "info",
+        "sent_bytes": 440,
+        "session_present": false,
+        "status": 200,
+        "type": "protocol_transport"
+      },
+      {
+        "at_worker_ms": 203946,
+        "method": "POST",
+        "route": "pair_pin_start",
+        "status": 200
+      },
+      {
+        "body_bytes": 0,
+        "connection_id": 1,
+        "cseq_present": true,
+        "event": "response",
+        "method": "POST",
+        "outcome": "complete",
+        "protocol": "RTSP/1.0",
+        "relative_ms": 203938,
+        "response_bytes": 97,
+        "route": "pair_pin_start",
+        "sent_bytes": 97,
+        "session_present": false,
+        "status": 200,
+        "type": "protocol_transport"
+      },
+      {
+        "body_bytes": 0,
+        "connection_id": 1,
+        "cseq_present": false,
+        "event": "close",
+        "method": "OTHER",
+        "outcome": "peer_closed",
+        "protocol": "none",
+        "relative_ms": 203942,
+        "response_bytes": 0,
+        "route": "other",
+        "sent_bytes": 0,
+        "session_present": false,
+        "status": 0,
+        "type": "protocol_transport"
+      }
+    ],
+    "received_blocks": 0,
+    "released_blocks": 0,
+    "rejected_blocks": 0
+  }
+}

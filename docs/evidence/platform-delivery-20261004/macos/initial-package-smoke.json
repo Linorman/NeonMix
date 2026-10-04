@@ -1,0 +1,31 @@
+{
+  "scope": "Relocated macOS .app in a path with spaces, clean developer environment",
+  "package_path": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-macos-arm64-20261004",
+  "relocation_path": "/Volumes/projects-mac/NeonMix/.local/p4 mac",
+  "checks": {
+    "packaged_gstreamer_runtime": true,
+    "coreaudio_device_enumeration": true,
+    "private_packaged_background_ipc": true,
+    "formal_app_native_window": true,
+    "native_command_palette_and_navigation": true,
+    "ui_exit_retains_independent_background": true
+  },
+  "passed": false,
+  "limitations": [
+    "No Apple source, analog listening, long soak or notarization acceptance."
+  ],
+  "failure_type": "RuntimeError",
+  "failure": "package Hub TLS timed out",
+  "trace": [
+    {
+      "file": "smoke.py",
+      "line": 125
+    },
+    {
+      "file": "smoke.py",
+      "line": 41
+    }
+  ],
+  "fixture_removed": true,
+  "owned_processes_exited": true
+}

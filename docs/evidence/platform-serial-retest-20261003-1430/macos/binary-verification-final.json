@@ -1,0 +1,14 @@
+{
+  "verified_epoch": 1791010753.874323,
+  "changed_binaries": [],
+  "binary_sha256": {
+    "neonmix-audio": "301a3b366974554a9d703c74140668331d240e045a553cd7f8b8b3fd66fb47ce",
+    "neonmix-hub": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51",
+    "neonmix-desktop": "bef1ee0b4640dda99ee0103063526264aa2d7cf0902fa42d3595a69a30ae9195",
+    "neonmix-background": "1939f2d22fde5db9dd97594220a3562fa5c162fd137603fa42065e18f13a0132",
+    "neonmix-airplay-worker": "4d5a52c2dcb6be9e58bc603997f4ebed81240b448058c6f21dbf9443d7c5a888",
+    "libneonmix-airplay-probe-crypto.dylib": "2701477b82d5b34da36a9b62e758d3c47c20b1fb59dc19cedf6bc0ee0beeea3a",
+    "neonmix-airplay-audio-probe": "5a736190842c9be496a91aa365e35ceb06dfc477c4bd58fed9385a0c761ca8c0",
+    "neonmix-airplay-identity-probe": "212df2fa27bfa2c438b3002cf9e3cd3a6db4a6588948eb3af83c329e9ed7a6ab"
+  }
+}

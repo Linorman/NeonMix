@@ -1,0 +1,191 @@
+   Compiling glib-sys v0.20.10
+   Compiling gobject-sys v0.20.10
+   Compiling gstreamer-sys v0.23.6
+   Compiling gstreamer-base-sys v0.23.6
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling gio-sys v0.20.10
+   Compiling gstreamer-app-sys v0.23.5
+   Compiling gstreamer-rtp-sys v0.23.5
+   Compiling eframe v0.31.1
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+   Compiling neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+   Compiling neonmix-windows v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/windows)
+   Compiling neonmix-linux v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/linux)
+   Compiling glib v0.20.12
+   Compiling neonmix-audio v0.1.0 (/Volumes/projects-mac/NeonMix/apps/audio)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling gstreamer v0.23.7
+warning: function `ease_out_cubic` is never used
+ --> apps/desktop/src/animation.rs:5:8
+  |
+5 | pub fn ease_out_cubic(t: f32) -> f32 {
+  |        ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `smooth_scroll_offset` is never used
+  --> apps/desktop/src/animation.rs:63:8
+   |
+63 | pub fn smooth_scroll_offset(ui: &mut egui::Ui, id: impl Into<egui::Id>, target: f32) -> f32 {
+   |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `SURFACE_5` is never used
+ --> apps/desktop/src/theme.rs:9:11
+  |
+9 | pub const SURFACE_5: Color32 = Color32::from_rgb(0x28, 0x3e, 0x51); // 最亮表面
+  |           ^^^^^^^^^
+
+warning: constant `TEXT_DISABLED` is never used
+  --> apps/desktop/src/theme.rs:15:11
+   |
+15 | pub const TEXT_DISABLED: Color32 = Color32::from_rgb(0x4a, 0x5b, 0x69);
+   |           ^^^^^^^^^^^^^
+
+warning: constant `ACCENT_HOVER` is never used
+  --> apps/desktop/src/theme.rs:19:11
+   |
+19 | pub const ACCENT_HOVER: Color32 = Color32::from_rgb(0x4d, 0xcb, 0xfa);
+   |           ^^^^^^^^^^^^
+
+warning: constant `ACCENT_ACTIVE` is never used
+  --> apps/desktop/src/theme.rs:20:11
+   |
+20 | pub const ACCENT_ACTIVE: Color32 = Color32::from_rgb(0x27, 0xa7, 0xde);
+   |           ^^^^^^^^^^^^^
+
+warning: constant `ACCENT_MUTED` is never used
+  --> apps/desktop/src/theme.rs:21:11
+   |
+21 | pub const ACCENT_MUTED: Color32 = Color32::from_rgb(0x2d, 0x7a, 0x9a); // 低饱和辅助色
+   |           ^^^^^^^^^^^^
+
+warning: constant `BACKGROUND` is never used
+  --> apps/desktop/src/theme.rs:35:11
+   |
+35 | pub const BACKGROUND: Color32 = SURFACE_1;
+   |           ^^^^^^^^^^
+
+warning: constant `SURFACE` is never used
+  --> apps/desktop/src/theme.rs:36:11
+   |
+36 | pub const SURFACE: Color32 = SURFACE_2;
+   |           ^^^^^^^
+
+warning: constant `TEXT` is never used
+  --> apps/desktop/src/theme.rs:37:11
+   |
+37 | pub const TEXT: Color32 = TEXT_PRIMARY;
+   |           ^^^^
+
+warning: constant `MUTED` is never used
+  --> apps/desktop/src/theme.rs:38:11
+   |
+38 | pub const MUTED: Color32 = TEXT_MUTED;
+   |           ^^^^^
+
+warning: constant `PRIMARY` is never used
+  --> apps/desktop/src/theme.rs:39:11
+   |
+39 | pub const PRIMARY: Color32 = ACCENT;
+   |           ^^^^^^^
+
+warning: function `section` is never used
+  --> apps/desktop/src/widgets.rs:72:8
+   |
+72 | pub fn section(ui: &mut egui::Ui, title: &str, content: impl FnOnce(&mut egui::Ui)) {
+   |        ^^^^^^^
+
+warning: variant `Danger` is never constructed
+   --> apps/desktop/src/widgets.rs:228:5
+    |
+225 | pub enum BadgeStatus {
+    |          ----------- variant in this enum
+...
+228 |     Danger,
+    |     ^^^^^^
+
+warning: function `icon_button` is never used
+   --> apps/desktop/src/widgets.rs:511:8
+    |
+511 | pub fn icon_button(ui: &mut egui::Ui, icon: &str, tooltip: &str) -> egui::Response {
+    |        ^^^^^^^^^^^
+
+warning: function `grid` is never used
+   --> apps/desktop/src/widgets.rs:584:8
+    |
+584 | pub fn grid(
+    |        ^^^^
+
+warning: function `loading_pulse` is never used
+   --> apps/desktop/src/widgets.rs:606:8
+    |
+606 | pub fn loading_pulse(ui: &mut egui::Ui, text: &str) {
+    |        ^^^^^^^^^^^^^
+
+warning: function `progress_bar` is never used
+   --> apps/desktop/src/widgets.rs:639:8
+    |
+639 | pub fn progress_bar(ui: &mut egui::Ui, progress: f32, label: Option<&str>) {
+    |        ^^^^^^^^^^^^
+
+warning: function `info_box` is never used
+   --> apps/desktop/src/widgets.rs:669:8
+    |
+669 | pub fn info_box(ui: &mut egui::Ui, icon: &str, text: &str, color: egui::Color32) {
+    |        ^^^^^^^^
+
+warning: function `spinner` is never used
+   --> apps/desktop/src/widgets.rs:710:8
+    |
+710 | pub fn spinner(ui: &mut egui::Ui, size: f32) {
+    |        ^^^^^^^
+
+warning: function `skeleton_box` is never used
+   --> apps/desktop/src/widgets.rs:747:8
+    |
+747 | pub fn skeleton_box(ui: &mut egui::Ui, width: f32, height: f32) {
+    |        ^^^^^^^^^^^^
+
+warning: function `metric_card` is never used
+   --> apps/desktop/src/widgets.rs:901:8
+    |
+901 | pub fn metric_card(ui: &mut egui::Ui, label: &str, value: &str, trend: Option<&str>) {
+    |        ^^^^^^^^^^^
+
+warning: function `toggle` is never used
+   --> apps/desktop/src/widgets.rs:929:8
+    |
+929 | pub fn toggle(ui: &mut egui::Ui, value: &mut bool, label: &str) -> egui::Response {
+    |        ^^^^^^
+
+warning: function `compact_status_bar` is never used
+   --> apps/desktop/src/widgets.rs:978:8
+    |
+978 | pub fn compact_status_bar(ui: &mut egui::Ui, items: &[(&str, &str, egui::Color32)]) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: function `key_value` is never used
+   --> apps/desktop/src/widgets.rs:989:8
+    |
+989 | pub fn key_value(ui: &mut egui::Ui, key: &str, value: &str) {
+    |        ^^^^^^^^^
+
+warning: function `code_block_with_copy` is never used
+   --> apps/desktop/src/widgets.rs:999:8
+    |
+999 | pub fn code_block_with_copy(ui: &mut egui::Ui, code: &str, label: &str) -> bool {
+    |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `collapsible_detail` is never used
+    --> apps/desktop/src/widgets.rs:1035:8
+     |
+1035 | pub fn collapsible_detail(
+     |        ^^^^^^^^^^^^^^^^^^
+
+   Compiling gstreamer-base v0.23.6
+   Compiling gstreamer-rtp v0.23.5
+   Compiling gstreamer-app v0.23.5
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+warning: `neonmix-desktop` (bin "neonmix-desktop") generated 27 warnings
+    Finished `release` profile [optimized + debuginfo] target(s) in 54.06s

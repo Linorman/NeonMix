@@ -1,0 +1,6 @@
+{
+  "exit_code": 1,
+  "stdout": "{\"type\":\"fatal\",\"message\":\"media IPC must be IPv4 loopback\"}\n",
+  "stderr": "",
+  "scope": "Real Windows worker with NamedPipe-shaped endpoint; no Apple source; dummy private file, no real credentials"
+}

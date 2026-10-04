@@ -1,0 +1,79 @@
+{
+  "passed": false,
+  "platform": "darwin",
+  "scope": "macOS local functional E05; no Windows/Linux runtime or cross-machine performance claim",
+  "binary_sha256": "a4cdf682d91559cf97d789b2eb6b02755eed8c714d72c83e15d62cf05498db8b",
+  "scenarios": {
+    "native_vault_write_read_delete": true,
+    "same_name_candidates": [
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "127.0.0.1:64956",
+            "url": "https://127.0.0.1:64956"
+          }
+        ],
+        "hub_id": "43252155-98e4-4041-a749-e010c3430033",
+        "instance": "NeonMix-4325215598e44041a749e010c3430033._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      },
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:64955",
+            "url": "https://10.11.11.147:64955"
+          },
+          {
+            "address": "10.211.55.2:64955",
+            "url": "https://10.211.55.2:64955"
+          },
+          {
+            "address": "10.254.101.147:64955",
+            "url": "https://10.254.101.147:64955"
+          },
+          {
+            "address": "10.37.129.2:64955",
+            "url": "https://10.37.129.2:64955"
+          },
+          {
+            "address": "127.0.0.1:64955",
+            "url": "https://127.0.0.1:64955"
+          },
+          {
+            "address": "192.168.100.111:64955",
+            "url": "https://192.168.100.111:64955"
+          },
+          {
+            "address": "192.168.100.208:64955",
+            "url": "https://192.168.100.208:64955"
+          }
+        ],
+        "hub_id": "9fb13513-8dc1-4dc2-8509-9d89585adefe",
+        "instance": "NeonMix-9fb135138dc14dc285099d89585adefe._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      }
+    ],
+    "automatic_pair_and_repeat_native_profile": {
+      "credential": "/Volumes/projects-mac/NeonMix/.local/tmp/e05-3tjyljds/sender.json",
+      "credential_store": "platform",
+      "device_id": "1c99e79b-0d34-46a3-8417-865b9d765bef",
+      "event": "paired",
+      "hub_id": "9fb13513-8dc1-4dc2-8509-9d89585adefe"
+    },
+    "unpaired_and_wrong_certificate_rejected": {
+      "http": 401,
+      "client_error": "error sending request for url (https://127.0.0.1:64956/v1/identity)"
+    }
+  },
+  "error": "paired Hub is offline, unreachable or its identity changed\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/Volumes/projects-mac/NeonMix/tools/e05_probe.py\", line 151, in <module>\n    run('snapshot','--credential',profile)\n    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Volumes/projects-mac/NeonMix/tools/e05_probe.py\", line 40, in run\n    assert (result.returncode == 0) == ok, result.stderr\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: paired Hub is offline, unreachable or its identity changed\n\n",
+  "cleanup": {
+    "platform_entries_attempted": 5,
+    "failed": [],
+    "temporary_profiles_removed": true
+  }
+}

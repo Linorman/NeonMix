@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 132, in main
+    wait_for(lambda: not snapshot()["devices"][member]["playback_allowed"])
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_background_probe.py", line 54, in wait_for
+    raise RuntimeError(f"probe condition timed out: {last}")
+RuntimeError: probe condition timed out: False

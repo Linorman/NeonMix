@@ -1,0 +1,192 @@
+[
+  {
+    "platform": "macos",
+    "name": "four-airplay",
+    "passed": true,
+    "recoveries": 24,
+    "windows": 73,
+    "steady_late": 0,
+    "global_late_sum": 0,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 4,
+      "successful": 32495,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "macos",
+    "name": "mix-3plus1",
+    "passed": true,
+    "recoveries": 6,
+    "windows": 19,
+    "steady_late": 0,
+    "global_late_sum": 0,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "macos",
+    "name": "mix-2plus2",
+    "passed": true,
+    "recoveries": 8,
+    "windows": 25,
+    "steady_late": 0,
+    "global_late_sum": 0,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "macos",
+    "name": "mix-1plus3",
+    "passed": true,
+    "recoveries": 2,
+    "windows": 7,
+    "steady_late": 0,
+    "global_late_sum": 0,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "macos",
+    "name": "mix-0plus4",
+    "passed": true,
+    "recoveries": 0,
+    "windows": 1,
+    "steady_late": 0,
+    "global_late_sum": 0,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "ubuntu",
+    "name": "four-contention",
+    "passed": true,
+    "recoveries": 16,
+    "windows": 49,
+    "steady_late": 0,
+    "global_late_sum": 123,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 4,
+      "successful": 29997,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "ubuntu",
+    "name": "3plus1",
+    "passed": true,
+    "recoveries": 6,
+    "windows": 19,
+    "steady_late": 0,
+    "global_late_sum": 226,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "ubuntu",
+    "name": "2plus2",
+    "passed": true,
+    "recoveries": 4,
+    "windows": 13,
+    "steady_late": 0,
+    "global_late_sum": 51,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "ubuntu",
+    "name": "1plus3",
+    "passed": true,
+    "recoveries": 2,
+    "windows": 7,
+    "steady_late": 0,
+    "global_late_sum": 788,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  },
+  {
+    "platform": "ubuntu",
+    "name": "0plus4",
+    "passed": true,
+    "recoveries": 0,
+    "windows": 1,
+    "steady_late": 0,
+    "global_late_sum": 0,
+    "max_lane_underrun_delta": 0,
+    "max_ingress_late_delta": 0,
+    "all_survivor_sessions_unchanged": true,
+    "all_victim_lanes_cleared": true,
+    "fixture_removed": true,
+    "reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    }
+  }
+]

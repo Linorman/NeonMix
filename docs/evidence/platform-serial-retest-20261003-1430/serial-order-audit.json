@@ -1,0 +1,15 @@
+{
+  "ubuntu_cleanup_epoch": 1791010080.9465957,
+  "ubuntu_cleanup_shanghai": "2026-10-03T14:48:00.946596+08:00",
+  "first_macos_fresh_command_epoch": 1791010103.5661702,
+  "first_macos_fresh_command_shanghai": "2026-10-03T14:48:23.566170+08:00",
+  "gap_seconds": 22.619574546813965,
+  "no_overlap_in_new_round": true,
+  "ubuntu_units": {
+    "neonmix-serial1430-ubuntu": "MainPID=0\nActiveState=inactive\n",
+    "neonmix-serial1430-lan": "MainPID=0\nActiveState=inactive\n",
+    "neonmix-serial1430-cpu-lan": "MainPID=0\nActiveState=inactive\n"
+  },
+  "macos_self_tests_started_only_after_ubuntu_cleanup": true,
+  "scope": "Native command and process lifecycle evidence; Mac LAN sender is part of Ubuntu designated experiment."
+}

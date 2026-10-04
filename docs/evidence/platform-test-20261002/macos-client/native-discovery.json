@@ -1,0 +1,33 @@
+{
+  "scope": "macOS DNS-SD discovery of both designated test rooms",
+  "exit_code": 0,
+  "candidates": [
+    {
+      "capabilities": "opus48-stereo,pair-v1",
+      "endpoints": [
+        {
+          "address": "192.168.100.186:17443",
+          "url": "https://192.168.100.186:17443"
+        }
+      ],
+      "hub_id": "b64966fa-8320-487d-b51a-5333496efa38",
+      "instance": "NeonMix-b64966fa8320487db51a5333496efa38-d59080f0a4ee._neonmix._tcp.local.",
+      "room_name": "NeonMix Windows Test",
+      "version": 1
+    },
+    {
+      "capabilities": "opus48-stereo,pair-v1",
+      "endpoints": [
+        {
+          "address": "192.168.100.112:7443",
+          "url": "https://192.168.100.112:7443"
+        }
+      ],
+      "hub_id": "cab92fcf-44de-4929-aa20-0c64e5c6b033",
+      "instance": "NeonMix-cab92fcf44de4929aa200c64e5c6b033-011e344a3ff0._neonmix._tcp.local.",
+      "room_name": "Ubuntu AirPlay 20261002",
+      "version": 1
+    }
+  ],
+  "both_found": true
+}

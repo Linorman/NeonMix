@@ -1,0 +1,46 @@
+{
+  "scenario": "mix",
+  "platform": "macOS",
+  "os_version": "27.0",
+  "architecture": "arm64",
+  "build_profile": "release",
+  "sources": 4,
+  "native_sources": 0,
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real CoreAudio output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "765b8761577c79fc1ac4ef3624d6f0b31d8a17bc256aef1b57d8067658dda36d",
+    "neonmix-airplay-worker": "5cfa7d8a2fb91c9ccc4ee0ff6f941682a28f6bbf50ee745b5c3ddf766b9de09e"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 3,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": 30.0,
+  "airplay_frequencies_hz": [
+    317,
+    439,
+    563,
+    701
+  ],
+  "native_frequencies_hz": [],
+  "passed": false,
+  "scenarios": {
+    "explicit_idle_pairing_window_renews_without_worker_restart": true,
+    "same_source_simultaneous_cross_receiver_has_one_owner": true
+  },
+  "isolation_checks": [],
+  "status_reads": {
+    "readers": 4,
+    "reader_interval_ms": 20,
+    "successful": 894,
+    "errors": 0
+  },
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

@@ -1,0 +1,21 @@
+{
+  "machine": "Apple M4 Pro, macOS",
+  "build": "tools/dev cargo build -p neonmix-desktop --release --locked --features screenshot",
+  "method": "same as before/cpu.json: preview mode, 5 s warm-up, process CPU time over 30 s / wall time; fixtures in ../fixtures",
+  "live_frame_budget": "20 fps focused, 10 fps unfocused (animation::LIVE_FRAME)",
+  "finding": "A sample(1) profile at 30 fps showed most main-thread time in CGLFlushDrawable (buffer presentation), not painting; CPU follows frame rate, so the live budget was lowered from 30 to 20 fps (10.5% -> 5.9% at 1100x760).",
+  "samples_percent_of_one_core": {
+    "live_playing_1100x760": 5.90,
+    "live_playing_1600x1000": 6.40,
+    "live_playing_reduce_motion_1100x760": 1.23,
+    "live_empty_1100x760": 0.96,
+    "mixer_playing_1100x760": 1.26,
+    "hub_full_1100x760": 1.23,
+    "diagnostics_full_1100x760": 1.26
+  },
+  "targets": {
+    "idle_no_audio": "<= baseline + 0.5 -> pass (0.96-1.26 vs 1.03-1.16)",
+    "live_flow_four_lanes_1100x760": "<= 8.0 -> pass (5.90)",
+    "live_flow_four_lanes_1600x1000": "<= 10.0 -> pass (6.40)"
+  }
+}

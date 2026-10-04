@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "E:\Desktop\NeonMix-test\r03\protocol-harness.py", line 18, in <module>
+    exec(compile(text,str(p),'exec'),{'__name__':'__main__','__file__':str(p),'protect_fixture':protect_fixture})
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\NeonMix-test\r03\apps\airplay-worker\pairing_probe.py", line 186, in <module>
+    main()
+    ~~~~^^
+  File "E:\Desktop\NeonMix-test\r03\apps\airplay-worker\pairing_probe.py", line 122, in main
+    assert Path(os.environ['TMPDIR']).resolve().is_relative_to(ROOT), 'run through tools/dev'
+                ~~~~~~~~~~^^^^^^^^^^
+  File "<frozen os>", line 717, in __getitem__
+KeyError: 'TMPDIR'

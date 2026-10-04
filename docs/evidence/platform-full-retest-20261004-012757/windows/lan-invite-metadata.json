@@ -1,0 +1,12 @@
+{
+  "endpoint": "https://192.168.100.186:17446",
+  "pid": 43208,
+  "expires_unix_seconds": 1791050872,
+  "remote_unix": 1791050572.5325036,
+  "local_fetch_begin_epoch": 1791050572.765196,
+  "ttl_via_product_cli": 300,
+  "local_fetch_end_epoch": 1791050573.253369,
+  "local_invite_mode": "0o600",
+  "local_path": "/Volumes/projects-mac/NeonMix/artifacts/platform-full-retest-20261004-012757/windows/lan-invite.json",
+  "secret_exported_to_evidence": false
+}

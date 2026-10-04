@@ -1,0 +1,82 @@
+[
+  {
+    "platform": "windows",
+    "name": "mix-0plus4",
+    "passed": true,
+    "failure_phase": null,
+    "failure": null,
+    "recoveries": 0,
+    "steady_timed_late_delta": 0,
+    "steady_lane_underrun": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "platform": "windows",
+    "name": "mix-1plus3",
+    "passed": true,
+    "failure_phase": null,
+    "failure": null,
+    "recoveries": 2,
+    "steady_timed_late_delta": 0,
+    "steady_lane_underrun": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "platform": "windows",
+    "name": "mix-2plus2",
+    "passed": true,
+    "failure_phase": null,
+    "failure": null,
+    "recoveries": 4,
+    "steady_timed_late_delta": 0,
+    "steady_lane_underrun": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "platform": "windows",
+    "name": "mix-3plus1",
+    "passed": true,
+    "failure_phase": null,
+    "failure": null,
+    "recoveries": 6,
+    "steady_timed_late_delta": 0,
+    "steady_lane_underrun": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "platform": "windows",
+    "name": "mix-4plus0-retest",
+    "passed": false,
+    "failure_phase": "independent receiver pairing and encrypted PCM",
+    "failure": null,
+    "recoveries": 0,
+    "steady_timed_late_delta": null,
+    "steady_lane_underrun": []
+  },
+  {
+    "platform": "windows",
+    "name": "mix-control",
+    "passed": true,
+    "failure_phase": null,
+    "failure": null,
+    "recoveries": 0,
+    "steady_timed_late_delta": null,
+    "steady_lane_underrun": []
+  }
+]

@@ -1,0 +1,13 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2.66s
+     Running tests/drift_stability.rs (target/release/deps/drift_stability-430423d6f86df5b9)
+
+running 1 test
+{"injected_ppm":-500,"duration_seconds":600,"commanded_ppm":-247.8,"min_queue_frames":813,"max_queue_frames":1735,"frequency_hz":437,"rms":0.002815033818166392,"underrun_frames":0}
+{"injected_ppm":-100,"duration_seconds":600,"commanded_ppm":4.609,"min_queue_frames":960,"max_queue_frames":1735,"frequency_hz":437.1,"rms":0.002815038048319554,"underrun_frames":0}
+{"injected_ppm":100,"duration_seconds":600,"commanded_ppm":-4.609,"min_queue_frames":1373,"max_queue_frames":2215,"frequency_hz":437,"rms":0.002815034724369968,"underrun_frames":0}
+{"injected_ppm":500,"duration_seconds":600,"commanded_ppm":246.363,"min_queue_frames":1249,"max_queue_frames":2336,"frequency_hz":437.1,"rms":0.002815028032593735,"underrun_frames":0}
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.06s
+

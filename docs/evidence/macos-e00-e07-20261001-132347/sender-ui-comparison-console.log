@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 170, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 79, in main
+    app.paste("邀请文本", invite["invitation"])
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 70, in paste
+    assert self.ax(script)==value
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

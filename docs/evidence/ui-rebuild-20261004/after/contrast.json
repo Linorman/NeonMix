@@ -1,0 +1,59 @@
+{
+ "TEXT": {
+  "BG": 17.1,
+  "SURFACE": 16.19,
+  "RAISED": 14.54,
+  "HOVER": 13.07
+ },
+ "TEXT_2": {
+  "BG": 9.48,
+  "SURFACE": 8.98,
+  "RAISED": 8.07,
+  "HOVER": 7.25
+ },
+ "TEXT_3": {
+  "BG": 5.87,
+  "SURFACE": 5.56,
+  "RAISED": 4.99,
+  "HOVER": 4.48
+ },
+ "ACCENT": {
+  "BG": 12.33,
+  "SURFACE": 11.68,
+  "RAISED": 10.49,
+  "HOVER": 9.42
+ },
+ "SRC_AIRPLAY": {
+  "BG": 7.19,
+  "SURFACE": 6.81,
+  "RAISED": 6.12,
+  "HOVER": 5.49
+ },
+ "SOLO": {
+  "BG": 13.52,
+  "SURFACE": 12.81,
+  "RAISED": 11.5,
+  "HOVER": 10.33
+ },
+ "SUCCESS": {
+  "BG": 11.77,
+  "SURFACE": 11.15,
+  "RAISED": 10.02,
+  "HOVER": 9.0
+ },
+ "WARNING": {
+  "BG": 11.01,
+  "SURFACE": 10.43,
+  "RAISED": 9.37,
+  "HOVER": 8.42
+ },
+ "DANGER": {
+  "BG": 6.97,
+  "SURFACE": 6.6,
+  "RAISED": 5.93,
+  "HOVER": 5.33
+ },
+ "ON_ACCENT_on_ACCENT": 11.4,
+ "ON_DANGER_on_DANGER": 6.69,
+ "note": "WCAG 2.x contrast ratios of theme v3 text/state colours. All >= 4.5:1 except TEXT_3 on HOVER (4.48), where muted captions do not sit."
+}

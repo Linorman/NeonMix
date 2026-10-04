@@ -1,0 +1,9 @@
+{
+  "scope": "LaunchServices open of relocated signed .app, equivalent to Finder launch",
+  "passed": true,
+  "visible_windows": 1,
+  "independently_created_background": true,
+  "created_state": true,
+  "open_exit_code": 0,
+  "fixture_removed": true
+}

@@ -5,6 +5,8 @@
 使用锁定CPAL 0.18.2，内部复用Windows windows-rs/WASAPI、Linux pipewire-rs、macOS Core Audio绑定，核心无平台类型。Linux明确选择PipeWire，不降级至ALSA/PulseAudio。选择依据是该版本新增native PipeWire、稳定ID、实际period查询与设备timestamp；不把“打开声卡”当作创建虚拟驱动。
 
 - Windows：对明确选择的render endpoint建立事件驱动loopback，虚拟端点与实验实体端点走同一采集桥接。驱动创建、签名和分发在E06/E09。
+
+Windows 共享模式输出在系统默认格式超出项目范围时，按设备声明的同声道、同采样类型配置协商应用流，优先 48kHz，其次 96/44.1kHz；已有支持范围内的默认格式和显式采样率请求保持原规则。WASAPI 的共享模式格式转换不改变设备的系统 mix 格式或默认路由。此回退只用于 render，loopback/input capture 仍遵循原生采集格式限制。Shanling UA2 默认384kHz、应用流48kHz的原生 Windows 复现与验证见 [UA2 兼容修复](../WINDOWS-UA2-COMPAT-20261004.md)。
 - Linux：CPAL对sink设置 `stream.capture.sink=true`，固定 `target.object` 并使用DONT_RECONNECT。独立 `sink` 命令通过pipewire-rs创建support.null-audio-sink，保持proxy生命周期，room slug形成node.name，退出移除；这是可选择的临时实验Sink，不是E06持久配置。
 - macOS：通过稳定UID打开已安装虚拟设备的input side；不使用process tap/AirPlay作为系统虚拟设备替代。HAL插件/受控桥接仍在E06。
 
@@ -23,3 +25,5 @@ Linux运行实验补充：23项核心/I/O测试与9组PipeWire数字场景在Ubu
 现有Itour两个UID的成对复验：Output端写入/Input端读取，以及Input端写入/Output端读取，两组采集和输出退出码均为0，但各240128帧全部静音，峰值和RMS均为0。两组都未通过桥接；不根据设备名称推断它们已经组成可用环回。原始记录见docs/evidence/macos-paired-virtual-probe/。
 
 BlackHole 2ch 0.7.1补验：安装后重启音频服务才出现设备；最初48/44.1/96k采集均全零。通过AVFoundation状态及TCC归属日志确认宿主应用麦克风权限被拒绝，授权后同一二进制三档桥接均读到437Hz测试音。因此此前Itour全零记录缺少权限前提，不作为其驱动不兼容的结论。macOS适配器新增AVAudioApplication.recordPermission预检查（macOS 14起可用，低于14.6部署目标），仅在控制线程查询，不改变权限，不打开默认麦克风。见[BlackHole验收](../BLACKHOLE-TEST.md)。
+
+2026-09-30 E06 原型补充：本文件上文的“尚无 macOS 插件”和“Linux 仅有实验 Sink”描述保留为 E01 历史状态。当前新增 Rust HAL 原型与 Sender 持有的 PipeWire Sink，设备、边界和剩余验收见 [ADR-009](ADR-009-virtual-outputs.md)。

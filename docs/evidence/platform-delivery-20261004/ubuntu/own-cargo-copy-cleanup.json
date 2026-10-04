@@ -1,0 +1,5 @@
+{
+  "at": "2026-10-04T00:38:30.940888",
+  "reason": "Only this invocation copied Cargo cache removed after builds and license capture, no other cache deleted",
+  "path": "/home/parallels/NeonMix/d26u/.local/cargo"
+}

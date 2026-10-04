@@ -1,0 +1,337 @@
+{
+  "capture": "coreaudio:BlackHole2ch_UID",
+  "output": "coreaudio:BuiltInSpeakerDevice",
+  "passed": true,
+  "cases": [
+    {
+      "native_rate": 44100,
+      "sender": {
+        "capture": {
+          "actual_period_frames": 480,
+          "backend": "core_audio",
+          "device_id": "coreaudio:BlackHole2ch_UID",
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 44100
+          },
+          "requested_period_frames": 480,
+          "resampler_delay_frames": 0,
+          "sample_type": "f32",
+          "stream_epoch": 1
+        },
+        "capture_conversion_delay_frames": 69,
+        "event": "sender_started",
+        "session_id": "00a6767f-1c86-487e-b22d-80a74606cad3",
+        "stream_id": 6808265370476067
+      },
+      "diagnostic": {
+        "drift_ppm": [
+          181.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "errors": [],
+        "limited_frames": 0,
+        "output_frames": 210688,
+        "output_stats": {
+          "callback_max_ns": 130417,
+          "callback_over_budget": 0,
+          "callbacks": 823,
+          "clock_epoch": 1,
+          "discontinuities": 0,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 210688,
+          "last_arrival_ns": 4441665584,
+          "last_device_ns": 183195855076958,
+          "last_error": 0,
+          "native_device_frame_position": 210432,
+          "native_internal_frames": 210432,
+          "native_stream_frames": 210432,
+          "no_data_intervals": 0,
+          "peak": 0.003949450328946114,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 210069,
+          "silent_frames": 34656,
+          "stale_frames": 0,
+          "submitted_frames": 210688
+        },
+        "queues": [
+          1840,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "receivers": [
+          {
+            "authenticated": true,
+            "late_packets": 0,
+            "lost_packets": 0,
+            "packets": {
+              "duplicate": 0,
+              "highest_sequence": 3306,
+              "highest_timestamp": 1639775583,
+              "invalid": 0,
+              "received": 376,
+              "reordered": 0,
+              "timestamp_step_errors": 0
+            },
+            "pcm_frames": 178080,
+            "pcm_peak": 0.01654052734375,
+            "pcm_timing_gaps": [],
+            "plc_samples": 0,
+            "queue_drops": 0,
+            "silent_pcm_frames": 280
+          }
+        ],
+        "underrun_frames": 0
+      }
+    },
+    {
+      "native_rate": 48000,
+      "sender": {
+        "capture": {
+          "actual_period_frames": 480,
+          "backend": "core_audio",
+          "device_id": "coreaudio:BlackHole2ch_UID",
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 48000
+          },
+          "requested_period_frames": 480,
+          "resampler_delay_frames": 0,
+          "sample_type": "f32",
+          "stream_epoch": 1
+        },
+        "capture_conversion_delay_frames": 0,
+        "event": "sender_started",
+        "session_id": "930ba177-d539-4a25-9e3f-f02e0a4614e0",
+        "stream_id": 1453208688424955
+      },
+      "diagnostic": {
+        "drift_ppm": [
+          185.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "errors": [],
+        "limited_frames": 0,
+        "output_frames": 609024,
+        "output_stats": {
+          "callback_max_ns": 130417,
+          "callback_over_budget": 0,
+          "callbacks": 2379,
+          "clock_epoch": 1,
+          "discontinuities": 0,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 609024,
+          "last_arrival_ns": 12740348709,
+          "last_device_ns": 183204153767833,
+          "last_error": 0,
+          "native_device_frame_position": 608768,
+          "native_internal_frames": 608768,
+          "native_stream_frames": 608768,
+          "no_data_intervals": 0,
+          "peak": 0.004010855220258236,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 608405,
+          "silent_frames": 146358,
+          "stale_frames": 0,
+          "submitted_frames": 609024
+        },
+        "queues": [
+          1839,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "receivers": [
+          {
+            "authenticated": true,
+            "late_packets": 0,
+            "lost_packets": 0,
+            "packets": {
+              "duplicate": 0,
+              "highest_sequence": 23639,
+              "highest_timestamp": 112009743,
+              "invalid": 0,
+              "received": 380,
+              "reordered": 0,
+              "timestamp_step_errors": 0
+            },
+            "pcm_frames": 180000,
+            "pcm_peak": 0.0162353515625,
+            "pcm_timing_gaps": [],
+            "plc_samples": 0,
+            "queue_drops": 0,
+            "silent_pcm_frames": 276
+          }
+        ],
+        "underrun_frames": 0
+      }
+    },
+    {
+      "native_rate": 96000,
+      "sender": {
+        "capture": {
+          "actual_period_frames": 480,
+          "backend": "core_audio",
+          "device_id": "coreaudio:BlackHole2ch_UID",
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 96000
+          },
+          "requested_period_frames": 480,
+          "resampler_delay_frames": 0,
+          "sample_type": "f32",
+          "stream_epoch": 1
+        },
+        "capture_conversion_delay_frames": 32,
+        "event": "sender_started",
+        "session_id": "fb920d65-ad59-4332-a50e-205d5951519a",
+        "stream_id": 3416245061189080
+      },
+      "diagnostic": {
+        "drift_ppm": [
+          184.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "errors": [],
+        "limited_frames": 0,
+        "output_frames": 1004288,
+        "output_stats": {
+          "callback_max_ns": 161125,
+          "callback_over_budget": 0,
+          "callbacks": 3923,
+          "clock_epoch": 1,
+          "discontinuities": 0,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 1004288,
+          "last_arrival_ns": 20975092250,
+          "last_device_ns": 183212388458499,
+          "last_error": 0,
+          "native_device_frame_position": 1004032,
+          "native_internal_frames": 1004032,
+          "native_stream_frames": 1004032,
+          "no_data_intervals": 0,
+          "peak": 0.003979403059929609,
+          "period_max": 256,
+          "period_min": 256,
+          "presented_frames": 1003669,
+          "silent_frames": 258050,
+          "stale_frames": 0,
+          "submitted_frames": 1004288
+        },
+        "queues": [
+          1839,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "receivers": [
+          {
+            "authenticated": true,
+            "late_packets": 0,
+            "lost_packets": 0,
+            "packets": {
+              "duplicate": 0,
+              "highest_sequence": 30959,
+              "highest_timestamp": 1646228343,
+              "invalid": 0,
+              "received": 377,
+              "reordered": 0,
+              "timestamp_step_errors": 0
+            },
+            "pcm_frames": 178560,
+            "pcm_peak": 0.01617431640625,
+            "pcm_timing_gaps": [],
+            "plc_samples": 0,
+            "queue_drops": 0,
+            "silent_pcm_frames": 234
+          }
+        ],
+        "underrun_frames": 0
+      }
+    }
+  ]
+}

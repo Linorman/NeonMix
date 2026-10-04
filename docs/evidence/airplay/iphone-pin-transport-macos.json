@@ -1,0 +1,100 @@
+{
+  "scope": "real iPhone selection; user reports no PIN window and route returns to iPhone",
+  "source": {
+    "model": "iPhone 16 Pro",
+    "os": "iOS 27",
+    "app": "Spotify"
+  },
+  "status": {
+    "ready": true,
+    "active": false,
+    "format": null,
+    "received_blocks": 0,
+    "released_blocks": 0,
+    "failure_stage": null,
+    "protocol_events": [
+      {
+        "body_bytes": 0,
+        "connection_id": 1,
+        "cseq_present": false,
+        "event": "open",
+        "method": "OTHER",
+        "outcome": "opened",
+        "protocol": "none",
+        "relative_ms": 344165,
+        "response_bytes": 0,
+        "route": "other",
+        "sent_bytes": 0,
+        "session_present": false,
+        "status": 0,
+        "type": "protocol_transport"
+      },
+      {
+        "at_worker_ms": 344474,
+        "method": "GET",
+        "route": "info",
+        "status": 200
+      },
+      {
+        "body_bytes": 70,
+        "connection_id": 1,
+        "cseq_present": true,
+        "event": "response",
+        "method": "GET",
+        "outcome": "complete",
+        "protocol": "RTSP/1.0",
+        "relative_ms": 344169,
+        "response_bytes": 440,
+        "route": "info",
+        "sent_bytes": 440,
+        "session_present": false,
+        "status": 200,
+        "type": "protocol_transport"
+      },
+      {
+        "at_worker_ms": 344479,
+        "method": "POST",
+        "route": "pair_pin_start",
+        "status": 200
+      },
+      {
+        "body_bytes": 0,
+        "connection_id": 1,
+        "cseq_present": true,
+        "event": "response",
+        "method": "POST",
+        "outcome": "complete",
+        "protocol": "RTSP/1.0",
+        "relative_ms": 344176,
+        "response_bytes": 97,
+        "route": "pair_pin_start",
+        "sent_bytes": 97,
+        "session_present": false,
+        "status": 200,
+        "type": "protocol_transport"
+      },
+      {
+        "body_bytes": 0,
+        "connection_id": 1,
+        "cseq_present": false,
+        "event": "close",
+        "method": "OTHER",
+        "outcome": "peer_closed",
+        "protocol": "none",
+        "relative_ms": 344179,
+        "response_bytes": 0,
+        "route": "other",
+        "sent_bytes": 0,
+        "session_present": false,
+        "status": 0,
+        "type": "protocol_transport"
+      }
+    ],
+    "protocol_events_dropped": 0
+  },
+  "binaries": {
+    "neonmix-hub": "bf94d57e7dc7eaafdc474001ef3f8428e0dc683ed2b92cf3546317ed93ba2bdb",
+    "neonmix-airplay-worker": "5853e9418f0bd1cb6bf57881d93b0a5ef0de6c8e5813f7f61a2157e3267fd11e"
+  },
+  "interpretation": "PINstart response completely handed to socket; peer closes before sending SRP; no diagnostic loss; not an incorrect PIN proof result"
+}

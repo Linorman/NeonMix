@@ -1,0 +1,1 @@
+{"callbacks":238,"event":"simulation_complete","frames":96000,"input_rate":48000,"output_rate":48000,"peak":0.06309572607278824,"periods":[1,127,256,441,480,511,1024],"positive_zero_crossings":2000,"resampler_delay_frames":0,"rms":0.04461541468992563}

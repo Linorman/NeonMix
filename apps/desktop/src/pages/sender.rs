@@ -1,8 +1,8 @@
 //! Sender: one sentence about where this computer's sound goes and the one
 //! action that changes it; setup steps; pairing and virtual output panels.
 use super::*;
-use crate::widgets::{Kind, Step, Tone};
-use egui::{Align, CornerRadius, Layout, Margin, Stroke};
+use crate::widgets::{Kind, Tone};
+use egui::{Align, CornerRadius, Layout, Margin};
 
 impl Desktop {
     fn own_device(&self) -> Option<&neonmix_control::Device> {
@@ -26,37 +26,6 @@ impl Desktop {
 
     pub(crate) fn sender_page(&mut self, ui: &mut egui::Ui) {
         let paired = self.sender_paired();
-        let binding = self.binding.is_some();
-        let running = self.status.as_ref().is_some_and(|s| s.sender.running);
-        if !running {
-            let state = |done: bool, current: bool| {
-                if done {
-                    Step::Done
-                } else if current {
-                    Step::Current
-                } else {
-                    Step::Todo
-                }
-            };
-            let found = paired || !self.candidates.is_empty();
-            let steps = [
-                ("发现房间", state(found, true)),
-                ("配对", state(paired, found)),
-                ("添加虚拟输出", state(binding, paired)),
-                ("开始发送", state(running, paired && binding)),
-            ];
-            match widgets::stepper(ui, &steps) {
-                Some(0 | 1) => {
-                    self.panels.insert("pair", true);
-                    self.scroll_to = Some("pair");
-                }
-                Some(2) => {
-                    self.panels.insert("binding", true);
-                    self.scroll_to = Some("binding");
-                }
-                _ => {}
-            }
-        }
         self.send_hero(ui);
         if ui.available_width() >= TWO_COLUMNS {
             ui.columns(2, |c| {
@@ -69,6 +38,130 @@ impl Desktop {
         } else {
             self.pair_panel(ui, paired);
             self.binding_panel(ui);
+        }
+    }
+
+    /// Where this computer's sound goes, stage by stage. Doubles as the
+    /// setup steps: unfinished stages name the next action and open its panel.
+    fn sender_pipeline(&mut self, ui: &mut egui::Ui) {
+        use crate::viz::{Stage, Step};
+        let paired = self.sender_paired();
+        let running = self.status.as_ref().is_some_and(|s| s.sender.running);
+        let metrics = self.status.as_ref().and_then(|s| s.sender.metrics.clone());
+        let packets = metrics
+            .as_ref()
+            .and_then(|m| m["encoded_media_packets"].as_u64())
+            .unwrap_or(0);
+        let binding = self.binding.clone();
+        let enabled = binding
+            .as_ref()
+            .and_then(|b| b["enabled"].as_bool())
+            .unwrap_or(false);
+        let output_name = binding
+            .as_ref()
+            .and_then(|b| b["display_name"].as_str())
+            .unwrap_or("虚拟输出")
+            .to_owned();
+        let device = self.own_device().cloned();
+        let room = self.remote_room.clone().unwrap_or_else(|| "房间".into());
+        let state = self.snapshot.clone();
+        let level = state.as_ref().filter(|_| running).and_then(|s| {
+            let lane = self.lanes(s).into_iter().find(|l| l.mine)?;
+            let db = widgets::to_db(lane.rms?)?;
+            Some(((db - widgets::METER_FLOOR_DB) / -widgets::METER_FLOOR_DB).clamp(0.0, 1.0))
+        });
+        let steps = [
+            Step {
+                title: "应用声音",
+                detail: if binding.is_some() && enabled {
+                    "选到该输出的所有应用".into()
+                } else {
+                    "在系统声音设置中选择输出".into()
+                },
+                state: if binding.is_some() && enabled {
+                    Stage::Done
+                } else {
+                    Stage::Todo
+                },
+                icon: icons::Icon::Pulse,
+            },
+            Step {
+                title: "虚拟输出",
+                detail: match (&binding, enabled) {
+                    (Some(_), true) => output_name.clone(),
+                    (Some(_), false) => "已禁用".into(),
+                    (None, _) if paired => "添加虚拟输出".into(),
+                    _ => "配对后添加".into(),
+                },
+                state: match (&binding, enabled) {
+                    (Some(_), true) => Stage::Done,
+                    (Some(_), false) => Stage::Fault,
+                    (None, _) if paired => Stage::Next,
+                    _ => Stage::Todo,
+                },
+                icon: icons::Icon::Mixer,
+            },
+            Step {
+                title: "局域网 · 加密",
+                detail: match &device {
+                    Some(d) if d.revoked => "配对已被撤销".into(),
+                    Some(d) if !d.playback_allowed => "管理员已断开".into(),
+                    _ if paired || running => "已配对，固定身份".into(),
+                    _ if !self.candidates.is_empty() => "粘贴邀请完成配对".into(),
+                    _ => "发现局域网房间".into(),
+                },
+                state: match &device {
+                    Some(d) if d.revoked || !d.playback_allowed => Stage::Fault,
+                    _ if paired || running => Stage::Done,
+                    _ => Stage::Next,
+                },
+                icon: icons::Icon::Sender,
+            },
+            Step {
+                title: "房间",
+                detail: if running && packets > 0 {
+                    format!("正在发送到「{room}」")
+                } else if running {
+                    "正在连接…".into()
+                } else if paired {
+                    format!("「{room}」· 未在发送")
+                } else {
+                    "尚未配对".into()
+                },
+                state: if running && packets > 0 {
+                    Stage::Done
+                } else if running || (paired && binding.is_some() && enabled) {
+                    Stage::Next
+                } else {
+                    Stage::Todo
+                },
+                icon: icons::Icon::Flow,
+            },
+            Step {
+                title: "实体输出",
+                detail: match &state {
+                    Some(s) if s.output.available => self.output_name(s),
+                    Some(_) => "输出丢失".into(),
+                    None => "连接房间后显示".into(),
+                },
+                state: match &state {
+                    Some(s) if s.output.available => Stage::Done,
+                    Some(_) => Stage::Fault,
+                    None => Stage::Todo,
+                },
+                icon: icons::Icon::Room,
+            },
+        ];
+        match crate::viz::pipeline(ui, &steps, level) {
+            Some(1) => {
+                self.panels.insert("binding", true);
+                self.scroll_to = Some("binding");
+            }
+            Some(2) => {
+                self.panels.insert("pair", true);
+                self.scroll_to = Some("pair");
+            }
+            _ => {}
         }
     }
 
@@ -149,17 +242,16 @@ impl Desktop {
                 Tone::Accent,
             )
         };
-        let shown = egui::Frame::new()
-            .fill(theme::SURFACE)
-            .stroke(Stroke::new(1.0, theme::BORDER))
-            .corner_radius(CornerRadius::same(theme::RADIUS))
-            .inner_margin(Margin {
+        let shown = widgets::surface(
+            ui,
+            (tone != Tone::Neutral).then(|| tone.color()),
+            Margin {
                 left: 20,
                 right: 18,
                 top: 16,
                 bottom: 16,
-            })
-            .show(ui, |ui| {
+            },
+            |ui| {
                 ui.set_min_width(ui.available_width());
                 ui.spacing_mut().item_spacing.y = 10.0;
                 let wide = ui.available_width() >= 560.0;
@@ -220,6 +312,8 @@ impl Desktop {
                     text(ui);
                     ui.horizontal(|ui| action(self, ui));
                 }
+                ui.add_space(4.0);
+                self.sender_pipeline(ui);
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing.x = 28.0;
                     widgets::metric(
@@ -257,7 +351,8 @@ impl Desktop {
                 if let Some(e) = self.status.as_ref().and_then(|s| s.sender.error.clone()) {
                     widgets::error_text(ui, user_error(e));
                 }
-            });
+            },
+        );
         let rect = shown.response.rect;
         let bar = egui::Rect::from_min_size(
             egui::pos2(rect.left() + 1.0, rect.top() + 16.0),
@@ -297,10 +392,33 @@ impl Desktop {
                     {
                         self.request(Request::Discover { seconds: 3 });
                     }
-                    if self.candidates.is_empty() {
+                    if self.candidates.is_empty() && !self.pending("discover") {
                         widgets::note(ui, "确认 Hub 正在共享且位于同一局域网。");
                     }
                 });
+                if self.pending("discover") || !self.candidates.is_empty() {
+                    let found: Vec<u64> = self
+                        .candidates
+                        .iter()
+                        .map(|c| {
+                            use std::hash::{Hash, Hasher};
+                            let mut h = std::collections::hash_map::DefaultHasher::new();
+                            c.get("hub_id").map(value_text).hash(&mut h);
+                            h.finish()
+                        })
+                        .collect();
+                    ui.horizontal(|ui| {
+                        crate::viz::radar(ui, self.pending("discover"), &found, 96.0);
+                        widgets::note(
+                            ui,
+                            if self.pending("discover") {
+                                "正在通过 mDNS 搜索局域网中的房间…".to_owned()
+                            } else {
+                                format!("发现 {} 个房间；身份以邀请为准。", found.len())
+                            },
+                        );
+                    });
+                }
                 for candidate in self.candidates.clone() {
                     widgets::inset(ui, |ui| {
                         ui.horizontal(|ui| {

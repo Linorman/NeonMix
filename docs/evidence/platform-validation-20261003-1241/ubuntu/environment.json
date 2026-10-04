@@ -1,0 +1,60 @@
+{
+  "uname": {
+    "exit_code": 0,
+    "stdout": "Linux ubuntu-gnu-linux-24-04-3 6.14.0-27-generic #27~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Jul 22 17:18:30 UTC 2 aarch64 aarch64 aarch64 GNU/Linux\n",
+    "stderr": ""
+  },
+  "release": {
+    "exit_code": 0,
+    "stdout": "PRETTY_NAME=\"Ubuntu 24.04.3 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.3 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+    "stderr": ""
+  },
+  "rustc": {
+    "exit_code": 0,
+    "stdout": "rustc 1.95.0 (59807616e 2026-04-14)\n",
+    "stderr": ""
+  },
+  "openssl": {
+    "exit_code": 0,
+    "stdout": "OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)\n",
+    "stderr": ""
+  },
+  "gstreamer": {
+    "exit_code": 0,
+    "stdout": "1.24.2\n",
+    "stderr": ""
+  },
+  "pipewire": {
+    "exit_code": 0,
+    "stdout": "pipewire\nCompiled with libpipewire 1.0.5\nLinked with libpipewire 1.0.5\n",
+    "stderr": ""
+  },
+  "routes": {
+    "exit_code": 0,
+    "stdout": "default via 192.168.100.1 dev enp0s5 proto dhcp src 192.168.100.112 metric 100 \n192.168.100.0/24 dev enp0s5 proto kernel scope link src 192.168.100.112 metric 100 \n",
+    "stderr": ""
+  },
+  "devices": {
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "error: unexpected argument '--json' found\n\nUsage: neonmix-audio devices\n\nFor more information, try '--help'.\n"
+  },
+  "processes": {
+    "exit_code": 0,
+    "stdout": "    PID   UID COMMAND\n      1     0 systemd\n      2     0 kthreadd\n      3     0 pool_workqueue_release\n      4     0 kworker/R-rcu_gp\n      5     0 kworker/R-sync_wq\n      6     0 kworker/R-kvfree_rcu_reclaim\n      7     0 kworker/R-slub_flushwq\n      8     0 kworker/R-netns\n     13     0 kworker/R-mm_percpu_wq\n     14     0 rcu_tasks_kthread\n     15     0 rcu_tasks_rude_kthread\n     16     0 rcu_tasks_trace_kthread\n     17     0 ksoftirqd/0\n     18     0 rcu_preempt\n     19     0 rcu_exp_par_gp_kthread_worker/0\n     20     0 rcu_exp_gp_kthread_worker\n     21     0 migration/0\n     22     0 idle_inject/0\n     23     0 cpuhp/0\n     24     0 cpuhp/1\n     25     0 idle_inject/1\n     26     0 migration/1\n     27     0 ksoftirqd/1\n     29     0 kworker/1:0H-events_highpri\n     30     0 cpuhp/2\n     31     0 idle_inject/2\n     32     0 migration/2\n     33     0 ksoftirqd/2\n     35     0 kworker/2:0H-kblockd\n     36     0 cpuhp/3\n     37     0 idle_inject/3\n     38     0 migration/3\n     39     0 ksoftirqd/3\n     41     0 kworker/3:0H-events_highpri\n     42     0 kdevtmpfs\n     43     0 kworker/R-inet_frag_wq\n     44     0 kauditd\n     45     0 khungtaskd\n     47     0 oom_reaper\n     48     0 kworker/R-writeback\n     49     0 kcompactd0\n     50     0 ksmd\n     51     0 khugepaged\n     52     0 kworker/R-kintegrityd\n     53     0 kworker/R-kblockd\n     54     0 kworker/R-blkcg_punt_bio\n     56     0 kworker/R-tpm_dev_wq\n     57     0 kworker/R-ata_sff\n     58     0 kworker/R-md\n     59     0 kworker/R-md_bitmap\n     60     0 kworker/R-edac-poller\n     62     0 kworker/R-devfreq_wq\n     63     0 watchdogd\n     65     0 kworker/0:1H-kblockd\n     66     0 kswapd0\n     67     0 ecryptfs-kthread\n     68     0 kworker/R-kthrotld\n     69     0 irq/12-ACPI:Ged\n     70     0 kworker/R-acpi_thermal_pm\n     73     0 kworker/R-mld\n     74     0 kworker/2:1H\n     75     0 kworker/R-ipv6_addrconf\n     84     0 kworker/R-kstrp\n     86     0 kworker/u17:0\n     99     0 kworker/R-charger_manager\n    122     0 kworker/3:1H-kblockd\n    152     0 kworker/1:1H-kblockd\n    164     0 scsi_eh_0\n    165     0 kworker/R-scsi_tmf_0\n    173     0 scsi_eh_1\n    174     0 kworker/R-scsi_tmf_1\n    175     0 scsi_eh_2\n    176     0 kworker/R-scsi_tmf_2\n    177     0 scsi_eh_3\n    178     0 kworker/R-scsi_tmf_3\n    179     0 scsi_eh_4\n    180     0 kworker/R-scsi_tmf_4\n    181     0 scsi_eh_5\n    182     0 kworker/R-scsi_tmf_5\n    419     0 jbd2/sda2-8\n    420     0 kworker/R-ext4-rsv-conversion\n    470     0 systemd-journal\n    540     0 systemd-udevd\n    544     0 psimon\n    857   990 systemd-oomd\n    860   991 systemd-resolve\n    981   108 avahi-daemon\n    982   101 dbus-daemon\n    985   988 gnome-remote-de\n    988   987 polkitd\n    989     0 power-profiles-\n    994     0 accounts-daemon\n    996     0 cron\n    997     0 switcheroo-cont\n   1002     0 systemd-logind\n   1004     0 udisksd\n   1013   108 avahi-daemon\n   1034     0 prltoolsd\n   1072     0 wpa_supplicant\n   1078   102 rsyslogd\n   1109     0 prlshprint\n   1110     0 prltimesync\n   1149     0 ModemManager\n   1278     0 prl_fsd\n   1281     0 fusermount\n   1478     0 unattended-upgr\n   1489     0 sshd\n   1502     0 gdm3\n   1551   106 kerneloops\n   1554   106 kerneloops\n   1559   117 rtkit-daemon\n   1826   118 colord\n   1905     0 upowerd\n   4943     0 fwupd\n  83455     0 gdm-session-wor\n  83480  1000 systemd\n  83486  1000 (sd-pam)\n  83505  1000 pipewire-pulse\n  83509  1000 gnome-keyring-d\n  83510  1000 dbus-daemon\n  83555  1000 xdg-document-po\n  83559  1000 xdg-permission-\n  83566     0 fusermount3\n  83580  1000 gdm-wayland-ses\n  83585  1000 gnome-session-b\n  83651  1000 gcr-ssh-agent\n  83653  1000 gnome-session-c\n  83672  1000 gvfsd\n  83683  1000 gvfsd-fuse\n  83686  1000 gnome-session-b\n  83732  1000 gnome-shell\n  83735  1000 at-spi-bus-laun\n  83745  1000 dbus-daemon\n  83819  1000 at-spi2-registr\n  83835  1000 gnome-shell-cal\n  83845  1000 evolution-sourc\n  83847  1000 gjs\n  83873  1000 ibus-daemon\n  83874  1000 gsd-a11y-settin\n  83878  1000 gsd-color\n  83885  1000 gsd-datetime\n  83896  1000 gsd-housekeepin\n  83909  1000 prlcc\n  83912  1000 evolution-alarm\n  83914  1000 gsd-disk-utilit\n  83930  1000 prldnd\n  83931  1000 prlcp\n  83939  1000 prlshprof\n  83943  1000 gsd-keyboard\n  83945  1000 gsd-media-keys\n  83947  1000 gsd-power\n  83989  1000 gsd-print-notif\n  83993  1000 gsd-rfkill\n  83998  1000 gsd-screensaver\n  83999  1000 gsd-sharing\n  84000  1000 gsd-smartcard\n  84002  1000 gsd-sound\n  84004  1000 gsd-wacom\n  84016  1000 ibus-memconf\n  84018  1000 ibus-extension-\n  84030  1000 ibus-portal\n  84043  1000 gvfs-udisks2-vo\n  84118  1000 goa-daemon\n  84125  1000 gvfs-mtp-volume\n  84133  1000 goa-identity-se\n  84136  1000 gsd-printer\n  84150  1000 gvfs-afc-volume\n  84157  1000 evolution-calen\n  84163  1000 gvfs-goa-volume\n  84171  1000 gvfs-gphoto2-vo\n  84183  1000 evolution-addre\n  84205  1000 ibus-engine-sim\n  84233  1000 dconf-service\n  84248  1000 gvfsd-trash\n  84279  1000 tracker-miner-f\n  84301  1000 gjs\n  84312  1000 xdg-desktop-por\n  84317  1000 xdg-desktop-por\n  84339  1000 xdg-desktop-por\n  84354  1000 gjs\n  84420  1000 gvfsd-metadata\n  84435  1000 snapd-desktop-i\n  84494  1000 snapd-desktop-i\n  84768  1000 update-notifier\n 108511     0 kworker/R-tls-strp\n 114204  1000 pipewire\n 114208  1000 pipewire\n 114209  1000 wireplumber\n 403001     0 snapd\n 403328     0 kworker/0:0H-kblockd\n 461311     0 prl_fsd\n 461313     0 fusermount\n 461494     0 NetworkManager\n 461673     0 psimon\n 497329  1000 Xwayland\n 497336  1000 gsd-xsettings\n 497363  1000 ibus-x11\n 497372  1000 mutter-x11-fram\n 540206  1000 nautilus\n 540231  1000 gvfsd-recent\n 571011     0 cupsd\n 571014   115 cups-browsed\n 617058     0 kworker/2:0-events\n 671710     0 kworker/1:1-cgroup_destroy\n 750385     0 kworker/u16:4-flush-8:0\n 753607     0 kworker/u16:2-kvfree_rcu_reclaim\n 762505     0 kworker/1:0-cgroup_destroy\n 762590     0 kworker/u16:3-events_unbound\n 765790     0 kworker/0:2-cgroup_bpf_destroy\n 767079     0 kworker/0:0-virtio_vsock\n 767360     0 kworker/u16:0-events_power_efficient\n 767862     0 kworker/3:0-cgroup_destroy\n 767863     0 kworker/3:3-cgroup_destroy\n 768213     0 kworker/2:2-events\n 768475     0 kworker/u16:1-flush-8:0\n 773552     0 kworker/2:3-cgroup_destroy\n 793404     0 kworker/0:1-cgroup_destroy\n 794504     0 kworker/1:2-cgroup_destroy\n 794505     0 kworker/1:3-events\n 794913     0 kworker/2:1-events\n 795320     0 kworker/3:1-cgroup_destroy\n 795344     0 kworker/u16:5-iou_exit\n 795776     0 kworker/3:2-events\n 796237     0 kworker/0:3-virtio_vsock\n 796286     0 sshd\n 796298     0 systemd\n 796300     0 (sd-pam)\n 796308     0 psimon\n 796315     0 snapd-desktop-i\n 796385     0 dbus-daemon\n 796386     0 xdg-document-po\n 796390     0 xdg-permission-\n 796397     0 fusermount3\n 796444     0 snapd-desktop-i\n 798247     0 runuser\n 798265  1000 python3\n 798280  1000 python3\n 798286  1000 python3\n 798295  1000 python3\n 798311  1000 ps\n",
+    "stderr": ""
+  },
+  "system": {
+    "exit_code": 0,
+    "stdout": "active\ninactive\n",
+    "stderr": ""
+  },
+  "env": {
+    "TMPDIR": "/home/parallels/NeonMix/.local/tl3/.local/tmp",
+    "DISPLAY": null,
+    "WAYLAND_DISPLAY": "wayland-0",
+    "XDG_RUNTIME_DIR": "/run/user/1000",
+    "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus"
+  },
+  "workdir": "/home/parallels/NeonMix/.local/tl3"
+}

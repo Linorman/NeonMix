@@ -1,0 +1,35 @@
+{
+  "tests": {
+    "macos": {
+      "passed": 225,
+      "failed": 0,
+      "ignored": 5
+    },
+    "ubuntu": {
+      "passed": 215,
+      "failed": 0,
+      "ignored": 5
+    },
+    "windows": {
+      "passed": 210,
+      "failed": 0,
+      "ignored": 5
+    }
+  },
+  "provenance": {
+    "macos": {
+      "source_mismatches": [],
+      "retained_binary_hashes_verified": 6
+    },
+    "ubuntu": {
+      "source_mismatches": []
+    },
+    "windows": {
+      "source_mismatches": []
+    }
+  },
+  "report_link_errors": [],
+  "secret_material_candidates": [],
+  "local_lan_fixtures_remaining": [],
+  "local_invites_remaining": []
+}

@@ -1,0 +1,71 @@
+[
+  {
+    "name": "fmt-members",
+    "command": [
+      "python3",
+      "-c",
+      "import subprocess,json; m=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version=1'])); ids=m['workspace_members']; raise SystemExit(max(subprocess.call(['cargo','fmt','--manifest-path',p['manifest_path'],'--check']) for p in m['packages'] if p['id'] in ids))"
+    ],
+    "exit_code": 0,
+    "seconds": 1.23,
+    "started_at": 1791009277.0875003,
+    "ended_at": 1791009278.3177097
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 15.07,
+    "started_at": 1791009278.318294,
+    "ended_at": 1791009293.388157
+  },
+  {
+    "name": "tests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "seconds": 59.268,
+    "started_at": 1791009293.3887885,
+    "ended_at": 1791009352.6565783
+  },
+  {
+    "name": "release",
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 124.838,
+    "started_at": 1791009352.657288,
+    "ended_at": 1791009477.4964132
+  },
+  {
+    "name": "worker-build",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/build-worker.py"
+    ],
+    "exit_code": 0,
+    "seconds": 4.237,
+    "started_at": 1791009477.6252458,
+    "ended_at": 1791009481.862456
+  }
+]

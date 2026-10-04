@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "steady_seconds": 30,
+  "completed_recoveries": 24,
+  "quality_windows": 73,
+  "aggregate_timed_late_delta_sum": 0,
+  "surviving_lane_underrun_delta_sum": 0,
+  "ingress_late_delta_sum": 0,
+  "status_reads": {
+    "readers": 4,
+    "successful": 29331,
+    "errors": 0
+  },
+  "preflight_cpu": {
+    "samples": 10,
+    "mean": 27.266,
+    "max": 36.318,
+    "above_80": 0
+  },
+  "test_cpu": {
+    "samples": 72,
+    "mean": 64.753,
+    "max": 77.75,
+    "above_80": 0
+  },
+  "cpu_policy": "Start after 10 consecutive 1-second whole-machine samples <=80%; observe during test. User clarified test-induced utilization above 80% is normal, so utilization alone does not interrupt this run.",
+  "elapsed_seconds": 72.722,
+  "binaries_unchanged": true,
+  "product_source_changed": false,
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true,
+  "original_user_pids_alive": {
+    "81271": true,
+    "98624": true,
+    "98625": true,
+    "98648": true
+  },
+  "source_pacing": [
+    {
+      "source_index": 1,
+      "sent_packets": 7645,
+      "max_schedule_lag_ns": 7359243,
+      "max_send_gap_ns": 13121542
+    },
+    {
+      "source_index": 2,
+      "sent_packets": 7661,
+      "max_schedule_lag_ns": 7666773,
+      "max_send_gap_ns": 13980167
+    },
+    {
+      "source_index": 3,
+      "sent_packets": 7609,
+      "max_schedule_lag_ns": 6077644,
+      "max_send_gap_ns": 12616958
+    },
+    {
+      "source_index": 4,
+      "sent_packets": 7529,
+      "max_schedule_lag_ns": 8029619,
+      "max_send_gap_ns": 12968917
+    }
+  ],
+  "limitations": [
+    "Single successful macOS synthetic encrypted AirPlay/CoreAudio digital run; historical failures retained and not disproven",
+    "Whole-machine CPU sampled at 1 Hz; no per-event scheduler attribution",
+    "No real Apple four-device/analog or 8h/24h soak validation"
+  ]
+}

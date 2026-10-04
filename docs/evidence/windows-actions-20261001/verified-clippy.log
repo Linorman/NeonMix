@@ -1,0 +1,37 @@
+    Checking neonmix-core v0.1.0 (D:\a\NeonMix\NeonMix\crates\audio-core)
+   Compiling cpal v0.18.2 (D:\a\NeonMix\NeonMix\vendor\cpal)
+    Checking neonmix-control v0.1.0 (D:\a\NeonMix\NeonMix\crates\control)
+    Checking neonmix-airplay-ipc v0.1.0 (D:\a\NeonMix\NeonMix\crates\airplay-ipc)
+    Checking neonmix-airplay-adapter v0.1.0 (D:\a\NeonMix\NeonMix\crates\airplay-adapter)
+    Checking neonmix-identity v0.1.0 (D:\a\NeonMix\NeonMix\crates\identity)
+    Checking neonmix-output-binding v0.1.0 (D:\a\NeonMix\NeonMix\crates\output-binding)
+    Checking neonmix-desktop-service v0.1.0 (D:\a\NeonMix\NeonMix\crates\desktop-service)
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cpal` (lib) generated 1 warning
+    Checking neonmix-io v0.1.0 (D:\a\NeonMix\NeonMix\crates\audio-io)
+    Checking neonmix-windows v0.1.0 (D:\a\NeonMix\NeonMix\adapters\windows)
+    Checking tympan-aspl v0.1.0 (D:\a\NeonMix\NeonMix\vendor\tympan-aspl)
+    Checking neonmix-media v0.1.0 (D:\a\NeonMix\NeonMix\crates\media)
+warning: function `set_name` is never used
+   --> vendor\tympan-aspl\src\raw\output_controls.rs:248:15
+    |
+248 | pub(crate) fn set_name(runtime: &DriverRuntime, value: String) {
+    |               ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `tympan-aspl` (lib) generated 1 warning
+    Checking neonmix-hal v0.1.0 (D:\a\NeonMix\NeonMix\drivers\macos\hal)
+   Compiling neonmix-hub v0.1.0 (D:\a\NeonMix\NeonMix\apps\hub)
+    Checking neonmix-desktop v0.1.0 (D:\a\NeonMix\NeonMix\apps\desktop)
+    Checking neonmix-audio v0.1.0 (D:\a\NeonMix\NeonMix\apps\audio)
+    Checking neonmix-macos v0.1.0 (D:\a\NeonMix\NeonMix\adapters\macos)
+    Checking neonmix-linux v0.1.0 (D:\a\NeonMix\NeonMix\adapters\linux)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 14.92s

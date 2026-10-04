@@ -45,6 +45,7 @@ impl Desktop {
     pub(crate) fn open_palette(&mut self) {
         if self.confirm.is_none() {
             self.palette = Some(Palette::default());
+            self.palette_since = Instant::now();
         }
     }
 
@@ -288,7 +289,9 @@ impl Desktop {
             .then(|| entries.get(palette.selected).map(|e| e.cmd.clone()))
             .flatten();
         let width = (ctx.screen_rect().width() - 48.0).min(520.0);
-        let top = (ctx.screen_rect().height() * 0.1).min(64.0);
+        // Opens with a short fade and settle from slightly above.
+        let appear = animation::fade_in(ctx, self.palette_since.elapsed(), 0.14);
+        let top = (ctx.screen_rect().height() * 0.1).min(64.0) - 8.0 * (1.0 - appear);
         // Reserve search, footer and frame space inside the minimum window.
         let list_height = (ctx.screen_rect().height() - top - 120.0).clamp(80.0, 340.0);
         let response = egui::Modal::new(egui::Id::new("palette"))
@@ -305,6 +308,7 @@ impl Desktop {
                     .corner_radius(CornerRadius::same(14)),
             )
             .show(ctx, |ui| {
+                ui.set_opacity(0.4 + 0.6 * appear);
                 ui.set_width(width);
                 ui.horizontal(|ui| {
                     let (icon, _) =

@@ -1,0 +1,374 @@
+{
+  "generated_at": "2026-10-03T00:12:10.443105+08:00",
+  "scope": "macOS functionality Alpha; synthetic encrypted sources and CoreAudio BlackHole; not Apple interoperability or release acceptance",
+  "date_range": [
+    "2026-10-02",
+    "2026-10-03"
+  ],
+  "checks": [
+    {
+      "command": "tools/dev cargo test --workspace --locked",
+      "result": "passed",
+      "scope": "integration baseline; explicit hardware and long-duration ignored tests excluded"
+    },
+    {
+      "command": "tools/dev cargo test -p neonmix-hub --bin neonmix-hub --locked",
+      "result": "passed",
+      "tests": 51,
+      "scope": "final control/transaction hardening"
+    },
+    {
+      "command": "tools/dev cargo test -p neonmix-desktop-service --test redaction --locked",
+      "result": "passed",
+      "tests": 5
+    },
+    {
+      "command": "tools/dev cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "result": "passed"
+    },
+    {
+      "command": "tools/dev cargo fmt --all -- --check",
+      "result": "passed"
+    },
+    {
+      "command": "tools/dev cargo build --workspace --release --locked",
+      "result": "passed"
+    },
+    {
+      "command": "tools/dev cargo check --manifest-path apps/credential-migrate/Cargo.toml --locked",
+      "result": "passed"
+    },
+    {
+      "check": "mdns vendor patch exact reconstruction against cached pinned upstream",
+      "result": "passed",
+      "files": 3
+    },
+    {
+      "check": "archive copy excludes private receiver recovery journals",
+      "result": "passed"
+    },
+    {
+      "check": "native UI preview 600/720/1100/1600 and stable source controls",
+      "result": "passed",
+      "evidence": "docs/evidence/multi-airplay-ui-20261002/expanded-verification.json"
+    }
+  ],
+  "binaries": {
+    "neonmix-hub": "67533a57a6cda257b9bbc36d27b2d7d5de5d4c5d5f721cd2243ed26872cfbffa",
+    "neonmix-airplay-worker": "07555b0d57ef10d4ba97ba579997fc73698d0f2b6f912364cbf365a719f444d6",
+    "neonmix-desktop": "19b705645bdaf5573541cf6e5871781b0bf0a5ae55a1480ed412597cf8d44cfb",
+    "neonmix-background": "f38dfa098a32053c79b23d7170620cfcd32efe41bac139005f0259ec2401496d",
+    "neonmix-audio": "b6e8415f19b7a3557aaf238b0d48b6e03e7224619be183397d51b56d51b69030",
+    "neonmix-airplay-profile": "476a94082d2e7dabbf424e3282c2ff8575c2d406166378a2d59c1ada5e6dfd2f"
+  },
+  "source_sha256": {
+    "Cargo.lock": "0d48623aab823388beb5a9895a01465568173523bedfde367a4274ea1036393e",
+    "Cargo.toml": "a31690027ad581031718ef241b499f18c97e8c476fc1b61ff87c71a560847b6e",
+    "apps/airplay-worker/CMakeLists.txt": "5ba7e3dbcc4c954da66c10b0dded03404ca1520ff19392d9860e062cd640a2d5",
+    "apps/airplay-worker/audio_probe.cpp": "41590167b499810499c6ab71d9dc06a1e108330e7789f5f5abf71bcdb5472997",
+    "apps/airplay-worker/auth_probe.py": "49e8a548db9bb3332730406c178d349dbe42782415092a45854782271dfe9c26",
+    "apps/airplay-worker/main.cpp": "71a98412b13cf16af2c5374861a6cddac715c2eb040d5a1a87603fcec2b17a21",
+    "apps/airplay-worker/pairing_probe.py": "0c5a93fd398b0544169cc268f78618db0f84df385970d9bc41d85290522ee24e",
+    "apps/airplay-worker/platform.h": "e4a5368426eb13c71c78002d8f85505fbdcf11da4614a1f04a8bb592feb1b011",
+    "apps/airplay-worker/probe.py": "e5aa33a4a5a45d9cd78d136fe5dbf152d89168d0e3d0ebb806dcaa78d613a91e",
+    "apps/credential-migrate/Cargo.lock": "0cc06a1b8c8e949ef93b338838cf4bd1cde1587ab701249366119c84197bb255",
+    "apps/desktop/Cargo.toml": "641979407d013ac5aa7c4cc6143e19dcad9016663c3a5b8e80930d6aafbb97b7",
+    "apps/desktop/src/animation.rs": "74f1d9989fe84eb579f19552da24be64c8aa12519d271588878640a38834f488",
+    "apps/desktop/src/icons.rs": "fca25501c2733218c460e507a940b2295826de0cca9b4c1766ca8987a89a4ea0",
+    "apps/desktop/src/main.rs": "dac9598917266a93b69ef3a7b46d0817cebd078194eea84389d9865cdb3f6c2f",
+    "apps/desktop/src/pages/airplay.rs": "21a7169065575ce1de31bc7d03021fb83bbecf10e926d67816f4df61bd14626d",
+    "apps/desktop/src/pages/devices.rs": "e228a57be33004e2690e6b76ea3de494d26847aa17346a9b68a3a316f2e9fa11",
+    "apps/desktop/src/pages/diagnostics.rs": "105ca2f822f4376c71618b2d5deb0745f166cb8df81fe60ab2f71276a322aa94",
+    "apps/desktop/src/pages/mixer.rs": "122dc4819e61b4709f29ce8af9dc5f57ed67de72abd58e8a8d676ecaae087e52",
+    "apps/desktop/src/pages/mod.rs": "f43eae1666586416f0eb032b9dbc569b87901a59323fc705908d72eb6fb00095",
+    "apps/desktop/src/pages/room.rs": "f002d42e79b7f647d3f8d74497b08d7e32998656b04896131af6c34af43700ba",
+    "apps/desktop/src/pages/sender.rs": "24357fc689bab6bf95e7741405cb6538d31a858d8d3c50cf5a0f3db427572607",
+    "apps/desktop/src/palette.rs": "aed6f4b8cc9259925fdcf3daac7e11b9ab2edaa8ab1b75f134b6f62404b62ca0",
+    "apps/desktop/src/shell.rs": "0611a92cf8130e4f1014cdff040ebb2a9e1681fb3a5ac9f24446d9af13f7ca1c",
+    "apps/desktop/src/shot.rs": "b96320dd9d32e629949af20a2ab4e1c810e904706f4346e4dfa54a21a158eec9",
+    "apps/desktop/src/theme.rs": "b6b8f3e9a198c50389cc8fec5be2c2e987c887b43fbcfe930e4265a0c4f6b413",
+    "apps/desktop/src/tray.rs": "26ac468a489b6a6170e852d2a990ba80b545c22bac6bc81b4fe8bd67d60cc98d",
+    "apps/desktop/src/widgets.rs": "9a5e21bee6ead7fcb6332ec9dba6202c6dc03f3030316c7101a3c79caacd4019",
+    "apps/hub/Cargo.toml": "db7fed713cfdfa19582e86649db6f9e7853544d9320f681075728fddc4ac035a",
+    "apps/hub/build.rs": "ffa3a45c91a3fe05ec828c6e5e2af014ba57111c0e88dc0060db0ef000c38d1e",
+    "apps/hub/src/admission.rs": "98c88b9d3547f042976c074b266a26e6e83f87cfc5fe254fd5879380936dcc11",
+    "apps/hub/src/airplay.rs": "6be4499b9c3b0ffde038def65c4296a75ac7bfbc750c0a9919c5768c8ef9f69a",
+    "apps/hub/src/airplay_api.rs": "2330389ada0f06db6c3ed207c51ddac44d06ba56ee7e4c30eb5a9182c2f8ec0d",
+    "apps/hub/src/binding.rs": "58168e4d0ebfcbe151db03beb6c19e24d737c8ac256f8103312c0f8ce286b1ba",
+    "apps/hub/src/connection.rs": "69fbdba05d21b098740399aba8877b8929a2e8259f07ba823c22b4061fa3afd1",
+    "apps/hub/src/control_client.rs": "3a01a25b1b10a1a35bd59975898b1b4b031014625a2504dd83da1fd9d39c7e30",
+    "apps/hub/src/framer.rs": "7fe08ad4f7c83155a7ee3bb64a4902f9abf61931d9dc9462ebd8ffd6adacb021",
+    "apps/hub/src/identity.rs": "ba50dbffd2b9e3a40038eafa8b461e8567d2ab9cf5e86b53b2ba609d489a2487",
+    "apps/hub/src/main.rs": "8bca22e1716debdfcf86b2a2e509c3b7e0f04153d485cf73261400f74ca5723f",
+    "apps/hub/src/media_log.rs": "66d74141b1fd784cdd320c10f6880f5698615322c2239dfa29c3fdeb44f605d6",
+    "apps/hub/src/media_wait.rs": "60eb4caf5ee66195c8515f390d6d9e50967bdc576e66ab2dd3ab7507ecd0daa6",
+    "apps/hub/src/media_worker.rs": "3c47abb355599a2262012032be24e42ba840a1923a805e22f8315bdd967082f0",
+    "apps/hub/src/pairing_api.rs": "e0c4d0bed113d1497ac355fc1becb1d7326915e394abcef6b399bdf16bc65806",
+    "apps/hub/src/probe.rs": "06b1dd0b92ff409871bf94266e0edb35ca4fe3cfddcdfb4e6e0b47dc7e059ea3",
+    "apps/hub/src/pump_timing.rs": "d8fb725d9542b56e4b1c3a3f7a96e56028031b905452b3dc97f68160f6ca1f99",
+    "apps/hub/src/qos.rs": "4e899e2db226553116aea66fd2f9db91baf3d5c53f933548a5e7f61334bb49f6",
+    "apps/hub/src/recoverable.rs": "2c64a03ca6842e9e661d706cc0bad3891690b99777b149c1f9422fb9da8eca9c",
+    "apps/hub/src/sender.rs": "167c4a4670926cdfbb65645ca4717ae7df94c38d730bb1a74f3cffecbdb732fe",
+    "apps/hub/src/server.rs": "c14c6959544dae81d14bfd3f739e55174e229a21c60a3bcc1ccea17f128d129d",
+    "apps/hub/src/virtual_output.rs": "26507023bc86acdd4198dbc470706519b1b7b829212b21433cbaf9cfaaef2cba",
+    "crates/airplay-adapter/Cargo.toml": "04c58dce4cb5cfd4bfd170687f6ecc4d097c80b732b1199f938224bea1c89c3b",
+    "crates/airplay-adapter/src/control.rs": "757e6da6b6cdb21c42c7665540fc539d18e13b3302285b0a398accf053a35c30",
+    "crates/airplay-adapter/src/ingress.rs": "2f1c48c0c3bced2f76187c4dfc46fc738c6bcc5b528c771c707766d0164ccabe",
+    "crates/airplay-adapter/src/lib.rs": "3e9131277fa4e0649519f54a72f787bab35a7d5c7f33bf0029e70405635076f9",
+    "crates/airplay-ipc/Cargo.toml": "72e7c85c0b93c36fe5a83530fa1f8c18ea1369e77d8f611ca7b7eced93cd4858",
+    "crates/airplay-ipc/src/lib.rs": "be79084549a6ea20537bb1e9a3acb36af857803dd076a0639d250baba5cc8abc",
+    "crates/airplay-ipc/src/local.rs": "146369b914a11272a1c82f6f421fab1334981a63b6808731b1b7553a0bc9261d",
+    "crates/airplay-ipc/src/local_unix.rs": "a078dbc006afdf0e883b331c84c64ed00cc9347ff10275846119b0770c401c57",
+    "crates/airplay-ipc/src/local_windows.rs": "394c170fa9e941c251620857f7d5905c562991a50037375b57cd8441dc33da7c",
+    "crates/audio-core/Cargo.toml": "29056aa2185573052009fbafe6211e689abbd7f9958c2219e415367a06447230",
+    "crates/audio-core/tests/timed_multi_source.rs": "7ea4abee845126f1297c200a074528de2070f0b7957ea58771a0fcf61b041048",
+    "crates/audio-io/Cargo.toml": "7add72dc6e89a0eab150a5d45b4518a08a7a5e19b4a9c892dd05779d2f02baa6",
+    "crates/control/Cargo.toml": "15eae055e94306447a33943626b2aef30f6b0e409337933245924cbcbfd7e516",
+    "crates/control/src/lib.rs": "7d0ec1e157c9307a5e48c0e0d2d3eeeaa3ecea8489d07799917df1365bdac383",
+    "crates/control/tests/authority.rs": "ea2ef83ec1d36411ae4903cc78125e24558ef673aeed3db9b7f720e21cebb7e1",
+    "crates/control/tests/transactions.rs": "a2d3a33da5f500cfa81126a7bf075fc85392ecddbbf638fbd49c779669bef917",
+    "crates/desktop-service/Cargo.toml": "ff274304b52ae79c8ef669d91e32cb519be8d3233969f581a5473e358269e3a4",
+    "crates/desktop-service/src/daemon.rs": "d10f0cfa736e9c475580ce5fe5e573c955ebee251076311d3c0777c2f793a807",
+    "crates/desktop-service/src/lib.rs": "04f73360ff65f7145c682d44371c095399df484fb7fe9c2c6de34a12729bb77e",
+    "crates/desktop-service/src/linux_owner.rs": "d8ea88fbe62909bf0e0bdae6dcf4ac1f190ad0a02967826f07fc06b651eb022a",
+    "crates/desktop-service/src/transport.rs": "473d1698c001613876075f575ab0a1f3c8bd648bdf9fe44b127f5d900c07718b",
+    "crates/desktop-service/src/transport_windows.rs": "61c86850ecf694ed7179281754be39c3a7d0fa8a45bc3552dc9b9e88987a55b5",
+    "crates/desktop-service/tests/lifecycle.rs": "a649aef2c877a7c469383321cb79e862ddc40af6f2fccad9383b8a191135ef61",
+    "crates/desktop-service/tests/redaction.rs": "5f60230a190521e24c2cd3485629bb55aaf5a4a655876c07c42dc94c09f14ca0",
+    "crates/desktop-service/tests/windows_native_ipc.rs": "eb2ad5890e656dbcd5e735960c3c42fd636294552cc799bb04c5471189c6cb3f",
+    "crates/identity/Cargo.toml": "ed0a880813be60ea7b94c0d78492dfe07a1989a6522d2bb0eb0b2d675f9c49ff",
+    "crates/identity/src/airplay_profile.rs": "e56a0f9001d3fd86aab4dc6609b9b3c58a4b4c0e9098920a6009d08c6b510e2f",
+    "crates/identity/src/bin/neonmix-airplay-profile.rs": "a49c6c1ccecc577aefdb53a9a4aa08c7b4bd7cd7d8fc6751bb00babd78fc1c6c",
+    "crates/identity/src/discovery.rs": "19d8a4ee637a6ebd15408e6dc88dc10e8e5a1effa17be8bb753305f1abe3522e",
+    "crates/identity/src/files.rs": "e3c384161daa711ff4dee330781e5bf143b0c502fff37095a4e8ee64fe526bcd",
+    "crates/identity/src/files_windows.rs": "41d79d25bbff4f3d0c50307ac9ec9adb112912caf8c39271ad028d2279561bba",
+    "crates/identity/src/lib.rs": "35b29dc089353633b3b6467895574c479f3bde40e008f40c9d96931682b29cef",
+    "crates/identity/src/pairing.rs": "60367537c4aed4b827f8684dc1a64933210c6619dada17eab5ce9036b11269ad",
+    "crates/identity/src/profiles.rs": "04e2862d7f221ae1b256d69f3430b5974b38ea2c5ee49a695d1085647ca79d7b",
+    "crates/identity/src/speaker.rs": "9b07870f804cfc669efceed576f665c18d3c19626cc2f2b59f2daf1c0d02543d",
+    "crates/identity/src/store.rs": "a6a6180a66e41313ccc939c4ce198092cbf5c6a1cbf385a8f5e489254ca7ef6e",
+    "crates/identity/src/trust.rs": "664ba78f983483bdba4e535e36dcb082d3de1ee642e34dcb27dcf7bb1503fdce",
+    "crates/media/Cargo.toml": "61911e4d5ef3e436a28adb3d0516f6a7a80bccfff6838b12df0c426d7a9b5cfe",
+    "crates/output-binding/Cargo.toml": "d95be42485cee5532b8a9b4381bb67267021690fde243a0311235bea22f075c4",
+    "native-dependencies.toml": "d39638d1ec79d44a1b4d8877cfcb01b3610c7d32ae0cb696325caa9c872c161a",
+    "patches/airplay-audio-only.patch": "faf1f0251c0727c56ffa82bd2caf72abece8290e415ca399704d6cb0a06d5b05",
+    "tools/airplay_mac_source_probe.py": "e56f1484e968d9891af1d3470e5ac3a726975df93465660c40578767ef52c49b",
+    "tools/airplay_mixer_probe.py": "664fc4be27a8d0da94b1efd6d441840017230c20e25a9d72767a96143a9c0b11",
+    "tools/airplay_multi_source_probe.py": "2f89b026f82ff47b1e20d5eecf2bde963a770deb8d4028f73141e17ce0a6cc18",
+    "tools/archive_policy.py": "f3b16a7e3521ee5529169b3a630db8ed03ce2cc9f759c3ebd359f9590a7cc32b",
+    "tools/credential_fixture.py": "60735c2353957467e8ab8baff32a43d5969f21e172d12e404dafb18bd9eb5411",
+    "tools/dev": "9b6f34e809659a3417b92c2de30b313a65b59c439a51aea1f647b848d0c07c58",
+    "tools/prepare_airplay.py": "626a8764d6e7601fb0f728448af65b5e9dcf90c4bc8e3ee93f486cb6be28f750",
+    "vendor/mdns-sd-scoped-provenance.json": "5c02e153de752fa5250ab4da734ef377fe527a5e829791456ce4076f258f9f8a",
+    "vendor/mdns-sd-scoped/src/service_daemon.rs": "96fb889b750e5c689e3bb8ab7e6e151756aa05d0c3dd36c9953f2057408fbc9f",
+    "vendor/patches/mdns-sd-0.21.4-ipv6-scope.patch": "95d2cc7c88ba0a4d2789ef48ea13a0a76aac3147a88b5bf6566cce8809ce9b11"
+  },
+  "reports": [
+    {
+      "path": "artifacts/airplay/multi-source/04e0510bfe10/result.json",
+      "sha256": "092d199a0745149a685cc114941e138239dc798b4aef1293178cb4489b7aab23",
+      "passed": true,
+      "sources": 2,
+      "native_sources": 0,
+      "scenario": "management",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "154abec30a2223d951f2f9515cf2872f73b2f07665b9dccd1c23cef93ff9f62f",
+        "neonmix-airplay-worker": "07555b0d57ef10d4ba97ba579997fc73698d0f2b6f912364cbf365a719f444d6"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/35c35636b42a/result.json",
+      "sha256": "2853946354f19562b128159633631997fe7c2fafdb000db7f49405fd1a327c82",
+      "passed": false,
+      "sources": 3,
+      "native_sources": 1,
+      "scenario": "standard",
+      "failure_phase": "worker_crash source 3",
+      "binaries": {
+        "neonmix-hub": "91a908f31f061b2721b5cc94531ee8439928e88add21fb5ce3eb8ba2606b73e1",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/415b32cb523b/result.json",
+      "sha256": "c5b3a19ebb2ded6fc31b005acb22e723801bc6e99cbf9807808973c0a33b05db",
+      "passed": true,
+      "sources": 1,
+      "native_sources": 3,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "91a908f31f061b2721b5cc94531ee8439928e88add21fb5ce3eb8ba2606b73e1",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/438d16ba1948/result.json",
+      "sha256": "de8779865b3c80a5e41b3ed5ad1871b6f821750d6167566fd9d93c59218d2a5c",
+      "passed": true,
+      "sources": 4,
+      "native_sources": 0,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "91a908f31f061b2721b5cc94531ee8439928e88add21fb5ce3eb8ba2606b73e1",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/4c7f74de3696/result.json",
+      "sha256": "c43983b1ed764bba82ce2cfd2681450874d7bca776dd0a99c9d8581d0b485974",
+      "passed": true,
+      "sources": 2,
+      "native_sources": 2,
+      "scenario": "mix",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "67533a57a6cda257b9bbc36d27b2d7d5de5d4c5d5f721cd2243ed26872cfbffa",
+        "neonmix-airplay-worker": "07555b0d57ef10d4ba97ba579997fc73698d0f2b6f912364cbf365a719f444d6"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/65dece189792/result.json",
+      "sha256": "485e421418048ec7375e1e25cfdd52db81a41060843caa9d84048903150e8a0d",
+      "passed": true,
+      "sources": 2,
+      "native_sources": 0,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "ef66f271c0e9b7eafbdcebda533c57a85c88443254b268da0f418811e3d31327",
+        "neonmix-airplay-worker": "a4c263dedf54a2529bdeca760fcc72389b110968471845d25e02ed8de76c9de2"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/7622a2339fe8/result.json",
+      "sha256": "fa5e4296f195da75fcdee2ac78b2707e33922a52ffd691e21835525a10dae041",
+      "passed": true,
+      "sources": 3,
+      "native_sources": 1,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "91a908f31f061b2721b5cc94531ee8439928e88add21fb5ce3eb8ba2606b73e1",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/7faceabb6034/result.json",
+      "sha256": "05fad932c2c1b39e3579ad887be149e4bbfd09aec04d91df38e76e39c04c82bf",
+      "passed": true,
+      "sources": 4,
+      "native_sources": 0,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "ef66f271c0e9b7eafbdcebda533c57a85c88443254b268da0f418811e3d31327",
+        "neonmix-airplay-worker": "a4c263dedf54a2529bdeca760fcc72389b110968471845d25e02ed8de76c9de2"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/9263ffe3a6fd/result.json",
+      "sha256": "41ac17bc9ca87f89e76204fa1eef4d5cf4bb6e541b1bda1e4ed3f2ac7c968089",
+      "passed": false,
+      "sources": 3,
+      "native_sources": 1,
+      "scenario": "standard",
+      "failure_phase": "idempotent command and old session rejection",
+      "binaries": {
+        "neonmix-hub": "49eabd81bf3ff025e01c8f5b687031c52cffb71bc4d07ae04256079b789870a7",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/931d93f37e38/result.json",
+      "sha256": "f493f7b1494f54d42624178db75fb9628abd977a4faed23e78175ab1f5650723",
+      "passed": true,
+      "sources": 2,
+      "native_sources": 0,
+      "scenario": "mix-control",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "154abec30a2223d951f2f9515cf2872f73b2f07665b9dccd1c23cef93ff9f62f",
+        "neonmix-airplay-worker": "07555b0d57ef10d4ba97ba579997fc73698d0f2b6f912364cbf365a719f444d6"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/9501037e8b4c/result.json",
+      "sha256": "a5c66d3849c78a3db0278b4714d9d8df767aad2b86d3087275231f91256aad65",
+      "passed": true,
+      "sources": 2,
+      "native_sources": 2,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "91a908f31f061b2721b5cc94531ee8439928e88add21fb5ce3eb8ba2606b73e1",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/c7f76540e0e3/result.json",
+      "sha256": "009de402ca1e791c60409b24c4e280dd33dcd821573ccbaf6d2b4779b480ec40",
+      "passed": true,
+      "sources": 3,
+      "native_sources": 1,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "49eabd81bf3ff025e01c8f5b687031c52cffb71bc4d07ae04256079b789870a7",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "artifacts/airplay/multi-source/fce38f9a52ea/result.json",
+      "sha256": "3d07c8204c8122569db79d1d003ec798ad5d404dccde57d90b13a60f8c9bc291",
+      "passed": true,
+      "sources": 0,
+      "native_sources": 4,
+      "scenario": "standard",
+      "failure_phase": null,
+      "binaries": {
+        "neonmix-hub": "91a908f31f061b2721b5cc94531ee8439928e88add21fb5ce3eb8ba2606b73e1",
+        "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+      }
+    },
+    {
+      "path": "docs/evidence/airplay/multi-source/legacy-regression-20261002/final-hub.json",
+      "sha256": "d7422c1c9b8ffec13bbcb87c0c451527c48c7f1899f5f906b23ed295152f408b",
+      "classification": "passed targeted legacy regression"
+    },
+    {
+      "path": "docs/evidence/airplay/multi-source/legacy-regression-20261002/final-mixer-alac-pause-setup.json",
+      "sha256": "c608e83e81bd7b69765f7f41bb2a4405860e0e319ce750169538a36945d2f4f1",
+      "classification": "passed targeted legacy regression"
+    },
+    {
+      "path": "docs/evidence/airplay/multi-source/legacy-regression-20261002/final-mixer-alac-track-gap.json",
+      "sha256": "ebc9b04f4810605a0546f001f9167678ea970d582ae808b365c04d6d9ba4005c",
+      "classification": "passed targeted legacy regression"
+    },
+    {
+      "path": "docs/evidence/airplay/multi-source/legacy-regression-20261002/final-mixer-pcm-prewarm.json",
+      "sha256": "ec0bed56ce54780e93b4ca4b3333b835dd3cfbdf62d4343514c24832aebffc9b",
+      "classification": "passed targeted legacy regression"
+    }
+  ],
+  "final_smoke": "artifacts/airplay/multi-source/4c7f74de3696/result.json",
+  "known_unresolved": [
+    "One early 3+1 recovery returned media_closed (35c35636b42a); not reproduced in same-build retry or subsequent 30-recovery pressure run; preserved and not declared fixed"
+  ],
+  "not_run": [
+    "real Apple multi-device and discovery UI interoperability",
+    "formal 10-minute-per-combination matrix",
+    "8-hour playback and 24-hour lifecycle/resource acceptance",
+    "physical end-to-end and audio/video P95",
+    "Windows/Linux native runtime and distribution acceptance"
+  ],
+  "cleanup": {
+    "multi_source_fixture_directories": 0,
+    "existing_user_room_unchanged": true,
+    "no_real_user_profile_migration": true,
+    "checked_user_processes_unchanged": true
+  }
+}

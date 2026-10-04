@@ -1,0 +1,155 @@
+{
+  "platform": "Windows-2025Server-10.0.26100-SP0",
+  "machine": "AMD64",
+  "source_commit": "6b2690d435a0003aea490a5e06b7a3cdcfcc8ec2",
+  "scenarios": {
+    "credential-manager": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "neonmix-identity",
+        "--test",
+        "native_vault",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "seconds": 32.281
+    },
+    "named-pipe": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "neonmix-desktop-service",
+        "--test",
+        "windows_native_ipc",
+        "--",
+        "--nocapture"
+      ],
+      "seconds": 50.578
+    },
+    "wasapi-devices": {
+      "passed": true,
+      "exit_code": 0,
+      "devices": [],
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "devices"
+      ],
+      "seconds": 0.016
+    },
+    "media-runtime": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "runtime"
+      ],
+      "seconds": 0.265
+    },
+    "media-dual": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "probe",
+        "--seconds",
+        "5",
+        "--streams",
+        "2"
+      ],
+      "seconds": 5.391
+    },
+    "media-loss-replay": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "probe",
+        "--seconds",
+        "5",
+        "--streams",
+        "1",
+        "--drop-every",
+        "17",
+        "--replay"
+      ],
+      "seconds": 5.219
+    },
+    "media-reject": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "probe",
+        "--seconds",
+        "2",
+        "--streams",
+        "1",
+        "--wrong-fingerprint"
+      ],
+      "seconds": 2.187
+    },
+    "simulate-44100": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "simulate",
+        "--input-rate",
+        "44100",
+        "--output-rate",
+        "48000"
+      ],
+      "seconds": 0.031
+    },
+    "simulate-48000": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "simulate",
+        "--input-rate",
+        "48000",
+        "--output-rate",
+        "48000"
+      ],
+      "seconds": 0.016
+    },
+    "simulate-96000": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "simulate",
+        "--input-rate",
+        "96000",
+        "--output-rate",
+        "48000"
+      ],
+      "seconds": 0.031
+    },
+    "desktop-pages": {
+      "passed": false,
+      "error": "hub: no visible native window, exit=1"
+    }
+  },
+  "limitations": {
+    "physical_audio_soak": {
+      "status": "skipped",
+      "enumerated_devices": 0,
+      "reason": "Hosted runner provides no explicitly selected physical audio fixture."
+    },
+    "driver_loading": "Unsigned CI build does not establish installation or kernel runtime.",
+    "gui": "Native window/render/startup/close smoke only; no interactive UX or screen-reader acceptance."
+  },
+  "passed": false
+}

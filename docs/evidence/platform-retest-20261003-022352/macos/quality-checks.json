@@ -1,0 +1,179 @@
+[
+  {
+    "name": "workspace-tests",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "seconds": 200.093,
+    "start_epoch": 1790966740.4858,
+    "end_epoch": 1790966940.5795698,
+    "cpu": {
+      "samples": 199,
+      "mean": 52.47,
+      "p95": 71.345,
+      "max": 81.438,
+      "minimum_headroom": 18.562,
+      "above80": 1,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  },
+  {
+    "name": "strict-clippy",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 67.588,
+    "start_epoch": 1790966940.582162,
+    "end_epoch": 1790967008.17038,
+    "cpu": {
+      "samples": 68,
+      "mean": 57.706,
+      "p95": 66.275,
+      "max": 69.591,
+      "minimum_headroom": 30.409,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  },
+  {
+    "name": "workspace-fmt",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 1,
+    "seconds": 0.509,
+    "start_epoch": 1790967008.17326,
+    "end_epoch": 1790967008.681803,
+    "cpu": {
+      "samples": 0,
+      "mean": null,
+      "p95": null,
+      "max": null,
+      "minimum_headroom": null,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": false
+    }
+  },
+  {
+    "name": "worker-protocol",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "apps/airplay-worker/probe.py"
+    ],
+    "exit_code": 1,
+    "seconds": 12.122,
+    "start_epoch": 1790967008.684649,
+    "end_epoch": 1790967020.8063328,
+    "cpu": {
+      "samples": 12,
+      "mean": 36.141,
+      "p95": 44.621,
+      "max": 44.621,
+      "minimum_headroom": 55.379,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  },
+  {
+    "name": "worker-pairing",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "apps/airplay-worker/pairing_probe.py"
+    ],
+    "exit_code": 1,
+    "seconds": 3.036,
+    "start_epoch": 1790967020.8090398,
+    "end_epoch": 1790967023.8453279,
+    "cpu": {
+      "samples": 3,
+      "mean": 35.949,
+      "p95": 38.782,
+      "max": 38.782,
+      "minimum_headroom": 61.218,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      ".local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "seconds": 1.014,
+    "start_epoch": 1790967023.8479528,
+    "end_epoch": 1790967024.862026,
+    "cpu": {
+      "samples": 1,
+      "mean": 40.394,
+      "p95": 40.394,
+      "max": 40.394,
+      "minimum_headroom": 59.606,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  },
+  {
+    "name": "worker-identity",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "tools/airplay_identity_probe.py",
+      "--worker",
+      ".local/airplay/build/neonmix-airplay-worker",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/worker-identity.json"
+    ],
+    "exit_code": 1,
+    "seconds": 10.601,
+    "start_epoch": 1790967024.8647768,
+    "end_epoch": 1790967035.46596,
+    "cpu": {
+      "samples": 11,
+      "mean": 35.454,
+      "p95": 43.055,
+      "max": 43.055,
+      "minimum_headroom": 56.945,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  }
+]

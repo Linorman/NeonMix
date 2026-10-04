@@ -1,0 +1,149 @@
+[
+  {
+    "name": "four-contention",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/four-contention.json",
+      "--sources",
+      "4",
+      "--fault-cycles",
+      "2",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 1,
+    "seconds": 33.862,
+    "started_at": 1791044304.2873769,
+    "ended_at": 1791044338.1495662
+  },
+  {
+    "name": "3plus1",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/3plus1.json",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 1,
+    "seconds": 38.528,
+    "started_at": 1791044338.150191,
+    "ended_at": 1791044376.6784618
+  },
+  {
+    "name": "2plus2",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/2plus2.json",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 1,
+    "seconds": 32.931,
+    "started_at": 1791044376.6796634,
+    "ended_at": 1791044409.6102548
+  },
+  {
+    "name": "1plus3",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/1plus3.json",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 34.544,
+    "started_at": 1791044409.611023,
+    "ended_at": 1791044444.1546772
+  },
+  {
+    "name": "0plus4",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/0plus4.json",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--steady-seconds",
+      "60"
+    ],
+    "exit_code": 1,
+    "seconds": 61.883,
+    "started_at": 1791044444.1549153,
+    "ended_at": 1791044506.0374563
+  },
+  {
+    "name": "mix-control",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/mix-control.json",
+      "--scenario",
+      "mix-control",
+      "--sources",
+      "2",
+      "--status-readers",
+      "4"
+    ],
+    "exit_code": 0,
+    "seconds": 3.948,
+    "started_at": 1791044506.038627,
+    "ended_at": 1791044509.9867656
+  },
+  {
+    "name": "management",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/management.json",
+      "--scenario",
+      "management",
+      "--sources",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 4.977,
+    "started_at": 1791044509.9870327,
+    "ended_at": 1791044514.9636652
+  }
+]

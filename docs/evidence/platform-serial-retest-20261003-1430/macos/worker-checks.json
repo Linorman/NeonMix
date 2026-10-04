@@ -1,0 +1,83 @@
+[
+  {
+    "name": "worker-protocol",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "apps/airplay-worker/probe.py"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010170.899353,
+    "end_epoch": 1791010172.641004,
+    "seconds": 1.742
+  },
+  {
+    "name": "worker-pairing",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "apps/airplay-worker/pairing_probe.py"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010172.641291,
+    "end_epoch": 1791010174.068187,
+    "seconds": 1.427
+  },
+  {
+    "name": "worker-identity",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_identity_probe.py",
+      "--worker",
+      ".local/airplay/build/neonmix-airplay-worker",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/worker-identity.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010174.0687108,
+    "end_epoch": 1791010184.182527,
+    "seconds": 10.114
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      ".local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010184.182709,
+    "end_epoch": 1791010185.116003,
+    "seconds": 0.933
+  },
+  {
+    "name": "credential-store",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/credential_store_probe.py",
+      "--release"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010185.116242,
+    "end_epoch": 1791010185.835449,
+    "seconds": 0.719
+  },
+  {
+    "name": "background",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/e07_background_probe.py",
+      "--release",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--evidence",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/background.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010185.8357399,
+    "end_epoch": 1791010190.980588,
+    "seconds": 5.145
+  }
+]

@@ -1,0 +1,326 @@
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.72s
+     Running unittests src/main.rs (target/debug/deps/neonmix_audio-4bee5f19e1bb3c31)
+
+running 5 tests
+test measurement::tests::never_counts_a_gap_as_continuous_source_time ... ok
+test measurement::tests::measures_received_tone_and_does_not_invent_one_for_silence ... ok
+test virtual_output::tests::owner_rejects_symlinked_state_and_public_lock_without_overwriting_it ... ok
+test measurement::tests::source_restart_does_not_count_intervening_silence_as_tone_time ... ok
+test virtual_output::tests::rejected_second_owner_preserves_live_lock_and_drop_releases_it ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/cli.rs (target/debug/deps/cli-6ad8cf3020bda55a)
+
+running 3 tests
+test unsupported_platform_sink_fails_explicitly ... ok
+test invalid_format_fails_without_claiming_success ... ok
+test offline_probe_returns_parseable_metrics ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+
+     Running tests/output_reopen.rs (target/debug/deps/output_reopen-231f2d0f3d260902)
+
+running 1 test
+test same_process_reopen_rebuilds_output_clock ... ignored, requires explicit NEONMIX_TEST_OUTPUT_DEVICE and physical native audio hardware
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_control-8d4cb683bae373d4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/authority.rs (target/debug/deps/authority-bc0d659ceb631516)
+
+running 11 tests
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test member_cannot_solo_or_change_others_and_master ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_core-a4c660c902a1b661)
+
+running 2 tests
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/audio_contract.rs (target/debug/deps/audio_contract-2d24eb1e3945d116)
+
+running 18 tests
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test mute_advances_signal_position ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test silence_is_data_but_idle_is_not ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test malicious_pcm_is_sanitized ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.20s
+
+     Running tests/drift_stability.rs (target/debug/deps/drift_stability-fc302e48f6ce067b)
+
+running 3 tests
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ignored, Run with --release --ignored: four accelerated 600-second drift cases
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ignored, Release-only accelerated 300-second delivery-stall regression
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ignored, Release-only accelerated over-limit drift degradation
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mixer.rs (target/debug/deps/mixer-b17f0e35e4b721e5)
+
+running 6 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/mixer_realtime.rs (target/debug/deps/mixer_realtime-5d119172e06f8b87)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.13s
+
+     Running tests/realtime.rs (target/debug/deps/realtime-ae05a12cea4debd3)
+
+running 1 test
+test steady_state_capture_and_sinc_output_do_not_allocate_or_free ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.61s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-446c14a604efcd55)
+
+running 1 test
+test tests::all_diagnostic_states_render_without_audio_backend ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_hal-cfcae12e17aa2d05)
+
+running 4 tests
+test tests::fixed_device_identity_and_format ... ok
+test tests::stale_frames_are_silent_after_wrap_and_restart ... ok
+test tests::cfplugin_vtable_round_trips_mixed_audio_and_clock ... ok
+test tests::concurrent_wraparound_never_returns_torn_stereo_or_old_frames ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/controls.rs (target/debug/deps/controls-cf58068c55daa636)
+
+running 5 tests
+test invalid_properties_and_io_lengths_do_not_change_volume ... ok
+test name_changes_keep_uid_clock_and_audio_and_reject_control_characters ... ok
+test device_volume_and_mute_apply_once_on_the_mixed_render_side ... ok
+test stopping_one_client_preserves_other_clients_clock_and_audio ... ok
+test removing_a_running_client_retires_only_its_io_and_last_removal_stops_clock ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/realtime.rs (target/debug/deps/realtime-b63def13abaf1151)
+
+running 1 test
+test hal_data_and_clock_callbacks_allocate_and_free_nothing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-4965c74093a6455c)
+
+running 13 tests
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test virtual_output::tests::binding_requires_exact_provider_uid_and_both_sides ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_identity-9f3ef489a5a217b1)
+
+running 6 tests
+test discovery::tests::incompatible_or_incomplete_records_do_not_become_candidates ... ok
+test discovery::tests::names_are_distinct_candidates_and_all_usable_addresses_survive ... ok
+test pairing::tests::expiration_cancellation_single_use_and_exact_retry ... ok
+test pairing::tests::quota_reclaims_expired_grants ... ok
+test files::tests::failed_replace_preserves_destination_and_cleans_its_own_temporary_file ... ok
+test files::tests::private_replace_is_exclusive_and_removes_an_old_insecure_file_mode ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_io-fb707cb52d0041a2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/pipewire_buffer.rs (target/debug/deps/pipewire_buffer-2e0a31e51802081a)
+
+running 2 tests
+test pipewire_buffer::tests::honors_offset_modulo_and_wrapped_chunks ... ok
+test pipewire_buffer::tests::clamps_native_size_but_rejects_partial_frames_or_short_scratch ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_linux-f03897182ac806f0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_macos-9d73da91c4304c4c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_media-4d2be4d5630fc680)
+
+running 4 tests
+test thread_priority::tests::media_worker_uses_timesharing_and_restores_its_base_priority ... ok
+test queue_trace::tests::real_appsink_capacity_loss_matches_private_buffer_sequence ... ok
+test queue_trace::tests::real_appsrc_capacity_loss_quarantines_following_audio ... ok
+test transport::duration_tests::authenticated_twenty_ms_opus_cannot_enter_a_ten_ms_stream ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/protocol.rs (target/debug/deps/protocol-29e16ad1c57d06bf)
+
+running 6 tests
+test authenticated_rtp_with_wrong_time_step_is_rejected ... ok
+test reordered_wrong_timestamp_does_not_poison_clock_or_consume_sequence ... ok
+test rtp_sequence_timestamp_wrap_duplicate_and_reorder ... ok
+test packet_quotas_and_feedback_congestion_pause_recovery ... ok
+test initial_reordering_across_timestamp_zero_preserves_forward_anchor ... ok
+test opus_packet_duration_matches_negotiated_clock_for_all_toc_modes ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/security.rs (target/debug/deps/security-6a1de83b7cc38584)
+
+running 3 tests
+test replay_corruption_revocation_and_fresh_key_context_isolation ... ok
+test native_jitter_reorders_and_discards_late_packets_with_real_plc ... ok
+test negotiated_expiry_stops_both_decode_and_ingress ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.09s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_output_binding-2ddfaf6ed578bcdb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/persistence.rs (target/debug/deps/persistence-869fab07ec399d0a)
+
+running 5 tests
+test losing_private_permissions_or_replacing_the_record_with_a_symlink_fails_closed ... ok
+test corrupt_or_oversized_records_fail_closed_and_are_not_replaced ... ok
+test reopen_rename_and_repeated_add_preserve_identity ... ok
+test concurrent_writers_use_revision_conflicts_and_never_publish_partial_json ... ok
+test disable_enable_and_recreation_cannot_reauthorize_an_old_sender ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_windows-d770f2094f741772)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_control
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_hal
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_identity
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_io
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_linux
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_macos
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_output_binding
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_windows
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

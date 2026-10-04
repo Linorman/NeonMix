@@ -1,0 +1,255 @@
+be6c6e3f0000-be6c6ed33000 r-xp 00000000 08:02 1082607                    /home/parallels/NeonMix/.local/run copy/u26/bin/neonmix-hub
+be6c6ed41000-be6c6ed80000 r--p 00951000 08:02 1082607                    /home/parallels/NeonMix/.local/run copy/u26/bin/neonmix-hub
+be6c6ed80000-be6c6ed83000 rw-p 00990000 08:02 1082607                    /home/parallels/NeonMix/.local/run copy/u26/bin/neonmix-hub
+be6c6ed83000-be6c6ed84000 rw-p 00000000 00:00 0 
+be6c74759000-be6c74a52000 rw-p 00000000 00:00 0                          [heap]
+e9ddec000000-e9ddec021000 rw-p 00000000 00:00 0 
+e9ddec021000-e9ddf0000000 ---p 00000000 00:00 0 
+e9ddf0000000-e9ddf0021000 rw-p 00000000 00:00 0 
+e9ddf0021000-e9ddf4000000 ---p 00000000 00:00 0 
+e9ddf4000000-e9ddf4021000 rw-p 00000000 00:00 0 
+e9ddf4021000-e9ddf8000000 ---p 00000000 00:00 0 
+e9ddf8000000-e9ddf8021000 rw-p 00000000 00:00 0 
+e9ddf8021000-e9ddfc000000 ---p 00000000 00:00 0 
+e9ddfc000000-e9ddfc021000 rw-p 00000000 00:00 0 
+e9ddfc021000-e9de00000000 ---p 00000000 00:00 0 
+e9de00000000-e9de0009a000 rw-p 00000000 00:00 0 
+e9de0009a000-e9de04000000 ---p 00000000 00:00 0 
+e9de04000000-e9de04025000 rw-p 00000000 00:00 0 
+e9de04025000-e9de08000000 ---p 00000000 00:00 0 
+e9de08000000-e9de08021000 rw-p 00000000 00:00 0 
+e9de08021000-e9de0c000000 ---p 00000000 00:00 0 
+e9de0c000000-e9de0c021000 rw-p 00000000 00:00 0 
+e9de0c021000-e9de10000000 ---p 00000000 00:00 0 
+e9de1185b000-e9de11960000 rw-p 00000000 00:00 0 
+e9de11960000-e9de11970000 ---p 00000000 00:00 0 
+e9de11970000-e9de11b70000 rw-p 00000000 00:00 0 
+e9de11b70000-e9de11b80000 ---p 00000000 00:00 0 
+e9de11b80000-e9de11d80000 rw-p 00000000 00:00 0 
+e9de11d80000-e9de11dde000 r-xp 00000000 08:02 662270                     /usr/lib/aarch64-linux-gnu/spa-0.2/audioconvert/libspa-audioconvert.so
+e9de11dde000-e9de11de3000 ---p 0005e000 08:02 662270                     /usr/lib/aarch64-linux-gnu/spa-0.2/audioconvert/libspa-audioconvert.so
+e9de11de3000-e9de11df0000 r--p 00063000 08:02 662270                     /usr/lib/aarch64-linux-gnu/spa-0.2/audioconvert/libspa-audioconvert.so
+e9de11df0000-e9de11df2000 rw-p 00070000 08:02 662270                     /usr/lib/aarch64-linux-gnu/spa-0.2/audioconvert/libspa-audioconvert.so
+e9de11e00000-e9de11e10000 ---p 00000000 00:00 0 
+e9de11e10000-e9de12010000 rw-p 00000000 00:00 0 
+e9de12010000-e9de12020000 ---p 00000000 00:00 0 
+e9de12020000-e9de12820000 rw-p 00000000 00:00 0 
+e9de12820000-e9de12845000 r-xp 00000000 08:02 661724                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-session-manager.so
+e9de12845000-e9de1285e000 ---p 00025000 08:02 661724                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-session-manager.so
+e9de1285e000-e9de12860000 r--p 0002e000 08:02 661724                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-session-manager.so
+e9de12860000-e9de12861000 rw-p 00030000 08:02 661724                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-session-manager.so
+e9de12870000-e9de12880000 ---p 00000000 00:00 0 
+e9de12880000-e9de12a80000 rw-p 00000000 00:00 0 
+e9de12a80000-e9de12a90000 ---p 00000000 00:00 0 
+e9de12a90000-e9de13290000 rw-p 00000000 00:00 0 
+e9de132b0000-e9de132bb000 r-xp 00000000 08:02 661704                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-metadata.so
+e9de132bb000-e9de132cf000 ---p 0000b000 08:02 661704                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-metadata.so
+e9de132cf000-e9de132d0000 r--p 0000f000 08:02 661704                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-metadata.so
+e9de132d0000-e9de132d1000 rw-p 00010000 08:02 661704                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-metadata.so
+e9de132e0000-e9de132fb000 r-xp 00000000 08:02 661692                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-adapter.so
+e9de132fb000-e9de13307000 ---p 0001b000 08:02 661692                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-adapter.so
+e9de13307000-e9de13310000 r--p 00027000 08:02 661692                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-adapter.so
+e9de13310000-e9de13311000 rw-p 00030000 08:02 661692                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-adapter.so
+e9de13320000-e9de1332b000 r-xp 00000000 08:02 661694                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-device.so
+e9de1332b000-e9de1333f000 ---p 0000b000 08:02 661694                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-device.so
+e9de1333f000-e9de13340000 r--p 0000f000 08:02 661694                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-device.so
+e9de13340000-e9de13341000 rw-p 00010000 08:02 661694                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-device.so
+e9de13350000-e9de13389000 r-xp 00000000 08:02 661695                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-node.so
+e9de13389000-e9de13397000 ---p 00039000 08:02 661695                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-node.so
+e9de13397000-e9de133a0000 r--p 00047000 08:02 661695                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-node.so
+e9de133a0000-e9de133a1000 rw-p 00050000 08:02 661695                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-client-node.so
+e9de133b0000-e9de133ee000 r-xp 00000000 08:02 661710                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-protocol-native.so
+e9de133ee000-e9de133f1000 ---p 0003e000 08:02 661710                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-protocol-native.so
+e9de133f1000-e9de13400000 r--p 00041000 08:02 661710                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-protocol-native.so
+e9de13400000-e9de13401000 rw-p 00050000 08:02 661710                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-protocol-native.so
+e9de13410000-e9de13416000 r-xp 00000000 08:02 661718                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-rt.so
+e9de13416000-e9de1342f000 ---p 00006000 08:02 661718                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-rt.so
+e9de1342f000-e9de13430000 r--p 0000f000 08:02 661718                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-rt.so
+e9de13430000-e9de13431000 rw-p 00010000 08:02 661718                     /usr/lib/aarch64-linux-gnu/pipewire-0.3/libpipewire-module-rt.so
+e9de13440000-e9de13493000 r-xp 00000000 08:02 658064                     /usr/lib/aarch64-linux-gnu/libdbus-1.so.3.32.4
+e9de13493000-e9de134af000 ---p 00053000 08:02 658064                     /usr/lib/aarch64-linux-gnu/libdbus-1.so.3.32.4
+e9de134af000-e9de134b0000 r--p 0005f000 08:02 658064                     /usr/lib/aarch64-linux-gnu/libdbus-1.so.3.32.4
+e9de134b0000-e9de134b1000 rw-p 00060000 08:02 658064                     /usr/lib/aarch64-linux-gnu/libdbus-1.so.3.32.4
+e9de134c0000-e9de134c5000 r-xp 00000000 08:02 662282                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-dbus.so
+e9de134c5000-e9de134df000 ---p 00005000 08:02 662282                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-dbus.so
+e9de134df000-e9de134e0000 r--p 0000f000 08:02 662282                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-dbus.so
+e9de134e0000-e9de134e1000 rw-p 00010000 08:02 662282                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-dbus.so
+e9de134f0000-e9de13514000 r-xp 00000000 08:02 1082746                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgpg-error.so.0
+e9de13514000-e9de1352f000 ---p 00024000 08:02 1082746                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgpg-error.so.0
+e9de1352f000-e9de13530000 r--p 0002f000 08:02 1082746                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgpg-error.so.0
+e9de13530000-e9de13531000 rw-p 00030000 08:02 1082746                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgpg-error.so.0
+e9de13540000-e9de1355e000 r-xp 00000000 08:02 658322                     /usr/lib/aarch64-linux-gnu/liblz4.so.1.9.4
+e9de1355e000-e9de1356f000 ---p 0001e000 08:02 658322                     /usr/lib/aarch64-linux-gnu/liblz4.so.1.9.4
+e9de1356f000-e9de13570000 r--p 0001f000 08:02 658322                     /usr/lib/aarch64-linux-gnu/liblz4.so.1.9.4
+e9de13570000-e9de13571000 rw-p 00020000 08:02 658322                     /usr/lib/aarch64-linux-gnu/liblz4.so.1.9.4
+e9de13580000-e9de13666000 r-xp 00000000 08:02 1082745                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcrypt.so.20
+e9de13666000-e9de1367b000 ---p 000e6000 08:02 1082745                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcrypt.so.20
+e9de1367b000-e9de13680000 r--p 000eb000 08:02 1082745                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcrypt.so.20
+e9de13680000-e9de13684000 rw-p 000f0000 08:02 1082745                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcrypt.so.20
+e9de13684000-e9de13685000 rw-p 00000000 00:00 0 
+e9de13690000-e9de1369b000 r-xp 00000000 08:02 658036                     /usr/lib/aarch64-linux-gnu/libcap.so.2.66
+e9de1369b000-e9de136af000 ---p 0000b000 08:02 658036                     /usr/lib/aarch64-linux-gnu/libcap.so.2.66
+e9de136af000-e9de136b0000 r--p 0000f000 08:02 658036                     /usr/lib/aarch64-linux-gnu/libcap.so.2.66
+e9de136b0000-e9de136b1000 rw-p 00010000 08:02 658036                     /usr/lib/aarch64-linux-gnu/libcap.so.2.66
+e9de136c0000-e9de13797000 r-xp 00000000 08:02 658552                     /usr/lib/aarch64-linux-gnu/libsystemd.so.0.38.0
+e9de13797000-e9de137a5000 ---p 000d7000 08:02 658552                     /usr/lib/aarch64-linux-gnu/libsystemd.so.0.38.0
+e9de137a5000-e9de137b0000 r--p 000e5000 08:02 658552                     /usr/lib/aarch64-linux-gnu/libsystemd.so.0.38.0
+e9de137b0000-e9de137b2000 rw-p 000f0000 08:02 658552                     /usr/lib/aarch64-linux-gnu/libsystemd.so.0.38.0
+e9de137c0000-e9de137c3000 r-xp 00000000 08:02 662283                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-journal.so
+e9de137c3000-e9de137df000 ---p 00003000 08:02 662283                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-journal.so
+e9de137df000-e9de137e0000 r--p 0000f000 08:02 662283                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-journal.so
+e9de137e0000-e9de137e1000 rw-p 00010000 08:02 662283                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-journal.so
+e9de137f0000-e9de1380d000 r-xp 00000000 08:02 662284                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-support.so
+e9de1380d000-e9de1381e000 ---p 0001d000 08:02 662284                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-support.so
+e9de1381e000-e9de13820000 r--p 0001e000 08:02 662284                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-support.so
+e9de13820000-e9de13821000 rw-p 00020000 08:02 662284                     /usr/lib/aarch64-linux-gnu/spa-0.2/support/libspa-support.so
+e9de1382e000-e9de13960000 rw-p 00000000 00:00 0 
+e9de13960000-e9de13970000 ---p 00000000 00:00 0 
+e9de13970000-e9de13b70000 rw-p 00000000 00:00 0 
+e9de13b70000-e9de13b80000 ---p 00000000 00:00 0 
+e9de13b80000-e9de13d80000 rw-p 00000000 00:00 0 
+e9de13d80000-e9de13d90000 ---p 00000000 00:00 0 
+e9de13d90000-e9de13f90000 rw-p 00000000 00:00 0 
+e9de13f90000-e9de13fa0000 ---p 00000000 00:00 0 
+e9de13fa0000-e9de141a0000 rw-p 00000000 00:00 0 
+e9de141a0000-e9de141d6000 r-xp 00000000 08:02 1082782                    /home/parallels/NeonMix/.local/run copy/u26/lib/libblkid.so.1
+e9de141d6000-e9de141eb000 ---p 00036000 08:02 1082782                    /home/parallels/NeonMix/.local/run copy/u26/lib/libblkid.so.1
+e9de141eb000-e9de141f0000 r--p 0003b000 08:02 1082782                    /home/parallels/NeonMix/.local/run copy/u26/lib/libblkid.so.1
+e9de141f0000-e9de141f1000 rw-p 00040000 08:02 1082782                    /home/parallels/NeonMix/.local/run copy/u26/lib/libblkid.so.1
+e9de14200000-e9de14210000 r-xp 00000000 08:02 1082623                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbz2.so.1.0
+e9de14210000-e9de1421f000 ---p 00010000 08:02 1082623                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbz2.so.1.0
+e9de1421f000-e9de14220000 r--p 0000f000 08:02 1082623                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbz2.so.1.0
+e9de14220000-e9de14221000 rw-p 00010000 08:02 1082623                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbz2.so.1.0
+e9de14230000-e9de142cb000 r-xp 00000000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+e9de142cb000-e9de142df000 ---p 0009b000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+e9de142df000-e9de142e0000 r--p 0009f000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+e9de142e0000-e9de142e1000 rw-p 000a0000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+e9de142f0000-e9de1430e000 r-xp 00000000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+e9de1430e000-e9de1431f000 ---p 0001e000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+e9de1431f000-e9de14320000 r--p 0001f000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+e9de14320000-e9de14321000 rw-p 00020000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+e9de14330000-e9de1435f000 r-xp 00000000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+e9de1435f000-e9de1436f000 ---p 0002f000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+e9de1436f000-e9de14370000 r--p 0002f000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+e9de14370000-e9de14371000 rw-p 00030000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+e9de14380000-e9de143ac000 r-xp 00000000 08:02 1082776                    /home/parallels/NeonMix/.local/run copy/u26/lib/libselinux.so.1
+e9de143ac000-e9de143bf000 ---p 0002c000 08:02 1082776                    /home/parallels/NeonMix/.local/run copy/u26/lib/libselinux.so.1
+e9de143bf000-e9de143c0000 r--p 0002f000 08:02 1082776                    /home/parallels/NeonMix/.local/run copy/u26/lib/libselinux.so.1
+e9de143c0000-e9de143c1000 rw-p 00030000 08:02 1082776                    /home/parallels/NeonMix/.local/run copy/u26/lib/libselinux.so.1
+e9de143c1000-e9de143c3000 rw-p 00000000 00:00 0 
+e9de143d0000-e9de1441e000 r-xp 00000000 08:02 1082775                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmount.so.1
+e9de1441e000-e9de1442e000 ---p 0004e000 08:02 1082775                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmount.so.1
+e9de1442e000-e9de14430000 r--p 0004e000 08:02 1082775                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmount.so.1
+e9de14430000-e9de14431000 rw-p 00050000 08:02 1082775                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmount.so.1
+e9de14440000-e9de1445a000 r-xp 00000000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+e9de1445a000-e9de1446f000 ---p 0001a000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+e9de1446f000-e9de14470000 r--p 0001f000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+e9de14470000-e9de14471000 rw-p 00020000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+e9de14480000-e9de14508000 r-xp 00000000 08:02 1082617                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpcre2-8.so.0
+e9de14508000-e9de1451f000 ---p 00088000 08:02 1082617                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpcre2-8.so.0
+e9de1451f000-e9de14520000 r--p 0008f000 08:02 1082617                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpcre2-8.so.0
+e9de14520000-e9de14521000 rw-p 00090000 08:02 1082617                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpcre2-8.so.0
+e9de14530000-e9de14538000 r-xp 00000000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+e9de14538000-e9de1454f000 ---p 00008000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+e9de1454f000-e9de14550000 r--p 0000f000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+e9de14550000-e9de14551000 rw-p 00010000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+e9de14560000-e9de14606000 r-xp 00000000 08:02 1082616                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdw.so.1
+e9de14606000-e9de14618000 ---p 000a6000 08:02 1082616                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdw.so.1
+e9de14618000-e9de14620000 r--p 000a8000 08:02 1082616                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdw.so.1
+e9de14620000-e9de14621000 rw-p 000b0000 08:02 1082616                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdw.so.1
+e9de14630000-e9de1463c000 r-xp 00000000 08:02 1082615                    /home/parallels/NeonMix/.local/run copy/u26/lib/libunwind.so.8
+e9de1463c000-e9de1464f000 ---p 0000c000 08:02 1082615                    /home/parallels/NeonMix/.local/run copy/u26/lib/libunwind.so.8
+e9de1464f000-e9de14650000 r--p 0000f000 08:02 1082615                    /home/parallels/NeonMix/.local/run copy/u26/lib/libunwind.so.8
+e9de14650000-e9de14651000 rw-p 00010000 08:02 1082615                    /home/parallels/NeonMix/.local/run copy/u26/lib/libunwind.so.8
+e9de14651000-e9de14672000 rw-p 00000000 00:00 0 
+e9de14680000-e9de14683000 r-xp 00000000 08:02 1082614                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgmodule-2.0.so.0
+e9de14683000-e9de1469f000 ---p 00003000 08:02 1082614                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgmodule-2.0.so.0
+e9de1469f000-e9de146a0000 r--p 0000f000 08:02 1082614                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgmodule-2.0.so.0
+e9de146a0000-e9de146a1000 rw-p 00010000 08:02 1082614                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgmodule-2.0.so.0
+e9de146b0000-e9de14734000 r-xp 00000000 08:02 1082628                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstbase-1.0.so.0
+e9de14734000-e9de1474f000 ---p 00084000 08:02 1082628                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstbase-1.0.so.0
+e9de1474f000-e9de14750000 r--p 0008f000 08:02 1082628                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstbase-1.0.so.0
+e9de14750000-e9de14751000 rw-p 00090000 08:02 1082628                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstbase-1.0.so.0
+e9de14760000-e9de148fa000 r-xp 00000000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+e9de148fa000-e9de1490d000 ---p 0019a000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+e9de1490d000-e9de14910000 r--p 0019d000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+e9de14910000-e9de14912000 rw-p 001a0000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+e9de14912000-e9de1491e000 rw-p 00000000 00:00 0 
+e9de14920000-e9de149a5000 r-xp 00000000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+e9de149a5000-e9de149bf000 ---p 00085000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+e9de149bf000-e9de149c0000 r--p 0008f000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+e9de149c0000-e9de149c1000 rw-p 00090000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+e9de149d0000-e9de149ef000 r-xp 00000000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+e9de149ef000-e9de149ff000 ---p 0001f000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+e9de149ff000-e9de14a00000 r--p 0001f000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+e9de14a00000-e9de14a01000 rw-p 00020000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+e9de14a10000-e9de14bfe000 r-xp 00000000 08:02 1082749                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgio-2.0.so.0
+e9de14bfe000-e9de14c09000 ---p 001ee000 08:02 1082749                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgio-2.0.so.0
+e9de14c09000-e9de14c10000 r--p 001f9000 08:02 1082749                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgio-2.0.so.0
+e9de14c10000-e9de14c11000 rw-p 00200000 08:02 1082749                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgio-2.0.so.0
+e9de14c11000-e9de14c13000 rw-p 00000000 00:00 0 
+e9de14c20000-e9de14c34000 r-xp 00000000 08:02 1082784                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstapp-1.0.so.0
+e9de14c34000-e9de14c4f000 ---p 00014000 08:02 1082784                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstapp-1.0.so.0
+e9de14c4f000-e9de14c50000 r--p 0001f000 08:02 1082784                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstapp-1.0.so.0
+e9de14c50000-e9de14c51000 rw-p 00020000 08:02 1082784                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstapp-1.0.so.0
+e9de14c57000-e9de14c60000 rw-s 00000000 00:01 22559                      /memfd:pipewire-memfd:flags=0x0000000f,type=2,size=32816 (deleted)
+e9de14c60000-e9de14db7000 r-xp 00000000 08:02 1082612                    /home/parallels/NeonMix/.local/run copy/u26/lib/libglib-2.0.so.0
+e9de14db7000-e9de14dcf000 ---p 00157000 08:02 1082612                    /home/parallels/NeonMix/.local/run copy/u26/lib/libglib-2.0.so.0
+e9de14dcf000-e9de14dd0000 r--p 0015f000 08:02 1082612                    /home/parallels/NeonMix/.local/run copy/u26/lib/libglib-2.0.so.0
+e9de14dd0000-e9de14dd1000 rw-p 00160000 08:02 1082612                    /home/parallels/NeonMix/.local/run copy/u26/lib/libglib-2.0.so.0
+e9de14dd1000-e9de14dd2000 rw-p 00000000 00:00 0 
+e9de14dd7000-e9de14de0000 rw-s 00000000 00:01 22558                      /memfd:pipewire-memfd:flags=0x0000000f,type=2,size=32816 (deleted)
+e9de14de0000-e9de14e48000 r-xp 00000000 08:02 1082613                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgobject-2.0.so.0
+e9de14e48000-e9de14e5d000 ---p 00068000 08:02 1082613                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgobject-2.0.so.0
+e9de14e5d000-e9de14e60000 r--p 0006d000 08:02 1082613                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgobject-2.0.so.0
+e9de14e60000-e9de14e61000 rw-p 00070000 08:02 1082613                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgobject-2.0.so.0
+e9de14e61000-e9de14e62000 rw-p 00000000 00:00 0 
+e9de14e66000-e9de14e67000 ---p 00000000 00:00 0 
+e9de14e67000-e9de14e6b000 rw-p 00000000 00:00 0 
+e9de14e6b000-e9de14e6c000 ---p 00000000 00:00 0 
+e9de14e6c000-e9de14e70000 rw-p 00000000 00:00 0 
+e9de14e70000-e9de14fd4000 r-xp 00000000 08:02 1082611                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstreamer-1.0.so.0
+e9de14fd4000-e9de14fea000 ---p 00164000 08:02 1082611                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstreamer-1.0.so.0
+e9de14fea000-e9de14ff0000 r--p 0016a000 08:02 1082611                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstreamer-1.0.so.0
+e9de14ff0000-e9de14ff3000 rw-p 00170000 08:02 1082611                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstreamer-1.0.so.0
+e9de14ff3000-e9de14ff4000 rw-p 00000000 00:00 0 
+e9de14ff6000-e9de14ff7000 ---p 00000000 00:00 0 
+e9de14ff7000-e9de14ffb000 rw-p 00000000 00:00 0 
+e9de14ffb000-e9de14ffc000 ---p 00000000 00:00 0 
+e9de14ffc000-e9de15000000 rw-p 00000000 00:00 0 
+e9de15000000-e9de1502d000 r-xp 00000000 08:02 1082786                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstrtp-1.0.so.0
+e9de1502d000-e9de1503c000 ---p 0002d000 08:02 1082786                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstrtp-1.0.so.0
+e9de1503c000-e9de15040000 r--p 0002c000 08:02 1082786                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstrtp-1.0.so.0
+e9de15040000-e9de15041000 rw-p 00030000 08:02 1082786                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgstrtp-1.0.so.0
+e9de15041000-e9de15042000 rw-s 00000000 00:01 22074                      /memfd:pipewire-memfd:flags=0x0000000f,type=2,size=4096 (deleted)
+e9de15042000-e9de15043000 rw-s 00000000 00:01 9413                       /memfd:pipewire-memfd:flags=0x0000000f,type=2,size=2312 (deleted)
+e9de15043000-e9de15044000 rw-s 00000000 00:01 20995                      /memfd:pipewire-memfd:flags=0x0000000f,type=2,size=2312 (deleted)
+e9de15044000-e9de1504b000 r--s 00000000 08:02 659700                     /usr/lib/aarch64-linux-gnu/gconv/gconv-modules.cache
+e9de1504b000-e9de1504c000 ---p 00000000 00:00 0 
+e9de1504c000-e9de15050000 rw-p 00000000 00:00 0 
+e9de15050000-e9de1515e000 r-xp 00000000 08:02 1082716                    /home/parallels/NeonMix/.local/run copy/u26/lib/libasound.so.2
+e9de1515e000-e9de1516a000 ---p 0010e000 08:02 1082716                    /home/parallels/NeonMix/.local/run copy/u26/lib/libasound.so.2
+e9de1516a000-e9de15170000 r--p 0011a000 08:02 1082716                    /home/parallels/NeonMix/.local/run copy/u26/lib/libasound.so.2
+e9de15170000-e9de15171000 rw-p 00120000 08:02 1082716                    /home/parallels/NeonMix/.local/run copy/u26/lib/libasound.so.2
+e9de15171000-e9de15172000 ---p 00000000 00:00 0 
+e9de15172000-e9de15176000 rw-p 00000000 00:00 0 
+e9de15176000-e9de15180000 rw-p 00000000 00:00 0 
+e9de15180000-e9de15235000 r-xp 00000000 08:02 1082793                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpipewire-0.3.so.0
+e9de15235000-e9de15247000 ---p 000b5000 08:02 1082793                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpipewire-0.3.so.0
+e9de15247000-e9de15270000 r--p 000b7000 08:02 1082793                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpipewire-0.3.so.0
+e9de15270000-e9de15271000 rw-p 000e0000 08:02 1082793                    /home/parallels/NeonMix/.local/run copy/u26/lib/libpipewire-0.3.so.0
+e9de15271000-e9de15272000 rw-p 00000000 00:00 0 
+e9de15272000-e9de15273000 rw-s 00000000 00:01 22557                      /memfd:pipewire-memfd:flags=0x0000000f,type=2,size=2312 (deleted)
+e9de15273000-e9de1529a000 r-xp 00000000 08:02 657792                     /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+e9de1529a000-e9de1529b000 ---p 00000000 00:00 0 
+e9de1529b000-e9de1529f000 rw-p 00000000 00:00 0 
+e9de1529f000-e9de152a0000 ---p 00000000 00:00 0 
+e9de152a0000-e9de152a4000 rw-p 00000000 00:00 0 
+e9de152a4000-e9de152a5000 ---p 00000000 00:00 0 
+e9de152a5000-e9de152a9000 rw-p 00000000 00:00 0 
+e9de152a9000-e9de152ad000 rw-p 00000000 00:00 0 
+e9de152ad000-e9de152af000 r--p 00000000 00:00 0                          [vvar]
+e9de152af000-e9de152b1000 r-xp 00000000 00:00 0                          [vdso]
+e9de152b1000-e9de152b3000 r--p 0002e000 08:02 657792                     /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+e9de152b3000-e9de152b5000 rw-p 00030000 08:02 657792                     /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+ffffce5cd000-ffffce5f4000 rw-p 00000000 00:00 0                          [stack]

@@ -1,0 +1,122 @@
+[
+  {
+    "name": "member-fmt",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "python3",
+      "-c",
+      "import json,subprocess;d=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version','1','--locked','--offline']));a=['cargo','fmt'];[a.extend(['-p',p['name']]) for p in d['packages'] if p['id'] in d['workspace_members']];raise SystemExit(subprocess.run(a+['--','--check']).returncode)"
+    ],
+    "started_epoch": 1791049474.400471,
+    "ended_epoch": 1791049475.4062562,
+    "exit_code": 0,
+    "timed_out": false
+  },
+  {
+    "name": "strict-clippy",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "started_epoch": 1791049475.4072351,
+    "ended_epoch": 1791049477.416901,
+    "exit_code": 0,
+    "timed_out": false
+  },
+  {
+    "name": "workspace-tests",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--",
+      "--test-threads=1"
+    ],
+    "started_epoch": 1791049477.417505,
+    "ended_epoch": 1791049554.652956,
+    "exit_code": 0,
+    "timed_out": false
+  },
+  {
+    "name": "release",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked",
+      "--offline",
+      "-j",
+      "2"
+    ],
+    "started_epoch": 1791049554.653454,
+    "ended_epoch": 1791049555.657978,
+    "exit_code": 0,
+    "timed_out": false
+  },
+  {
+    "name": "worker-sources",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "python3",
+      "tools/prepare_airplay.py",
+      "--sources-only"
+    ],
+    "started_epoch": 1791049555.6591911,
+    "ended_epoch": 1791049556.66445,
+    "exit_code": 0,
+    "timed_out": false
+  },
+  {
+    "name": "worker-configure",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cmake",
+      "-S",
+      "apps/airplay-worker",
+      "-B",
+      ".local/airplay/build",
+      "-DCMAKE_BUILD_TYPE=Release"
+    ],
+    "started_epoch": 1791049556.6647968,
+    "ended_epoch": 1791049557.671533,
+    "exit_code": 0,
+    "timed_out": false
+  },
+  {
+    "name": "worker-build",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/dev",
+      "cmake",
+      "--build",
+      ".local/airplay/build",
+      "--parallel",
+      "2",
+      "--target",
+      "neonmix-airplay-worker",
+      "neonmix-airplay-audio-probe",
+      "neonmix-airplay-probe-crypto",
+      "neonmix-airplay-identity-probe"
+    ],
+    "started_epoch": 1791049557.6718972,
+    "ended_epoch": 1791049563.7095659,
+    "exit_code": 0,
+    "timed_out": false
+  }
+]

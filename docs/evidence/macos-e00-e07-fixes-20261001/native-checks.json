@@ -1,0 +1,8 @@
+{
+  "native-workflow": {
+    "exit_code": 1
+  },
+  "sender-ui": {
+    "exit_code": 1
+  }
+}

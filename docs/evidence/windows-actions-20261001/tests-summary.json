@@ -1,0 +1,47 @@
+{
+  "source_commit": "acff3c306f15816d9cf6bcd662adef39e1a48ab2",
+  "workflow_url": "https://github.com/Linorman/NeonMix/actions/runs/36846853256",
+  "passed": 131,
+  "failed": 0,
+  "ignored": 5,
+  "test_targets": 50,
+  "checks": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 1.078
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 15.062
+    },
+    "tests": {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--no-fail-fast"
+      ],
+      "exit_code": 0,
+      "seconds": 70.688
+    }
+  },
+  "tests_complete": true
+}

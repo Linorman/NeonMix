@@ -1,0 +1,24 @@
+{
+  "platform": "macOS arm64",
+  "fixture": "synthetic multi-AirPlay plus recorded native UI state; no receiver started",
+  "screenshots": [
+    "hub-1100.png",
+    "hub-720.png",
+    "mixer-1100.png",
+    "mixer-720.png",
+    "devices-1100.png",
+    "devices-720.png"
+  ],
+  "unit_tests": {
+    "desktop": 13,
+    "desktop_service": 4,
+    "desktop_service_lifecycle": 7,
+    "desktop_service_redaction": 4,
+    "identity": 22
+  },
+  "limitations": [
+    "No real Apple-device multi-source validation",
+    "Native preview verifies layout, not end-to-end transport",
+    "No full VoiceOver or physical IME acceptance"
+  ]
+}

@@ -1,0 +1,129 @@
+Exception in thread Thread-1 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python313\Lib\threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1615, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd2 in position 0: invalid continuation byte
+Exception in thread Thread-3 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python313\Lib\threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1615, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd2 in position 0: invalid continuation byte
+Exception in thread Thread-5 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python313\Lib\threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1615, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xd2 in position 0: invalid continuation byte
+{
+  "scope": "Actual native NamedPipe parent PID/current SID/owner-only protected ACL verification; synthetic RFC8032 key; no alternate-user login or recycled-PID simulation",
+  "cases": {
+    "private_parent": {
+      "passed": true,
+      "exit_code": 0,
+      "ready": true,
+      "token_bytes_received": 65,
+      "events": [
+        {
+          "type": "ready",
+          "control_version": 2,
+          "worker_generation": 7,
+          "port": 7653,
+          "public_key": "c5ece04f49cc748fdf5b9a3cfc4f0c57fa785b24a264219ae8fdfdb5c21e98cb",
+          "features": 1209817600
+        }
+      ],
+      "stderr": ""
+    },
+    "broad_dacl": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC pipe requires a protected owner-only DACL"
+        }
+      ],
+      "stderr": ""
+    },
+    "unprotected_dacl": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC pipe requires a protected owner-only DACL"
+        }
+      ],
+      "stderr": ""
+    },
+    "wrong_server_pid": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC Hub identity mismatch"
+        }
+      ],
+      "stderr": ""
+    },
+    "missing_pipe": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC pipe connection failed"
+        }
+      ],
+      "stderr": ""
+    },
+    "invalid_name": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "invalid private media pipe"
+        }
+      ],
+      "stderr": ""
+    }
+  },
+  "passed": true,
+  "owned_fixture_files_removed": true,
+  "all_owned_processes_stopped": true
+}

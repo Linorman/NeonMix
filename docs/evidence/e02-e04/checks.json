@@ -1,0 +1,130 @@
+{
+  "format": {
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.158
+  },
+  "clippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 0.512
+  },
+  "tests": {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 14.444
+  },
+  "release": {
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 30.147
+  },
+  "simulate": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-audio",
+      "simulate"
+    ],
+    "exit_code": 0,
+    "seconds": 0.067
+  },
+  "media-runtime": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "runtime"
+    ],
+    "exit_code": 0,
+    "seconds": 0.123
+  },
+  "media-dual": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 5.066
+  },
+  "media-loss-replay": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "1",
+      "--drop-every",
+      "17",
+      "--replay"
+    ],
+    "exit_code": 0,
+    "seconds": 5.065
+  },
+  "media-reject": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "2",
+      "--streams",
+      "1",
+      "--wrong-fingerprint"
+    ],
+    "exit_code": 0,
+    "seconds": 2.074
+  },
+  "drift": {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "-p",
+      "neonmix-core",
+      "--test",
+      "drift_stability",
+      "--",
+      "--ignored",
+      "--nocapture"
+    ],
+    "exit_code": 0,
+    "seconds": 17.086
+  },
+  "final_workspace_tests": {
+    "passed": 50
+  },
+  "hub_binary_sha256": "8f4c9bd8aa7357e5c05424243c0d95424e6e995c8a675789e4f0fbb788b07f49",
+  "macos_native_probes": {
+    "control_ipv4": true,
+    "control_ipv6": true,
+    "capture_44100_48000_96000": true
+  }
+}

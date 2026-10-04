@@ -1,0 +1,176 @@
+[New LWP 525001]
+[New LWP 525000]
+[New LWP 524998]
+[New LWP 524996]
+[New LWP 524993]
+[New LWP 524992]
+[New LWP 524987]
+[New LWP 524761]
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstrtp-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstbase-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstreamer-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgobject-2.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstapp-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgio-2.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgmodule-2.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstapp.so
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstdtls.so
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstsrtp.so
+
+warning: could not find '.gnu_debugaltlink' file for /lib/aarch64-linux-gnu/libnss3.so
+
+warning: could not find '.gnu_debugaltlink' file for /lib/aarch64-linux-gnu/libnssutil3.so
+
+warning: could not find '.gnu_debugaltlink' file for /lib/aarch64-linux-gnu/libplc4.so
+
+warning: could not find '.gnu_debugaltlink' file for /lib/aarch64-linux-gnu/libplds4.so
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstcoreelements.so
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstrtpmanager.so
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstnet-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstaudio-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgsttag-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstrtp.so
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstvideo-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstpbutils-1.0.so.0
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstopus.so
+
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstaudioconvert.so
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+
+warning: 38	../sysdeps/unix/sysv/linux/aarch64/syscall.S: No such file or directory
+warning: Missing auto-load script at offset 0 in section .debug_gdb_scripts
+of file /home/parallels/NeonMix/.local/r26/target/debug/deps/neonmix_hub-b1bde802e218bf55.
+Use `info auto-load python-scripts [REGEXP]' to list them.
+
+Thread 9 (Thread 0xea22315eef40 (LWP 524761) "media_worker::t"):
+#0  0x0000ea2231d91e9c in __futex_abstimed_wait_common64 (private=128, cancel=true, abstime=0x0, op=265, expected=525001, futex_word=0xea2230daf010) at ./nptl/futex-internal.c:57
+#1  __futex_abstimed_wait_common (cancel=true, private=128, abstime=0x0, clockid=0, expected=525001, futex_word=0xea2230daf010) at ./nptl/futex-internal.c:87
+#2  __GI___futex_abstimed_wait_cancelable64 (futex_word=futex_word@entry=0xea2230daf010, expected=525001, clockid=clockid@entry=0, abstime=abstime@entry=0x0, private=private@entry=128) at ./nptl/futex-internal.c:139
+#3  0x0000ea2231d97348 in __pthread_clockjoin_ex (threadid=257432569442112, thread_return=0x0, clockid=0, abstime=0x0, block=<optimized out>) at ./nptl/pthread_join_common.c:102
+#4  0x0000ba125c4d5868 in std::sys::thread::unix::Thread::join () at library/std/src/sys/thread/unix.rs:126
+#5  0x0000ba125c1c143c in std::thread::lifecycle::JoinInner<core::option::Option<neonmix_core::queue::BlockProducer>>::join<core::option::Option<neonmix_core::queue::BlockProducer>> (self=...) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/lifecycle.rs:241
+#6  0x0000ba125c0e71ec in std::thread::join_handle::JoinHandle<core::option::Option<neonmix_core::queue::BlockProducer>>::join<core::option::Option<neonmix_core::queue::BlockProducer>> (self=...) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/join_handle.rs:150
+#7  0x0000ba125c17c1f4 in neonmix_hub::media_worker::{impl#2}::drop (self=0xea22315ec040) at apps/hub/src/media_worker.rs:269
+#8  0x0000ba125c17690c in core::ptr::drop_in_place<neonmix_hub::media_worker::MediaWorker> () at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/ptr/mod.rs:805
+#9  0x0000ba125c120620 in neonmix_hub::media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader () at apps/hub/src/media_worker.rs:338
+#10 0x0000ba125c1377d0 in neonmix_hub::media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader::{closure#0} () at apps/hub/src/media_worker.rs:281
+#11 0x0000ba125c170ed0 in core::ops::function::FnOnce::call_once<neonmix_hub::media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader::{closure_env#0}, ()> () at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/ops/function.rs:250
+#12 0x0000ba125c1d2418 in core::ops::function::FnOnce::call_once<fn() -> core::result::Result<(), alloc::string::String>, ()> () at library/core/src/ops/function.rs:250
+#13 test::__rust_begin_short_backtrace<core::result::Result<(), alloc::string::String>, fn() -> core::result::Result<(), alloc::string::String>> () at library/test/src/lib.rs:663
+
+Thread 8 (Thread 0xea222bffef40 (LWP 524987) "pool-spawner"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ea22322cb630 in g_cond_wait () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#2  0x0000ea22322378d8 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#3  0x0000ea22322a04bc [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#4  0x0000ea223229f618 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#5  0x0000ea2231d9595c [PAC] in start_thread (arg=0xea22315ef680) at ./nptl/pthread_create.c:447
+#6  0x0000ea2231dfba4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 7 (Thread 0xea2228feef40 (LWP 524992) "jitter:src"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ea22322cb630 in g_cond_wait () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#2  0x0000ea2230961dac [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstrtpmanager.so
+#3  0x0000ea22324edf60 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstreamer-1.0.so.0
+#4  0x0000ea22322a59b0 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#5  0x0000ea223229f618 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#6  0x0000ea2231d9595c [PAC] in start_thread (arg=0xea222bfff680) at ./nptl/pthread_create.c:447
+#7  0x0000ea2231dfba4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 6 (Thread 0xea2203ffef40 (LWP 524993) "dtlsenc0:src"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ea22322cb630 in g_cond_wait () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#2  0x0000ea2230b3fe24 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstdtls.so
+#3  0x0000ea22324edf60 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstreamer-1.0.so.0
+#4  0x0000ea22322a59b0 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#5  0x0000ea223229f618 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#6  0x0000ea2231d9595c [PAC] in start_thread (arg=0xea222bfff680) at ./nptl/pthread_create.c:447
+#7  0x0000ea2231dfba4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 5 (Thread 0xea22027cef40 (LWP 524996) "timer"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ea22322cb630 in g_cond_wait () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#2  0x0000ea22309618dc [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/gstreamer/plugins/libgstrtpmanager.so
+#3  0x0000ea223229f618 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#4  0x0000ea2231d9595c [PAC] in start_thread (arg=0xea22315ef680) at ./nptl/pthread_create.c:447
+#5  0x0000ea2231dfba4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 4 (Thread 0xea22017aef40 (LWP 524998) "wire_in:src"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ea22322cb630 in g_cond_wait () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#2  0x0000ea22321d7f48 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstapp-1.0.so.0
+#3  0x0000ea22325ef2d8 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstbase-1.0.so.0
+#4  0x0000ea22325f1d98 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstbase-1.0.so.0
+#5  0x0000ea22324edf60 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstreamer-1.0.so.0
+#6  0x0000ea22322a59b0 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#7  0x0000ea223229f618 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#8  0x0000ea2231d9595c [PAC] in start_thread (arg=0xea222bfff680) at ./nptl/pthread_create.c:447
+#9  0x0000ea2231dfba4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 3 (Thread 0xea21e3ffef40 (LWP 525000) "rtcp_in:src"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ea22322cb630 in g_cond_wait () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#2  0x0000ea22321d7f48 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstapp-1.0.so.0
+#3  0x0000ea22325ef2d8 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstbase-1.0.so.0
+#4  0x0000ea22325f1d98 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstbase-1.0.so.0
+#5  0x0000ea22324edf60 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libgstreamer-1.0.so.0
+#6  0x0000ea22322a59b0 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#7  0x0000ea223229f618 [PAC] in ?? () from /home/parallels/NeonMix/.local/r26/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+#8  0x0000ea2231d9595c [PAC] in start_thread (arg=0xea222bfff680) at ./nptl/pthread_create.c:447
+#9  0x0000ea2231dfba4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 2 (Thread 0xea2230daef40 (LWP 525001) "media-0"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ba125c0d1d44 in std::sys::pal::unix::futex::futex_wait () at library/std/src/sys/pal/unix/futex.rs:73
+#2  std::sys::sync::mutex::futex::Mutex::lock_contended () at library/std/src/sys/sync/mutex/futex.rs:61
+#3  0x0000ba125c1384ec in std::sys::sync::mutex::futex::Mutex::lock (self=0xea222c13b250) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sys/sync/mutex/futex.rs:33
+#4  std::sync::poison::mutex::Mutex<neonmix_hub::media_worker::Report>::lock<neonmix_hub::media_worker::Report> (self=0xea222c13b250) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sync/poison/mutex.rs:492
+#5  0x0000ba125c1266f0 in neonmix_hub::media_worker::{impl#1}::prepare::{closure#1} () at apps/hub/src/media_worker.rs:193
+#6  0x0000ba125c188d98 in std::sys::backtrace::__rust_begin_short_backtrace<neonmix_hub::media_worker::{impl#1}::prepare::{closure_env#1}, core::option::Option<neonmix_core::queue::BlockProducer>> (f=...) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sys/backtrace.rs:166
+#7  0x0000ba125c1c120c in std::thread::lifecycle::spawn_unchecked::{closure#1}::{closure#0}<neonmix_hub::media_worker::{impl#1}::prepare::{closure_env#1}, core::option::Option<neonmix_core::queue::BlockProducer>> () at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/lifecycle.rs:91
+#8  0x0000ba125c181e94 in core::panic::unwind_safe::{impl#25}::call_once<core::option::Option<neonmix_core::queue::BlockProducer>, std::thread::lifecycle::spawn_unchecked::{closure#1}::{closure_env#0}<neonmix_hub::media_worker::{impl#1}::prepare::{closure_env#1}, core::option::Option<neonmix_core::queue::BlockProducer>>> (self=...) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/panic/unwind_safe.rs:274
+#9  0x0000ba125c16ee54 in std::panicking::catch_unwind::do_call<core::panic::unwind_safe::AssertUnwindSafe<std::thread::lifecycle::spawn_unchecked::{closure#1}::{closure_env#0}<neonmix_hub::media_worker::{impl#1}::prepare::{closure_env#1}, core::option::Option<neonmix_core::queue::BlockProducer>>>, core::option::Option<neonmix_core::queue::BlockProducer>> (data=0xea2230dadd10) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/panicking.rs:581
+#10 0x0000ba125c1c1808 in __rust_try ()
+#11 0x0000ba125c1c04d4 in std::panicking::catch_unwind<core::option::Option<neonmix_core::queue::BlockProducer>, core::panic::unwind_safe::AssertUnwindSafe<std::thread::lifecycle::spawn_unchecked::{closure#1}::{closure_env#0}<neonmix_hub::media_worker::{impl#1}::prepare::{closure_env#1}, core::option::Option<neonmix_core::queue::BlockProducer>>>> (f=...) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/panicking.rs:544
+#12 std::panic::catch_unwind<core::panic::unwind_safe::AssertUnwindSafe<std::thread::lifecycle::spawn_unchecked::{closure#1}::{closure_env#0}<neonmix_hub::media_worker::{impl#1}::prepare::{closure_env#1}, core::option::Option<neonmix_core::queue::BlockProducer>>>, core::option::Option<neonmix_core::queue::BlockProducer>> (f=...) at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/panic.rs:359
+#13 std::thread::lifecycle::spawn_unchecked::{closure#1}<neonmix_hub::media_worker::{impl#1}::prepare::{closure_env#1}, core::option::Option<neonmix_core::queue::BlockProducer>> () at /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/lifecycle.rs:89
+
+Thread 1 (Thread 0xea22327d9020 (LWP 524746) "neonmix_hub-b1b"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/aarch64/syscall.S:38
+#1  0x0000ba125c4dc434 in std::sys::pal::unix::futex::futex_wait () at library/std/src/sys/pal/unix/futex.rs:73
+#2  std::sys::sync::thread_parking::futex::Parker::park () at library/std/src/sys/sync/thread_parking/futex.rs:55
+#3  std::thread::thread::Thread::park () at library/std/src/thread/thread.rs:121
+#4  0x0000ba125c1dd058 in std::sync::mpmc::context::Context::wait_until () at library/std/src/sync/mpmc/context.rs:143
+#5  std::sync::mpmc::list::{impl#3}::recv::{closure#1}<test::event::CompletedTest> () at library/std/src/sync/mpmc/list.rs:453
+#6  0x0000ba125c1e560c in std::sync::mpmc::context::{impl#0}::with::{closure#0}<std::sync::mpmc::list::{impl#3}::recv::{closure_env#1}<test::event::CompletedTest>, ()> () at library/std/src/sync/mpmc/context.rs:49
+#7  std::sync::mpmc::context::{impl#0}::with::{closure#1}<std::sync::mpmc::list::{impl#3}::recv::{closure_env#1}<test::event::CompletedTest>, ()> () at library/std/src/sync/mpmc/context.rs:57
+#8  std::thread::local::LocalKey::try_with<core::cell::Cell<core::option::Option<std::sync::mpmc::context::Context>>, std::sync::mpmc::context::{impl#0}::with::{closure_env#1}<std::sync::mpmc::list::{impl#3}::recv::{closure_env#1}<test::event::CompletedTest>, ()>, ()> () at library/std/src/thread/local.rs:513
+#9  std::sync::mpmc::context::Context::with<std::sync::mpmc::list::{impl#3}::recv::{closure_env#1}<test::event::CompletedTest>, ()> () at library/std/src/sync/mpmc/context.rs:53
+#10 std::sync::mpmc::list::Channel::recv<test::event::CompletedTest> () at library/std/src/sync/mpmc/list.rs:442
+#11 0x0000ba125c1ef974 in std::sync::mpmc::Receiver::recv<test::event::CompletedTest> () at library/std/src/sync/mpmc/mod.rs:985
+#12 std::sync::mpsc::Receiver::recv<test::event::CompletedTest> () at library/std/src/sync/mpsc.rs:849
+#13 test::run_tests<test::console::run_tests_console::{closure_env#2}> () at library/test/src/lib.rs:472
+[Inferior 1 (process 524746) detached]

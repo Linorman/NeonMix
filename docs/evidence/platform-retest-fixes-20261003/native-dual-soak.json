@@ -1,0 +1,704 @@
+{
+  "platform": "darwin",
+  "device": "coreaudio:BlackHole2ch_UID",
+  "binary_sha256": "373de61ef34cfa73a3cd5aac0b37a8502c49f291bfd300bd9733d445a00b46cb",
+  "passed": true,
+  "checks": {
+    "unauthenticated": 401,
+    "dual_soak": {
+      "event": "capture_complete",
+      "measurement": {
+        "analyzed_frames": 2879744,
+        "estimated_frequency_hz": 450.2447729846469,
+        "peak": 0.008051999844610691,
+        "positive_zero_crossings": 27012,
+        "rms": 0.003980180107349544
+      },
+      "stats": {
+        "callback_max_ns": 6667,
+        "callback_over_budget": 0,
+        "callbacks": 11250,
+        "clock_epoch": 1,
+        "discontinuities": 1,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 2880000,
+        "last_arrival_ns": 60075547667,
+        "last_device_ns": 458530354214167,
+        "last_error": 0,
+        "native_device_frame_position": null,
+        "native_internal_frames": null,
+        "native_stream_frames": null,
+        "no_data_intervals": 0,
+        "peak": 0.007969625294208527,
+        "period_max": 256,
+        "period_min": 256,
+        "presented_frames": 0,
+        "silent_frames": 0,
+        "stale_frames": 0,
+        "submitted_frames": 0
+      }
+    },
+    "dual_soak_diagnostics": {
+      "airplay": {
+        "multi_receiver": false,
+        "receivers": [
+          {
+            "active": false,
+            "admission_denials": {},
+            "discovery_state": "hidden",
+            "enabled": false,
+            "error": null,
+            "failure_stage": null,
+            "format": null,
+            "ingress": {
+              "accepted_packets": 0,
+              "clock_resets": 0,
+              "future_packets": 0,
+              "identity_rejections": 0,
+              "last_mapping_id": 0,
+              "last_presentation_time_ns": 0,
+              "last_source_rate": 0,
+              "last_source_sample_position": 0,
+              "last_uncertainty_ns": 0,
+              "late_packets": 0,
+              "latency_advance_ns": 0,
+              "malformed_packets": 0,
+              "output_latency_ns": 0,
+              "overflow_packets": 0,
+              "pending_bytes": 0,
+              "pending_frames": 0,
+              "playout_lead_ns": 0,
+              "protocol_lead_ns": 0,
+              "released_packets": 0,
+              "timeline_rejections": 0
+            },
+            "last_media_reset": null,
+            "media_resets": 0,
+            "mix": {
+              "gain_db": 0.0,
+              "muted": false,
+              "solo": false
+            },
+            "pairing_window_open": false,
+            "pairing_window_remaining_seconds": 0,
+            "playback_allowed": true,
+            "playback_mode": "low_latency",
+            "protocol_events": [],
+            "protocol_events_dropped": 0,
+            "queued_blocks": 0,
+            "ready": false,
+            "received_blocks": 0,
+            "rejected_blocks": 0,
+            "released_blocks": 0,
+            "revision": 1,
+            "source_id": null,
+            "source_name": null,
+            "source_revoked": false,
+            "visibility_reason": "disabled"
+          }
+        ],
+        "revision": 1
+      },
+      "drift_ppm": [
+        66.065,
+        -145.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "errors": [],
+      "fifo_frames": [
+        3497,
+        3524,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "filtered_queues": [
+        3393,
+        3385,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360
+      ],
+      "lane_stream_ids": [
+        4867007379296203,
+        859475316162909,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "last_underrun_fifo_frames": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_underrun_needed_frames": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_underrun_output_frame": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_underrun_source_end": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "limited_frames": 0,
+      "media_workers": [
+        {
+          "max_loop_gap_ns": 15288792,
+          "max_pump_ns": 18334,
+          "max_report_ns": 51750,
+          "pump_timing": {
+            "feedback": {
+              "at_ns": 12023738584,
+              "cpu_ns": 43459,
+              "phase": "feedback",
+              "requested_wait_ns": null,
+              "wall_ns": 46333
+            },
+            "max_wait_lateness_ns": 302250,
+            "outgoing": {
+              "at_ns": 45078955084,
+              "cpu_ns": 40959,
+              "phase": "outgoing",
+              "requested_wait_ns": null,
+              "wall_ns": 40666
+            },
+            "receive": {
+              "at_ns": 8090841792,
+              "cpu_ns": 28375,
+              "phase": "receive",
+              "requested_wait_ns": null,
+              "wall_ns": 36083
+            },
+            "recent_slow": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "report": {
+              "at_ns": 22161061209,
+              "cpu_ns": 36459,
+              "phase": "report",
+              "requested_wait_ns": null,
+              "wall_ns": 52458
+            },
+            "slow_count": 0,
+            "source": {
+              "at_ns": 106649709,
+              "cpu_ns": 2125,
+              "phase": "source",
+              "requested_wait_ns": null,
+              "wall_ns": 25208
+            },
+            "wait": {
+              "at_ns": 20043125,
+              "cpu_ns": 9959,
+              "phase": "wait",
+              "requested_wait_ns": 19999542,
+              "wall_ns": 15263917
+            }
+          },
+          "receive_throttles": 0,
+          "scheduling": {
+            "base_priority": 47,
+            "configured": true,
+            "error": null,
+            "nice": null,
+            "policy": 1
+          }
+        },
+        {
+          "max_loop_gap_ns": 15780375,
+          "max_pump_ns": 17875,
+          "max_report_ns": 39916,
+          "pump_timing": {
+            "feedback": {
+              "at_ns": 54094884541,
+              "cpu_ns": 41875,
+              "phase": "feedback",
+              "requested_wait_ns": null,
+              "wall_ns": 41959
+            },
+            "max_wait_lateness_ns": 101500,
+            "outgoing": {
+              "at_ns": 54094958958,
+              "cpu_ns": 39875,
+              "phase": "outgoing",
+              "requested_wait_ns": null,
+              "wall_ns": 39792
+            },
+            "receive": {
+              "at_ns": 13573238125,
+              "cpu_ns": 25834,
+              "phase": "receive",
+              "requested_wait_ns": null,
+              "wall_ns": 29291
+            },
+            "recent_slow": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "report": {
+              "at_ns": 18254664916,
+              "cpu_ns": 34292,
+              "phase": "report",
+              "requested_wait_ns": null,
+              "wall_ns": 40250
+            },
+            "slow_count": 0,
+            "source": {
+              "at_ns": 50084240291,
+              "cpu_ns": 11333,
+              "phase": "source",
+              "requested_wait_ns": null,
+              "wall_ns": 18042
+            },
+            "wait": {
+              "at_ns": 9875,
+              "cpu_ns": 8125,
+              "phase": "wait",
+              "requested_wait_ns": 19990000,
+              "wall_ns": 15770791
+            }
+          },
+          "receive_throttles": 0,
+          "scheduling": {
+            "base_priority": 47,
+            "configured": true,
+            "error": null,
+            "nice": null,
+            "policy": 1
+          }
+        }
+      ],
+      "meters": {
+        "lanes": [
+          {
+            "peak": 0.01602100022137165,
+            "rms": 0.01126327645033598,
+            "stream_id": 4867007379296203
+          },
+          {
+            "peak": 0.016011709347367287,
+            "rms": 0.011209781281650066,
+            "stream_id": 859475316162909
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          },
+          {
+            "peak": 0.0,
+            "rms": 0.0,
+            "stream_id": 0
+          }
+        ],
+        "limiter_gain": 1.0,
+        "output": {
+          "peak": 0.008009598590433598,
+          "rms": 0.004011598415672779
+        },
+        "sample_rate": 48000,
+        "window_frames": 2400
+      },
+      "output_frames": 2930176,
+      "output_stats": {
+        "callback_max_ns": 240750,
+        "callback_over_budget": 0,
+        "callbacks": 11446,
+        "clock_epoch": 1,
+        "discontinuities": 0,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 2930176,
+        "last_arrival_ns": 61083215584,
+        "last_device_ns": 458530447130833,
+        "last_error": 0,
+        "native_device_frame_position": 2929920,
+        "native_internal_frames": 2929920,
+        "native_stream_frames": 2929920,
+        "no_data_intervals": 0,
+        "peak": 0.007951651699841022,
+        "period_max": 256,
+        "period_min": 256,
+        "presented_frames": 2929665,
+        "silent_frames": 12579,
+        "stale_frames": 0,
+        "submitted_frames": 2930176
+      },
+      "packet_budget_drops": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_queue_age_max_ns": [
+        10668000,
+        10622458,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "queues": [
+        3497,
+        3524,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "receivers": [
+        {
+          "authenticated": true,
+          "authenticated_to_jitter_max_ns": 40389541,
+          "jitter_to_pcm_max_ns": 2479667,
+          "last_buffer_peak": 0.015899658203125,
+          "last_buffer_rms": 0.01114365881711665,
+          "last_loss_duration_ns": 0,
+          "last_pcm_pts_ns": 60869347500,
+          "last_pcm_timing_gap": null,
+          "last_source_position": 2920320,
+          "late_packets": 0,
+          "lost_packets": 0,
+          "native_scheduling": {
+            "configured": 4,
+            "entered": 4,
+            "failed": 0,
+            "max_base_priority": 47,
+            "min_base_priority": 47
+          },
+          "overflow_plc_packets": 0,
+          "packets": {
+            "duplicate": 0,
+            "highest_sequence": 23243,
+            "highest_timestamp": 709392548,
+            "invalid": 0,
+            "received": 6084,
+            "reordered": 0,
+            "timestamp_step_errors": 0
+          },
+          "pcm_frames": 2920320,
+          "pcm_peak": 0.016143798828125,
+          "pcm_sink_dropped": 0,
+          "pcm_timing_gap_count": 0,
+          "pcm_timing_gaps": [],
+          "pipeline_base_time_ns": 458469546923125,
+          "pipeline_clock_ns": 458530417591875,
+          "plc_samples": 0,
+          "queue_drops": 0,
+          "retimed_loss_events": 0,
+          "silent_pcm_frames": 1135,
+          "wire_to_authenticated_max_ns": 51750
+        },
+        {
+          "authenticated": true,
+          "authenticated_to_jitter_max_ns": 31210041,
+          "jitter_to_pcm_max_ns": 142000,
+          "last_buffer_peak": 0.0159912109375,
+          "last_buffer_rms": 0.011223136064629815,
+          "last_loss_duration_ns": 0,
+          "last_pcm_pts_ns": 60709001500,
+          "last_pcm_timing_gap": null,
+          "last_source_position": 2912160,
+          "late_packets": 0,
+          "lost_packets": 0,
+          "native_scheduling": {
+            "configured": 4,
+            "entered": 4,
+            "failed": 0,
+            "max_base_priority": 47,
+            "min_base_priority": 47
+          },
+          "overflow_plc_packets": 0,
+          "packets": {
+            "duplicate": 0,
+            "highest_sequence": 32350,
+            "highest_timestamp": 413780473,
+            "invalid": 0,
+            "received": 6068,
+            "reordered": 0,
+            "timestamp_step_errors": 0
+          },
+          "pcm_frames": 2912160,
+          "pcm_peak": 0.01611328125,
+          "pcm_sink_dropped": 0,
+          "pcm_timing_gap_count": 0,
+          "pcm_timing_gaps": [],
+          "pipeline_base_time_ns": 458469717441875,
+          "pipeline_clock_ns": 458530426785541,
+          "plc_samples": 0,
+          "queue_drops": 0,
+          "retimed_loss_events": 0,
+          "silent_pcm_frames": 1198,
+          "wire_to_authenticated_max_ns": 45500
+        }
+      ],
+      "sinc_delay_frames": 64,
+      "timed_drift_ppm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timed_late_frames": 0,
+      "timed_phase_error_ns": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "underrun_frames": 0,
+      "underrun_frames_by_lane": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

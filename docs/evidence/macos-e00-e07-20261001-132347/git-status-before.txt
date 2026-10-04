@@ -1,0 +1,51 @@
+ M "01_NeonMix_\350\256\276\350\256\241\346\226\271\346\241\210\344\270\216\346\212\200\346\234\257\351\200\211\345\236\213.md"
+ M DESIGN.md
+ M README.md
+ M UX-CONTRACT.md
+ M docs/STATUS.md
+ M docs/adr/ADR-001-process-and-realtime.md
+ M docs/adr/ADR-002-native-backends.md
+ M docs/adr/ADR-008-language-and-build.md
+ M drivers/macos/README.md
+ M drivers/windows/README.md
+ M vendor/README.md
+?? "03_NeonMix_AirPlay\346\216\245\345\205\245_\350\256\276\350\256\241\346\226\271\346\241\210\344\270\216\346\212\200\346\234\257\351\200\211\345\236\213.md"
+?? "04_NeonMix_AirPlay\346\216\245\345\205\245_\345\274\200\345\217\221\350\256\241\345\210\222.md"
+?? docs/DESKTOP-IPC-CONTRACT.md
+?? docs/E02-E04-AUDIT.md
+?? docs/E02-E04-REQUIREMENTS.md
+?? docs/E02-E04-REVIEW-20260930.md
+?? docs/E02-E04-STABILITY-20260930.md
+?? docs/E02-E04.md
+?? docs/E05-AUDIT.md
+?? docs/E05.md
+?? docs/E06-AUDIT.md
+?? docs/E06.md
+?? docs/E07.md
+?? docs/E07_UI_IMPROVEMENTS.md
+?? docs/MEDIA-CONTROL-CONTRACT.md
+?? docs/OUTPUT-BINDING-CONTRACT.md
+?? docs/UBUNTU-ARM64-E00-E01.md
+?? docs/UBUNTU-ARM64-E02-E04.md
+?? docs/UBUNTU-ARM64-E06.md
+?? docs/adr/ADR-003-media-mixer-control.md
+?? docs/adr/ADR-009-virtual-outputs.md
+?? docs/adr/ADR-010-windows-render-driver.md
+?? docs/adr/ADR-011-discovery-and-pairing.md
+?? docs/adr/ADR-012-desktop-background.md
+?? docs/evidence/e02-e04/
+?? docs/evidence/e05/
+?? docs/evidence/e06/
+?? docs/evidence/e07/
+?? docs/evidence/ubuntu-arm64-peer/
+?? docs/evidence/ubuntu-e02-e04/
+?? docs/evidence/windows-arm64/
+?? drivers/windows/wavert/DRIVER-CONTRACT.md
+?? patches/tympan-aspl-0.1.0-realtime-clock.md
+?? tools/macos_acceptance_run.py
+?? vendor/tympan-aspl/.github/ISSUE_TEMPLATE/
+?? vendor/tympan-aspl/.github/PULL_REQUEST_TEMPLATE.md
+?? vendor/tympan-aspl/CLAUDE.md
+?? vendor/tympan-aspl/README.ja.md
+?? vendor/tympan-aspl/README.md
+?? vendor/tympan-aspl/docs/

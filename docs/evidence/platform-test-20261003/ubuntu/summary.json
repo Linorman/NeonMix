@@ -1,0 +1,16 @@
+{
+  "tests": {
+    "passed": 215,
+    "failed": 0,
+    "ignored": 5
+  },
+  "worker_protocol_checks": 23,
+  "worker_protocol_passed": true,
+  "codecs": [
+    "PCM",
+    "ALAC",
+    "AAC"
+  ],
+  "background_scenarios": 12,
+  "source_canonical_sha256": "b0aa5d6bcf84e1d12dae4ff400cd885cb288f124107332907a9a1cb6cda7e9ef"
+}

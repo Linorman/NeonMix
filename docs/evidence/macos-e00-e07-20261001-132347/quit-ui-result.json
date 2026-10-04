@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "scenarios": {
+    "escape_keeps_hub": true,
+    "confirmed_exit_ends_ui_background_and_hub": true
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "native_start_order": "hot",
+  "prefetch_blocks": 96,
+  "codec": "alac",
+  "playback_mode": "low_latency",
+  "protocol_lead_ms": 2000,
+  "pause_seconds": 0.0,
+  "pause_cycles": 1,
+  "resume_lead_ms": 250,
+  "resume_reset": "none",
+  "track_gap": false,
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; receiver private file-store fixture entry",
+  "binary_sha256": {
+    "neonmix-hub": "4d1c1ed97447951fc0b3e637924d72ae8dd6e4478ebdc202adbd4ae7deeab571",
+    "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+  },
+  "passed": true,
+  "scenarios": {
+    "playback_mode_admin_permission_and_persistence": true,
+    "receiver_key_and_trust_survive_worker_restart": true,
+    "room_source_identity_visible_without_control_credentials": true,
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+    "steady_timing_without_new_late_packets_or_skipped_samples": true,
+    "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+    "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+    "worker_kill_clears_airplay_and_preserves_native_audio": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "timing": {
+    "latency_advance_ns": 1819253878,
+    "protocol_lead_ns": 1939427628,
+    "playout_lead_ns": 120173750,
+    "output_latency_ns": 5312500
+  },
+  "airplay_pcm": {
+    "received_blocks": 403,
+    "released_blocks": 396,
+    "codec": "alac",
+    "source_frame_count": 352,
+    "accepted_packets": 403,
+    "identity_rejections": 0,
+    "source_rate": 44100,
+    "internal_rate": 48000,
+    "lane_rms": 0.08547705411911011,
+    "uncertainty_ns": 8670114,
+    "timed_late_frames": 0
+  },
+  "mixed_output_rms": 0.021383576095104218,
+  "output_frames_around_worker_crash": {
+    "before": 202752,
+    "after": 209408
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

@@ -1,0 +1,21 @@
+{
+  "platform": "macOS",
+  "os_version": "27.0",
+  "os_build": "26A5416b",
+  "source": "actual system Sound output selector on receiver host",
+  "receiver_profile": "AppleTV3,2 audio-only features 0x481C5A00 PIN flags 0xC",
+  "discovered": true,
+  "authenticated": true,
+  "srp_public_key_bytes": 256,
+  "srp_proof_bytes": 20,
+  "signed_pair_verify": true,
+  "fairplay_setup": true,
+  "audio_setup_and_record": true,
+  "decoded_pcm_received_blocks": 644,
+  "initial_pcm_rejected_blocks": 644,
+  "initial_pcm_released_blocks": 0,
+  "initial_control_id_bug": "libplist JSON integer saturation above INT64_MAX; Hub now emits IDs in 1..2^53-1 and worker rejects values outside that range",
+  "final_audio_playback": "pending native source revalidation after ID fix",
+  "video_sync": "not measured",
+  "evidence_scope": "preserved first successful actual Mac handshake observation; not final audio playback or acoustic synchronization acceptance"
+}

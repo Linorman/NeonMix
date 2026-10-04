@@ -1,0 +1,24 @@
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Checking glib-sys v0.20.10
+    Checking gobject-sys v0.20.10
+    Checking neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+    Checking gstreamer-sys v0.23.6
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking gstreamer-base-sys v0.23.6
+    Checking gio-sys v0.20.10
+    Checking gstreamer-rtp-sys v0.23.5
+    Checking gstreamer-app-sys v0.23.5
+    Checking glib v0.20.12
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Checking neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Checking gstreamer v0.23.7
+    Checking neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-audio v0.1.0 (/Volumes/projects-mac/NeonMix/apps/audio)
+    Checking gstreamer-base v0.23.6
+    Checking gstreamer-rtp v0.23.5
+    Checking gstreamer-app v0.23.5
+    Checking neonmix-linux v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/linux)
+    Checking neonmix-windows v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/windows)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 14.59s

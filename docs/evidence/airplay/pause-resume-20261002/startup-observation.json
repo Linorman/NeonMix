@@ -1,0 +1,17 @@
+{
+  "stage": "waiting_on_macos_keychain_read",
+  "stack_function": "SecKeychainFindGenericPassword",
+  "existing_entries": {
+    "hub_private_key_entry_exists": true,
+    "admin_token_entry_exists": true,
+    "receiver_key_entry_exists": true
+  },
+  "real_iphone_pause_resume_confirmed": false,
+  "blocked_audit": {
+    "consecutive_goal_turns": 3,
+    "same_live_hub_pid": 26454,
+    "stack_wait_reconfirmed": true,
+    "airplay_worker_started": false,
+    "required_external_change": "macOS Keychain access must complete before real iPhone verification"
+  }
+}

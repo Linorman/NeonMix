@@ -1,0 +1,227 @@
+   Compiling winnow v1.0.4
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling target-lexicon v0.13.5
+   Compiling serde_spanned v1.1.1
+   Compiling smallvec v1.16.2
+   Compiling pkg-config v0.3.34
+   Compiling version-compare v0.2.1
+   Compiling futures-core v0.3.34
+   Compiling futures-sink v0.3.34
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.189
+   Compiling slab v0.4.12
+   Compiling memchr v2.8.3
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+   Compiling windows-sys v0.61.2
+   Compiling futures-task v0.3.34
+   Compiling serde_json v1.0.151
+   Compiling http v1.5.0
+   Compiling syn v2.0.119
+   Compiling tracing-core v0.1.36
+   Compiling base64 v0.23.1
+   Compiling rustls v0.23.45
+   Compiling futures-macro v0.3.34
+   Compiling num-integer v0.1.47
+   Compiling windows-sys v0.59.0
+   Compiling httparse v1.10.1
+   Compiling either v1.18.0
+   Compiling option-operations v0.5.0
+   Compiling percent-encoding v2.3.2
+   Compiling muldiv v1.0.1
+   Compiling getrandom v0.3.4
+   Compiling tower-service v0.3.3
+   Compiling futures-channel v0.3.34
+   Compiling atomic_refcell v0.1.14
+   Compiling atomic-waker v1.1.2
+   Compiling try-lock v0.2.5
+   Compiling powerfmt v0.2.0
+   Compiling deranged v0.5.8
+   Compiling time-core v0.1.9
+   Compiling fnv v1.0.7
+   Compiling num-conv v0.2.2
+   Compiling httpdate v1.0.3
+   Compiling itertools v0.14.0
+   Compiling want v0.3.1
+   Compiling icu_normalizer v2.3.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling form_urlencoded v1.2.2
+   Compiling num-rational v0.4.2
+   Compiling rubato v0.16.2
+   Compiling sync_wrapper v1.0.2
+   Compiling tracing v0.1.44
+   Compiling pem v4.0.0
+   Compiling webpki-roots v1.0.9
+   Compiling ipnet v2.12.2
+   Compiling tower-layer v0.3.3
+   Compiling rustversion v1.0.23
+   Compiling indexmap v2.14.2
+   Compiling flume v0.12.0
+   Compiling sha1 v0.10.7
+   Compiling fs-err v3.3.1
+   Compiling ryu v1.0.23
+   Compiling data-encoding v2.11.1
+   Compiling http-body v1.1.0
+   Compiling idna_adapter v1.2.2
+   Compiling webpki-roots v0.26.11
+   Compiling futures-util v0.3.34
+   Compiling mime v0.3.17
+   Compiling http-body-util v0.1.5
+   Compiling idna v1.1.0
+   Compiling rand_core v0.9.5
+   Compiling base64 v0.22.1
+   Compiling matchit v0.8.4
+   Compiling neonmix-hub v0.1.0 (E:\Desktop\NeonMix-test\apps\hub)
+   Compiling cfg-expr v0.20.9
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling rand_chacha v0.9.0
+   Compiling axum-core v0.5.6
+   Compiling url v2.5.8
+   Compiling time v0.3.55
+   Compiling rand v0.9.5
+   Compiling toml v1.1.6+spec-1.1.0
+   Compiling toml_edit v0.25.15+spec-1.1.0
+   Compiling arc-swap v1.9.2
+   Compiling system-deps v7.0.8
+   Compiling yasna v0.6.0
+   Compiling proc-macro-crate v3.5.0
+   Compiling glib-sys v0.20.10
+   Compiling gobject-sys v0.20.10
+   Compiling gstreamer-sys v0.23.6
+   Compiling gstreamer-base-sys v0.23.6
+   Compiling gio-sys v0.20.10
+   Compiling gstreamer-app-sys v0.23.5
+   Compiling gstreamer-rtp-sys v0.23.5
+   Compiling rcgen v0.14.10
+   Compiling glib-macros v0.20.12
+   Compiling windows-implement v0.60.2
+   Compiling windows-interface v0.59.3
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.3
+   Compiling anstyle-query v1.1.5
+   Compiling if-addrs v0.15.0
+   Compiling anstyle-wincon v3.0.11
+   Compiling serde v1.0.229
+   Compiling uuid v1.26.1
+   Compiling serde_path_to_error v0.1.20
+   Compiling futures-executor v0.3.34
+   Compiling audio_thread_priority v0.35.1
+   Compiling anstream v1.0.0
+   Compiling socket-pktinfo v0.4.1
+   Compiling clap_builder v4.6.7
+   Compiling tungstenite v0.29.0
+   Compiling tokio v1.53.1
+   Compiling mdns-sd v0.21.4
+   Compiling mdns-sd v0.21.4 (E:\Desktop\NeonMix-test\vendor\mdns-sd-scoped)
+   Compiling neonmix-core v0.1.0 (E:\Desktop\NeonMix-test\crates\audio-core)
+   Compiling serde_urlencoded v0.7.1
+   Compiling windows-core v0.62.2
+   Compiling neonmix-control v0.1.0 (E:\Desktop\NeonMix-test\crates\control)
+   Compiling neonmix-airplay-ipc v0.1.0 (E:\Desktop\NeonMix-test\crates\airplay-ipc)
+   Compiling neonmix-output-binding v0.1.0 (E:\Desktop\NeonMix-test\crates\output-binding)
+   Compiling windows-future v0.3.2
+   Compiling windows-numerics v0.3.1
+   Compiling windows-collections v0.3.2
+   Compiling neonmix-airplay-adapter v0.1.0 (E:\Desktop\NeonMix-test\crates\airplay-adapter)
+   Compiling windows v0.62.2
+   Compiling neonmix-identity v0.1.0 (E:\Desktop\NeonMix-test\crates\identity)
+   Compiling clap v4.6.7
+   Compiling glib v0.20.12
+   Compiling tokio-util v0.7.19
+   Compiling tokio-rustls v0.26.6
+   Compiling tower v0.5.3
+   Compiling tokio-tungstenite v0.29.0
+   Compiling tower-http v0.6.11
+   Compiling h2 v0.4.19
+   Compiling hyper v1.11.1
+   Compiling gstreamer v0.23.7
+   Compiling hyper-util v0.1.21
+   Compiling hyper-rustls v0.27.10
+   Compiling axum v0.8.9
+   Compiling axum-server v0.7.3
+   Compiling reqwest v0.12.28
+   Compiling cpal v0.18.2 (E:\Desktop\NeonMix-test\vendor\cpal)
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling neonmix-io v0.1.0 (E:\Desktop\NeonMix-test\crates\audio-io)
+   Compiling neonmix-windows v0.1.0 (E:\Desktop\NeonMix-test\adapters\windows)
+warning: `cpal` (lib) generated 1 warning
+   Compiling gstreamer-base v0.23.6
+   Compiling gstreamer-rtp v0.23.5
+   Compiling gstreamer-app v0.23.5
+   Compiling neonmix-media v0.1.0 (E:\Desktop\NeonMix-test\crates\media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 30.03s
+     Running unittests src\lib.rs (target\debug\deps\neonmix_control-70e70c25678b017a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\authority.rs (target\debug\deps\authority-88f47679e9693d93.exe)
+
+running 11 tests
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test member_cannot_solo_or_change_others_and_master ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running unittests src\main.rs (target\debug\deps\neonmix_hub-8fa7934889827ffa.exe)
+
+running 23 tests
+test identity::tests::setup_crash_helper ... ok
+test server::airplay::tests::expired_or_disabled_pairing_window_never_returns_a_stale_pin ... ok
+test server::airplay::tests::stop_and_disconnect_fail_closed_even_when_control_consumer_stalls ... ok
+test server::airplay::tests::idle_coreaudio_epoch_change_keeps_pin_window_but_active_media_is_revoked ... ok
+test server::airplay::tests::full_grant_preserves_all_hub_identity_fields ... ok
+test server::airplay::tests::existing_receiver_profiles_default_to_low_latency_and_keep_trust ... ok
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test identity::tests::legacy_and_mixed_formats_never_enter_laboratory_branch ... ok
+test identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity ... FAILED
+test server::airplay::tests::bounded_media_backpressure_preserves_burst_packets_and_stop_remains_independent ... ok
+test identity::tests::forget_is_resumable_and_protects_admin_kind_and_device_aliases ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test identity::tests::setup_force_exit_preserves_incomplete_identity_and_refuses_retry ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+
+failures:
+
+---- identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity stdout ----
+{"credential_store":"file","directory":"\\\\?\\E:\\Desktop\\NeonMix-test\\.local\\tmp\\hub-credentials-1a39583a-981b-4114-9368-c2883976a8d7\\source","event":"hub_configured","hub_id":"2722f7a2-b374-4dea-bfff-d360a5e13fd6","room_name":"room"}
+
+thread 'identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity' (29544) panicked at apps\hub\src\identity.rs:647:9:
+assertion `left == right` failed
+  left: Some("\\\\?\\E:\\Desktop\\NeonMix-test\\.local\\tmp\\hub-credentials-1a39583a-981b-4114-9368-c2883976a8d7\\moved\\state.json")
+ right: Some("E:\\Desktop\\NeonMix-test\\.local/tmp\\hub-credentials-1a39583a-981b-4114-9368-c2883976a8d7\\moved\\state.json")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity
+
+test result: FAILED. 22 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.91s
+
+error: test failed, to rerun pass `-p neonmix-hub --bin neonmix-hub`

@@ -1,0 +1,63 @@
+{
+  "platform": "macOS",
+  "scope": "actual SpeakerPublisher native DNS-SD resolution and IPv4 multicast AAAA replies attributed to source-interface ownership",
+  "limitations": [
+    "independent discovery fixture; no RTSP or audio playback",
+    "no Windows or Linux runtime verification",
+    "global/ULA subnet semantics covered by unit tests",
+    "same-LAN NICs can receive each other multicast; native callback scope identifies reception rather than advertisement origin"
+  ],
+  "fixture_sha256": "9c3611f5dc62e998a4c885e8c635387876c03e56bbab09d067bb7b98ecaa59cb",
+  "interfaces": [
+    {
+      "interface": "en0",
+      "ipv4_address_count": 2,
+      "ipv6_address_count": 4,
+      "link_local_record_count": 2,
+      "native_callback_different_lan_interface_count": 1,
+      "native_callback_non_lan_link_local_count": 0,
+      "wire_aaaa_replies_by_source_interface": {
+        "en0": {
+          "reply_count": 1,
+          "link_local_record_count": 1,
+          "foreign_link_local_record_count": 0
+        },
+        "en11": {
+          "reply_count": 1,
+          "link_local_record_count": 1,
+          "foreign_link_local_record_count": 0
+        }
+      },
+      "airplay_srv_resolved": true,
+      "passed": true
+    },
+    {
+      "interface": "en11",
+      "ipv4_address_count": 2,
+      "ipv6_address_count": 4,
+      "link_local_record_count": 2,
+      "native_callback_different_lan_interface_count": 1,
+      "native_callback_non_lan_link_local_count": 0,
+      "wire_aaaa_replies_by_source_interface": {
+        "en11": {
+          "reply_count": 1,
+          "link_local_record_count": 1,
+          "foreign_link_local_record_count": 0
+        },
+        "en0": {
+          "reply_count": 1,
+          "link_local_record_count": 1,
+          "foreign_link_local_record_count": 0
+        }
+      },
+      "airplay_srv_resolved": true,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "upstream_version": "0.21.4",
+  "patch_sha256": "9e4fd03c8b278b0ac3407e328972be7f7a599d89f6852ba0ae8937292a100e80",
+  "unit_test_result": "66 passed; includes 4 NeonMix scope/reflection regression tests",
+  "speaker_source_sha256": "ec0343ef7531a0c3c7eefe40a93da6012f970679b6d34ca6277f91d8c3547636",
+  "probe_source_sha256": "f2ac6fcc6a3fb4a6a1e48627071ab2715c720184559f0a57124210fc4d94ef91"
+}

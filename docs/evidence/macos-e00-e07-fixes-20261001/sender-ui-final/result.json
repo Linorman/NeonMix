@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "binary_sha256": "05b90a53008339adac823a8ae2babc790c8ff4afa1f21f58c6f2adc2425061e1",
+  "scenarios": {
+    "native_discovery_shows_actual_room": true,
+    "native_invitation_paste_pair_commits_member_identity": true,
+    "native_provider_selection_and_binding_add": true,
+    "native_binding_rename_keeps_identity": true,
+    "native_start_stop_sender_retains_hub": true,
+    "native_disable_enable_does_not_autostart": true,
+    "native_device_disconnect_allow_requires_manual_restart": true,
+    "native_delete_confirmation_escape_keeps_binding": true
+  },
+  "limits": [
+    "fields located by accessible names",
+    "single host; no real IME composition or VoiceOver listening"
+  ],
+  "masked_invitation_readback": true,
+  "keychain_cleanup": [
+    true,
+    true,
+    true
+  ]
+}

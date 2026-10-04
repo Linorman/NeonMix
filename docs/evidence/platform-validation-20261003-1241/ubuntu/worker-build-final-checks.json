@@ -1,0 +1,42 @@
+[
+  {
+    "command": [
+      "python3",
+      "tools/prepare_airplay.py",
+      "--sources-only"
+    ],
+    "exit_code": 0,
+    "seconds": 3.863
+  },
+  {
+    "command": [
+      "cmake",
+      "-S",
+      "apps/airplay-worker",
+      "-B",
+      "/home/parallels/NeonMix/.local/tl3/.local/airplay/build",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCMAKE_PREFIX_PATH=/home/parallels/NeonMix/.local/tl3/.local/native/root/usr",
+      "-DCMAKE_C_FLAGS=-I/home/parallels/NeonMix/.local/tl3/.local/native/root/usr/include/aarch64-linux-gnu",
+      "-DCMAKE_CXX_FLAGS=-I/home/parallels/NeonMix/.local/tl3/.local/native/root/usr/include/aarch64-linux-gnu"
+    ],
+    "exit_code": 0,
+    "seconds": 0.756
+  },
+  {
+    "command": [
+      "cmake",
+      "--build",
+      "/home/parallels/NeonMix/.local/tl3/.local/airplay/build",
+      "--parallel",
+      "2",
+      "--target",
+      "neonmix-airplay-worker",
+      "neonmix-airplay-audio-probe",
+      "neonmix-airplay-probe-crypto",
+      "neonmix-airplay-identity-probe"
+    ],
+    "exit_code": 0,
+    "seconds": 5.686
+  }
+]

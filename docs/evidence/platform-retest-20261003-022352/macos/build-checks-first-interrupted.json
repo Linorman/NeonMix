@@ -1,0 +1,15 @@
+[
+  {
+    "name": "release",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": -2,
+    "seconds": 173.713
+  }
+]

@@ -1,0 +1,61 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "native_start_order": "hot",
+  "prefetch_blocks": 0,
+  "codec": "alac",
+  "playback_mode": "low_latency",
+  "protocol_lead_ms": 2000,
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; real receiver Keychain fixture entry",
+  "binary_sha256": {
+    "neonmix-hub": "d0cad4855119c59a4f7a16ca2c8155b1aeb0fedd0166efbb1cdac1722ce7ba09",
+    "neonmix-airplay-worker": "0946e49a4977b1eb18716348fb2e7ec618d8046597b9551cff8ab7bb6cdee9c2"
+  },
+  "passed": true,
+  "scenarios": {
+    "playback_mode_admin_permission_and_persistence": true,
+    "room_source_identity_visible_without_control_credentials": true,
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+    "continuous_timing_without_late_packets_or_skipped_samples": true,
+    "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+    "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+    "worker_kill_clears_airplay_and_preserves_native_audio": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "timing": {
+    "latency_advance_ns": 1819898215,
+    "protocol_lead_ns": 1937551382,
+    "playout_lead_ns": 117653167,
+    "output_latency_ns": 5312500
+  },
+  "airplay_pcm": {
+    "received_blocks": 3787,
+    "released_blocks": 3780,
+    "codec": "alac",
+    "source_frame_count": 352,
+    "accepted_packets": 3787,
+    "identity_rejections": 0,
+    "source_rate": 44100,
+    "internal_rate": 48000,
+    "lane_rms": 0.0837574154138565,
+    "uncertainty_ns": 8705099,
+    "timed_late_frames": 0
+  },
+  "mixed_output_rms": 0.021636491641402245,
+  "output_frames_around_worker_crash": {
+    "before": 1531392,
+    "after": 1538048
+  },
+  "fixture_keychain_cleanup": {
+    "entries": 1,
+    "passed": true
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

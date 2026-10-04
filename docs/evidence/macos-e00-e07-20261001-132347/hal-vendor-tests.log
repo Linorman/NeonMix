@@ -1,0 +1,305 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/lib.rs (target/debug/deps/tympan_aspl-75d8ed52f46bf44b)
+
+running 274 tests
+test bundle::plist::tests::audioserver_type_uuid_matches_core_audio ... ok
+test bundle::plist::tests::builder_setters_override_defaults ... ok
+test bundle::plist::tests::escape_xml_handles_all_five_entities ... ok
+test bundle::plist::tests::generated_plist_embeds_all_cfbundle_keys ... ok
+test bundle::plist::tests::generated_plist_embeds_identity_and_factory_values ... ok
+test bundle::plist::tests::generated_plist_has_xml_and_doctype_preamble ... ok
+test bundle::plist::tests::generated_plist_wires_the_audioserver_type_uuid ... ok
+test bundle::plist::tests::key_value_pairs_are_balanced ... ok
+test bundle::plist::tests::new_defaults_optional_fields_to_the_identifier ... ok
+test bundle::plist::tests::string_values_are_xml_escaped ... ok
+test device::tests::device_id_round_trips ... ok
+test device::tests::device_pairs_id_and_spec ... ok
+test device::tests::identity_fields_round_trip ... ok
+test device::tests::loopback_has_both_streams ... ok
+test device::tests::new_device_starts_streamless_at_48k ... ok
+test device::tests::output_only_device_is_not_loopback ... ok
+test device::tests::with_setters_replace_streams ... ok
+test dispatch::tests::device_identity_comes_from_the_spec ... ok
+test dispatch::tests::device_is_alive_and_reflects_running_state ... ok
+test dispatch::tests::device_latency_and_safety_offset_are_zero ... ok
+test dispatch::tests::device_owner_is_the_plugin ... ok
+test dispatch::tests::device_sample_rate_tracks_runtime_state ... ok
+test dispatch::tests::device_state_from_spec_is_idle_at_nominal_rate ... ok
+test dispatch::tests::device_streams_filter_by_scope ... ok
+test dispatch::tests::device_transport_type_is_virtual ... ok
+test dispatch::tests::device_zero_timestamp_period_is_one_second_of_frames ... ok
+test dispatch::tests::is_property_settable_rejects_unknown_object_and_property ... ok
+test dispatch::tests::only_the_sample_rate_is_settable ... ok
+test dispatch::tests::plugin_box_list_is_empty ... ok
+test dispatch::tests::plugin_class_and_base_class ... ok
+test dispatch::tests::plugin_device_list_and_owned_objects_point_at_the_device ... ok
+test dispatch::tests::plugin_has_no_owner ... ok
+test dispatch::tests::plugin_identity_comes_from_driver_info ... ok
+test dispatch::tests::property_data_size_matches_the_value_size ... ok
+test dispatch::tests::property_data_size_propagates_errors ... ok
+test dispatch::tests::set_read_only_property_is_illegal ... ok
+test dispatch::tests::set_rejects_unknown_object_and_property ... ok
+test dispatch::tests::set_sample_rate_applies_a_supported_rate ... ok
+test dispatch::tests::set_sample_rate_rejects_an_undersized_buffer ... ok
+test dispatch::tests::set_sample_rate_rejects_an_unsupported_rate ... ok
+test dispatch::tests::stream_class_owner_and_direction ... ok
+test dispatch::tests::stream_formats_come_from_the_stream_spec ... ok
+test dispatch::tests::stream_starting_channel_comes_from_the_spec ... ok
+test dispatch::tests::unknown_object_is_bad_object ... ok
+test dispatch::tests::unknown_selector_is_unknown_property ... ok
+test driver::tests::add_ref_release_delegate_to_refcount ... ok
+test driver::tests::concurrent_callbacks_are_shared_and_stop_drains_before_restart ... ok
+test driver::tests::default_matches_new ... ok
+test driver::tests::device_is_forwarded_from_the_user_driver ... ok
+test driver::tests::double_initialize_is_illegal ... ok
+test driver::tests::full_lifecycle_round_trip ... ok
+test driver::tests::info_reflects_associated_constants ... ok
+test driver::tests::initialize_transitions_and_forwards_to_user ... ok
+test driver::tests::new_starts_uninitialized_with_refcount_one ... ok
+test driver::tests::process_io_after_start_copies_input_to_output ... ok
+test driver::tests::process_io_requires_running_state ... ok
+test driver::tests::start_failure_rolls_state_back_to_initialized ... ok
+test driver::tests::start_io_transitions_and_forwards_to_user ... ok
+test driver::tests::start_requires_initialized ... ok
+test driver::tests::stop_io_returns_to_initialized ... ok
+test driver::tests::stop_without_start_is_illegal ... ok
+test driver::tests::type_erased_dispatch_drives_full_lifecycle ... ok
+test error::tests::debug_renders_fourcc_errors ... ok
+test error::tests::debug_renders_non_fourcc_errors_numerically ... ok
+test error::tests::debug_renders_ok_specially ... ok
+test error::tests::error_codes_classify_correctly ... ok
+test error::tests::error_constants_match_fourcc_values ... ok
+test error::tests::layout_is_transparent_i32 ... ok
+test error::tests::ok_classifies_correctly ... ok
+test error::tests::ok_method_converts_to_result ... ok
+test error::tests::result_flattens_back_to_status ... ok
+test error::tests::round_trips_through_i32 ... ok
+test format::tests::float32_48k_stereo_has_expected_fields ... ok
+test format::tests::format_linear_pcm_constant_is_lpcm ... ok
+test format::tests::int16_44k1_mono_has_expected_fields ... ok
+test format::tests::int24_packs_into_three_bytes ... ok
+test format::tests::int32_uses_four_byte_words ... ok
+test format::tests::negotiation_variants_distinguish ... ok
+test format::tests::non_interleaved_float32_is_not_canonical ... ok
+test format::tests::only_float32_interleaved_is_canonical ... ok
+test format::tests::sample_format_flag_sets_are_distinct ... ok
+test format::tests::sample_format_round_trips_through_constructors ... ok
+test format::tests::unknown_format_id_has_no_sample_format ... ok
+test fourcc::tests::debug_wraps_display ... ok
+test fourcc::tests::display_falls_back_to_hex_for_unprintable ... ok
+test fourcc::tests::display_quotes_printable_codes ... ok
+test fourcc::tests::layout_is_transparent_u32 ... ok
+test fourcc::tests::new_packs_bytes_big_endian ... ok
+test fourcc::tests::ordering_is_by_raw_value ... ok
+test fourcc::tests::printable_detection ... ok
+test fourcc::tests::round_trips_through_bytes ... ok
+test fourcc::tests::round_trips_through_u32 ... ok
+test fourcc::tests::zero_is_zero ... ok
+test io::tests::io_buffer_reports_slice_lengths ... ok
+test io::tests::io_operation_constants_match_core_audio_codes ... ok
+test io::tests::io_operation_layout_is_transparent ... ok
+test io::tests::only_process_operations_are_processing ... ok
+test io::tests::output_only_device_sees_empty_input ... ok
+test io::tests::silence_output_zeroes_the_buffer ... ok
+test io::tests::timestamp_default_is_zero ... ok
+test io::tests::timestamp_zero_is_origin ... ok
+test object::tests::class_ids_match_core_audio_codes ... ok
+test object::tests::every_kind_bases_on_audio_object ... ok
+test object::tests::ids_order_numerically ... ok
+test object::tests::layout_is_transparent_u32 ... ok
+test object::tests::predicates_classify_reserved_ids ... ok
+test object::tests::reserved_ids_have_fixed_values ... ok
+test object::tests::round_trips_through_u32 ... ok
+test objects::tests::all_ids_is_tree_ordered ... ok
+test objects::tests::contains_matches_resolve ... ok
+test objects::tests::device_owns_streams_filtered_by_scope ... ok
+test objects::tests::device_streams_respects_a_one_sided_device ... ok
+test objects::tests::loopback_assigns_ids_in_tree_order ... ok
+test objects::tests::object_kinds_follow_the_tree ... ok
+test objects::tests::output_only_device_skips_the_input_id ... ok
+test objects::tests::owner_walks_up_the_tree ... ok
+test objects::tests::plugin_owns_the_device ... ok
+test objects::tests::resolve_maps_ids_back_to_objects ... ok
+test objects::tests::stream_spec_is_forwarded_from_the_device_spec ... ok
+test objects::tests::streamless_device_has_only_plugin_and_device ... ok
+test objects::tests::streams_own_nothing ... ok
+test property::tests::address_equality_is_structural ... ok
+test property::tests::element_main_is_zero ... ok
+test property::tests::global_address_is_object_wide ... ok
+test property::tests::newtype_layouts_are_transparent ... ok
+test property::tests::property_value_byte_sizes_match_the_c_types ... ok
+test property::tests::property_value_is_empty_only_for_empty_lists ... ok
+test property::tests::scope_constants_match_core_audio_codes ... ok
+test property::tests::scoped_address_is_not_object_wide ... ok
+test property::tests::selector_constants_match_core_audio_codes ... ok
+test property::tests::selectors_built_from_fourcc_round_trip ... ok
+test property::tests::value_range_contains_is_inclusive ... ok
+test property::tests::value_range_point_has_equal_bounds ... ok
+test raw::abi::tests::asbd_is_40_bytes ... ok
+test raw::abi::tests::audio_timestamp_layout ... ok
+test raw::abi::tests::cfuuid_bytes_is_16_bytes ... ok
+test raw::abi::tests::client_info_layout ... ok
+test raw::abi::tests::driver_interface_is_a_dense_pointer_table ... ok
+test raw::abi::tests::io_cycle_info_matches_sdk_layout ... ok
+test raw::abi::tests::option_fn_is_abi_compatible_with_a_bare_fn_pointer ... ok
+test raw::abi::tests::property_address_is_three_packed_u32s ... ok
+test raw::abi::tests::scalar_aliases_have_the_expected_widths ... ok
+test raw::abi::tests::smpte_time_layout ... ok
+test raw::abi::tests::value_range_is_two_f64s ... ok
+test raw::cf::tests::create_string_handles_an_empty_string ... ok
+test raw::cf::tests::create_string_handles_non_ascii ... ok
+test raw::cf::tests::create_string_returns_a_live_object_that_releases ... ok
+test raw::clock::tests::clock_snapshot_cannot_mix_anchors_and_seeds_during_restart ... ok
+test raw::clock::tests::default_matches_new ... ok
+test raw::clock::tests::new_clock_is_stopped ... ok
+test raw::clock::tests::seed_is_carried_into_the_timestamp ... ok
+test raw::clock::tests::start_anchors_running_and_bumps_the_seed ... ok
+test raw::clock::tests::stop_halts_the_clock ... ok
+test raw::clock::tests::zero_timestamp_clamps_a_backwards_clock_to_the_anchor ... ok
+test raw::clock::tests::zero_timestamp_floors_within_a_period ... ok
+test raw::clock::tests::zero_timestamp_reports_period_boundaries ... ok
+test raw::clock::tests::zero_timestamp_tolerates_a_zero_tick_rate ... ok
+test raw::entry::tests::add_and_remove_device_client_succeed ... ok
+test raw::entry::tests::add_ref_and_release_track_the_count ... ok
+test raw::entry::tests::begin_and_end_io_operation_succeed ... ok
+test raw::entry::tests::do_io_operation_declines_an_oversized_cycle ... ok
+test raw::entry::tests::do_io_operation_ignores_an_operation_it_does_not_handle ... ok
+test raw::entry::tests::do_io_operation_reads_silence_from_an_untouched_ring ... ok
+test raw::entry::tests::do_io_operation_round_trips_audio_through_the_device_ring ... ok
+test raw::entry::tests::get_property_data_reads_an_object_list ... ok
+test raw::entry::tests::get_property_data_rejects_an_unknown_property ... ok
+test raw::entry::tests::get_property_data_size_and_data_agree_for_a_scalar ... ok
+test raw::entry::tests::get_zero_time_stamp_reports_a_timeline_once_running ... ok
+test raw::entry::tests::get_zero_time_stamp_requires_a_running_device ... ok
+test raw::entry::tests::get_zero_time_stamp_tolerates_null_out_pointers ... ok
+test raw::entry::tests::has_property_distinguishes_known_and_unknown ... ok
+test raw::entry::tests::initialize_records_the_host_pointer ... ok
+test raw::entry::tests::initialize_start_stop_drive_the_lifecycle ... ok
+test raw::entry::tests::io_timing_entry_points_reject_a_null_driver ... ok
+test raw::entry::tests::is_property_settable_reports_the_sample_rate_as_writable ... ok
+test raw::entry::tests::null_driver_ref_is_handled ... ok
+test raw::entry::tests::query_interface_accepts_the_driver_and_iunknown_uuids ... ok
+test raw::entry::tests::query_interface_rejects_an_unknown_uuid ... ok
+test raw::entry::tests::set_property_data_writes_the_sample_rate ... ok
+test raw::entry::tests::start_io_anchors_the_clock_and_stop_io_halts_it ... ok
+test raw::entry::tests::text_properties_marshal_a_cfstring_on_macos ... ok
+test raw::entry::tests::will_do_io_operation_claims_only_the_data_operations ... ok
+test raw::entry::tests::will_do_io_operation_declines_every_operation_for_now ... ok
+test raw::marshal::tests::asbd_round_trips_through_a_buffer ... ok
+test raw::marshal::tests::property_address_round_trips ... ok
+test raw::marshal::tests::read_scalars_reject_short_buffers ... ok
+test raw::marshal::tests::read_u32_and_f64_parse_native_endian ... ok
+test raw::marshal::tests::stream_format_round_trips_through_asbd ... ok
+test raw::marshal::tests::timestamp_extracts_sample_and_host_time ... ok
+test raw::marshal::tests::timestamp_to_raw_marks_the_two_fields_valid ... ok
+test raw::marshal::tests::value_range_round_trips ... ok
+test raw::marshal::tests::write_accepts_an_oversized_buffer_and_reports_the_used_length ... ok
+test raw::marshal::tests::write_f64_value ... ok
+test raw::marshal::tests::write_object_id_value ... ok
+test raw::marshal::tests::write_object_list_value ... ok
+test raw::marshal::tests::write_range_list_value ... ok
+test raw::marshal::tests::write_rejects_an_undersized_buffer ... ok
+test raw::marshal::tests::write_rejects_text_values ... ok
+test raw::marshal::tests::write_u32_value ... ok
+test raw::platform::tests::host_ticks_per_period_is_positive_for_a_real_format ... ok
+test raw::platform::tests::host_ticks_per_period_rejects_a_nonpositive_sample_rate ... ok
+test raw::platform::tests::host_ticks_per_period_scales_with_the_frame_count ... ok
+test raw::platform::tests::host_time_advances_monotonically ... ok
+test raw::ring::tests::a_loopback_round_trip_across_threads ... ok
+test raw::ring::tests::channels_interleave_correctly ... ok
+test raw::ring::tests::clear_silences_the_whole_ring ... ok
+test raw::ring::tests::fractional_sample_time_floors_to_the_frame ... ok
+test raw::ring::tests::negative_sample_time_is_floored_into_range ... ok
+test raw::ring::tests::new_ring_has_the_requested_geometry_and_is_silent ... ok
+test raw::ring::tests::sample_time_reduces_modulo_capacity ... ok
+test raw::ring::tests::write_then_read_round_trips_at_the_same_sample_time ... ok
+test raw::ring::tests::writes_wrap_at_the_ring_boundary ... ok
+test raw::ring::tests::zero_capacity_panics - should panic ... ok
+test raw::ring::tests::zero_channels_panics - should panic ... ok
+test raw::runtime::tests::driver_object_is_send_and_sync ... ok
+test raw::runtime::tests::driver_object_starts_with_refcount_one ... ok
+test raw::runtime::tests::from_ref_recovers_the_object ... ok
+test raw::runtime::tests::from_ref_rejects_null ... ok
+test raw::runtime::tests::host_pointer_round_trips ... ok
+test raw::runtime::tests::runtime_materialises_the_object_tree_and_identity ... ok
+test raw::runtime::tests::state_lock_is_mutable ... ok
+test raw::tests::factory_dispatch_builds_a_live_driver_object ... ok
+test raw::tests::factory_dispatch_drives_a_full_lifecycle_through_the_vtable ... ok
+test raw::tests::raw_aliases_match_safe_wrapper_widths ... ok
+test raw::vtable::tests::iunknown_preamble_is_wired ... ok
+test raw::vtable::tests::lifecycle_property_and_io_timing_slots_are_wired ... ok
+test raw::vtable::tests::the_table_is_a_single_shared_instance ... ok
+test raw::vtable::tests::unsupported_operations_have_callable_slots ... ok
+test realtime::context::tests::constructor_is_callable ... ok
+test realtime::log::tests::capacity_matches_constructor_argument ... ok
+test realtime::log::tests::drainer_panic_is_swallowed_by_drop ... ok
+test realtime::log::tests::drop_flushes_events_pushed_after_the_last_poll ... ok
+test realtime::log::tests::events_pushed_before_drop_are_all_drained ... ok
+test realtime::log::tests::log_returns_false_when_queue_is_full ... ok
+test realtime::refcount::tests::add_ref_returns_incremented_count ... ok
+test realtime::refcount::tests::concurrent_add_ref_only_yields_total_count ... ok
+test realtime::refcount::tests::concurrent_add_ref_release_balance_to_zero ... ok
+test realtime::refcount::tests::default_matches_new ... ok
+test realtime::refcount::tests::many_round_trips_preserve_invariants ... ok
+test realtime::refcount::tests::new_starts_at_one ... ok
+test realtime::refcount::tests::new_unowned_starts_at_zero ... ok
+test realtime::refcount::tests::owning_refcount_releases_to_zero ... ok
+test realtime::refcount::tests::release_returns_decremented_count ... ok
+test realtime::refcount::tests::release_when_zero_panics_in_debug - should panic ... ok
+test realtime::ring::tests::capacity_matches_constructor_argument ... ok
+test realtime::ring::tests::cross_thread_push_pop_preserves_order ... ok
+test realtime::ring::tests::dropping_ring_drops_remaining_items ... ok
+test realtime::ring::tests::fifo_order_is_preserved ... ok
+test realtime::ring::tests::interleaved_push_and_pop_works ... ok
+test realtime::ring::tests::new_ring_is_empty_and_not_full ... ok
+test realtime::ring::tests::pop_when_empty_returns_none ... ok
+test realtime::ring::tests::popped_items_are_not_double_dropped ... ok
+test realtime::ring::tests::push_then_pop_returns_same_value ... ok
+test realtime::ring::tests::push_when_full_returns_back_the_value ... ok
+test realtime::ring::tests::ring_wraps_around_correctly ... ok
+test realtime::ring::tests::zero_capacity_panics - should panic ... ok
+test realtime::state::tests::allows_io_only_in_running ... ok
+test realtime::state::tests::concurrent_initialize_has_exactly_one_winner ... ok
+test realtime::state::tests::default_matches_new ... ok
+test realtime::state::tests::full_lifecycle_round_trip ... ok
+test realtime::state::tests::initialize_uninitialized_to_initialized ... ok
+test realtime::state::tests::initialize_when_already_initialized_errors ... ok
+test realtime::state::tests::new_cell_starts_uninitialized ... ok
+test realtime::state::tests::reset_from_any_state ... ok
+test realtime::state::tests::start_requires_initialized ... ok
+test realtime::state::tests::start_when_already_running_errors ... ok
+test realtime::state::tests::stop_requires_running ... ok
+test realtime::state::tests::stop_returns_to_initialized ... ok
+test stream::tests::builder_setters_apply ... ok
+test stream::tests::direction_property_values_match_core_audio ... ok
+test stream::tests::direction_round_trips_through_property_value ... ok
+test stream::tests::direction_scopes_and_opposites ... ok
+test stream::tests::input_stream_defaults ... ok
+test stream::tests::output_stream_defaults ... ok
+
+test result: ok. 274 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/raw_lifecycle.rs (target/debug/deps/raw_lifecycle-649df0695b280086)
+
+running 1 test
+test raw_factory_drives_a_full_io_lifecycle_through_the_vtable ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/realtime_safety.rs (target/debug/deps/realtime_safety-c08adb2a3b6c3a0f)
+
+running 2 tests
+test prepared_start_stop_are_allocation_free ... ok
+test process_io_dispatch_is_allocation_free ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests tympan_aspl
+
+running 3 tests
+test src/fourcc.rs - fourcc::FourCharCode::new (line 34) ... ok
+test src/macros.rs - macros::plugin_entry (line 28) ... ignored
+test src/realtime/log.rs - realtime::log (line 40) ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.94s
+

@@ -1,0 +1,13 @@
+{"phase": "no_source", "rms": 0.0, "silent_fraction": 1.0}
+{"phase": "full_volume", "rms": 0.01120634679836402, "silent_fraction": 0.0}
+{"phase": "two_applications", "rms": 0.0158481860781031, "silent_fraction": 0.0}
+{"phase": "half_volume", "rms": 0.005603173399182632, "silent_fraction": 0.0}
+{"phase": "device_mute", "rms": 3.847463276194947e-10, "silent_fraction": 1.0}
+{"phase": "unmuted", "rms": 0.011206346798366079, "silent_fraction": 0.0}
+{"phase": "source_stopped", "rms": 3.847463276194947e-10, "silent_fraction": 1.0}
+{
+  "passed": true,
+  "error": null,
+  "restore_errors": [],
+  "evidence": "/Volumes/projects-mac/NeonMix/artifacts/e06-macos-hal/20261001-132902"
+}

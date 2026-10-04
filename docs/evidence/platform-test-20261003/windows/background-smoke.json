@@ -1,0 +1,36 @@
+{
+  "status": {
+    "ok": true,
+    "data": {
+      "hub": {
+        "error": null,
+        "last_event": null,
+        "metrics": null,
+        "pid": null,
+        "running": false
+      },
+      "hub_settings": null,
+      "output_binding": null,
+      "pid": 30968,
+      "profiles": [],
+      "sender": {
+        "error": null,
+        "last_event": null,
+        "metrics": null,
+        "pid": null,
+        "running": false
+      },
+      "sender_options": null,
+      "version": 1
+    },
+    "error": null
+  },
+  "shutdown": {
+    "ok": true,
+    "data": {
+      "event": "background_stopped"
+    },
+    "error": null
+  },
+  "exit_code": 0
+}

@@ -1,0 +1,43 @@
+{
+  "host": "macOS",
+  "macos_tests": {
+    "passed": true,
+    "count": 6,
+    "command": "tools/dev cargo test --offline -p neonmix-desktop-service"
+  },
+  "macos_clippy": {
+    "passed": true,
+    "command": "tools/dev cargo clippy --offline -p neonmix-desktop-service --all-targets -- -D warnings"
+  },
+  "windows_cross_clippy": {
+    "passed": true,
+    "target": "x86_64-pc-windows-gnu",
+    "all_targets": true,
+    "warnings": "deny",
+    "foreign_programs_executed": false,
+    "uses_existing_project_headers": true
+  },
+  "source_sha256": {
+    "crates/desktop-service/src/bin/neonmix-background.rs": "d52c9b0dd2e0bd80dee65da1593bfc8c2437397416e2f6ebc112f369c4ad74e4",
+    "crates/desktop-service/src/daemon.rs": "2362c70cfecb05c2cb7e99b2a7cc7f3c1cc7138ce04f36bc0836c15423e6b8d0",
+    "crates/desktop-service/src/lib.rs": "a53a73cf5a07241b05a3c4c049f1debe3953b0ac1cb6d5d5f21a3bd740ded04c",
+    "crates/desktop-service/src/linux_owner.rs": "d8ea88fbe62909bf0e0bdae6dcf4ac1f190ad0a02967826f07fc06b651eb022a",
+    "crates/desktop-service/src/transport.rs": "473d1698c001613876075f575ab0a1f3c8bd648bdf9fe44b127f5d900c07718b",
+    "crates/desktop-service/src/transport_windows.rs": "61c86850ecf694ed7179281754be39c3a7d0fa8a45bc3552dc9b9e88987a55b5",
+    "crates/desktop-service/tests/lifecycle.rs": "c6e39498ae3fd35a4cf83551235d9a27f69f3dd531d294a10aa340b599e96b3f",
+    "crates/desktop-service/tests/windows_native_ipc.rs": "eb2ad5890e656dbcd5e735960c3c42fd636294552cc799bb04c5471189c6cb3f"
+  },
+  "linux_cross_clippy": {
+    "passed": true,
+    "target": "x86_64-unknown-linux-gnu",
+    "all_targets": true,
+    "warnings": "deny",
+    "foreign_programs_executed": false,
+    "uses_existing_project_sysroot": true
+  },
+  "latest_revision_scope": [
+    "Linux independent virtual output owner bootstrap/reuse/owned shutdown",
+    "output_authorization_required response semantics",
+    "release native probe selection"
+  ]
+}

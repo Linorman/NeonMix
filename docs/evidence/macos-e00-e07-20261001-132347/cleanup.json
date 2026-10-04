@@ -1,0 +1,16 @@
+{
+  "temporary_state_leftovers": [],
+  "report_links_verified": true,
+  "cache_and_build_roots": [
+    ".local",
+    "target",
+    "artifacts",
+    "docs/evidence"
+  ],
+  "preserved_binary_sha256": {
+    "neonmix-audio": "29c459fe9847aac9662ad892e6d008a5916924cea7f8db5b8421805c5d89c230",
+    "neonmix-desktop": "1e142aa0a8f66120e5f8121365f8a9b2fd6bbde316c29be167377b4292e1f5c3",
+    "neonmix-hub": "bd7bac2f9e2926d7bafa4a40c7ee545f017c78df2f8065cd9771c658f7101ff7",
+    "neonmix-background": "4c09f7b4186f38da85ba499fcd86dd322c46028c20c90d360f460b091718434e"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "platform": "Windows-11-10.0.26100-SP0",
+  "python": "3.13.5",
+  "root": "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241",
+  "cache": {
+    "CARGO_HOME": "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\.local\\cargo",
+    "CARGO_TARGET_DIR": "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\target",
+    "TEMP": "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\.local\\tmp",
+    "TMP": "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\.local\\tmp",
+    "RUSTUP_HOME": "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\.local\\rustup",
+    "GST_REGISTRY": "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\.local\\gstreamer-windows\\registry.bin"
+  },
+  "rustc": {
+    "exit_code": 0,
+    "stdout": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-pc-windows-msvc\nrelease: 1.95.0\nLLVM version: 22.1.2\n",
+    "stderr": ""
+  },
+  "cargo": {
+    "exit_code": 0,
+    "stdout": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)\n",
+    "stderr": ""
+  },
+  "user_instances": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "sessions": {
+    "exit_code": 1,
+    "stdout": " \ufffd\u1ef0\ufffd\ufffd               \ufffd\u00fb\ufffd\ufffd\ufffd                 ID  \u05f4\u032c   \ufffd\ufffd\ufffd\ufffd        \ufffd\u8c78 \n>services                                            0  \ufffd\u03ff\ufffd                        \n console                   Administrator             1  \ufffd\ufffd\ufffd\ufffd\ufffd\ufffd                      \n",
+    "stderr": ""
+  }
+}

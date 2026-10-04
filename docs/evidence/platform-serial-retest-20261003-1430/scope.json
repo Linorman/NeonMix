@@ -1,0 +1,18 @@
+{
+  "latest_user_request": "Redo Ubuntu and macOS tests, strictly sequential because they share host CPU",
+  "fresh_run": "platform-serial-retest-20261003-1430",
+  "ubuntu": "new command outputs and runtime reports required",
+  "macos": "start only after complete Ubuntu cleanup; fresh command outputs and runtime reports required",
+  "windows": "previous 12:41 same-source results only; no new run requested",
+  "requirements": [
+    "519-file common source match before and after",
+    "fresh native fmt/clippy/tests/release/worker checks",
+    "single-source codec/identity/pairing/pause/setup/sync",
+    "five multi-source mixes with unchanged steady-quality assertions and directed recovery only if reached",
+    "formal desktop/background/credential checks with actual rendered size limits stated",
+    "fresh 60-second Mac-to-Ubuntu LAN with sole Mac sender",
+    "source and executable SHA256/commands/first failure/retest separately retained",
+    "owned process and secret-fixture cleanup",
+    "new experimental report and current STATUS link"
+  ]
+}

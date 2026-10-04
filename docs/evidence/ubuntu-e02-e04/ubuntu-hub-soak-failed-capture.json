@@ -1,0 +1,34 @@
+{
+  "event": "capture_complete",
+  "measurement": {
+    "analyzed_frames": 14303232,
+    "estimated_frequency_hz": 437.21900664252956,
+    "peak": 0.00813897605985403,
+    "positive_zero_crossings": 7868,
+    "rms": 0.002731681826183627
+  },
+  "stats": {
+    "callback_max_ns": 5445166,
+    "callback_over_budget": 1,
+    "callbacks": 55964,
+    "clock_epoch": 41,
+    "discontinuities": 231,
+    "dropped_frames": 0,
+    "errors": 0,
+    "frames": 14326784,
+    "last_arrival_ns": 300004067810,
+    "last_device_ns": 6636054195183,
+    "last_error": 0,
+    "native_device_frame_position": null,
+    "native_internal_frames": null,
+    "native_stream_frames": null,
+    "no_data_intervals": 0,
+    "peak": 0.003985683433711529,
+    "period_max": 256,
+    "period_min": 256,
+    "presented_frames": 0,
+    "silent_frames": 1026656,
+    "stale_frames": 23040,
+    "submitted_frames": 0
+  }
+}

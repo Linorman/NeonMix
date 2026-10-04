@@ -1,0 +1,149 @@
+[
+  {
+    "name": "four-contention",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/four-contention.json",
+      "--sources",
+      "4",
+      "--fault-cycles",
+      "2",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 54.153,
+    "started_at": 1791009527.6460567,
+    "ended_at": 1791009581.7986352
+  },
+  {
+    "name": "3plus1",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/3plus1.json",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 40.875,
+    "started_at": 1791009581.7988482,
+    "ended_at": 1791009622.6733737
+  },
+  {
+    "name": "2plus2",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/2plus2.json",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 38.014,
+    "started_at": 1791009622.6736054,
+    "ended_at": 1791009660.687562
+  },
+  {
+    "name": "1plus3",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/1plus3.json",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 34.213,
+    "started_at": 1791009660.6883488,
+    "ended_at": 1791009694.9018154
+  },
+  {
+    "name": "0plus4",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/0plus4.json",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--steady-seconds",
+      "60"
+    ],
+    "exit_code": 0,
+    "seconds": 61.454,
+    "started_at": 1791009694.9020422,
+    "ended_at": 1791009756.3560705
+  },
+  {
+    "name": "mix-control",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/mix-control.json",
+      "--scenario",
+      "mix-control",
+      "--sources",
+      "2",
+      "--status-readers",
+      "4"
+    ],
+    "exit_code": 0,
+    "seconds": 3.735,
+    "started_at": 1791009756.3566477,
+    "ended_at": 1791009760.0918858
+  },
+  {
+    "name": "management",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/management.json",
+      "--scenario",
+      "management",
+      "--sources",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 4.847,
+    "started_at": 1791009760.0921454,
+    "ended_at": 1791009764.939201
+  }
+]

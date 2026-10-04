@@ -1,0 +1,148 @@
+[
+  {
+    "name": "fmt-members",
+    "command": [
+      "python3",
+      "-c",
+      "import subprocess,json; m=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version=1'])); ids=m['workspace_members']; raise SystemExit(max(subprocess.call(['cargo','fmt','--manifest-path',p['manifest_path'],'--check']) for p in m['packages'] if p['id'] in ids))"
+    ],
+    "exit_code": 0,
+    "seconds": 0.623,
+    "started_at": 1791004828.256667,
+    "ended_at": 1791004828.8795652
+  },
+  {
+    "name": "worker-protocol",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.838,
+    "started_at": 1791004828.8797784,
+    "ended_at": 1791004830.71731
+  },
+  {
+    "name": "worker-pairing",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/pairing_probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 5.547,
+    "started_at": 1791004830.7176628,
+    "ended_at": 1791004836.26457
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      "/home/parallels/NeonMix/.local/tl3/.local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "seconds": 0.646,
+    "started_at": 1791004836.265022,
+    "ended_at": 1791004836.9108214
+  },
+  {
+    "name": "identity",
+    "command": [
+      "python3",
+      "tools/airplay_identity_probe.py",
+      "--worker",
+      "/home/parallels/NeonMix/.local/tl3/.local/airplay/build/neonmix-airplay-worker",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/identity.json"
+    ],
+    "exit_code": 0,
+    "seconds": 9.402,
+    "started_at": 1791004836.911339,
+    "ended_at": 1791004846.3129804
+  },
+  {
+    "name": "single-pcm",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/single-pcm.json"
+    ],
+    "exit_code": 0,
+    "seconds": 7.708,
+    "started_at": 1791004846.313192,
+    "ended_at": 1791004854.0213976
+  },
+  {
+    "name": "single-alac",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/single-alac.json"
+    ],
+    "exit_code": 0,
+    "seconds": 7.917,
+    "started_at": 1791004854.0217254,
+    "ended_at": 1791004861.9383585
+  },
+  {
+    "name": "synchronized",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--playback-mode",
+      "synchronized",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/synchronized.json"
+    ],
+    "exit_code": 0,
+    "seconds": 6.767,
+    "started_at": 1791004861.9388192,
+    "ended_at": 1791004868.7054794
+  },
+  {
+    "name": "background",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/e07_background_probe.py",
+      "--release",
+      "--binary-directory",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/bin",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--evidence",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/background.json"
+    ],
+    "exit_code": 0,
+    "seconds": 3.749,
+    "started_at": 1791004868.7057576,
+    "ended_at": 1791004872.4550893
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "started_at": 1791045511.7300403,
+  "package_directory": "/home/parallels/NeonMix/p26 space/u26-20261004",
+  "clean_environment": true,
+  "development_paths_in_product_maps": [],
+  "passed": false,
+  "hub_exit": 0,
+  "audio_exit": 2,
+  "error": "AssertionError: ",
+  "trace": "Traceback (most recent call last):\n  File \"/home/parallels/NeonMix/d26u/artifacts/d26u/relocation.py\", line 29, in <module>\n    c=subprocess.run([str(b/'neonmix'),*args],env=clean,capture_output=True,text=True,timeout=20);(o/('relocation-'+name+'.log')).write_text(c.stdout+c.stderr);r[name+'_exit']=c.returncode;assert c.returncode==0\n                                                                                                                                                                                                    ^^^^^^^^^^^^^^^\nAssertionError\n",
+  "shutdown_error": "FileNotFoundError",
+  "ended_at": 1791045511.7486355
+}

@@ -1,0 +1,339 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+    Checking cfg-if v1.0.5
+    Checking windows-link v0.2.1
+   Compiling thiserror v2.0.21
+   Compiling autocfg v1.5.1
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+    Checking log v0.4.34
+    Checking itoa v1.0.18
+    Checking once_cell v1.21.4
+   Compiling heck v0.5.0
+    Checking pin-project-lite v0.2.17
+   Compiling windows_x86_64_msvc v0.52.6
+    Checking futures-core v0.3.34
+    Checking memchr v2.8.3
+    Checking rtrb v0.3.2
+   Compiling version_check v0.9.5
+   Compiling zmij v1.0.23
+    Checking futures-sink v0.3.34
+   Compiling serde_json v1.0.151
+   Compiling winnow v1.0.4
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling target-lexicon v0.13.5
+   Compiling serde_spanned v1.1.1
+    Checking bytes v1.12.1
+   Compiling smallvec v1.16.2
+   Compiling shlex v2.0.1
+   Compiling version-compare v0.2.1
+   Compiling find-msvc-tools v0.1.14
+    Checking zeroize v1.9.0
+   Compiling getrandom v0.4.3
+    Checking windows-sys v0.61.2
+   Compiling pkg-config v0.3.34
+    Checking typenum v1.20.1
+    Checking getrandom v0.2.17
+    Checking untrusted v0.9.0
+    Checking bitflags v2.13.2
+    Checking cpufeatures v0.2.17
+    Checking scopeguard v1.2.0
+   Compiling libc v0.2.189
+    Checking base64 v0.23.1
+   Compiling rustls v0.23.45
+    Checking subtle v2.6.1
+    Checking slab v0.4.12
+    Checking rustls-pki-types v1.15.1
+    Checking lock_api v0.4.14
+    Checking stable_deref_trait v1.2.1
+    Checking windows-result v0.4.1
+    Checking windows-strings v0.5.1
+    Checking num-conv v0.2.2
+    Checking time-core v0.1.9
+    Checking futures-task v0.3.34
+    Checking powerfmt v0.2.0
+    Checking deranged v0.5.8
+   Compiling generic-array v0.14.7
+    Checking tracing-core v0.1.36
+   Compiling num-traits v0.2.19
+   Compiling paste v1.0.15
+    Checking anstyle v1.0.14
+    Checking once_cell_polyfill v1.70.2
+    Checking utf8parse v0.2.2
+    Checking windows-threading v0.2.1
+    Checking spin v0.9.9
+   Compiling zerocopy v0.8.59
+    Checking colorchoice v1.0.5
+    Checking is_terminal_polyfill v1.70.2
+    Checking pem v4.0.0
+    Checking futures-channel v0.3.34
+   Compiling cc v1.5.1
+    Checking rustls-pemfile v2.2.0
+    Checking fastrand v2.5.0
+    Checking strsim v0.11.1
+    Checking clap_lex v1.1.1
+   Compiling cpal v0.18.2 (E:\Desktop\NeonMix-test\r06\vendor\cpal)
+    Checking tracing v0.1.44
+    Checking base64 v0.22.1
+    Checking anstyle-parse v1.0.0
+    Checking percent-encoding v2.3.2
+    Checking writeable v0.6.4
+    Checking dasp_sample v0.11.0
+    Checking litemap v0.8.3
+    Checking http v1.5.0
+   Compiling hashbrown v0.17.1
+    Checking utf8_iter v1.0.4
+    Checking flume v0.12.0
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling equivalent v1.0.2
+    Checking time v0.3.55
+   Compiling icu_properties_data v2.3.0
+    Checking windows-targets v0.52.6
+   Compiling cfg_aliases v0.2.2
+    Checking stats_alloc v0.1.10
+   Compiling khronos_api v3.1.0
+   Compiling crossbeam-utils v0.8.23
+    Checking form_urlencoded v1.2.2
+   Compiling xml-rs v0.8.29
+   Compiling httparse v1.10.1
+    Checking simd-adler32 v0.3.10
+    Checking either v1.18.0
+    Checking windows-sys v0.59.0
+   Compiling parking_lot_core v0.9.12
+    Checking muldiv v1.0.1
+   Compiling getrandom v0.3.4
+    Checking adler2 v2.0.1
+   Compiling crc32fast v1.5.2
+   Compiling cfg-expr v0.20.9
+    Checking tower-service v0.3.3
+    Checking windows-sys v0.52.0
+    Checking windows-result v0.2.0
+   Compiling ahash v0.8.12
+   Compiling windows_x86_64_msvc v0.53.1
+    Checking accesskit v0.17.1
+    Checking itertools v0.14.0
+    Checking atomic-waker v1.1.2
+   Compiling toml v1.1.6+spec-1.1.0
+    Checking ttf-parser v0.25.1
+    Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
+   Compiling indexmap v2.14.2
+    Checking dpi v0.1.2
+    Checking option-operations v0.5.0
+    Checking fnv v1.0.7
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+    Checking http-body v1.1.0
+    Checking try-lock v0.2.5
+    Checking yasna v0.6.0
+   Compiling gl_generator v0.14.0
+    Checking num-integer v0.1.47
+    Checking windows-strings v0.1.0
+    Checking miniz_oxide v0.9.1
+    Checking digest v0.10.7
+   Compiling system-deps v7.0.8
+    Checking want v0.3.1
+   Compiling winit v0.30.13
+    Checking httpdate v1.0.3
+    Checking foldhash v0.1.5
+    Checking atomic_refcell v0.1.14
+    Checking arrayvec v0.7.8
+    Checking ab_glyph_rasterizer v0.1.10
+    Checking raw-window-handle v0.6.2
+    Checking parking_lot v0.12.5
+    Checking rand_core v0.9.5
+    Checking rubato v0.16.2
+    Checking num-rational v0.4.2
+    Checking hashbrown v0.15.5
+    Checking miniz_oxide v0.8.9
+    Checking fdeflate v0.3.7
+    Checking webpki-roots v1.0.9
+    Checking sha2 v0.10.9
+    Checking sync_wrapper v1.0.2
+    Checking unicode-segmentation v1.13.3
+    Checking smol_str v0.2.2
+    Checking cursor-icon v1.2.0
+    Checking immutable-chunkmap v2.1.4
+    Checking tower-layer v0.3.3
+    Checking nohash-hasher v0.2.0
+    Checking epaint_default_fonts v0.31.1
+    Checking profiling v1.0.18
+    Checking pxfm v0.1.30
+    Checking ipnet v2.12.2
+   Compiling neonmix-media v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\media)
+    Checking windows-targets v0.53.5
+   Compiling glutin v0.32.3
+   Compiling memoffset v0.9.1
+   Compiling ring v0.17.14
+    Checking static_assertions v1.1.0
+   Compiling rustversion v1.0.23
+    Checking error-code v3.4.0
+    Checking flate2 v1.1.10
+    Checking byteorder-lite v0.1.0
+    Checking windows-sys v0.60.2
+    Checking sha1 v0.10.7
+   Compiling toml_edit v0.25.15+spec-1.1.0
+    Checking tympan-aspl v0.1.0 (E:\Desktop\NeonMix-test\r06\vendor\tympan-aspl)
+    Checking http-body-util v0.1.5
+   Compiling glutin-winit v0.5.0
+   Compiling glutin_wgl_sys v0.6.1
+   Compiling glutin_egl_sys v0.7.1
+   Compiling fs-err v3.3.1
+    Checking clipboard-win v5.4.1
+    Checking libloading v0.8.9
+    Checking ryu v1.0.23
+   Compiling muda v0.21.0
+   Compiling winapi v0.3.9
+    Checking accesskit_consumer v0.26.0
+    Checking data-encoding v2.11.1
+    Checking webpki-roots v0.26.11
+    Checking crossbeam-channel v0.5.17
+    Checking keyboard-types v0.8.3
+    Checking png v0.18.1
+    Checking mime v0.3.17
+   Compiling litrs v1.0.0
+    Checking web-time v1.1.0
+    Checking glow v0.16.0
+   Compiling tray-icon v0.26.0
+    Checking uuid v1.26.1
+   Compiling glib-sys v0.20.10
+warning: function `set_name` is never used
+   --> vendor\tympan-aspl\src\raw\output_controls.rs:248:15
+    |
+248 | pub(crate) fn set_name(runtime: &DriverRuntime, value: String) {
+    |               ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling gobject-sys v0.20.10
+   Compiling gstreamer-sys v0.23.6
+   Compiling gio-sys v0.20.10
+   Compiling gstreamer-base-sys v0.23.6
+warning: `tympan-aspl` (lib) generated 1 warning
+   Compiling gstreamer-app-sys v0.23.5
+   Compiling gstreamer-rtp-sys v0.23.5
+   Compiling proc-macro-crate v3.5.0
+    Checking axum-core v0.5.6
+    Checking neonmix-hal v0.1.0 (E:\Desktop\NeonMix-test\r06\drivers\macos\hal)
+    Checking serde_path_to_error v0.1.20
+   Compiling neonmix-hub v0.1.0 (E:\Desktop\NeonMix-test\r06\apps\hub)
+   Compiling document-features v0.2.12
+    Checking arc-swap v1.9.2
+    Checking matchit v0.8.4
+    Checking owned_ttf_parser v0.25.1
+   Compiling windows-interface v0.59.3
+   Compiling windows-implement v0.60.2
+   Compiling glib-macros v0.20.12
+   Compiling windows-implement v0.58.0
+   Compiling windows-interface v0.58.0
+    Checking socket2 v0.6.5
+    Checking mio v1.2.3
+    Checking anstyle-wincon v3.0.11
+    Checking anstyle-query v1.1.5
+    Checking if-addrs v0.15.0
+    Checking audio_thread_priority v0.35.1
+    Checking moxcms v0.8.1
+    Checking ppv-lite86 v0.2.21
+    Checking ab_glyph v0.2.32
+    Checking anstream v1.0.0
+    Checking socket-pktinfo v0.4.1
+    Checking rand_chacha v0.9.0
+    Checking clap_builder v4.6.7
+    Checking mdns-sd v0.21.4 (E:\Desktop\NeonMix-test\r06\vendor\mdns-sd-scoped)
+    Checking mdns-sd v0.21.4
+   Compiling synstructure v0.14.0
+    Checking rand v0.9.5
+    Checking windows-core v0.62.2
+    Checking windows-core v0.58.0
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling tokio-macros v2.7.2
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.3
+   Compiling futures-macro v0.3.34
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling clap_derive v4.6.7
+   Compiling bytemuck_derive v1.12.1
+    Checking windows-numerics v0.3.1
+    Checking windows-collections v0.3.2
+    Checking windows-future v0.3.2
+    Checking windows v0.58.0
+    Checking rustls-webpki v0.103.15
+    Checking rcgen v0.14.10
+    Checking tokio v1.53.1
+    Checking windows v0.62.2
+    Checking futures-util v0.3.34
+    Checking zerofrom v0.1.8
+    Checking bytemuck v1.25.2
+    Checking yoke v0.8.3
+    Checking emath v0.31.1
+    Checking zerovec v0.11.8
+    Checking zerotrie v0.2.5
+    Checking clap v4.6.7
+    Checking ecolor v0.31.1
+    Checking image v0.25.10
+    Checking epaint v0.31.1
+    Checking tinystr v0.8.4
+    Checking potential_utf v0.1.6
+    Checking icu_collections v2.3.0
+    Checking icu_locale_core v2.3.0
+    Checking egui v0.31.1
+    Checking futures-executor v0.3.34
+    Checking icu_provider v2.3.1
+    Checking glib v0.20.12
+    Checking neonmix-core v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\audio-core)
+    Checking neonmix-control v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\control)
+    Checking neonmix-airplay-ipc v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\airplay-ipc)
+    Checking neonmix-output-binding v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\output-binding)
+    Checking serde_urlencoded v0.7.1
+    Checking icu_properties v2.3.0
+    Checking icu_normalizer v2.3.0
+    Checking arboard v3.6.1
+    Checking neonmix-identity v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\identity)
+    Checking tungstenite v0.29.0
+    Checking neonmix-airplay-adapter v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\airplay-adapter)
+    Checking idna_adapter v1.2.2
+    Checking tokio-util v0.7.19
+    Checking tokio-rustls v0.26.6
+    Checking tower v0.5.3
+    Checking idna v1.1.0
+    Checking tokio-tungstenite v0.29.0
+    Checking url v2.5.8
+    Checking neonmix-desktop-service v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\desktop-service)
+    Checking h2 v0.4.19
+    Checking webbrowser v1.2.4
+    Checking tower-http v0.6.11
+    Checking egui_glow v0.31.1
+    Checking hyper v1.11.1
+    Checking gstreamer v0.23.7
+    Checking accesskit_windows v0.24.1
+    Checking accesskit_winit v0.23.1
+    Checking hyper-util v0.1.21
+    Checking egui-winit v0.31.1
+    Checking eframe v0.31.1
+    Checking neonmix-desktop v0.1.0 (E:\Desktop\NeonMix-test\r06\apps\desktop)
+    Checking hyper-rustls v0.27.10
+    Checking axum v0.8.9
+    Checking axum-server v0.7.3
+    Checking reqwest v0.12.28
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cpal` (lib) generated 1 warning
+    Checking neonmix-io v0.1.0 (E:\Desktop\NeonMix-test\r06\crates\audio-io)
+    Checking neonmix-windows v0.1.0 (E:\Desktop\NeonMix-test\r06\adapters\windows)
+    Checking neonmix-linux v0.1.0 (E:\Desktop\NeonMix-test\r06\adapters\linux)
+    Checking neonmix-macos v0.1.0 (E:\Desktop\NeonMix-test\r06\adapters\macos)
+    Checking neonmix-audio v0.1.0 (E:\Desktop\NeonMix-test\r06\apps\audio)
+    Checking gstreamer-base v0.23.6
+    Checking gstreamer-rtp v0.23.5
+    Checking gstreamer-app v0.23.5
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 24.00s

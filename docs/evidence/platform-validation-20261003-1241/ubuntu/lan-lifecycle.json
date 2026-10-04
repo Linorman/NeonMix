@@ -1,0 +1,61 @@
+{
+  "started_at": 1791007087.99186,
+  "scope": "same-snapshot native Mac LAN sender to real Ubuntu PipeWire output; no other realtime fixture",
+  "output_available": true,
+  "status": {
+    "hub": {
+      "error": null,
+      "last_event": {
+        "event": "hub_started",
+        "hub_id": "3fe9ec92-c99f-46d6-8a00-e4c294c4aac6",
+        "lanes": 16,
+        "listen": "0.0.0.0:7443",
+        "output": {
+          "actual_period_frames": 1024,
+          "backend": "pipewire",
+          "device_id": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 48000
+          },
+          "requested_period_frames": null,
+          "resampler_delay_frames": 0,
+          "sample_type": "f32",
+          "stream_epoch": 1
+        },
+        "room_name": "Ubuntu validation tl3"
+      },
+      "metrics": null,
+      "pid": 817295,
+      "running": true
+    },
+    "hub_settings": {
+      "name": "Ubuntu validation tl3",
+      "output": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo"
+    },
+    "output_binding": null,
+    "pid": 817279,
+    "profiles": [
+      {
+        "credential": "hub/admin.json",
+        "device_id": "0a275bcb-5fe6-43f3-b908-9b27b51df545",
+        "hub_id": "3fe9ec92-c99f-46d6-8a00-e4c294c4aac6",
+        "name": "admin",
+        "pending": false,
+        "role": "admin"
+      }
+    ],
+    "sender": {
+      "error": null,
+      "last_event": null,
+      "metrics": null,
+      "pid": null,
+      "running": false
+    },
+    "sender_options": null,
+    "version": 1
+  },
+  "shutdown": true,
+  "fixture_deleted": true,
+  "ended_at": 1791007528.2104783
+}

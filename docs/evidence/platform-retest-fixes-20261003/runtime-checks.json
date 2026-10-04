@@ -1,0 +1,190 @@
+[
+  {
+    "name": "four-airplay",
+    "command": [
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/four-airplay.json",
+      "--sources",
+      "4",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30",
+      "--fault-cycles",
+      "3"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970583.928438,
+    "end_epoch": 1790970649.1318731,
+    "seconds": 65.203
+  },
+  {
+    "name": "mix-3plus1",
+    "command": [
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/mix-3plus1.json",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1",
+      "--steady-seconds",
+      "20"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970649.132226,
+    "end_epoch": 1790970680.7568069,
+    "seconds": 31.625
+  },
+  {
+    "name": "mix-2plus2",
+    "command": [
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/mix-2plus2.json",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2",
+      "--steady-seconds",
+      "15",
+      "--fault-cycles",
+      "2"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970680.757185,
+    "end_epoch": 1790970709.716059,
+    "seconds": 28.959
+  },
+  {
+    "name": "mix-1plus3",
+    "command": [
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/mix-1plus3.json",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3",
+      "--steady-seconds",
+      "15"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970709.716418,
+    "end_epoch": 1790970729.303665,
+    "seconds": 19.587
+  },
+  {
+    "name": "mix-0plus4",
+    "command": [
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/mix-0plus4.json",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--steady-seconds",
+      "60"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970729.304049,
+    "end_epoch": 1790970790.733833,
+    "seconds": 61.43
+  },
+  {
+    "name": "single-pcm",
+    "command": [
+      "python3",
+      "tools/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/single-pcm.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970790.7342138,
+    "end_epoch": 1790970801.565562,
+    "seconds": 10.831
+  },
+  {
+    "name": "single-alac",
+    "command": [
+      "python3",
+      "tools/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/single-alac.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970801.56605,
+    "end_epoch": 1790970809.413516,
+    "seconds": 7.847
+  },
+  {
+    "name": "single-sync",
+    "command": [
+      "python3",
+      "tools/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--playback-mode",
+      "synchronized",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-fixes-20261003-followup/single-sync.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970809.413866,
+    "end_epoch": 1790970816.1955898,
+    "seconds": 6.782
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      ".local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1790970816.196009,
+    "end_epoch": 1790970816.858407,
+    "seconds": 0.662
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "background": {
+    "exit_code": 0
+  },
+  "devices": {
+    "exit_code": 0
+  },
+  "native-output": {
+    "exit_code": 0
+  },
+  "gui": {
+    "exit_code": 0
+  }
+}

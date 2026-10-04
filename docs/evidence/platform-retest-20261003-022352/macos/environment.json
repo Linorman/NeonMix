@@ -1,0 +1,29 @@
+{
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A5416b\n",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)\n",
+  "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)\n",
+  "python": "3.14.6",
+  "fixture_output": "coreaudio:BlackHole2ch_UID",
+  "preexisting_pids": [
+    81271,
+    98624,
+    98625,
+    98648
+  ],
+  "cargo_build_jobs": 2,
+  "cmake_build_jobs": 2,
+  "historical_cpu_gate": {
+    "start": "last 10 one-second samples aggregate <80%",
+    "abort": "two consecutive samples >80% or any >=95%",
+    "measure": "Mach HOST_CPU_LOAD_INFO aggregate, logical_cores=12",
+    "runtime_overlap": "serial only; paused for primary cross-platform LAN tests"
+  },
+  "current_cpu_policy": {
+    "measurement": "1Hz whole-host aggregate",
+    "percentage_start_abort_threshold": null,
+    "cpu_affinity_or_hard_cap": false,
+    "scheduling": "no own compilation/other stress concurrently; final original 4-readers case rerun after user withdrew fixed ceiling"
+  }
+}

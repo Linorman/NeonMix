@@ -1,0 +1,18 @@
+   Compiling glib-sys v0.20.10
+   Compiling gobject-sys v0.20.10
+   Compiling gstreamer-sys v0.23.6
+   Compiling gio-sys v0.20.10
+   Compiling gstreamer-base-sys v0.23.6
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling gstreamer-app-sys v0.23.5
+   Compiling gstreamer-rtp-sys v0.23.5
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Checking neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking glib v0.20.12
+    Checking gstreamer v0.23.7
+    Checking gstreamer-base v0.23.6
+    Checking gstreamer-rtp v0.23.5
+    Checking gstreamer-app v0.23.5
+    Checking neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.54s

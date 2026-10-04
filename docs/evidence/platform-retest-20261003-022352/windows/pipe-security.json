@@ -1,0 +1,90 @@
+{
+  "scope": "Actual native NamedPipe parent PID/current SID/owner-only protected ACL verification; synthetic RFC8032 key; no alternate-user login or recycled-PID simulation",
+  "cases": {
+    "private_parent": {
+      "passed": true,
+      "exit_code": 0,
+      "ready": true,
+      "token_bytes_received": 65,
+      "events": [
+        {
+          "type": "ready",
+          "control_version": 2,
+          "worker_generation": 7,
+          "port": 2101,
+          "public_key": "c5ece04f49cc748fdf5b9a3cfc4f0c57fa785b24a264219ae8fdfdb5c21e98cb",
+          "features": 1209817600
+        }
+      ],
+      "stderr": ""
+    },
+    "broad_dacl": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC pipe requires a protected owner-only DACL"
+        }
+      ],
+      "stderr": ""
+    },
+    "unprotected_dacl": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC pipe requires a protected owner-only DACL"
+        }
+      ],
+      "stderr": ""
+    },
+    "wrong_server_pid": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC Hub identity mismatch"
+        }
+      ],
+      "stderr": ""
+    },
+    "missing_pipe": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "media IPC pipe connection failed"
+        }
+      ],
+      "stderr": ""
+    },
+    "invalid_name": {
+      "passed": true,
+      "exit_code": 1,
+      "ready": false,
+      "token_bytes_received": 0,
+      "events": [
+        {
+          "type": "fatal",
+          "message": "invalid private media pipe"
+        }
+      ],
+      "stderr": ""
+    }
+  },
+  "passed": true,
+  "owned_fixture_files_removed": true,
+  "all_owned_processes_stopped": true
+}

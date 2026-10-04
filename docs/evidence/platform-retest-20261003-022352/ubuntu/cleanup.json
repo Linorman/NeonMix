@@ -1,0 +1,14 @@
+{
+  "active_owned_neonmix_processes": [],
+  "remaining_owned_fixture_directories": [],
+  "source_file_count": 516,
+  "source_mismatches": [],
+  "source_canonical_sha256": "3ef7d6f5ea47a98b671768030311a494bd95c317c1b032bbc38bd00c038b9c84",
+  "default_output_before": "* node.name = \"alsa_output.pci-0000_00_01.0.analog-stereo\"",
+  "default_output_after": "* node.name = \"alsa_output.pci-0000_00_01.0.analog-stereo\"",
+  "old_manual_package_untouched": "/home/parallels/NeonMix/artifacts/packages/u26-211335",
+  "system_settings_changed": false,
+  "default_audio_route_changed": false,
+  "owned_fixture_private_tmp_permission": "0o700",
+  "retained_binaries": "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/bin"
+}

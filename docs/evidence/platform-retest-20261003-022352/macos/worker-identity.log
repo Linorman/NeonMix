@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/tools/airplay_identity_probe.py", line 168, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/tools/airplay_identity_probe.py", line 161, in main
+    assert destination.is_relative_to(ROOT), 'report must remain in project'
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+AssertionError: report must remain in project

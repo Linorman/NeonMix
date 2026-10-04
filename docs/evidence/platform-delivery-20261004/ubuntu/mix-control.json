@@ -1,0 +1,433 @@
+{
+  "scenario": "mix-control",
+  "platform": "Linux",
+  "os_version": "6.14.0-27-generic",
+  "architecture": "aarch64",
+  "build_profile": "release",
+  "sources": 2,
+  "native_sources": 0,
+  "output_device": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real PipeWire output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "d76d47080c43d42b5a0b670a1e605cadf59babec6aef7cbbad26723da11fffd0",
+    "neonmix-airplay-worker": "049bd8eaf6a719359027742c3a2854a72a7186b897abfc053c4654473032c40a"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": null,
+  "airplay_frequencies_hz": [
+    317,
+    439
+  ],
+  "native_frequencies_hz": [],
+  "passed": true,
+  "scenarios": {
+    "explicit_idle_pairing_window_renews_without_worker_restart": true,
+    "targeted_gain_mute_single_solo_multi_solo_and_clear": true,
+    "gain_mute_persist_and_solo_clears_on_same_source_reconnect": true,
+    "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+  },
+  "isolation_checks": [],
+  "last_live_observation": {
+    "expected_sources": [
+      0,
+      1
+    ],
+    "active": 2,
+    "sessions": [
+      {
+        "lane": 0,
+        "released_blocks": 89,
+        "ingress_late": 0,
+        "lane_rms": 0.056416869163513184
+      },
+      {
+        "lane": 1,
+        "released_blocks": 34,
+        "ingress_late": 0,
+        "lane_rms": 0.05650339648127556
+      }
+    ],
+    "output_rms": 0.020167434588074684,
+    "output_stats": {
+      "callback_max_ns": 934834,
+      "callback_over_budget": 0,
+      "callbacks": 61,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 62464,
+      "last_arrival_ns": 1326089834,
+      "last_device_ns": 250515539095306,
+      "last_error": 0,
+      "native_device_frame_position": 63488,
+      "native_internal_frames": 62464,
+      "native_stream_frames": 62464,
+      "no_data_intervals": 0,
+      "peak": 0.04018022492527962,
+      "period_max": 1024,
+      "period_min": 1024,
+      "presented_frames": 56321,
+      "silent_frames": 30591,
+      "stale_frames": 0,
+      "submitted_frames": 62464
+    }
+  },
+  "mix_control_checks": [
+    {
+      "operation": "A_minus_6dB_B_unchanged",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.02836279571056366,
+          "ratio": 0.5027360810887908,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.0566173680126667,
+          "ratio": 1.0020170739900374,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_muted_B_unchanged",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        },
+        {
+          "source_index": 2,
+          "rms": 0.056487876921892166,
+          "ratio": 0.9997253340445024,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_solo_B_silent",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.02844895049929619,
+          "ratio": 0.504263191508244,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_and_B_multi_solo",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.028299394994974136,
+          "ratio": 0.5016122910499324,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.056474629789590836,
+          "ratio": 0.9994908856196945,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "clear_all_solo",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.028409475460648537,
+          "ratio": 0.5035634887556285,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05657001957297325,
+          "ratio": 1.0011790988833702,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "muted_A_solo_before_disconnect",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        },
+        {
+          "source_index": 2,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "B_audible_after_solo_owner_disconnect",
+      "meters": [
+        {
+          "source_index": 2,
+          "rms": 0.05658852308988571,
+          "ratio": 1.00150657507179,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_reconnect_retains_mute_B_audible",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05646499618887901,
+          "ratio": 0.9993203896617211,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "explicit_unmute_restores_persisted_minus_6dB",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.028460783883929253,
+          "ratio": 0.5044729405568621,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05663707107305527,
+          "ratio": 1.002365779760231,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    }
+  ],
+  "baseline_lane_rms": [
+    0.056416869163513184,
+    0.05650339648127556
+  ],
+  "mix_control_reconnect": {
+    "gain_db": -6,
+    "muted_preference_preserved": true,
+    "solo_cleared": true,
+    "source_identity_preserved": true,
+    "new_session": true,
+    "source_B_context_unchanged": true,
+    "continuity": {
+      "timed_late_frames_by_lane_delta": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_timed_late": {
+        "last_timed_late_stream_id": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_epoch": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_output_frame": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_target_ns": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late_presentation_ns": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "output_frames": 20480,
+      "global_timed_late_frames_before": 0,
+      "global_timed_late_frames_after": 0,
+      "global_timed_late_frames_delta": 0,
+      "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+      "lanes": [
+        {
+          "kind": "airplay",
+          "source_index": 2,
+          "lane": 1,
+          "underrun_frames_before": 0,
+          "underrun_frames_after": 0,
+          "underrun_frames_delta": 0,
+          "late_packets_before": 0,
+          "late_packets_after": 0,
+          "late_packets_delta": 0,
+          "counter_reset": false
+        }
+      ]
+    }
+  },
+  "global_disable": {
+    "receivers": [
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      },
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      }
+    ],
+    "reserved": 0,
+    "owned_worker_count": 0
+  },
+  "status_reads": {
+    "readers": 4,
+    "successful": 1172,
+    "errors": 0
+  },
+  "source_pacing": [
+    {
+      "source_index": 1,
+      "sent_packets": 309,
+      "max_schedule_lag_ns": 27555257,
+      "max_send_gap_ns": 35141542
+    },
+    {
+      "source_index": 2,
+      "sent_packets": 318,
+      "max_schedule_lag_ns": 27628759,
+      "max_send_gap_ns": 35216875
+    }
+  ],
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

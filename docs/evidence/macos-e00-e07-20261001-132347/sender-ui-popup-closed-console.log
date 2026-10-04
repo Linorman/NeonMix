@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 183, in <module>
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 127, in main
+    admin.press("设备管理")
+    ~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_background_probe.py", line 54, in wait_for
+    raise RuntimeError(f"probe condition timed out: {last}")
+RuntimeError: probe condition timed out: False

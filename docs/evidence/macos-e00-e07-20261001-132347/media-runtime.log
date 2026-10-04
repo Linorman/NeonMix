@@ -1,0 +1,1 @@
+{"gstreamer":"GStreamer 1.28.7","plugins":[["appsrc","1.28.7","LGPL"],["appsink","1.28.7","LGPL"],["opusenc","1.28.7","LGPL"],["opusdec","1.28.7","LGPL"],["rtpopuspay","1.28.7","LGPL"],["rtpopusdepay","1.28.7","LGPL"],["rtpjitterbuffer","1.28.7","LGPL"],["dtlssrtpenc","1.28.7","BSD"],["dtlssrtpdec","1.28.7","BSD"],["srtpenc","1.28.7","LGPL"],["srtpdec","1.28.7","LGPL"]]}

@@ -1,0 +1,34 @@
+{
+  "os": {
+    "exit_code": 0,
+    "stdout": "Linux ubuntu-gnu-linux-24-04-3 6.14.0-27-generic #27~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Jul 22 17:18:30 UTC 2 aarch64 aarch64 aarch64 GNU/Linux\n",
+    "stderr": ""
+  },
+  "rust": {
+    "exit_code": 0,
+    "stdout": "rustc 1.95.0 (59807616e 2026-04-14)\n",
+    "stderr": ""
+  },
+  "openssl": {
+    "exit_code": 0,
+    "stdout": "OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)\n",
+    "stderr": ""
+  },
+  "gstreamer": {
+    "exit_code": 0,
+    "stdout": "1.24.2\n",
+    "stderr": ""
+  },
+  "pipewire": {
+    "exit_code": 0,
+    "stdout": "1.0.5\n",
+    "stderr": ""
+  },
+  "default_output": {
+    "exit_code": 0,
+    "stdout": "id 55, type PipeWire:Interface:Node\n    alsa.card = \"0\"\n    alsa.card_name = \"HDA Intel\"\n    alsa.class = \"generic\"\n    alsa.components = \"HDA:1ab80001,1ab80101,00100100\"\n    alsa.device = \"0\"\n    alsa.driver_name = \"snd_hda_intel\"\n    alsa.id = \"Intel\"\n    alsa.long_card_name = \"HDA Intel at 0x14000000 irq 31\"\n    alsa.mixer_name = \"Generic 1ab8 Generic\"\n    alsa.name = \"Generic Analog\"\n    alsa.resolution_bits = \"16\"\n    alsa.subclass = \"generic-mix\"\n    alsa.subdevice = \"0\"\n    alsa.subdevice_name = \"subdevice #0\"\n    api.alsa.card.longname = \"HDA Intel at 0x14000000 irq 31\"\n    api.alsa.card.name = \"HDA Intel\"\n    api.alsa.path = \"front:0\"\n    api.alsa.pcm.card = \"0\"\n    api.alsa.pcm.stream = \"playback\"\n    audio.adapt.follower = \"\"\n    audio.channels = \"2\"\n    audio.position = \"FL,FR\"\n    card.profile.device = \"3\"\n  * client.id = \"34\"\n    clock.quantum-limit = \"8192\"\n    device.api = \"alsa\"\n    device.class = \"sound\"\n  * device.id = \"48\"\n    device.profile.description = \"Analog Stereo\"\n    device.profile.name = \"analog-stereo\"\n    device.routes = \"1\"\n  * factory.id = \"18\"\n    factory.mode = \"merge\"\n    factory.name = \"api.alsa.pcm.sink\"\n    library.name = \"audioconvert/libspa-audioconvert\"\n  * media.class = \"Audio/Sink\"\n  * node.description = \"Built-in Audio Analog Stereo\"\n    node.driver = \"true\"\n  * node.name = \"alsa_output.pci-0000_00_01.0.analog-stereo\"\n  * node.nick = \"Generic Analog\"\n    node.pause-on-idle = \"false\"\n  * object.path = \"alsa:pcm:0:front:0:playback\"\n  * object.serial = \"56\"\n  * priority.driver = \"1009\"\n  * priority.session = \"1009\"\n",
+    "stderr": ""
+  },
+  "os_release": "PRETTY_NAME=\"Ubuntu 24.04.3 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.3 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "architecture": "aarch64"
+}

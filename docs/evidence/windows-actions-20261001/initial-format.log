@@ -1,0 +1,42 @@
+Diff in \\?\D:\a\NeonMix\NeonMix\apps\hub\src\airplay.rs:135:
+         self.epoch.fetch_add(1, Relaxed);
+         self.status.active = false;
+         self.status.playback_allowed = false;
+[31m-        self.status.revision=self.status.revision.saturating_add(1);
+[0m[32m+        self.status.revision = self.status.revision.saturating_add(1);
+[0m         if let Some(command) = &self.commands
+             && command.try_send(Action::Disconnect).is_err()
+         {
+Diff in \\?\D:\a\NeonMix\NeonMix\apps\hub\src\airplay.rs:918:
+     }
+     #[test]
+     fn idle_coreaudio_epoch_change_keeps_pin_window_but_active_media_is_revoked() {
+[31m-        let mut state=State::new(PathBuf::from(".local/tmp/airplay-epoch-test"),"127.0.0.1:0".parse().unwrap());
+[0m[31m-        let (tx,rx)=mpsc::sync_channel(8);state.commands=Some(tx);state.status.enabled=true;
+[0m[32m+        let mut state = State::new(
+[0m[32m+            PathBuf::from(".local/tmp/airplay-epoch-test"),
+[0m[32m+            "127.0.0.1:0".parse().unwrap(),
+[0m[32m+        );
+[0m[32m+        let (tx, rx) = mpsc::sync_channel(8);
+[0m[32m+        state.commands = Some(tx);
+[0m[32m+        state.status.enabled = true;
+[0m         state.output_epoch_changed();
+[31m-        assert!(state.status.playback_allowed);assert!(rx.try_recv().is_err());
+[0m[31m-        state.status.active=true;state.gate.store(true,Release);
+[0m[31m-        let before=state.status.revision;state.output_epoch_changed();
+[0m[31m-        assert!(!state.status.active);assert!(!state.gate.load(Acquire));assert!(!state.status.playback_allowed);
+[0m[31m-        assert!(state.status.revision>before);assert!(matches!(rx.try_recv(),Ok(Action::Disconnect)));
+[0m[32m+        assert!(state.status.playback_allowed);
+[0m[32m+        assert!(rx.try_recv().is_err());
+[0m[32m+        state.status.active = true;
+[0m[32m+        state.gate.store(true, Release);
+[0m[32m+        let before = state.status.revision;
+[0m[32m+        state.output_epoch_changed();
+[0m[32m+        assert!(!state.status.active);
+[0m[32m+        assert!(!state.gate.load(Acquire));
+[0m[32m+        assert!(!state.status.playback_allowed);
+[0m[32m+        assert!(state.status.revision > before);
+[0m[32m+        assert!(matches!(rx.try_recv(), Ok(Action::Disconnect)));
+[0m     }
+     #[test]
+     fn media_transport_rejects_authenticated_truncation_and_oversized_frame() {

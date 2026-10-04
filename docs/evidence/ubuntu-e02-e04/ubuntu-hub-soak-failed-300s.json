@@ -1,0 +1,86 @@
+{
+  "platform": "darwin",
+  "device": "pipewire:neonmix.sink.e02lab",
+  "binary_sha256": "7a3cf510b5fcdf8c821a2cee84b3465a6d1f38dc5cd436e4ffadd6686efb1ace",
+  "passed": false,
+  "checks": {
+    "unauthenticated": 401,
+    "single": {
+      "event": "capture_complete",
+      "measurement": {
+        "analyzed_frames": 95488,
+        "estimated_frequency_hz": 437.02885980129315,
+        "peak": 0.0040374877862632275,
+        "positive_zero_crossings": 867,
+        "rms": 0.0028106482593608178
+      },
+      "stats": {
+        "callback_max_ns": 59958,
+        "callback_over_budget": 0,
+        "callbacks": 374,
+        "clock_epoch": 1,
+        "discontinuities": 1,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 95744,
+        "last_arrival_ns": 1998576709,
+        "last_device_ns": 6332747547473,
+        "last_error": 0,
+        "native_device_frame_position": null,
+        "native_internal_frames": null,
+        "native_stream_frames": null,
+        "no_data_intervals": 0,
+        "peak": 0.0040097711607813835,
+        "period_max": 256,
+        "period_min": 256,
+        "presented_frames": 0,
+        "silent_frames": 256,
+        "stale_frames": 0,
+        "submitted_frames": 0
+      }
+    },
+    "dual": {
+      "event": "capture_complete",
+      "measurement": {
+        "analyzed_frames": 95488,
+        "estimated_frequency_hz": 450.1592842198227,
+        "peak": 0.008017976768314838,
+        "positive_zero_crossings": 893,
+        "rms": 0.003975080899752198
+      },
+      "stats": {
+        "callback_max_ns": 65166,
+        "callback_over_budget": 0,
+        "callbacks": 374,
+        "clock_epoch": 1,
+        "discontinuities": 1,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 95744,
+        "last_arrival_ns": 2000290001,
+        "last_device_ns": 6335600880628,
+        "last_error": 0,
+        "native_device_frame_position": null,
+        "native_internal_frames": null,
+        "native_stream_frames": null,
+        "no_data_intervals": 0,
+        "peak": 0.007960963994264603,
+        "period_max": 256,
+        "period_min": 256,
+        "presented_frames": 0,
+        "silent_frames": 256,
+        "stale_frames": 0,
+        "submitted_frames": 0
+      }
+    }
+  },
+  "hub_platform": "linux",
+  "hosts": {
+    "hub": "192.168.100.112",
+    "linux": "192.168.100.112",
+    "macos": "192.168.100.111"
+  },
+  "linux_binary_sha256": "40a2f92e31cb2f27349f0835104a6dbe23cd102ca128d4fd62adf9c87bbf457f",
+  "error": "AssertionError()",
+  "traceback": "Traceback (most recent call last):\n  File \"/Volumes/projects-mac/NeonMix/tools/e02_e04_probe.py\", line 257, in <module>\n    capture('dual_soak', seconds=args.soak_seconds)\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Volumes/projects-mac/NeonMix/tools/e02_e04_probe.py\", line 149, in capture\n    assert stats['errors'] == stats['callback_over_budget'] == 0\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+}

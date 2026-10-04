@@ -1,0 +1,106 @@
+{
+  "passed": false,
+  "platform": "darwin",
+  "scope": "macOS local functional E05; no Windows/Linux runtime or cross-machine performance claim",
+  "binary_sha256": "ef3bd941d2abdb7bd142ccac9e75778393629c6c470b43be82b9282b8137d9ce",
+  "scenarios": {
+    "native_vault_write_read_delete": true,
+    "same_name_candidates": [
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:51649",
+            "url": "https://10.11.11.147:51649"
+          },
+          {
+            "address": "10.211.55.2:51649",
+            "url": "https://10.211.55.2:51649"
+          },
+          {
+            "address": "10.254.101.147:51649",
+            "url": "https://10.254.101.147:51649"
+          },
+          {
+            "address": "10.37.129.2:51649",
+            "url": "https://10.37.129.2:51649"
+          },
+          {
+            "address": "127.0.0.1:51649",
+            "url": "https://127.0.0.1:51649"
+          },
+          {
+            "address": "192.168.100.111:51649",
+            "url": "https://192.168.100.111:51649"
+          },
+          {
+            "address": "192.168.100.208:51649",
+            "url": "https://192.168.100.208:51649"
+          }
+        ],
+        "hub_id": "0fd8e5a3-45cf-4886-8421-baac6dd61b7c",
+        "instance": "NeonMix-0fd8e5a345cf48868421baac6dd61b7c-d9b8fa980409._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      },
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "127.0.0.1:51650",
+            "url": "https://127.0.0.1:51650"
+          }
+        ],
+        "hub_id": "788e5535-0c4f-467e-a811-b02e50001766",
+        "instance": "NeonMix-788e55350c4f467ea811b02e50001766-4b32686f2b57._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      }
+    ],
+    "automatic_pair_and_repeat_native_profile": {
+      "credential": "/Volumes/projects-mac/NeonMix/.local/tmp/e05-5tieukfw/sender.json",
+      "credential_store": "platform",
+      "device_id": "d85cc413-eebd-446c-8fc1-b33ac2840bd4",
+      "event": "paired",
+      "hub_id": "0fd8e5a3-45cf-4886-8421-baac6dd61b7c"
+    },
+    "unpaired_and_wrong_certificate_rejected": {
+      "http": 401,
+      "client_error": "error sending request for url (https://127.0.0.1:51650/v1/identity)"
+    },
+    "changed_key_rejected_and_duplicate_identity_candidates": {
+      "client_error": "error sending request for url (https://127.0.0.1:51650/v1/identity)",
+      "instances": [
+        "NeonMix-0fd8e5a345cf48868421baac6dd61b7c-4b32686f2b57._neonmix._tcp.local.",
+        "NeonMix-0fd8e5a345cf48868421baac6dd61b7c-d9b8fa980409._neonmix._tcp.local."
+      ]
+    },
+    "same_certificate_foreign_hub_uuid_rejected": "authenticated Hub UUID differs from paired identity",
+    "single_use_exact_retry": {
+      "hub_id": "0fd8e5a3-45cf-4886-8421-baac6dd61b7c",
+      "device_id": "7630995e-91ff-49f4-bac8-326aa1550d26",
+      "revision": 4
+    },
+    "cancel_and_client_server_expiry": true,
+    "revoke_control_and_active_protected_media": {
+      "pcm_before": 48960,
+      "sender_exit": 1,
+      "watch_exit": 1
+    },
+    "goodbye_address_change_persistent_trust_revocation_and_grant_expiry": {
+      "old_port": 51649,
+      "new_port": 51727,
+      "stable_hub_id": "0fd8e5a3-45cf-4886-8421-baac6dd61b7c"
+    },
+    "lost_response_local_recovery": true,
+    "missing_vault_secret_fails_closed": true
+  },
+  "pairing_seconds_single_sample": 0.6437,
+  "error": "expected E05 state did not arrive",
+  "traceback": "Traceback (most recent call last):\n  File \"/Volumes/projects-mac/NeonMix/tools/e05_probe.py\", line 244, in <module>\n    ipv6_stats=wait(ipv6_diagnostics,lambda d:d['receivers'] and d['receivers'][0]['authenticated'] and d['receivers'][0]['pcm_frames']>48000)\n  File \"/Volumes/projects-mac/NeonMix/tools/e05_probe.py\", line 71, in wait\n    raise TimeoutError('expected E05 state did not arrive')\nTimeoutError: expected E05 state did not arrive\n",
+  "cleanup": {
+    "platform_entries_attempted": 8,
+    "failed": [],
+    "temporary_profiles_removed": true
+  }
+}

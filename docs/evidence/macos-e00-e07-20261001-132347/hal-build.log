@@ -1,0 +1,8 @@
+   Compiling tympan-aspl v0.1.0 (/Volumes/projects-mac/NeonMix/vendor/tympan-aspl)
+   Compiling neonmix-hal v0.1.0 (/Volumes/projects-mac/NeonMix/drivers/macos/hal)
+    Finished `release` profile [optimized + debuginfo] target(s) in 1.03s
+/Volumes/projects-mac/NeonMix/artifacts/macos/NeonMixHAL.driver: replacing existing signature
+/Volumes/projects-mac/NeonMix/artifacts/macos/NeonMixHAL.driver/Contents/Info.plist: OK
+0000000000000818 T _NeonMixHalFactory
+/Volumes/projects-mac/NeonMix/artifacts/macos/NeonMixHAL.driver/Contents/MacOS/NeonMixHAL: Mach-O 64-bit dynamically linked shared library arm64
+/Volumes/projects-mac/NeonMix/artifacts/macos/NeonMixHAL.driver

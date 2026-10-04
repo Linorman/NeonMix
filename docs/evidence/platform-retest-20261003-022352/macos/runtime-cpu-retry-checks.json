@@ -1,0 +1,37 @@
+[
+  {
+    "name": "four-airplay-contention-cpu-retry",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-contention-cpu-retry.json",
+      "--sources",
+      "4",
+      "--fault-cycles",
+      "3",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": -2,
+    "seconds": 53.219,
+    "start_epoch": 1790967419.558951,
+    "end_epoch": 1790967472.777904,
+    "cpu": {
+      "samples": 53,
+      "mean": 70.47,
+      "p95": 81.643,
+      "max": 92.821,
+      "minimum_headroom": 7.179,
+      "above80": 3,
+      "near_full": false,
+      "sustained_above80": true,
+      "condition_met": false
+    }
+  }
+]

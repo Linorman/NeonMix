@@ -1,0 +1,105 @@
+{
+  "target": "ubuntu",
+  "endpoint": "https://192.168.100.112:7443",
+  "requested_seconds": 60,
+  "client_binary_sha256": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51",
+  "scope": "macOS native CLI synthetic 437 Hz / -36 dBFS Sender; not Apple AirPlay",
+  "source_snapshot_canonical_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+  "counter_note": "lost_packets includes overflow PLC; do not equate this total with network packet loss",
+  "query_failures": [],
+  "passed": false,
+  "pair_exit_code": 0,
+  "send_exit_code": 0,
+  "sample_count": 28,
+  "last_sample": {
+    "elapsed_seconds": 60.736,
+    "session_status": [
+      "network_degraded"
+    ],
+    "output_available": true,
+    "output_frames": 17277952,
+    "output_peak": 0.0040586101822555065,
+    "output_errors": 0,
+    "callback_over_budget": 0,
+    "underrun_frames": 21120,
+    "lost_packets": [
+      456
+    ],
+    "pcm_sink_dropped": [
+      14
+    ],
+    "overflow_plc_packets": [
+      448
+    ],
+    "lost_minus_overflow_plc": [
+      8
+    ],
+    "timed_late_frames": 0,
+    "device_output_latency_ns": null,
+    "received_packets": [
+      5973
+    ],
+    "highest_sequence": [
+      21134
+    ],
+    "queue_drops": [
+      0
+    ],
+    "late_packets": [
+      0
+    ],
+    "pcm_timing_gap_count": [
+      14
+    ]
+  },
+  "last_active_sample": {
+    "elapsed_seconds": 60.736,
+    "session_status": [
+      "network_degraded"
+    ],
+    "output_available": true,
+    "output_frames": 17277952,
+    "output_peak": 0.0040586101822555065,
+    "output_errors": 0,
+    "callback_over_budget": 0,
+    "underrun_frames": 21120,
+    "lost_packets": [
+      456
+    ],
+    "pcm_sink_dropped": [
+      14
+    ],
+    "overflow_plc_packets": [
+      448
+    ],
+    "lost_minus_overflow_plc": [
+      8
+    ],
+    "timed_late_frames": 0,
+    "device_output_latency_ns": null,
+    "received_packets": [
+      5973
+    ],
+    "highest_sequence": [
+      21134
+    ],
+    "queue_drops": [
+      0
+    ],
+    "late_packets": [
+      0
+    ],
+    "pcm_timing_gap_count": [
+      14
+    ]
+  },
+  "active_sample_count": 28,
+  "max_lost_packets": 456,
+  "max_pcm_sink_dropped": 14,
+  "max_overflow_plc_packets": 448,
+  "max_queue_drops": 0,
+  "max_late_packets": 0,
+  "max_pcm_timing_gap_count": 14,
+  "max_lost_minus_overflow_plc": 8,
+  "max_underrun_frames": 21120
+}

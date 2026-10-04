@@ -1,0 +1,28 @@
+{
+  "platform": "macOS arm64",
+  "sdk_abi": "docs/evidence/e06/hal-sdk-abi.json",
+  "blackhole_runtime": "docs/evidence/e06/blackhole.json",
+  "hal_system_loaded": false,
+  "hal_tests_passed": 8,
+  "binding_tests_passed": 1,
+  "vendor_tests_passed": 277,
+  "vendor_doc_tests_ignored": 1,
+  "realtime_io_cycles": 1000,
+  "realtime_allocations": 0,
+  "realtime_reallocations": 0,
+  "realtime_deallocations": 0,
+  "bundle_signing": "ad-hoc complete bundle; codesign --verify --strict passed",
+  "bundle_files_sha256": {
+    "Contents/Info.plist": "0f25c691c5a9d057a3dc0e20a90d3ee45e12d5a7fa9db18e137e75a5abb9180f",
+    "Contents/_CodeSignature/CodeResources": "b62c3baa0691b2d6bac8b78df8d1fe9db6349c3d0c2a82eeff59b8d5d0e60c7a",
+    "Contents/MacOS/NeonMixHAL": "4b2f98aeb44e392bfae6e9094c30c7c2ff615d0b7a6606ccccfa06d857e74f3d",
+    "Contents/Resources/TYMPAN-LICENSE-APACHE": "ae6a9a1078a4c11e8fd37e72f44bc98bf0bb05b711b418dc51e344350c183541",
+    "Contents/Resources/TYMPAN-LICENSE-MIT": "90aff6e2895d5fce4593b2ea6ee8a14b021ffbec94735339a864f440bf79a2af"
+  },
+  "local_dependency_patch_sha256": "db298fe05b3c3bcde9fee8128c53dda09d6336d57c0a9207db934db9835af0d6",
+  "sigterm_runtime": "docs/evidence/e06/sigterm.json",
+  "binding_persistence_tests_passed": 5,
+  "binding_runtime": "docs/evidence/e06/binding.json",
+  "native_name_system_loaded": false,
+  "binding_runtime_binary_sha256": "e25e8d4aa401972ae9ee8908f9e8d446d1f7e92a69e8376706343cd137602faa"
+}

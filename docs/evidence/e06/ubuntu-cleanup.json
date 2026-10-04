@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "test_nodes_removed": true,
+  "no_neonmix_audio_processes": true,
+  "removed": [
+    "/home/parallels/NeonMix/.local/e06-20260930/workspace/.local/e06-owner",
+    "/home/parallels/NeonMix/.local/e06-20260930/workspace/.local/e06-owner-persistent",
+    "/home/parallels/NeonMix/.local/e06-20260930/workspace/.local/e06-binding",
+    "/home/parallels/NeonMix/.local/e06-20260930/workspace/.local/e06-runtime",
+    "/home/parallels/NeonMix/.local/e06-20260930/workspace/.local/e06-state",
+    "/home/parallels/NeonMix/.local/e06-20260930/workspace/.local/tmp/e06_snapshot_inventory.py"
+  ],
+  "default_metadata": "Found \"default\" metadata 35\nupdate: id:0 key:'default.video.source' value:'{\"name\":\"v4l2_input.pci-0000_00_03.0-usb-0_4_1.0\"}' type:'Spa:String:JSON'\nupdate: id:0 key:'default.audio.sink' value:'{\"name\":\"alsa_output.pci-0000_00_01.0.analog-stereo\"}' type:'Spa:String:JSON'\nupdate: id:0 key:'default.audio.source' value:'{\"name\":\"alsa_input.pci-0000_00_01.0.analog-stereo\"}' type:'Spa:String:JSON'\n",
+  "services": "active\nactive\nactive\n"
+}

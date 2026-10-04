@@ -1,0 +1,30 @@
+{
+  "mode": "client",
+  "received": 6000,
+  "kernel_to_user": {
+    "p50_ms": 0.052708,
+    "p99_ms": 0.303416,
+    "max_ms": 28.725458
+  },
+  "kernel_arrival_gaps": {
+    "p50_ms": 10.014833,
+    "p99_ms": 16.132542,
+    "max_ms": 36.62475
+  },
+  "sender_gaps": {
+    "p50_ms": 9.946,
+    "p99_ms": 11.777,
+    "max_ms": 37.729
+  },
+  "sent": 6000,
+  "rtt": {
+    "p50_ms": 2.898084,
+    "p99_ms": 22.884084,
+    "max_ms": 82.979791
+  },
+  "network_delay_variation": {
+    "p50_ms": 1.032028,
+    "p99_ms": 7.134454,
+    "max_ms": 14.440351
+  }
+}

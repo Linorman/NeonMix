@@ -4,6 +4,7 @@ use eframe::egui::{Color32, Painter, Pos2, Rect, Stroke, Vec2, vec2};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Icon {
+    Flow,
     Mixer,
     Room,
     Sender,
@@ -22,6 +23,21 @@ pub fn paint(painter: &Painter, rect: Rect, icon: Icon, color: Color32) {
     let stroke = Stroke::new((1.6 * u).max(1.2), color);
     let p = |x: f32, y: f32| c + vec2((x - 8.0) * u, (y - 8.0) * u);
     match icon {
+        Icon::Flow => {
+            // Three sources converging on one node.
+            for y in [3.5, 8.0, 12.5] {
+                painter.circle_filled(p(2.5, y), 1.5 * u, color);
+                painter.add(eframe::egui::Shape::CubicBezier(
+                    eframe::egui::epaint::CubicBezierShape::from_points_stroke(
+                        [p(4.0, y), p(8.0, y), p(8.0, 8.0), p(10.5, 8.0)],
+                        false,
+                        eframe::egui::Color32::TRANSPARENT,
+                        stroke,
+                    ),
+                ));
+            }
+            painter.circle_stroke(p(12.5, 8.0), 2.4 * u, stroke);
+        }
         Icon::Mixer => {
             for (x, knob) in [(4.0, 10.0), (8.0, 5.0), (12.0, 8.0)] {
                 painter.line_segment([p(x, 2.0), p(x, 14.0)], stroke);

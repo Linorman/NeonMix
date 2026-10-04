@@ -1,0 +1,114 @@
+   Compiling libc v0.2.189
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling version_check v0.9.5
+   Compiling cfg-if v1.0.5
+   Compiling typenum v1.20.1
+   Compiling generic-array v0.14.7
+   Compiling find-msvc-tools v0.1.14
+   Compiling shlex v2.0.1
+   Compiling cc v1.5.1
+   Compiling crypto-common v0.1.7
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling syn v2.0.119
+   Compiling syn v3.0.6
+   Compiling subtle v2.6.1
+   Compiling zeroize_derive v1.5.0
+   Compiling block-buffer v0.10.4
+   Compiling serde_core v1.0.229
+   Compiling zeroize v1.9.0
+   Compiling digest v0.10.7
+   Compiling ring v0.17.14
+   Compiling num-integer v0.1.47
+   Compiling block-padding v0.3.3
+   Compiling cpufeatures v0.2.17
+   Compiling getrandom v0.4.3
+   Compiling pkg-config v0.3.34
+   Compiling scopeguard v1.2.0
+   Compiling zmij v1.0.23
+   Compiling lock_api v0.4.14
+   Compiling libdbus-sys v0.2.7
+   Compiling inout v0.1.4
+   Compiling rustls-pki-types v1.15.1
+   Compiling getrandom v0.2.17
+   Compiling fastrand v2.5.0
+   Compiling serde v1.0.229
+   Compiling untrusted v0.9.0
+   Compiling thiserror v2.0.21
+   Compiling log v0.4.34
+   Compiling serde_json v1.0.151
+   Compiling cipher v0.4.4
+   Compiling spin v0.9.9
+   Compiling sha2 v0.10.9
+   Compiling num-bigint v0.4.8
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling socket2 v0.6.5
+   Compiling futures-core v0.3.34
+   Compiling utf8parse v0.2.2
+   Compiling cfg_aliases v0.2.2
+   Compiling num-conv v0.2.2
+   Compiling powerfmt v0.2.0
+   Compiling once_cell v1.21.4
+   Compiling deranged v0.5.8
+   Compiling itoa v1.0.18
+   Compiling futures-sink v0.3.34
+   Compiling time-core v0.1.9
+   Compiling memchr v2.8.3
+   Compiling time v0.3.55
+   Compiling flume v0.12.0
+   Compiling anstyle-parse v1.0.0
+   Compiling nix v0.31.3
+   Compiling socket-pktinfo v0.4.1
+   Compiling num-rational v0.4.2
+   Compiling uuid v1.26.1
+   Compiling mio v1.2.3
+   Compiling num-iter v0.1.46
+   Compiling hmac v0.12.1
+   Compiling num-complex v0.4.6
+   Compiling if-addrs v0.15.0
+   Compiling colorchoice v1.0.5
+   Compiling anstyle-query v1.1.5
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling rustls v0.23.45
+   Compiling base64 v0.23.1
+   Compiling anstream v1.0.0
+   Compiling pem v4.0.0
+   Compiling num v0.4.3
+   Compiling hkdf v0.12.4
+   Compiling dbus v0.9.12
+   Compiling yasna v0.6.0
+   Compiling rustls-webpki v0.103.15
+   Compiling cbc v0.1.2
+   Compiling aes v0.8.4
+   Compiling clap_lex v1.1.1
+   Compiling strsim v0.11.1
+   Compiling bitflags v2.13.2
+   Compiling heck v0.5.0
+   Compiling clap_derive v4.6.7
+   Compiling clap_builder v4.6.7
+   Compiling dbus-secret-service v4.1.0
+   Compiling rcgen v0.14.10
+   Compiling mdns-sd v0.21.4 (/home/parallels/NeonMix/d26u/vendor/mdns-sd-scoped)
+   Compiling mdns-sd v0.21.4
+   Compiling rustls-pemfile v2.2.0
+   Compiling base64 v0.22.1
+   Compiling neonmix-identity v0.1.0 (/home/parallels/NeonMix/d26u/crates/identity)
+   Compiling keyring v3.6.2
+   Compiling clap v4.6.7
+   Compiling ctrlc v3.5.2
+   Compiling neonmix-control v0.1.0 (/home/parallels/NeonMix/d26u/crates/control)
+   Compiling neonmix-output-binding v0.1.0 (/home/parallels/NeonMix/d26u/crates/output-binding)
+   Compiling neonmix-credential-migrate v0.1.0 (/home/parallels/NeonMix/d26u/apps/credential-migrate)
+error: linking with `cc` failed: exit status: 1
+  |
+  = note:  "cc" "/home/parallels/NeonMix/d26u/target/release/deps/rustczfws8N/symbols.o" "<17 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "/home/parallels/NeonMix/.local/tl3/target/release/deps/{libctrlc-cf2d6799e4146027,libkeyring-310b1af4aec60573}.rlib" "/home/parallels/NeonMix/d26u/target/release/deps/{libdbus_secret_service-349b0a5e19dfe719,libhkdf-6a2aa61a54452655,libhmac-0bba50d77e4cbbe2,libcbc-5efbf51a028d6f8e,libaes-b7851fb74e1cf6f4,libcipher-071babb2e22baad4,libinout-92f48dfa6de734e9,libblock_padding-7029c2b2137f8143,libonce_cell-2f3b36d261762f73,libnum-f8efe7826526719b,libnum_iter-1d51f0c6d1cb2353,libnum_rational-e065babf5f667568,libnum_complex-891298f22d7cf766,libnum_bigint-80f100aa8b00d9ce,libnum_integer-0238f3381272f8e7,libnum_traits-512cae6fce16090d,libdbus-ffa942edfc730953,liblibdbus_sys-b0d733f05cfc7974}.rlib" "/home/parallels/NeonMix/.local/tl3/target/release/deps/libnix-89b1e7f2a71b483b.rlib" "/home/parallels/NeonMix/d26u/target/release/deps/libbitflags-d826c4235c0bc744.rlib" "/home/parallels/NeonMix/.local/tl3/target/release/deps/libneonmix_credential_migrate-18b39f80195de0f6.rlib" "/home/parallels/NeonMix/d26u/target/release/deps/{libclap-cb56efecaa8181be,libclap_builder-e76eb4902e56ab82,libstrsim-228804fc39ccf177,libanstream-ac5946e2a7736c4e,libanstyle_query-2fceba29e3842c01,libis_terminal_polyfill-b5020ed0fd02ff22,libcolorchoice-9965e95b6fb15bc8,libanstyle_parse-c2c052e6d40d2b3a,libutf8parse-d8f6d20e4574788f,libclap_lex-89a2f964bbc7349d,libanstyle-9ab1b57634d9def8,libneonmix_output_binding-1b0688a85ea401bc,libneonmix_identity-d60618851394a191,librustls_pemfile-b1346dd50aa08116,librcgen-1b3d49f749193b99,libyasna-efa3f2db67cf6b7c,libtime-f82d6682cbc80852,libpowerfmt-be1cc4d45b4aa662,libnum_conv-f640288a7869b0ac,libderanged-0e1af0d918b41d21,libtime_core-63da6307e1b8908c,libpem-ccef7431c3d3af34,libbase64-19d9e68e7e08cfe1,libserde_json-9622691f341c56ac,libmemchr-98fca7a2c5dd4d21,libitoa-0b709fb768560e92,libzmij-f911c93ee621997c,librustls-ebc27ef4f44de34f,libwebpki-940d28d60b604e4f,libring-0bb1806e530e5dd6,libgetrandom-871545f4ac4d7c26,libuntrusted-c046b09bec9b7550,librustls_pki_types-3a56991b0318d26e,libzeroize-d218457e3a280511,libmdns_sd-1df70b4ae2da07a3,libmdns_sd-db9924997e03a5b7,libfastrand-e7756a970e199c69,libsocket_pktinfo-c24a9230c37ece8c,libsocket2-01ed47070abf348e,libmio-573cdd8fac4fa108,libflume-5368ebfa1d7942e4,libspin-716ca512f5efd724,liblock_api-42b9a07e5c563ac9,libscopeguard-9ee51a3131f91c2a,libfutures_sink-35b095ec372ec312,libfutures_core-6022af15dd474870,libif_addrs-d6eaed24245374fe,liblog-a81f6fbeb487068e,libbase64-eca533c543a6f8e8,libneonmix_control-634b4a96b989615e,libthiserror-f1f8e54f5542bfaa,libuuid-1f0a12b36583cd41,libgetrandom-72f41ccaa5279853,liblibc-3983cbe1eb32897e,libsha2-9aaf2647409611cb,libcfg_if-c54f727845cdd8e9,libdigest-2938c0fe207076dc,libsubtle-cb698c9daa9094d2,libblock_buffer-533795ba72d91063,libcrypto_common-d366322bab52093b,libgeneric_array-9cd9e7edbaed477e,libtypenum-396dd92e5de91556,libserde-24a103076c19eff7,libserde_core-02a9e76268b1885f}.rlib" "<sysroot>/lib/rustlib/aarch64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/home/parallels/NeonMix/d26u/target/release/deps/rustczfws8N/raw-dylibs" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "/home/parallels/NeonMix/d26u/target/release/build/libdbus-sys-c3b848704d28268d/out" "-L" "/home/parallels/NeonMix/d26u/target/release/build/ring-0ad697432b804876/out" "-L" "<sysroot>/lib/rustlib/aarch64-unknown-linux-gnu/lib" "-o" "/home/parallels/NeonMix/d26u/target/release/deps/neonmix_credential_migrate-ccbe903cb0c84802" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,-O1" "-nodefaultlibs"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: /usr/bin/ld: final link failed: No space left on device
+          collect2: error: ld returned 1 exit status
+          
+
+error: could not compile `neonmix-credential-migrate` (bin "neonmix-credential-migrate") due to 1 previous error

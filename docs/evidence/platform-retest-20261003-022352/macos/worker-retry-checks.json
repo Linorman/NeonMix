@@ -1,0 +1,75 @@
+[
+  {
+    "name": "worker-protocol-retry",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/harness/protocol-diagnostic.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.119,
+    "start_epoch": 1790967116.3874948,
+    "end_epoch": 1790967117.506902,
+    "cpu": {
+      "samples": 1,
+      "mean": 31.417,
+      "p95": 31.417,
+      "max": 31.417,
+      "minimum_headroom": 68.583,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  },
+  {
+    "name": "worker-pairing-retry",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "apps/airplay-worker/pairing_probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.52,
+    "start_epoch": 1790967117.509847,
+    "end_epoch": 1790967119.029558,
+    "cpu": {
+      "samples": 1,
+      "mean": 36.234,
+      "p95": 36.234,
+      "max": 36.234,
+      "minimum_headroom": 63.766,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  },
+  {
+    "name": "worker-identity-retry",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "tools/airplay_identity_probe.py",
+      "--worker",
+      ".local/airplay/build/neonmix-airplay-worker",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/worker-identity-retry.json"
+    ],
+    "exit_code": 0,
+    "seconds": 9.595,
+    "start_epoch": 1790967119.032385,
+    "end_epoch": 1790967128.62731,
+    "cpu": {
+      "samples": 10,
+      "mean": 35.671,
+      "p95": 55.333,
+      "max": 55.333,
+      "minimum_headroom": 44.667,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  }
+]

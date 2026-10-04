@@ -1,0 +1,33 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+     Running tests/mixer.rs (target/debug/deps/mixer-97a94e084c838b50)
+
+running 6 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... FAILED
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... FAILED
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+
+failures:
+
+---- buffering_silence_does_not_consume_the_resume_fade stdout ----
+
+thread 'buffering_silence_does_not_consume_the_resume_fade' (12263851) panicked at crates/audio-core/tests/mixer.rs:246:5:
+buffering completed the fade before PCM arrived: 0.019999921
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- every_gain_change_finishes_in_five_ms_including_low_and_high_levels stdout ----
+
+thread 'every_gain_change_finishes_in_five_ms_including_low_and_high_levels' (12263853) panicked at crates/audio-core/tests/mixer.rs:204:5:
+wrong unity-to-low midpoint: 0.0999997
+
+
+failures:
+    buffering_silence_does_not_consume_the_resume_fade
+    every_gain_change_finishes_in_five_ms_including_low_and_high_levels
+
+test result: FAILED. 4 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+error: test failed, to rerun pass `-p neonmix-core --test mixer`

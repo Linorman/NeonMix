@@ -1,0 +1,9 @@
+# AirPlay worker source and license boundary
+
+The independent worker uses the fixed UxPlay v1.73.7 protocol/audio sources and PlayFair, both covered by the upstream GPL distribution baseline. NeonMix worker bridge sources in `apps/airplay-worker` are GPL-3.0-or-later. UxPlay protocol files retain their original LGPL-2.1-or-later headers; llhttp is MIT; libplist is LGPL-2.1-or-later. License texts and the exact source archives are listed in `SOURCES.json` and `tools/prepare_airplay.py`.
+
+The worker is a separate executable and is excluded from the proprietary Rust Cargo workspace. Process separation is an engineering boundary, **not a legal conclusion that bundling it is compatible with a proprietary product**. Distribution requires preserving applicable license notices and providing complete corresponding worker source, pinned upstream source, patches and build instructions. This prototype does not approve proprietary release packaging.
+
+The UxPlay author notices identify EstebanKubata / PlayFair, Juho Vähä-Herttua and ShairPlay contributors, dsafa22, Florian Draschbacher and RPiPlay contributors, antimof, and fduncanh. Their original source-file notices are retained in the extracted protocol sources. The upstream README separately notes uncertainty about PlayFair's legal status; that statement is preserved in the pinned source rather than resolved by this implementation.
+
+GStreamer official runtime and SDK are extracted into this project without running installers. GStreamer and its libav/FFmpeg plugin have component-specific licenses; their complete upstream notice sets must accompany any packaged runtime. `libav` is used only by explicitly constructed audio decoder pipelines. The worker never creates a video decoder or audio sink. Removing upstream renderers/mirror/HLS files does not remove GPL obligations.

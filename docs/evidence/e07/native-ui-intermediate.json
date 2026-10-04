@@ -1,0 +1,13 @@
+{
+  "platform": "macOS",
+  "passed": true,
+  "scenarios": {
+    "native_ax_controls_exposed": true,
+    "native_chinese_clipboard_input": true,
+    "native_device_popup_and_explicit_setup": true,
+    "red_close_hides_ui_retains_background": true,
+    "actual_gui_sigkill_preserves_audio_pid_and_output_frames": true,
+    "new_gui_reads_actual_saved_room": true
+  },
+  "remaining": "tray restore and native CmdW/CmdQ will be tested after menu fix; full VoiceOver listening audit is not performed"
+}

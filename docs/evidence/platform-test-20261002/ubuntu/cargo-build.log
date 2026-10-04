@@ -1,0 +1,12 @@
+warning: function `set_name` is never used
+   --> vendor/tympan-aspl/src/raw/output_controls.rs:248:15
+    |
+248 | pub(crate) fn set_name(runtime: &DriverRuntime, value: String) {
+    |               ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `tympan-aspl` (lib) generated 1 warning
+   Compiling neonmix-desktop v0.1.0 (/home/parallels/NeonMix/.local/platform-test-20261002/workspace/apps/desktop)
+   Compiling neonmix-hub v0.1.0 (/home/parallels/NeonMix/.local/platform-test-20261002/workspace/apps/hub)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.95s

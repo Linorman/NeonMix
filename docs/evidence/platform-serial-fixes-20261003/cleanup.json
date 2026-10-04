@@ -1,0 +1,20 @@
+{
+  "epoch": 1791013716.0072231,
+  "owned_live_processes": [],
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true,
+  "original_user_pids_alive": {
+    "81271": true,
+    "98624": true,
+    "98625": true,
+    "98648": true
+  },
+  "default_audio_route_changed": false,
+  "system_dependencies_installed": false,
+  "development_output_locations": [
+    ".local",
+    "target",
+    "artifacts",
+    "docs/evidence/platform-serial-fixes-20261003"
+  ]
+}

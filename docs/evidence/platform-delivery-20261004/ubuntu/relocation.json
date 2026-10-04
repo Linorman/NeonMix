@@ -1,0 +1,75 @@
+{
+  "started_at": 1791045661.2548661,
+  "package_directory": "/home/parallels/NeonMix/p26 space/u26-20261004",
+  "clean_environment": true,
+  "development_paths_in_product_maps": [],
+  "passed": true,
+  "hub_exit": 0,
+  "audio_exit": 0,
+  "output_available": true,
+  "airplay_ready": true,
+  "airplay_quality": {
+    "output_frames_delta": 244736,
+    "timed_late_frames_delta": 0,
+    "underrun_frames_delta": 48,
+    "errors": 0,
+    "rms": 0.014163834974169731
+  },
+  "product_maps_before_gui": [
+    {
+      "pid": 991831,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-background",
+      "mapped_file_count": 5,
+      "development_paths": []
+    },
+    {
+      "pid": 991858,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-hub",
+      "mapped_file_count": 48,
+      "development_paths": []
+    },
+    {
+      "pid": 991916,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-airplay-worker",
+      "mapped_file_count": 31,
+      "development_paths": []
+    }
+  ],
+  "airplay_quality_passed": false,
+  "desktop_launcher_exit": 0,
+  "product_maps_with_gui": [
+    {
+      "pid": 991831,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-background",
+      "mapped_file_count": 5,
+      "development_paths": []
+    },
+    {
+      "pid": 991858,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-hub",
+      "mapped_file_count": 48,
+      "development_paths": []
+    },
+    {
+      "pid": 991916,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-airplay-worker",
+      "mapped_file_count": 31,
+      "development_paths": []
+    },
+    {
+      "pid": 992022,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-desktop",
+      "mapped_file_count": 47,
+      "development_paths": []
+    },
+    {
+      "pid": 992067,
+      "exe": "/home/parallels/NeonMix/p26 space/u26-20261004/bin/neonmix-hub",
+      "mapped_file_count": 27,
+      "development_paths": []
+    }
+  ],
+  "background_after_gui_termination": true,
+  "shutdown": true,
+  "ended_at": 1791045682.113528
+}

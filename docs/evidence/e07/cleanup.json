@@ -1,0 +1,9 @@
+{
+  "platform": "macOS",
+  "project_local_artifacts": true,
+  "disposable_e07_directories_remaining": [],
+  "probe_keychain_entries_removed": true,
+  "probe_children_stopped": true,
+  "default_audio_route_changed": false,
+  "system_driver_installed": false
+}

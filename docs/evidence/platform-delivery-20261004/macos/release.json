@@ -1,0 +1,16 @@
+{
+  "command": [
+    "tools/dev",
+    "cargo",
+    "build",
+    "--workspace",
+    "--release",
+    "--locked",
+    "--offline",
+    "-j",
+    "2"
+  ],
+  "started_epoch": 1791043680.06671,
+  "ended_epoch": 1791043681.370046,
+  "exit_code": 0
+}

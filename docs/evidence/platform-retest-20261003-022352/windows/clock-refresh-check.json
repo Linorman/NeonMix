@@ -1,0 +1,11 @@
+{
+  "remote_unix_time": 1790966290,
+  "local_unix_time": 1790966291.203608,
+  "observed_clock_offset_seconds": -1.204,
+  "refresh_first_failure": "invitation output already exists",
+  "old_expires_unix_seconds": 1790965941,
+  "successful_new_expires_unix_seconds": 1790966608,
+  "successful_transfer_local_unix_seconds": 1790966310.023804,
+  "successful_new_ttl_seconds": 300,
+  "system_clock_changed": false
+}

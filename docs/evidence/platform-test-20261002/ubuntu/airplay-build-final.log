@@ -1,0 +1,59 @@
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/build
+[  2%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/libcnary/node.c.o
+[  4%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/byteutils.c.o
+[  6%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/libcnary/node_list.c.o
+[  8%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/base64.c.o
+[ 10%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/bplist.c.o
+[ 13%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/compat.c.o
+[ 15%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/crypto.c.o
+[ 17%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/fairplay_playfair.c.o
+[ 19%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/bytearray.c.o
+[ 21%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/http_request.c.o
+[ 23%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/hashtable.c.o
+[ 26%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/http_response.c.o
+[ 28%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/jplist.c.o
+[ 30%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/httpd.c.o
+[ 32%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/logger.c.o
+[ 34%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/netutils.c.o
+[ 36%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/pairing.c.o
+[ 39%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/jsmn.c.o
+[ 41%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/oplist.c.o
+[ 43%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/raop.c.o
+[ 45%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/raop_buffer.c.o
+[ 47%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/out-default.c.o
+[ 50%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/raop_ntp.c.o
+[ 52%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/raop_rtp.c.o
+[ 54%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/out-limd.c.o
+[ 56%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/srp.c.o
+[ 58%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/utils.c.o
+[ 60%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/out-plutil.c.o
+[ 63%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/playfair/hand_garble.c.o
+[ 65%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/playfair/modified_md5.c.o
+[ 67%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/playfair/omg_hax.c.o
+[ 69%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/plist.c.o
+[ 71%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/playfair/playfair.c.o
+[ 73%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/playfair/sap_hash.c.o
+[ 76%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/ptrarray.c.o
+[ 78%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/llhttp/api.c.o
+[ 80%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/time64.c.o
+[ 82%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/llhttp/http.c.o
+[ 84%] Building C object CMakeFiles/plist.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/src/libplist-2.6.0/src/xplist.c.o
+[ 86%] Building C object CMakeFiles/protocol.dir/home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/airplay/patched/lib/llhttp/llhttp.c.o
+[ 89%] Building C object CMakeFiles/protocol.dir/disabled_media.c.o
+[ 91%] Linking C static library libplist.a
+[ 93%] Building C object CMakeFiles/protocol.dir/speaker_profile.c.o
+[ 95%] Linking C static library libprotocol.a
+[ 95%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Linking CXX executable neonmix-airplay-worker
+[100%] Built target neonmix-airplay-worker
+[ 58%] Built target protocol
+[ 95%] Built target plist
+[ 97%] Linking CXX executable neonmix-airplay-audio-probe
+[100%] Built target neonmix-airplay-audio-probe
+[ 36%] Built target plist
+[ 93%] Built target protocol
+[ 95%] Linking C shared library libneonmix-airplay-probe-crypto.so
+[100%] Built target neonmix-airplay-probe-crypto

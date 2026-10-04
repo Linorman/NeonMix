@@ -1,0 +1,521 @@
+{
+  "four-contention": {
+    "source_report_sha256": "1774290cbc99d2df2a43b89b9c02773652a6cc9b127c41f2f28ac4ddf58b08cb",
+    "passed": false,
+    "failure": "steady Mixer skipped timed PCM",
+    "steady_timed_late_delta": 4086,
+    "steady_per_lane_timed_late_delta": [
+      826,
+      1170,
+      917,
+      1173,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "steady_lane_underrun_delta": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "recovery_windows": []
+  },
+  "3plus1": {
+    "source_report_sha256": "d20e73baadebe06351dab8559efb3709513d6bb14180d137ebd40d15bdf44aa0",
+    "passed": false,
+    "failure": "recovery_interval Mixer skipped timed PCM",
+    "steady_timed_late_delta": 0,
+    "steady_per_lane_timed_late_delta": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "steady_lane_underrun_delta": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "recovery_windows": [
+      {
+        "record": 0,
+        "phase": "fault_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      },
+      {
+        "record": 0,
+        "phase": "recovery_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      },
+      {
+        "record": 1,
+        "phase": "fault_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      },
+      {
+        "record": 1,
+        "phase": "recovery_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      },
+      {
+        "record": 2,
+        "phase": "fault_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      },
+      {
+        "record": 2,
+        "phase": "recovery_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      },
+      {
+        "record": 3,
+        "phase": "fault_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      },
+      {
+        "record": 3,
+        "phase": "recovery_interval",
+        "global_timed_late_frames_delta": 20,
+        "per_lane_delta": [
+          0,
+          20,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [
+          0,
+          0
+        ],
+        "counter_reset": false
+      }
+    ]
+  },
+  "2plus2": {
+    "source_report_sha256": "2575cd70db9d216b614447c9867cc979a128943dad02fa32232e086d2023c8c5",
+    "passed": false,
+    "failure": "steady Mixer lane underrun",
+    "steady_timed_late_delta": 0,
+    "steady_per_lane_timed_late_delta": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "steady_lane_underrun_delta": [
+      62,
+      0,
+      0,
+      0
+    ],
+    "recovery_windows": []
+  },
+  "1plus3": {
+    "source_report_sha256": "52510d32aacb7e7c271a666335504244eb0d325b0b7d4b1eeb25020ca72e98f2",
+    "passed": true,
+    "failure": null,
+    "steady_timed_late_delta": 0,
+    "steady_per_lane_timed_late_delta": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "steady_lane_underrun_delta": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "recovery_windows": [
+      {
+        "record": 0,
+        "phase": "fault_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [],
+        "counter_reset": false
+      },
+      {
+        "record": 0,
+        "phase": "recovery_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [],
+        "counter_reset": false
+      },
+      {
+        "record": 1,
+        "phase": "fault_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [],
+        "counter_reset": false
+      },
+      {
+        "record": 1,
+        "phase": "recovery_interval",
+        "global_timed_late_frames_delta": 0,
+        "per_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "lane_underrun_delta": [
+          0,
+          0,
+          0
+        ],
+        "lane_ingress_late_delta": [],
+        "counter_reset": false
+      }
+    ]
+  },
+  "0plus4": {
+    "source_report_sha256": "fa23d76871c791a0b2302f88d537c48ec399a17145ec727347d219a936be83ae",
+    "passed": false,
+    "failure": "native tone source exited",
+    "steady_timed_late_delta": null,
+    "steady_per_lane_timed_late_delta": null,
+    "steady_lane_underrun_delta": [],
+    "recovery_windows": []
+  }
+}

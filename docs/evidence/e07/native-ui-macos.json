@@ -1,0 +1,20 @@
+{
+  "platform": "macOS",
+  "binary_sha256": "24af50953d27c796995b4dc5960d91dc7fb3347456e08cffddb213eae37a9f89",
+  "passed": true,
+  "scenarios": {
+    "native_ax_named_controls": true,
+    "native_chinese_input_preserves_clipboard": true,
+    "native_popup_setup_start_and_real_authority": true,
+    "cmd_w_hides_and_tray_restores_with_audio_owner_retained": true,
+    "actual_gui_crash_audio_continues_and_new_gui_reads_saved_state": true,
+    "native_mixer_controls_commit_server_state": true,
+    "native_diagnostic_export": true,
+    "native_quit_confirmation_escape_preserves_audio": true,
+    "native_cmd_q_explicit_exit_ends_audio_and_background": true
+  },
+  "limits": [
+    "native Chinese paste and egui IME event regression covered; full VoiceOver listening audit not performed",
+    "single-host check; other platforms not run"
+  ]
+}

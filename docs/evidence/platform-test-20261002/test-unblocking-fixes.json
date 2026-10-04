@@ -1,0 +1,26 @@
+{
+  "apps/airplay-worker/CMakeLists.txt": {
+    "baseline_sha256": "fa12d8b7c8e915364e5818d5a0aa5e6dd2f1f64b6abf8bb8030db2e7c05bdebd",
+    "baseline_plus_fix_sha256": "5ba7e3dbcc4c954da66c10b0dded03404ca1520ff19392d9860e062cd640a2d5"
+  },
+  "apps/airplay-worker/main.cpp": {
+    "baseline_sha256": "d043f29677d7e855daf4b885cf0fbab14db4f8aec33a7e5f1cb0a4aec1b731d1",
+    "baseline_plus_fix_sha256": "fb11ebe13a670485ed569361820e62d4231cd11178cfaa126ea9618aa3e8a758"
+  },
+  "crates/airplay-ipc/src/local_windows.rs": {
+    "baseline_sha256": "b9764b5ff0445a04b2e8925f7d91dbc02c920f252418f18709ce793da7774b09",
+    "baseline_plus_fix_sha256": "394c170fa9e941c251620857f7d5905c562991a50037375b57cd8441dc33da7c"
+  },
+  "apps/hub/src/server.rs": {
+    "baseline_sha256": "e6d9d4597b79deee42ae9b8892c7441186ebbc1e70347c324e24a986bd6d5942",
+    "baseline_plus_fix_sha256": "68870afa45c9c48554391b31e28a4fc3925f8bc9e0d8f9eaf2ca63e03115c904"
+  },
+  "apps/hub/src/identity.rs": {
+    "baseline_sha256": "dd09091bd7263ef7663c58141235ef4bd604cce137a5778e8d9195346db5b103",
+    "baseline_plus_fix_sha256": "ba50dbffd2b9e3a40038eafa8b461e8567d2ab9cf5e86b53b2ba609d489a2487"
+  },
+  "tools/credential_store_probe.py": {
+    "baseline_sha256": "f6a5118039f7a73cc99130b065ddc11075ae5c00191242b9369bce82e21f513a",
+    "baseline_plus_fix_sha256": "abb1e38603ff92b1415e6d8bc36478c576e77fee4cbd0f9cc9091095e8110392"
+  }
+}

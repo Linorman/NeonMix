@@ -1,0 +1,88 @@
+{
+  "started_at": 1791009785.7257636,
+  "requested_size": [
+    600,
+    440
+  ],
+  "scope": "formal release desktop, Xwayland only for capture; five real Ctrl+number navigation actions, no preview mode",
+  "binary_sha256": "9d32c83edb54b6f150fd7db14c6c77cbcd514670167af550f0745f0adff7fb9c",
+  "passed": true,
+  "hub_pid_before": 839122,
+  "owned_window_id": "0x800005",
+  "gui_pid": 839086,
+  "screenshots": [
+    {
+      "page": "hub",
+      "shortcut": "Ctrl+1",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-hub.xwd",
+      "sha256": "db3cce7d7ce31c9a19756372400b5c38f2cbb366bbe0b4dc987408943361cc7f",
+      "bytes": 1059180
+    },
+    {
+      "page": "sender",
+      "shortcut": "Ctrl+2",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-sender.xwd",
+      "sha256": "ab6772b0218570196626f4825c370f4bae637adc04e390c8f54341aa3b9541ec",
+      "bytes": 1059180
+    },
+    {
+      "page": "mixer",
+      "shortcut": "Ctrl+3",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-mixer.xwd",
+      "sha256": "97fe778d0adc6c5a18b6d60d0720b5fd9af93e3c70fcbd6b8309e3a5d62dbb4c",
+      "bytes": 1059180
+    },
+    {
+      "page": "devices",
+      "shortcut": "Ctrl+4",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-devices.xwd",
+      "sha256": "2af8fe707236340941e1ce74ea6516cf4646f24e5813dc4871553af258827c3e",
+      "bytes": 1059180
+    },
+    {
+      "page": "diagnostics",
+      "shortcut": "Ctrl+5",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-diagnostics.xwd",
+      "sha256": "3083b2cf79500fdd4adad898c8f8236ed2c3292f25e7bd561cb1d0fddad21d70",
+      "bytes": 1059180
+    },
+    {
+      "page": "palette",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-palette.xwd",
+      "actual_size": [
+        600,
+        440
+      ],
+      "sha256": "96d8ae7e97779142cc55980f1d89f0780b4c76d5d9904ed1e275cafa9ada37d4"
+    },
+    {
+      "page": "reopen",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-reopen.xwd",
+      "actual_size": [
+        600,
+        440
+      ],
+      "sha256": "99229b6c3e083bdbf4ed5a37f13582b76bde1fa2970bada2df5adc1ff6f6dd9d"
+    },
+    {
+      "page": "quit-confirmation",
+      "path": "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui-narrow-quit-confirmation.xwd",
+      "actual_size": [
+        600,
+        440
+      ],
+      "sha256": "f7b5427340d6a0bc01f8be35e2d7e73ac3e3f6f93462091ee3f40f720dc002e8"
+    }
+  ],
+  "gui_alive_after_window_close": true,
+  "background_after_window_close": true,
+  "window_after_close": "\nxwininfo: Window id: 0x800005 \"NeonMix\"\n\n  Absolute upper-left X:  166\n  Absolute upper-left Y:  169\n  Relative upper-left X:  14\n  Relative upper-left Y:  49\n  Width: 600\n  Height: 440\n  Depth: 24\n  Visual: 0x2d2\n  Visual Class: TrueColor\n  Border width: 0\n  Class: InputOutput\n  Colormap: 0x800004 (not installed)\n  Bit Gravity State: ForgetGravity\n  Window Gravity State: NorthWestGravity\n  Backing Store State: NotUseful\n  Save Under State: no\n  Map State: IsViewable\n  Override Redirect State: no\n  Corners:  +166+169  -458+169  -458-159  +166-159\n  -geometry 600x440+152+120\n\n",
+  "background_survives_gui_termination": true,
+  "gui_reopen_same_background": true,
+  "gui_alive_after_navigation": true,
+  "gui_confirmed_shutdown": true,
+  "actual_size_verified": true,
+  "shutdown": true,
+  "fixture_files_removed": true,
+  "ended_at": 1791009802.046734
+}

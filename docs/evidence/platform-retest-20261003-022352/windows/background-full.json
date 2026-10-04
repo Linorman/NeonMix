@@ -1,0 +1,31 @@
+{
+  "platform": "Windows",
+  "scenarios": {
+    "private_namedpipe_and_state": true,
+    "file_profiles_reference_dedicated_secret_entries": true,
+    "explicit_physical_output_low_level_test_tone": true,
+    "authenticated_viewer_role_and_real_snapshot": true,
+    "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true,
+    "repeat_invitation_after_cancel_uses_ephemeral_file": true,
+    "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true,
+    "diagnostics_redacted_with_real_meters": true,
+    "strict_numeric_whitelist_private_diagnostic_export": true,
+    "media_process_crash_reported_without_unbounded_restart": true,
+    "settings_revision_and_explicit_graceful_stop": true,
+    "explicit_background_shutdown_ends_audio_process": true
+  },
+  "limits": {
+    "ipc_bytes": 262144,
+    "command_timeout_seconds": 25,
+    "explicit_restart_after_failure": true
+  },
+  "build_profile": "release",
+  "listen_port": 7443,
+  "binary_sha256": {
+    "neonmix-background.exe": "e73dea26c929fbd665bee771304d91fceb85e1d98083e5029654d12da93f5ea5",
+    "neonmix-audio.exe": "e35b2a1fb99e9a92f5e36421f52d56558bfcc7bc485039f2ba4e452e93405188",
+    "neonmix-hub.exe": "1590ba2de63fbab8e7411e141fe9ad99b5353285a9b8e9aca4347931f3059dd1"
+  },
+  "passed": true,
+  "fixture_removed": true
+}

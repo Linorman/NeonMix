@@ -1,0 +1,27 @@
+{
+  "epoch": 1791012904.8092,
+  "product_sources": {
+    "apps/hub/src/airplay.rs": "35d1ff6fb788339a289c5d3fc9fd998361914ee96e09e4dc1768c4776cdd7b3c",
+    "apps/hub/src/server.rs": "8feeb608b8cfb25938b5210812ebeaa5e14d975423049c8943d6ba352a7c676a",
+    "crates/audio-core/src/mixer.rs": "a4793d918f4b09200803851b5e98c97b944824525141e94d7546434800933384",
+    "crates/audio-core/tests/timed_mixer.rs": "61c05c5c6c4aa1168f9f4ee9af4565deb22ba9932c91fbcdf00d7a5ecce9f21c",
+    "crates/media/src/transport.rs": "af99454b5bfb35cf5d4a66b578c11974c9e242636e45f89582725a144cd2bf7e",
+    "crates/media/tests/security.rs": "16011aed15e23daa89f1e11022f1ff43f3abc5a4cc72d564e845362ac86adb61",
+    "tools/airplay_multi_source_probe.py": "72cfff9a2bb9d3482f3f1aef1d7c0b4e88216eff27afa0199181023c86885279"
+  },
+  "binaries": {
+    "target/release/neonmix-audio": "25ba6ef308f2d62e19d53f112383d26fde6de65af69457d643f09200baa0f106",
+    "target/release/neonmix-desktop": "3cd5ea6b65b142a67df832fe3bb75b04d7a1a1e0532c1e7f35276b1eb7a20465",
+    "target/release/neonmix-hub": "7176a5e18651a0b72816bf5738e1fee75c73c6a82e44fb08e3a3adb238795470",
+    "target/release/neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640",
+    "target/release/neonmix-airplay-profile": "476a94082d2e7dabbf424e3282c2ff8575c2d406166378a2d59c1ada5e6dfd2f",
+    "target/release/neonmix-background": "f38dfa098a32053c79b23d7170620cfcd32efe41bac139005f0259ec2401496d"
+  },
+  "runtime": "project-local GStreamer 1.28.7; unchanged worker source compared to 14:30 manifest",
+  "original_user_pids": [
+    81271,
+    98624,
+    98625,
+    98648
+  ]
+}

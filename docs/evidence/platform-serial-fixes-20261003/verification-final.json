@@ -1,0 +1,7 @@
+{
+  "epoch": 1791013494.234615,
+  "binaries_unchanged": true,
+  "product_rust_sources_unchanged": true,
+  "probe_final_sha256": "36e1278691e2c09d5804b4867ed85bf9680c228ca064efedafff9c28d86f2927",
+  "probe_diagnostic_followup": "Improved timeout label/phase, failure output stats and source pacing; no product binary or workload change"
+}

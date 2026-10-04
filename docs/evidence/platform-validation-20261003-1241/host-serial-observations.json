@@ -1,0 +1,45 @@
+[
+  {
+    "utc": "2026-10-03T05:49:34.388115+00:00",
+    "phase": "before Ubuntu native LAN; macOS local tests paused",
+    "processes": [
+      {
+        "pid": 81271,
+        "ppid": 1,
+        "cpu_percent_one_core_basis": 0.0,
+        "executable": "/Volumes/projects-mac/NeonMix/target/release/neonmix-background"
+      },
+      {
+        "pid": 86456,
+        "ppid": 1,
+        "cpu_percent_one_core_basis": 0.0,
+        "executable": "Core Audio Driver (NeonMixHAL.driver)"
+      },
+      {
+        "pid": 98624,
+        "ppid": 1,
+        "cpu_percent_one_core_basis": 0.0,
+        "executable": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-background"
+      },
+      {
+        "pid": 98625,
+        "ppid": 98624,
+        "cpu_percent_one_core_basis": 29.6,
+        "executable": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-hub"
+      },
+      {
+        "pid": 98648,
+        "ppid": 98625,
+        "cpu_percent_one_core_basis": 0.0,
+        "executable": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-airplay-worker"
+      }
+    ],
+    "non_baseline_neonmix_pids": [],
+    "additional_preexisting_system_driver": {
+      "pid": 86456,
+      "name": "Core Audio Driver (NeonMixHAL.driver)",
+      "started": "2026-09-30 18:58:57 local",
+      "cpu_percent": 0.0
+    }
+  }
+]

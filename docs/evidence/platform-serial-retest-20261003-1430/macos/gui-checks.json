@@ -1,0 +1,14 @@
+[
+  {
+    "name": "formal-ui",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-serial-retest-20261003-1430/macos/harness/formal_ui.py"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010344.263964,
+    "end_epoch": 1791010381.3709881,
+    "seconds": 37.107
+  }
+]

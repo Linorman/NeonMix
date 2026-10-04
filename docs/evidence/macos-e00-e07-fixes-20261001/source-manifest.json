@@ -1,0 +1,16 @@
+{
+  "sources": {
+    "apps/desktop/src/main.rs": "126085f3f37aa9ee6e3ce46f837a0b546419d46a5bbf1d80200c56c1de773243",
+    "apps/desktop/src/widgets.rs": "90a42787b2f15941b1ab584f7ef344e224badd4ee1f125e1519bb983cf34c643",
+    "apps/desktop/src/theme.rs": "235a8cfe29302e61a4c9fec9dc0778d7f2dce5dda5a6eccf64c0288469146488",
+    "apps/desktop/src/animation.rs": "3fa13d6eb4c8c4d91bad66ba806c30f15cb5b2c159f460aac0f0c6b0ee4c474b",
+    "crates/desktop-service/src/daemon.rs": "e8c14722a74303d275375dc1851fb7115d672874b95eb86361c89c260a8039b5"
+  },
+  "binaries": {
+    "neonmix-audio": "2bdeaa87cfbef9d8422e1ed88e8119946e34d64eb5472fb004dccd13d062c848",
+    "neonmix-desktop": "05b90a53008339adac823a8ae2babc790c8ff4afa1f21f58c6f2adc2425061e1",
+    "neonmix-hub": "014f3e528d66f45893f51abf06271567cd6fababed2430c2ccd9145a834c9159",
+    "neonmix-airplay-worker": "3cff6be2f9915784c16f3d232f41f42ca7c087167ecd4e3e1eb7f7937c54d80b",
+    "neonmix-background": "0a70986276a7a09bb2c3e40ceee941c42d85b392c1c813d21a793f98cca114cd"
+  }
+}

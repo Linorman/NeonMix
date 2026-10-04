@@ -1,0 +1,50 @@
+[
+  {
+    "name": "four-airplay-contention",
+    "exit_code": -2,
+    "cpu": {
+      "samples": 33,
+      "mean": 66.465,
+      "p95": 81.91,
+      "max": 86.717,
+      "minimum_headroom": 13.283,
+      "above80": 2,
+      "near_full": false,
+      "sustained_above80": true,
+      "condition_met": false
+    },
+    "reason": "CPU gate triggered; own process group SIGINT; do not classify as product functional failure"
+  },
+  {
+    "name": "four-airplay-contention-cpu-retry",
+    "exit_code": -2,
+    "cpu": {
+      "samples": 53,
+      "mean": 70.47,
+      "p95": 81.643,
+      "max": 92.821,
+      "minimum_headroom": 7.179,
+      "above80": 3,
+      "near_full": false,
+      "sustained_above80": true,
+      "condition_met": false
+    },
+    "reason": "CPU gate triggered; own process group SIGINT; do not classify as product functional failure"
+  },
+  {
+    "name": "four-airplay-contention-20ms",
+    "exit_code": -2,
+    "cpu": {
+      "samples": 10,
+      "mean": 66.484,
+      "p95": 94.653,
+      "max": 94.653,
+      "minimum_headroom": 5.347,
+      "above80": 2,
+      "near_full": false,
+      "sustained_above80": true,
+      "condition_met": false
+    },
+    "reason": "CPU gate triggered; own process group SIGINT; do not classify as product functional failure"
+  }
+]

@@ -1,0 +1,8 @@
+Run tools/dev.ps1 python tools/prepare_windows_driver.py to restore the locked project-local SDK.
+At C:\Users\linorman\NeonMix-test-20261001\tools\build_windows_driver.ps1:14 char:5
++     throw 'Run tools/dev.ps1 python tools/prepare_windows_driver.py t ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Run tools/dev.p...ject-local SDK.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Run tools/dev.ps1 python tools/prepare_windows_driver.py to restore the locked project-l 
+   ocal SDK.
+ 

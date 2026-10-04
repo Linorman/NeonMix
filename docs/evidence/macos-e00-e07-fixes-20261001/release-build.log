@@ -1,0 +1,9 @@
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-hal v0.1.0 (/Volumes/projects-mac/NeonMix/drivers/macos/hal)
+   Compiling neonmix-audio v0.1.0 (/Volumes/projects-mac/NeonMix/apps/audio)
+   Compiling neonmix-linux v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/linux)
+   Compiling neonmix-windows v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/windows)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 49.88s

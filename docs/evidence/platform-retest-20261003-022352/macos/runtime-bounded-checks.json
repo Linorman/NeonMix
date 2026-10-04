@@ -1,0 +1,37 @@
+[
+  {
+    "name": "four-airplay-contention-20ms",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/harness/four-bounded.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-contention-20ms.json",
+      "--sources",
+      "4",
+      "--fault-cycles",
+      "3",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": -2,
+    "seconds": 10.525,
+    "start_epoch": 1790967518.906786,
+    "end_epoch": 1790967529.431851,
+    "cpu": {
+      "samples": 10,
+      "mean": 66.484,
+      "p95": 94.653,
+      "max": 94.653,
+      "minimum_headroom": 5.347,
+      "above80": 2,
+      "near_full": false,
+      "sustained_above80": true,
+      "condition_met": false
+    }
+  }
+]

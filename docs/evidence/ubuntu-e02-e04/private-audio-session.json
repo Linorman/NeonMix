@@ -1,0 +1,10 @@
+{
+  "runtime_directory": "/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/.local/runtime",
+  "dbus_address": "unix:path=/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/.local/runtime/bus",
+  "daemon_pids": [
+    33626,
+    33627,
+    33635
+  ],
+  "configuration": "separate project-local PipeWire/D-Bus session; ALSA/V4L2 monitors disabled; no desktop/default routing changes"
+}

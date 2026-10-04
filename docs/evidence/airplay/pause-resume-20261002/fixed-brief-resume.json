@@ -1,0 +1,73 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "native_start_order": "hot",
+  "prefetch_blocks": 0,
+  "codec": "alac",
+  "playback_mode": "low_latency",
+  "protocol_lead_ms": 2000,
+  "pause_seconds": 0.1,
+  "resume_lead_ms": 250,
+  "resume_reset": "none",
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; real receiver Keychain fixture entry",
+  "binary_sha256": {
+    "neonmix-hub": "c9b5b1cb20c1567e8c72249e53ded192ddc8616a48950238ed6042303b43ebfd",
+    "neonmix-airplay-worker": "210be3186e3a760fcecfdf1985e6e3e36f91a20cc03d5c275e9221c2ec0a36f9"
+  },
+  "passed": true,
+  "scenarios": {
+    "playback_mode_admin_permission_and_persistence": true,
+    "room_source_identity_visible_without_control_credentials": true,
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+    "same_session_pause_resume_without_route_reselection": true,
+    "continuous_timing_without_late_packets_or_skipped_samples": true,
+    "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+    "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+    "worker_kill_clears_airplay_and_preserves_native_audio": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "pause_resume": {
+    "released_before": 27,
+    "released_after": 60,
+    "late_packets": 0,
+    "timeline_rejections": 0,
+    "media_resets": 1,
+    "last_media_reset": "timestamp_jump"
+  },
+  "timing": {
+    "latency_advance_ns": 75306444,
+    "protocol_lead_ns": 195689110,
+    "playout_lead_ns": 120382666,
+    "output_latency_ns": 5312500
+  },
+  "airplay_pcm": {
+    "received_blocks": 444,
+    "released_blocks": 437,
+    "codec": "alac",
+    "source_frame_count": 352,
+    "accepted_packets": 444,
+    "identity_rejections": 0,
+    "source_rate": 44100,
+    "internal_rate": 48000,
+    "lane_rms": 0.08378848433494568,
+    "uncertainty_ns": 8721614,
+    "timed_late_frames": 0
+  },
+  "mixed_output_rms": 0.021146178245544434,
+  "output_frames_around_worker_crash": {
+    "before": 253440,
+    "after": 259840
+  },
+  "fixture_keychain_cleanup": {
+    "entries": 1,
+    "passed": true
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

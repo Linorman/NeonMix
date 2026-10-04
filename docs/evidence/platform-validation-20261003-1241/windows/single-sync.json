@@ -1,0 +1,68 @@
+{
+  "platform": "Windows",
+  "build_profile": "release",
+  "output_device": "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+  "native_start_order": "prewarm",
+  "prefetch_blocks": 0,
+  "codec": "pcm",
+  "playback_mode": "synchronized",
+  "protocol_lead_ms": 2000,
+  "pause_seconds": 0.0,
+  "pause_cycles": 1,
+  "resume_lead_ms": 250,
+  "resume_reset": "none",
+  "track_gap": false,
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real WASAPI output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; receiver private file-store fixture entry",
+  "binary_sha256": {
+    "neonmix-hub.exe": "3fc568925907cb42670214843ec14dc838a3796f87d70a9db78ac0bfc6447e6c",
+    "neonmix-airplay-worker.exe": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0"
+  },
+  "passed": true,
+  "scenarios": {
+    "playback_mode_admin_permission_and_persistence": true,
+    "receiver_key_and_trust_survive_worker_restart": true,
+    "room_source_identity_visible_without_control_credentials": true,
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+    "steady_timing_without_new_late_packets_or_skipped_samples": true,
+    "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+    "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+    "worker_kill_clears_airplay_and_preserves_native_audio": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "airplay_binding": {
+    "session_id": 1,
+    "stream_id": 2,
+    "lane": 1
+  },
+  "timing": {
+    "latency_advance_ns": 0,
+    "protocol_lead_ns": 1938848440,
+    "playout_lead_ns": 1938848440,
+    "output_latency_ns": 41937500
+  },
+  "airplay_pcm": {
+    "received_blocks": 635,
+    "released_blocks": 405,
+    "codec": "pcm_s16",
+    "source_frame_count": 352,
+    "accepted_packets": 635,
+    "identity_rejections": 0,
+    "source_rate": 44100,
+    "internal_rate": 48000,
+    "lane_rms": 0.08483892679214478,
+    "uncertainty_ns": 8637609,
+    "timed_late_frames": 0
+  },
+  "mixed_output_rms": 0.02150498516857624,
+  "output_frames_around_worker_crash": {
+    "before": 341376,
+    "after": 349056
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

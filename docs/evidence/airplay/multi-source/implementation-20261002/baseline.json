@@ -1,0 +1,13 @@
+{
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "files": {
+    "apps/hub/src/airplay.rs": "df2a8730c6665a5702ebe9d04e92470746448b93914b7fa589d630cc58aa4bcb",
+    "apps/hub/src/server.rs": "e6d9d4597b79deee42ae9b8892c7441186ebbc1e70347c324e24a986bd6d5942",
+    "apps/airplay-worker/main.cpp": "fb11ebe13a670485ed569361820e62d4231cd11178cfaa126ea9618aa3e8a758",
+    "crates/identity/src/speaker.rs": "7cf8c833a9a0800f008e8564c174ffee32e01761ad778a1e93323e3406976e6e",
+    "crates/airplay-ipc/src/lib.rs": "c22ef4cb68519bbb955087497393898a78eeaaff720c2c38687cc5d891586c3d",
+    "07_NeonMix_\u591aAirPlay\u8bbe\u5907\u6df7\u97f3_\u8bbe\u8ba1\u65b9\u6848.md": "1aab536f0c84beb4c027474c5ae61642d57837d11385baac4bd2dfbd22c27bf7",
+    "08_NeonMix_\u591aAirPlay\u8bbe\u5907\u6df7\u97f3_\u5f00\u53d1\u8ba1\u5212.md": "36a3536313deac2a695dc8826bd8d15dbb6d464db2e907d653e612257ff81861"
+  },
+  "scope": "Existing dirty workspace preserved; no running user room changed"
+}

@@ -11,6 +11,7 @@ const CONTENT_MAX_WIDTH: f32 = 1180.0;
 impl Desktop {
     pub(crate) fn show(&mut self, ctx: &egui::Context) {
         self.process();
+        self.track_events();
         if self.message != self.shown_message {
             self.shown_message = self.message.clone();
             self.message_since = Instant::now();
@@ -43,6 +44,27 @@ impl Desktop {
                 bottom: 0,
             }))
             .show(ctx, |ui| {
+                // Ambient light that names the room state; it only moves
+                // when that state changes.
+                let ambient = if self.error {
+                    theme::DANGER.gamma_multiply(0.05)
+                } else if self.status.as_ref().is_some_and(|s| s.hub.running)
+                    || self.snapshot.is_some()
+                {
+                    theme::ACCENT.gamma_multiply(0.045)
+                } else {
+                    egui::Color32::TRANSPARENT
+                };
+                let ambient = animation::color(ctx, egui::Id::new("ambient"), ambient);
+                if ambient.a() > 0 {
+                    let r = ui.max_rect();
+                    crate::fx::glow(
+                        ui.painter(),
+                        r.left_top() + egui::vec2(220.0, 40.0),
+                        360.0,
+                        ambient,
+                    );
+                }
                 egui::Frame::new()
                     .inner_margin(Margin {
                         left: 0,
@@ -56,8 +78,8 @@ impl Desktop {
                     });
                 // Settle from partial opacity: a page switch never blanks the
                 // window for a frame, it only eases the new content in.
-                let fade = 0.55
-                    + 0.45 * animation::fade_in(ctx, self.page_since.elapsed(), animation::PAGE);
+                let enter = animation::fade_in(ctx, self.page_since.elapsed(), 0.18);
+                let fade = 0.6 + 0.4 * enter;
                 egui::ScrollArea::vertical()
                     .id_salt(self.page.title())
                     .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
@@ -72,6 +94,8 @@ impl Desktop {
                             })
                             .show(ui, |ui| {
                                 ui.set_opacity(fade);
+                                // New page settles up from 6 px below.
+                                ui.add_space(6.0 * (1.0 - enter));
                                 ui.set_max_width(ui.available_width().min(CONTENT_MAX_WIDTH));
                                 ui.spacing_mut().item_spacing.y = 14.0;
                                 // No page-wide disable while an action runs: egui
@@ -82,6 +106,7 @@ impl Desktop {
                                     self.airplay_panel(ui);
                                 } else {
                                     match self.page {
+                                        Page::Live => self.live_page(ui),
                                         Page::Hub => self.hub_page(ui),
                                         Page::Sender => self.sender_page(ui),
                                         Page::Mixer => self.mixer_page(ui),
@@ -147,7 +172,25 @@ impl Desktop {
         ui.horizontal(|ui| {
             ui.add_space(4.0);
             let (rect, _) = ui.allocate_exact_size(egui::vec2(18.0, 20.0), egui::Sense::hover());
-            for (i, h) in [7.0, 15.0, 11.0, 5.0].into_iter().enumerate() {
+            // The mark is the room's output: bars follow the master RMS
+            // through meter ballistics and rest in the logo shape in silence.
+            let rms = self
+                .diagnostics
+                .as_ref()
+                .and_then(|v| v.pointer("/meters/output/rms"))
+                .and_then(Value::as_f64)
+                .filter(|_| self.snapshot.as_ref().is_some_and(|s| s.output.available));
+            let level = rms.and_then(widgets::to_db).map(|db| {
+                let (db, _) = animation::meter(ui.ctx(), egui::Id::new("brand-meter"), db);
+                ((db - widgets::METER_FLOOR_DB) / -widgets::METER_FLOOR_DB).clamp(0.0, 1.0)
+            });
+            let shape = [7.0, 15.0, 11.0, 5.0];
+            let live = [0.55, 1.0, 0.8, 0.45];
+            for i in 0..4 {
+                let h = match level {
+                    Some(l) if l > 0.05 => (4.0 + 14.0 * l * live[i]).min(18.0),
+                    _ => shape[i],
+                };
                 let x = rect.left() + 1.5 + i as f32 * 4.5;
                 ui.painter().line_segment(
                     [
@@ -157,17 +200,26 @@ impl Desktop {
                     Stroke::new(2.5, theme::ACCENT),
                 );
             }
+            if level.is_some_and(|l| l > 0.05) {
+                crate::fx::glow(
+                    ui.painter(),
+                    rect.center(),
+                    14.0,
+                    theme::ACCENT.gamma_multiply(0.15),
+                );
+            }
             ui.label(
                 RichText::new("NeonMix")
                     .font(theme::heading(17.0))
                     .color(theme::TEXT),
             );
         });
-        ui.add_space(if short { 10.0 } else { 18.0 });
+        ui.add_space(if short { 8.0 } else { 18.0 });
 
-        let item_height = if short { 32.0 } else { 36.0 };
+        let item_height = if short { 30.0 } else { 36.0 };
         let item_width = ui.available_width();
         let mut selected_top = None;
+        ui.spacing_mut().item_spacing.y = 0.0;
         let first_top = ui.cursor().top();
         for (i, (page, title)) in Page::ALL.into_iter().enumerate() {
             let selected = self.page == page;
@@ -223,7 +275,7 @@ impl Desktop {
                 },
                 animation::lerp_color(theme::TEXT_2, theme::TEXT, active.max(hover * 0.6)),
             );
-            if !short && item_width > 180.0 {
+            if !short && item_width > 180.0 && i < 6 {
                 painter.text(
                     egui::pos2(rect.right() - 10.0, rect.center().y),
                     egui::Align2::RIGHT_CENTER,
@@ -242,19 +294,26 @@ impl Desktop {
             if response.clicked() {
                 self.navigate(page);
             }
-            ui.add_space(2.0);
+            ui.add_space(if short { 2.0 } else { 6.0 });
         }
         // Indicator slides between items instead of jumping.
         if let Some(top) = selected_top {
-            let y = ui.ctx().animate_value_with_time(
+            let y = animation::ease_to(
+                ui.ctx(),
                 ui.id().with("nav-indicator"),
                 top - first_top,
-                0.18,
+                0.22,
             );
             let left = ui.min_rect().left();
             let bar = egui::Rect::from_min_size(
                 egui::pos2(left, first_top + y + 9.0),
                 egui::vec2(3.0, item_height - 18.0),
+            );
+            crate::fx::glow(
+                ui.painter(),
+                bar.center(),
+                10.0,
+                theme::ACCENT.gamma_multiply(0.35),
             );
             ui.painter()
                 .rect_filled(bar, CornerRadius::same(2), theme::ACCENT);
@@ -271,7 +330,40 @@ impl Desktop {
                 )
                 .inner
             };
-            let quit = full(ui, "退出后台", Kind::Quiet, false);
+            // Hide and quit share one row so the destructive pair never
+            // outweighs navigation; narrow sidebars use compact buttons.
+            let compact = width < 180.0;
+            let half = (width - 6.0) / 2.0;
+            let (hide, quit) = ui
+                .allocate_ui_with_layout(
+                    egui::vec2(width, theme::CONTROL_HEIGHT),
+                    Layout::left_to_right(Align::Center),
+                    |ui| {
+                        ui.spacing_mut().item_spacing.x = 6.0;
+                        let cell = |ui: &mut egui::Ui, text: &str, kind: Kind| {
+                            ui.allocate_ui_with_layout(
+                                egui::vec2(half, theme::CONTROL_HEIGHT),
+                                Layout::top_down_justified(Align::Min),
+                                |ui| {
+                                    if compact {
+                                        widgets::button_compact(ui, text, kind)
+                                    } else {
+                                        widgets::button(ui, text, kind)
+                                    }
+                                },
+                            )
+                            .inner
+                        };
+                        (
+                            cell(ui, "隐藏窗口", Kind::Secondary),
+                            cell(ui, "退出后台", Kind::Quiet),
+                        )
+                    },
+                )
+                .inner;
+            if hide.clicked() {
+                self.hide_window(ui.ctx());
+            }
             if quit.clicked() {
                 self.confirmation(
                     "退出后台".into(),
@@ -281,23 +373,22 @@ impl Desktop {
                     quit.id,
                 );
             }
-            if full(ui, "隐藏窗口", Kind::Secondary, false).clicked() {
-                if self.tray.is_some() {
-                    ui.ctx()
-                        .send_viewport_cmd(egui::ViewportCommand::Visible(false));
-                } else {
-                    ui.ctx()
-                        .send_viewport_cmd(egui::ViewportCommand::Minimized(true));
-                }
-            }
             if self.status.as_ref().is_some_and(|s| s.sender.running)
-                && full(ui, "停止发送", Kind::Danger, self.pending_stop).clicked()
+                && full(ui, "停止发送", Kind::Quiet, self.pending_stop).clicked()
             {
                 self.stop_sender();
             }
             ui.add_space(6.0);
             self.identity(ui, width, short);
         });
+    }
+
+    fn hide_window(&self, ctx: &egui::Context) {
+        if self.tray.is_some() {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+        } else {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(true));
+        }
     }
 
     /// Identity switcher at the foot of the sidebar: who this window acts as.
@@ -361,6 +452,9 @@ impl Desktop {
         if previous != self.credential {
             self.snapshot = None;
             self.diagnostics = None;
+            self.events.clear();
+            self.level_history.clear();
+            self.metric_history.clear();
             self.fresh = None;
             self.synced = None;
             self.last_poll = Instant::now() - Duration::from_secs(5);
@@ -401,6 +495,7 @@ impl Desktop {
         } else {
             format!("{room} · {room_state}")
         };
+        let hub_id = self.snapshot.as_ref().map(|s| s.hub_id);
         let left = |ui: &mut egui::Ui| {
             ui.label(
                 RichText::new(title)
@@ -408,6 +503,17 @@ impl Desktop {
                     .color(theme::TEXT),
             );
             ui.add_space(6.0);
+            if let Some(id) = hub_id {
+                let (rect, _) =
+                    ui.allocate_exact_size(egui::vec2(18.0, 18.0), egui::Sense::hover());
+                crate::emblem::paint(
+                    ui.painter(),
+                    rect.center(),
+                    9.0,
+                    crate::emblem::Emblem::from_id(id),
+                    1.0,
+                );
+            }
             let _ = widgets::pill(ui, &chip, room_tone)
                 .on_hover_text("当前控制身份所连接的房间及其状态");
         };
@@ -495,6 +601,24 @@ impl Desktop {
         }
     }
 
+    pub(crate) fn master_gain(&mut self, current: f32, gain: f32) {
+        self.mix_change(
+            format!(
+                "总音量 {} → {} dB",
+                widgets::gain_text(current),
+                widgets::gain_text(gain)
+            ),
+            Write::Control(Operation::OutputMix {
+                gain_db: Some(gain),
+                muted: None,
+            }),
+            Write::Control(Operation::OutputMix {
+                gain_db: Some(current),
+                muted: None,
+            }),
+        );
+    }
+
     pub(crate) fn master_mute(&mut self, on: bool) {
         self.mix_change(
             if on { "总静音" } else { "取消总静音" }.into(),
@@ -542,10 +666,28 @@ impl Desktop {
             // 还原: the last mixer change, for a few seconds.
             if self.undo_available() {
                 ui.ctx().request_repaint_after(Duration::from_millis(500));
-                if widgets::small_button(ui, true, &format!("还原  {}", widgets::command_hint("Z")))
-                    .on_hover_text("恢复上一次混音调整前的值")
-                    .clicked()
-                {
+                let restore = widgets::small_button(
+                    ui,
+                    true,
+                    &format!("还原  {}", widgets::command_hint("Z")),
+                )
+                .on_hover_text("恢复上一次混音调整前的值");
+                if let Some(undo) = &self.undo {
+                    // The 8 s restore window, draining under the button.
+                    let left = 1.0 - undo.at.elapsed().as_secs_f32() / 8.0;
+                    let r = restore.rect;
+                    let line = egui::Rect::from_min_size(
+                        egui::pos2(r.left() + 4.0, r.bottom() + 1.0),
+                        egui::vec2((r.width() - 8.0) * left.clamp(0.0, 1.0), 2.0),
+                    );
+                    ui.painter().rect_filled(
+                        line,
+                        CornerRadius::same(1),
+                        theme::ACCENT.gamma_multiply(0.8),
+                    );
+                    ui.ctx().request_repaint_after(Duration::from_millis(100));
+                }
+                if restore.clicked() {
                     self.restore_last();
                 }
                 if let Some(undo) = &self.undo {

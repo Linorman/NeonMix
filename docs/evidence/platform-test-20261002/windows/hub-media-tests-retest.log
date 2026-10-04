@@ -1,0 +1,76 @@
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling neonmix-hub v0.1.0 (E:\Desktop\NeonMix-test\apps\hub)
+warning: `cpal` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.47s
+     Running unittests src\main.rs (target\debug\deps\neonmix_hub-8fa7934889827ffa.exe)
+
+running 23 tests
+test identity::tests::setup_crash_helper ... ok
+test server::airplay::tests::full_grant_preserves_all_hub_identity_fields ... ok
+test server::airplay::tests::existing_receiver_profiles_default_to_low_latency_and_keep_trust ... ok
+test server::airplay::tests::expired_or_disabled_pairing_window_never_returns_a_stale_pin ... ok
+test server::airplay::tests::stop_and_disconnect_fail_closed_even_when_control_consumer_stalls ... ok
+test server::airplay::tests::idle_coreaudio_epoch_change_keeps_pin_window_but_active_media_is_revoked ... ok
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test identity::tests::legacy_and_mixed_formats_never_enter_laboratory_branch ... ok
+test server::airplay::tests::bounded_media_backpressure_preserves_burst_packets_and_stop_remains_independent ... ok
+test identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity ... ok
+test identity::tests::forget_is_resumable_and_protects_admin_kind_and_device_aliases ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test identity::tests::setup_force_exit_preserves_incomplete_identity_and_refuses_retry ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.00s
+
+     Running unittests src\lib.rs (target\debug\deps\neonmix_media-3b6305d18da07d8c.exe)
+
+running 3 tests
+test queue_trace::tests::real_appsrc_capacity_loss_quarantines_following_audio ... ok
+test queue_trace::tests::real_appsink_capacity_loss_matches_private_buffer_sequence ... ok
+test transport::duration_tests::authenticated_twenty_ms_opus_cannot_enter_a_ten_ms_stream ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running tests\protocol.rs (target\debug\deps\protocol-20ffc185d807d699.exe)
+
+running 6 tests
+test opus_packet_duration_matches_negotiated_clock_for_all_toc_modes ... ok
+test packet_quotas_and_feedback_congestion_pause_recovery ... ok
+test authenticated_rtp_with_wrong_time_step_is_rejected ... ok
+test initial_reordering_across_timestamp_zero_preserves_forward_anchor ... ok
+test rtp_sequence_timestamp_wrap_duplicate_and_reorder ... ok
+test reordered_wrong_timestamp_does_not_poison_clock_or_consume_sequence ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\security.rs (target\debug\deps\security-964ef651d20bbeda.exe)
+
+running 3 tests
+test replay_corruption_revocation_and_fresh_key_context_isolation ... ok
+test native_jitter_reorders_and_discards_late_packets_with_real_plc ... ok
+test negotiated_expiry_stops_both_decode_and_ingress ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.22s
+
+   Doc-tests neonmix_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

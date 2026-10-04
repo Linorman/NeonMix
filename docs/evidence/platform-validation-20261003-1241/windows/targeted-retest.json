@@ -1,0 +1,24 @@
+{
+  "command": [
+    "python",
+    "native-harness.py",
+    "multi",
+    "--output",
+    "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+    "--sources",
+    "4",
+    "--native-sources",
+    "0",
+    "--fault-cycles",
+    "2",
+    "--status-readers",
+    "4",
+    "--steady-seconds",
+    "30",
+    "--report",
+    "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\mix-4plus0-retest.json"
+  ],
+  "exit_code": 1,
+  "seconds": 23.35,
+  "reason": "First four-AirPlay fixture cleanup failed with WinError 5 and obscured its quality result; preserve failure and rerun once with report-before-cleanup harness"
+}

@@ -1,0 +1,1 @@
+{"passed": true, "scope": "project bundle CFPlugIn host; not coreaudiod", "notifications": 14, "binary_sha256": "5db00500991e704f302ef3af9c0aa1fa7f86d681c98235145a2909a0032ed67c", "sdk_version": "27.0"}

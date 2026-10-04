@@ -1,0 +1,9 @@
+{
+  "ui_found_room": false,
+  "ipc_data_kind": "list",
+  "ipc_event_count": 7,
+  "ipc_final_event": "discovery_complete",
+  "ipc_candidate_count": 1,
+  "expected_ui_access": "data.get(\"candidates\") on the top-level value",
+  "mismatch_confirmed": true
+}

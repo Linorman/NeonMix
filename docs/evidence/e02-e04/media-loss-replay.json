@@ -1,0 +1,38 @@
+{
+  "drop_every": 17,
+  "limited_frames": 0,
+  "output": null,
+  "output_frames": 240000,
+  "output_stats": null,
+  "peak": 0.004600394982844591,
+  "platform": "macos",
+  "receivers": [
+    {
+      "authenticated": true,
+      "late_packets": 0,
+      "lost_packets": 28,
+      "packets": {
+        "duplicate": 0,
+        "highest_sequence": 31743,
+        "highest_timestamp": 3388395715,
+        "invalid": 0,
+        "received": 469,
+        "reordered": 0,
+        "timestamp_step_errors": 0
+      },
+      "pcm_frames": 236160,
+      "pcm_peak": 0.018310546875,
+      "pcm_timing_gaps": [],
+      "plc_samples": 13440,
+      "queue_drops": 0,
+      "silent_pcm_frames": 227
+    }
+  ],
+  "rejected": 0,
+  "replay": true,
+  "rms": 0.002732976700638559,
+  "seconds": 5,
+  "streams": 1,
+  "underrun_frames": 0,
+  "wrong_fingerprint": false
+}

@@ -1,0 +1,176 @@
+{
+  "scenario": "management",
+  "platform": "Windows",
+  "os_version": "Windows-11-10.0.26100-SP0",
+  "architecture": "AMD64",
+  "build_profile": "release",
+  "sources": 2,
+  "native_sources": 0,
+  "output_device": "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real WASAPI output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub.exe": "1590ba2de63fbab8e7411e141fe9ad99b5353285a9b8e9aca4347931f3059dd1",
+    "neonmix-airplay-worker.exe": "14fcaadc940cbf97b5c65cf8415c2a81813d1dc65b646868696fc4220b084cd6"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": null,
+  "airplay_frequencies_hz": [
+    317,
+    439
+  ],
+  "native_frequencies_hz": [],
+  "passed": true,
+  "scenarios": {
+    "explicit_idle_pairing_window_renews_without_worker_restart": true,
+    "live_configure_idle_entries_preserves_active_sessions": true,
+    "multi_receiver_v1_requires_upgrade": true,
+    "revoke_global_and_allow_cannot_restore_pairing": true,
+    "explicit_repair_requires_new_pin_and_preserves_same_source_identity": true,
+    "independent_playback_mode_does_not_reset_other_source": true,
+    "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+  },
+  "isolation_checks": [],
+  "management_checks": [
+    {
+      "operation": "live_configure_add_remove_idle",
+      "continuity": {
+        "output_frames": 12480,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          }
+        ]
+      },
+      "original_contexts_unchanged": true
+    },
+    {
+      "operation": "revoke_source_A",
+      "source_B_context_unchanged": true,
+      "continuity": {
+        "output_frames": 8640,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          }
+        ]
+      }
+    },
+    {
+      "operation": "revoked_key_at_other_idle_receiver",
+      "status": 403,
+      "response_bytes": 0
+    },
+    {
+      "operation": "repair_same_key_with_new_pin",
+      "source_identity_preserved": true,
+      "fresh_session": true,
+      "source_B_context_unchanged": true,
+      "source_A_mode": "synchronized",
+      "source_B_mode": "low_latency",
+      "continuity": {
+        "output_frames": 143520,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          }
+        ]
+      }
+    }
+  ],
+  "global_disable": {
+    "receivers": [
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      },
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      },
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      },
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      }
+    ],
+    "reserved": 0,
+    "owned_worker_count": 0
+  },
+  "status_reads": {
+    "readers": 0,
+    "successful": 0,
+    "errors": 0
+  },
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

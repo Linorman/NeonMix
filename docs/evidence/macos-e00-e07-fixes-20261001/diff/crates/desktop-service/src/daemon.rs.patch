@@ -1,0 +1,92 @@
+--- before/crates/desktop-service/src/daemon.rs
++++ after/crates/desktop-service/src/daemon.rs
+@@ -16,6 +16,21 @@
+ 
+ const COMMAND_TIMEOUT: Duration = Duration::from_secs(25);
+ const LOG_LINE_LIMIT: usize = 16_384;
++
++fn discovery_result(value: Value) -> Result<Value> {
++    let completion = match value {
++        Value::Array(events) => events
++            .into_iter()
++            .rev()
++            .find(|event| event["event"] == "discovery_complete"),
++        event if event["event"] == "discovery_complete" => Some(event),
++        _ => None,
++    };
++    completion
++        .filter(|event| event["candidates"].is_array())
++        .ok_or_else(|| "发现结果缺少完成事件或房间列表".into())
++}
++
+ fn audio_command(executable: &Path, args: Vec<String>) -> Command {
+     let mut command = Command::new(executable);
+     command
+@@ -788,12 +803,14 @@
+                 if !(1..=10).contains(&seconds) {
+                     return Err("发现窗口必须为 1..10 秒".into());
+                 }
+-                self.hub_command(vec![
+-                    "discover".into(),
+-                    "--seconds".into(),
+-                    seconds.to_string(),
+-                ])
+-                .await
++                let events = self
++                    .hub_command(vec![
++                        "discover".into(),
++                        "--seconds".into(),
++                        seconds.to_string(),
++                    ])
++                    .await?;
++                discovery_result(events)
+             }
+             Request::Invite {
+                 credential,
+@@ -1443,3 +1460,46 @@
+         .map_err(|_| "IPC write timeout")?
+         .map_err(|e| e.to_string())
+ }
++
++#[cfg(test)]
++mod discovery_tests {
++    use super::*;
++
++    #[test]
++    fn discovery_returns_the_final_candidate_snapshot_instead_of_transient_events() {
++        let candidate = json!({"hub_id":"test-hub", "room_name":"客厅"});
++        let completion = json!({"event":"discovery_complete", "candidates":[candidate]});
++        let events = json!([
++            {"event":"resolved", "candidate":candidate},
++            {"event":"resolved", "candidate":candidate},
++            completion,
++        ]);
++        assert_eq!(discovery_result(events).unwrap(), completion);
++    }
++
++    #[test]
++    fn discovery_empty_completion_clears_removed_candidates_and_supports_single_line_output() {
++        let completion = json!({"event":"discovery_complete", "candidates":[]});
++        assert_eq!(discovery_result(completion.clone()).unwrap(), completion);
++        assert_eq!(
++            discovery_result(json!([
++                {"event":"resolved", "candidate":{"hub_id":"removed-hub"}},
++                completion,
++            ]))
++            .unwrap(),
++            completion,
++        );
++    }
++
++    #[test]
++    fn discovery_incomplete_or_malformed_output_is_an_error() {
++        for value in [
++            Value::Null,
++            json!([]),
++            json!([{"event":"resolved", "candidate":{}}]),
++            json!({"event":"discovery_complete", "candidates":"invalid"}),
++        ] {
++            assert!(discovery_result(value).is_err());
++        }
++    }
++}

@@ -1,0 +1,105 @@
+{
+  "target": "windows",
+  "endpoint": "https://192.168.100.186:17446",
+  "requested_seconds": 60,
+  "client_binary_sha256": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51",
+  "scope": "macOS native CLI synthetic 437 Hz / -36 dBFS Sender; not Apple AirPlay",
+  "source_snapshot_canonical_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+  "counter_note": "lost_packets includes overflow PLC; do not equate this total with network packet loss",
+  "query_failures": [],
+  "passed": true,
+  "pair_exit_code": 0,
+  "send_exit_code": 0,
+  "sample_count": 29,
+  "last_sample": {
+    "elapsed_seconds": 59.558,
+    "session_status": [
+      "playing"
+    ],
+    "output_available": true,
+    "output_frames": 7570176,
+    "output_peak": 0.004007317591458559,
+    "output_errors": 0,
+    "callback_over_budget": 0,
+    "underrun_frames": 0,
+    "lost_packets": [
+      0
+    ],
+    "pcm_sink_dropped": [
+      0
+    ],
+    "overflow_plc_packets": [
+      0
+    ],
+    "lost_minus_overflow_plc": [
+      0
+    ],
+    "timed_late_frames": 0,
+    "device_output_latency_ns": null,
+    "received_packets": [
+      5938
+    ],
+    "highest_sequence": [
+      6109
+    ],
+    "queue_drops": [
+      0
+    ],
+    "late_packets": [
+      0
+    ],
+    "pcm_timing_gap_count": [
+      0
+    ]
+  },
+  "last_active_sample": {
+    "elapsed_seconds": 59.558,
+    "session_status": [
+      "playing"
+    ],
+    "output_available": true,
+    "output_frames": 7570176,
+    "output_peak": 0.004007317591458559,
+    "output_errors": 0,
+    "callback_over_budget": 0,
+    "underrun_frames": 0,
+    "lost_packets": [
+      0
+    ],
+    "pcm_sink_dropped": [
+      0
+    ],
+    "overflow_plc_packets": [
+      0
+    ],
+    "lost_minus_overflow_plc": [
+      0
+    ],
+    "timed_late_frames": 0,
+    "device_output_latency_ns": null,
+    "received_packets": [
+      5938
+    ],
+    "highest_sequence": [
+      6109
+    ],
+    "queue_drops": [
+      0
+    ],
+    "late_packets": [
+      0
+    ],
+    "pcm_timing_gap_count": [
+      0
+    ]
+  },
+  "active_sample_count": 29,
+  "max_lost_packets": 0,
+  "max_pcm_sink_dropped": 0,
+  "max_overflow_plc_packets": 0,
+  "max_queue_drops": 0,
+  "max_late_packets": 0,
+  "max_pcm_timing_gap_count": 0,
+  "max_lost_minus_overflow_plc": 0,
+  "max_underrun_frames": 0
+}

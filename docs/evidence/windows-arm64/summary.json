@@ -1,0 +1,30 @@
+{
+  "status": "native_capture_stability_failed_waiting_for_reference_machine",
+  "host": "192.168.100.113",
+  "architecture": "ARM64 Windows VM",
+  "backend_native_tests_passed": 61,
+  "backend_native_tests_ignored": 5,
+  "native_named_pipe": "passed",
+  "native_credential_store": "passed_in_console_session; SSH logon returns 1312",
+  "bottom_layer_guaranteed": false,
+  "audio_short_matrix_before_reboot": "25 passed",
+  "soak_300_seconds": "failed on native capture Xrun; failures preserved",
+  "after_os_update": "render endpoint id changed; loopback callback and clock healthy but samples all zero; no console user logged in",
+  "excluded": [
+    "GUI per user instruction",
+    "Windows MSVC/x64 driver load and signing",
+    "media/hub runtime without Windows GStreamer SDK"
+  ],
+  "login_blocked_goal_turns": 0,
+  "latest_login_check": "linorman console session active; SSH reconnected",
+  "latest_soak": "failed around 12.2 seconds; capture Xrun with callback_over_budget=0",
+  "native_packet_diagnostic": "raw 120-second read passed; core bridge comparison observed flags=0x1, device position gap=960 frames (20 ms)",
+  "environment_comparisons": [
+    "4-period capture ring: failed and reverted",
+    "VM host physical speakers: failed and reverted",
+    "adaptive hypervisor off: failed and reverted"
+  ],
+  "remaining_validation": "requires further native capture investigation/reference hardware; GStreamer SDK and x64 MSVC/driver gates also unverified",
+  "reference_machine_blocked_goal_turns": 1,
+  "experiments_reverted": true
+}

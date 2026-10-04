@@ -1,0 +1,106 @@
+[
+  {
+    "platform": "ubuntu",
+    "name": "four-contention",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/ubuntu/four-contention.json",
+    "source_sha256": "0315d7fccf5885e61ee3e18c6d795a4a6af84036173eb10a0a0ac4f2a5c0a6f0",
+    "windows": 49,
+    "rejected": [
+      {
+        "stage": "recovery_interval",
+        "reason": "recovery_interval Mixer skipped timed PCM",
+        "timed_late_delta": 123
+      }
+    ]
+  },
+  {
+    "platform": "ubuntu",
+    "name": "3plus1",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/ubuntu/3plus1.json",
+    "source_sha256": "8eb6b92ec4b551766a20b4f111837437f59f79ca9220ef9ce2fa817bcc683d01",
+    "windows": 19,
+    "rejected": [
+      {
+        "stage": "recovery_interval",
+        "reason": "recovery_interval Mixer skipped timed PCM",
+        "timed_late_delta": 226
+      }
+    ]
+  },
+  {
+    "platform": "ubuntu",
+    "name": "2plus2",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/ubuntu/2plus2.json",
+    "source_sha256": "876836ea0952380e2fdc0624999eb8dd26f5e1f6cf926ae95c9adacbf073e73f",
+    "windows": 13,
+    "rejected": [
+      {
+        "stage": "recovery_interval",
+        "reason": "recovery_interval Mixer skipped timed PCM",
+        "timed_late_delta": 51
+      }
+    ]
+  },
+  {
+    "platform": "ubuntu",
+    "name": "1plus3",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/ubuntu/1plus3.json",
+    "source_sha256": "5d02d7f98eed83bf7bbc59e58dd9c9ef2bade9d8c95dd403ff217ab8c96d4168",
+    "windows": 7,
+    "rejected": [
+      {
+        "stage": "recovery_interval",
+        "reason": "recovery_interval Mixer skipped timed PCM",
+        "timed_late_delta": 788
+      }
+    ]
+  },
+  {
+    "platform": "ubuntu",
+    "name": "0plus4",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/ubuntu/0plus4.json",
+    "source_sha256": "680ca201bf48c85ff495ab1fc23238b65986b452a895f1fe74c54611b75fb9c3",
+    "windows": 1,
+    "rejected": []
+  },
+  {
+    "platform": "macos",
+    "name": "four-airplay",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/macos/four-airplay.json",
+    "source_sha256": "b819676e6a64fe36d5331fb13b55ede1ec4053392fa9a2b49d40091c4a07614c",
+    "windows": 73,
+    "rejected": []
+  },
+  {
+    "platform": "macos",
+    "name": "mix-3plus1",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/macos/mix-3plus1.json",
+    "source_sha256": "e1c0ec531e61426907cc666854e6e64e95225916b15bb11fa58cfaa06c8021be",
+    "windows": 19,
+    "rejected": []
+  },
+  {
+    "platform": "macos",
+    "name": "mix-2plus2",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/macos/mix-2plus2.json",
+    "source_sha256": "000a05334e0b8071bc3fe995975ec45f77c30fd6753b9bd0b9551f456ba930a6",
+    "windows": 25,
+    "rejected": []
+  },
+  {
+    "platform": "macos",
+    "name": "mix-1plus3",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/macos/mix-1plus3.json",
+    "source_sha256": "b98f87572df89fa552bf3d266b7815ee11a9944929125e9a22ee8188c3527c01",
+    "windows": 7,
+    "rejected": []
+  },
+  {
+    "platform": "macos",
+    "name": "mix-0plus4",
+    "source": "docs/evidence/platform-serial-retest-20261003-1430/macos/mix-0plus4.json",
+    "source_sha256": "28f1fbdbac36c7e8e45a97c8c5d8090e8fa0aacb38dd16ed0a2093ae2ecc2e60",
+    "windows": 1,
+    "rejected": []
+  }
+]

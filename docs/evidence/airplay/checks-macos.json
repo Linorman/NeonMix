@@ -1,0 +1,17 @@
+{
+  "platform": "macOS",
+  "date": "2026-10-01",
+  "workspace_tests_passed": 141,
+  "workspace_failed_summaries": 0,
+  "formatter_passed": true,
+  "backend_strict_clippy_passed": true,
+  "release_build_passed": true,
+  "limitations": [
+    "desktop retains pre-existing unused-component and style warnings",
+    "actual Mac final playback/video synchronization still requires completion"
+  ],
+  "binaries": {
+    "target/debug/neonmix-hub": "620f7f702d1dfd4569f61aa98dc47f3d1906075f9118844cdb8b30fc196e4a89",
+    "target/debug/neonmix-airplay-worker": "cef74b5a4f5a43970fb29e54f661f8c60fe26f1a2794724a8684b6d2364976bb"
+  }
+}

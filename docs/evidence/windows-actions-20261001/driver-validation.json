@@ -1,0 +1,14 @@
+{
+  "source_commit": "6b2690d435a0003aea490a5e06b7a3cdcfcc8ec2",
+  "workflow_url": "https://github.com/Linorman/NeonMix/actions/runs/36841991251",
+  "job_id": 110303020421,
+  "machine": "0x8664",
+  "subsystem": 1,
+  "dll_characteristics": "0x4160",
+  "sha256": "c4095a3e9eb281456d8bd85ef9550c12a697312536c7076fe3002a66f197bf04",
+  "native_msvc_wdk_build": true,
+  "inf_and_catalog_validation": true,
+  "signed": false,
+  "kernel_loaded": false,
+  "hardware_audio_tested": false
+}

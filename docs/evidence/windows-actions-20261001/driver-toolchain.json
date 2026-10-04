@@ -1,0 +1,11 @@
+{
+  "Properties": {
+    "WDKContentRoot": "D:\\a\\NeonMix\\NeonMix\\.local\\windows-driver-sdk\\Microsoft.Windows.WDK.x64.10.0.26100.6584\\c\\",
+    "WDKBinRoot": "D:\\a\\NeonMix\\NeonMix\\.local\\windows-driver-sdk\\Microsoft.Windows.WDK.x64.10.0.26100.6584\\c\\bin\\10.0.26100.0",
+    "InfToolPath": "D:\\a\\NeonMix\\NeonMix\\.local\\windows-driver-sdk\\Microsoft.Windows.WDK.x64.10.0.26100.6584\\c\\bin\\10.0.26100.0\\x64\\",
+    "WindowsSdkDir": "D:\\a\\NeonMix\\NeonMix\\.local\\windows-driver-sdk\\Microsoft.Windows.SDK.CPP.10.0.26100.6584\\c\\",
+    "WindowsSDKVersionedBinRoot": "D:\\a\\NeonMix\\NeonMix\\.local\\windows-driver-sdk\\Microsoft.Windows.SDK.CPP.10.0.26100.6584\\c\\bin\\10.0.26100.0",
+    "VCToolsVersion": "14.44.35207",
+    "WindowsTargetPlatformVersion": "10.0.26100.0"
+  }
+}

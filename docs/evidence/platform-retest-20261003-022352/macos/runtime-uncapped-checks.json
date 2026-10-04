@@ -1,0 +1,38 @@
+[
+  {
+    "name": "four-airplay-uncapped",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-uncapped.json",
+      "--sources",
+      "4",
+      "--fault-cycles",
+      "3",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 66.402,
+    "start_epoch": 1790968872.4627268,
+    "end_epoch": 1790968938.864928,
+    "cpu": {
+      "samples": 66,
+      "mean": 66.166,
+      "p95": 77.037,
+      "max": 89.522,
+      "minimum_headroom": 10.478,
+      "above80": 1,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": null
+    },
+    "cpu_policy": "observation only; no percentage admission/abort threshold, affinity or hard cap; own compile/other stress paused"
+  }
+]

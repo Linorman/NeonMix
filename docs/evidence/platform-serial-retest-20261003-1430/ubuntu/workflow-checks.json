@@ -1,0 +1,75 @@
+[
+  {
+    "name": "checks",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/run-checks.py"
+    ],
+    "started_at": 1791009277.071585,
+    "ended_at": 1791009482.1065989,
+    "exit_code": 0
+  },
+  {
+    "name": "adapt",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/adapt.py"
+    ],
+    "started_at": 1791009482.1191454,
+    "ended_at": 1791009482.1395226,
+    "exit_code": 0
+  },
+  {
+    "name": "environment",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/environment.py"
+    ],
+    "started_at": 1791009482.1397536,
+    "ended_at": 1791009482.190477,
+    "exit_code": 0
+  },
+  {
+    "name": "low",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/run-runtime.py",
+      "low"
+    ],
+    "started_at": 1791009482.1907344,
+    "ended_at": 1791009527.623366,
+    "exit_code": 0
+  },
+  {
+    "name": "matrix",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/run-runtime.py",
+      "matrix"
+    ],
+    "started_at": 1791009527.631089,
+    "ended_at": 1791009765.1818671,
+    "exit_code": 0
+  },
+  {
+    "name": "gui",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui_probe.py"
+    ],
+    "started_at": 1791009765.1820989,
+    "ended_at": 1791009785.7056212,
+    "exit_code": 0
+  },
+  {
+    "name": "gui-narrow",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/gui_probe.py",
+      "--narrow"
+    ],
+    "started_at": 1791009785.7058475,
+    "ended_at": 1791009802.0563943,
+    "exit_code": 0
+  }
+]

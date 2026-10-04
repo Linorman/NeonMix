@@ -12,6 +12,14 @@ struct Health {
     tone: Tone,
 }
 
+/// Trend key and whether it is a running total, per health tile.
+const TRENDS: [(&str, bool); 4] = [
+    ("output", true),
+    ("network", true),
+    ("buffer", false),
+    ("capture", true),
+];
+
 fn n(v: Option<&Value>) -> u64 {
     v.and_then(Value::as_u64).unwrap_or(0)
 }
@@ -184,7 +192,7 @@ impl Desktop {
             ui.horizontal(|ui| {
                 for &i in row {
                     let open = self.panel_open(PANELS[i], health[i].tone != Tone::Success);
-                    if widgets::tile(
+                    let tile = widgets::tile(
                         ui,
                         width,
                         titles[i],
@@ -192,9 +200,30 @@ impl Desktop {
                         &health[i].detail,
                         health[i].tone,
                         open,
-                    )
-                    .clicked()
-                    {
+                    );
+                    // Last two minutes: increases for running totals, the
+                    // value itself for the queue estimate.
+                    let (key, delta) = TRENDS[i];
+                    if let Some(samples) = self.metric_history.get(&key).filter(|s| s.len() >= 3) {
+                        let r = tile.rect;
+                        let spark = egui::Rect::from_min_max(
+                            egui::pos2(r.right() - 86.0, r.top() + 30.0),
+                            egui::pos2(r.right() - 14.0, r.top() + 50.0),
+                        );
+                        let color = match health[i].tone {
+                            Tone::Success | Tone::Neutral => theme::ACCENT,
+                            tone => tone.color(),
+                        };
+                        crate::history::paint_spark(
+                            ui.painter(),
+                            spark,
+                            samples,
+                            self.metric_history.window(),
+                            color,
+                            delta,
+                        );
+                    }
+                    if tile.clicked() {
                         picked = Some(i);
                     }
                 }

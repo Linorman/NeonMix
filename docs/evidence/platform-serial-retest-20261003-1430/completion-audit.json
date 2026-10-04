@@ -1,0 +1,26 @@
+{
+  "objective": "fresh Ubuntu and macOS native rerun, sequential, with new report; prior Windows separately preserved",
+  "source_matched": true,
+  "ubuntu_tests": {
+    "passed": 222,
+    "failed": 0,
+    "ignored": 5,
+    "suites": 54
+  },
+  "macos_tests": {
+    "passed": 232,
+    "failed": 0,
+    "ignored": 5,
+    "suite_summaries": 54
+  },
+  "matrix_raw_audit": "matrix-independent-audit.json",
+  "ubuntu_native_lan_quality_passed": false,
+  "owned_cleanup_verified": true,
+  "serial_order_verified": true,
+  "missing_report_links": [],
+  "parent_production_source_changes": [],
+  "remaining_owned_invites": [],
+  "report": "docs/PLATFORM-SERIAL-RETEST-20261003-1430.md",
+  "scope_complete": true,
+  "test_results_are_not_all_product_quality_passed": true
+}
