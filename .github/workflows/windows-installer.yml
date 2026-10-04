@@ -1,0 +1,105 @@
+name: Windows installer
+
+on:
+  push:
+    branches: [installer-windows]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  CARGO_HOME: ${{ github.workspace }}/.local/cargo
+  RUSTUP_HOME: ${{ github.workspace }}/.local/rustup
+  CARGO_TARGET_DIR: ${{ github.workspace }}/target
+  PYTHONUTF8: '1'
+
+jobs:
+  installer:
+    name: NeonMix Windows x64 installer
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Project-local environment
+        run: |
+          New-Item -ItemType Directory -Force .local/tmp, artifacts/installers | Out-Null
+          foreach ($name in @('TMPDIR', 'TMP', 'TEMP')) {
+            "$name=$env:GITHUB_WORKSPACE/.local/tmp" >> $env:GITHUB_ENV
+          }
+      - name: Pinned Rust
+        run: rustup toolchain install 1.95.0 --profile minimal
+      - name: MSVC GStreamer SDK and runtime
+        run: ./tools/dev.ps1 python tools/prepare_windows_gstreamer.py
+      - name: Release workspace (MSVC)
+        run: ./tools/dev.ps1 cargo build --release --workspace --locked
+      - name: MSYS2 MinGW toolchain and GStreamer (AirPlay worker)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-openssl
+            mingw-w64-x86_64-gstreamer
+            mingw-w64-x86_64-gst-plugins-base
+            mingw-w64-x86_64-gst-libav
+      - name: AirPlay sources (checksum-locked UxPlay and libplist)
+        run: |
+          $env:PATH = "C:\Program Files\Git\usr\bin;$env:PATH"
+          ./tools/dev.ps1 python tools/prepare_airplay.py --sources-only
+      - name: AirPlay worker (MinGW)
+        shell: msys2 {0}
+        run: |
+          cmake -S apps/airplay-worker -B .local/airplay/build-windows -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DNEONMIX_GSTREAMER_PREFIX="$(cygpath -m /mingw64)"
+          cmake --build .local/airplay/build-windows --target neonmix-airplay-worker --parallel 4
+      - name: NSIS and Python PE reader
+        run: |
+          choco install nsis --no-progress -y
+          python -m pip install pefile
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Stage and build installer
+        run: |
+          $msys = (msys2 -c 'cygpath -m /mingw64').Trim()
+          python tools/package_windows.py --mingw $msys `
+            --worker .local/airplay/build-windows/neonmix-airplay-worker.exe `
+            --makensis 'C:\Program Files (x86)\NSIS\makensis.exe'
+      - name: Install silently and smoke test the installed tree
+        run: |
+          $installer = (Get-ChildItem artifacts/installers/NeonMix-*-setup.exe).FullName
+          $target = Join-Path $env:RUNNER_TEMP 'NeonMix Installed'
+          Start-Process -Wait -FilePath $installer -ArgumentList '/S', "/D=$target"
+          if (-not (Test-Path "$target\NeonMix.exe")) { throw 'installer did not create NeonMix.exe' }
+          $env:PATH = "$target\bin;$env:PATH"
+          $env:GST_PLUGIN_SYSTEM_PATH_1_0 = "$target\plugins"
+          $env:GST_PLUGIN_PATH_1_0 = ''
+          $env:GST_REGISTRY = Join-Path $env:RUNNER_TEMP 'installed-registry.bin'
+          $env:GST_REGISTRY_FORK = 'no'
+          $runtime = & "$target\bin\neonmix-hub.exe" runtime
+          if ($LASTEXITCODE -ne 0 -or $runtime -notmatch 'opusenc') { throw "hub runtime failed: $runtime" }
+          $env:GST_PLUGIN_SYSTEM_PATH_1_0 = "$target\airplay\plugins"
+          $env:GST_REGISTRY = Join-Path $env:RUNNER_TEMP 'installed-airplay-registry.bin'
+          $worker = '' | & "$target\bin\neonmix-airplay-worker.exe" 2>&1 | Out-String
+          if ($worker -notmatch 'startup control') { throw "worker did not start (exit $LASTEXITCODE): $worker" }
+          $version = & "$target\bin\neonmix-desktop.exe" --version
+          Write-Host $version
+          Start-Process -Wait -FilePath "$target\Uninstall.exe" -ArgumentList '/S'
+          Start-Sleep -Seconds 3
+          if (Test-Path "$target\bin") { throw 'uninstall left files behind' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neonmix-windows-x64-installer
+          path: |
+            artifacts/installers/NeonMix-*-setup.exe
+            artifacts/installers/NeonMix-*-windows-x64.json
+          retention-days: 30
