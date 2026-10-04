@@ -87,6 +87,7 @@ impl Desktop {
                                         Page::Mixer => self.mixer_page(ui),
                                         Page::Devices => self.devices_page(ui),
                                         Page::Diagnostics => self.diagnostics_page(ui),
+                                        Page::About => self.about_page(ui),
                                     }
                                 }
                             });
@@ -125,6 +126,7 @@ impl Desktop {
             egui::Key::Num3,
             egui::Key::Num4,
             egui::Key::Num5,
+            egui::Key::Num6,
         ]
         .into_iter()
         .enumerate()

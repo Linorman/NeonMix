@@ -22,7 +22,17 @@ use std::{
     time::{Duration, Instant},
 };
 
+/// Version shown by `--version` and the 关于 page: package version plus the
+/// commit it was built from.
+const VERSION: &str = concat!(
+    env!("CARGO_PKG_VERSION"),
+    " (",
+    env!("NEONMIX_GIT_HASH"),
+    ")"
+);
+
 #[derive(Parser)]
+#[command(version = VERSION)]
 struct Args {
     #[arg(long, default_value = ".local/desktop")]
     state_dir: PathBuf,
@@ -34,7 +44,7 @@ struct Args {
     #[arg(long, requires = "preview_page")]
     preview_data: Option<PathBuf>,
     /// Open a page without connecting to a background (visual verification only).
-    #[arg(long, value_parser = ["hub", "sender", "mixer", "devices", "diagnostics", "airplay"])]
+    #[arg(long, value_parser = ["hub", "sender", "mixer", "devices", "diagnostics", "about", "airplay"])]
     preview_page: Option<String>,
 }
 #[derive(Clone, Copy, PartialEq, Hash, Debug)]
@@ -44,6 +54,7 @@ enum Page {
     Mixer,
     Devices,
     Diagnostics,
+    About,
 }
 impl Page {
     fn icon(self) -> icons::Icon {
@@ -53,14 +64,16 @@ impl Page {
             Self::Mixer => icons::Icon::Mixer,
             Self::Devices => icons::Icon::Devices,
             Self::Diagnostics => icons::Icon::Pulse,
+            Self::About => icons::Icon::Info,
         }
     }
-    const ALL: [(Self, &'static str); 5] = [
+    const ALL: [(Self, &'static str); 6] = [
         (Self::Hub, "Hub 设置"),
         (Self::Sender, "Sender"),
         (Self::Mixer, "Mixer"),
         (Self::Devices, "设备管理"),
         (Self::Diagnostics, "诊断"),
+        (Self::About, "关于"),
     ];
     fn title(self) -> &'static str {
         Self::ALL.iter().find(|p| p.0 == self).unwrap().1
@@ -313,6 +326,7 @@ impl Desktop {
                 "mixer" => Page::Mixer,
                 "devices" => Page::Devices,
                 "diagnostics" => Page::Diagnostics,
+                "about" => Page::About,
                 _ => Page::Hub,
             };
         } else {

@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 OUT=$1; W=${2:-1100}; H=${3:-760}
 F=${4:-docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json}
 mkdir -p "$OUT"
-for p in hub sender mixer devices diagnostics; do
+for p in hub sender mixer devices diagnostics about; do
   rm -f "$OUT/$p-$W.png"
   NEONMIX_SCREENSHOT_TO="$OUT/$p-$W.png" tools/dev target/release/neonmix-desktop \
     --preview-page "$p" --preview-data "$F" --width "$W" --height "$H" >/dev/null 2>&1 &

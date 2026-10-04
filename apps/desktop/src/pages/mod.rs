@@ -3,6 +3,7 @@
 //! then details in collapsible panels.
 use super::*;
 
+mod about;
 mod airplay;
 mod devices;
 mod diagnostics;
