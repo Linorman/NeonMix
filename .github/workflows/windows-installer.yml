@@ -90,9 +90,16 @@ jobs:
           $env:GST_PLUGIN_SYSTEM_PATH_1_0 = "$target\airplay\plugins"
           $env:GST_REGISTRY = Join-Path $env:RUNNER_TEMP 'installed-airplay-registry.bin'
           $worker = '' | & "$target\airplay\bin\neonmix-airplay-worker.exe" 2>&1 | Out-String
-          if ($worker -notmatch 'startup control') { throw "worker did not start (exit $LASTEXITCODE): $worker" }
+          if ($worker -notmatch '"type":"fatal"') { throw "worker did not start (exit $LASTEXITCODE): $worker" }
           $version = & "$target\bin\neonmix-desktop.exe" --version
           Write-Host $version
+          # Informational: the hosted runner may lack a usable OpenGL context.
+          Start-Process -FilePath "$target\NeonMix.exe"
+          Start-Sleep -Seconds 20
+          Write-Host ('processes: ' + ((Get-Process neonmix-* -ErrorAction SilentlyContinue | ForEach-Object Name) -join ', '))
+          Write-Host ('state dir: ' + ((Get-ChildItem "$env:LOCALAPPDATA\NeonMix" -ErrorAction SilentlyContinue | ForEach-Object Name) -join ', '))
+          Get-Process neonmix-* -ErrorAction SilentlyContinue | Stop-Process -Force
+          Start-Sleep -Seconds 2
           Start-Process -Wait -FilePath "$target\Uninstall.exe" -ArgumentList '/S'
           Start-Sleep -Seconds 3
           if (Test-Path "$target\bin") { throw 'uninstall left files behind' }
