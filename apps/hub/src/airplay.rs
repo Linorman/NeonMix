@@ -981,7 +981,7 @@ fn run_worker(
         mapping_id: 1,
     };
     let pin = format!("{:04}", Uuid::new_v4().as_u128() % 10000);
-    let executable = std::env::current_exe()?.with_file_name(if cfg!(windows) {
+    let sibling = std::env::current_exe()?.with_file_name(if cfg!(windows) {
         "neonmix-airplay-worker.exe"
     } else {
         "neonmix-airplay-worker"
@@ -989,11 +989,17 @@ fn run_worker(
     let runtime = std::env::var_os("NEONMIX_AIRPLAY_RUNTIME")
         .map(PathBuf::from)
         .unwrap_or_else(|| {
-            executable
+            sibling
                 .parent()
                 .unwrap_or_else(|| std::path::Path::new("."))
                 .join("airplay")
         });
+    // A package may keep the worker and its own DLL set under the runtime
+    // directory so they cannot collide with the Hub's libraries.
+    let private = runtime
+        .join("bin")
+        .join(sibling.file_name().unwrap_or_default());
+    let executable = if private.is_file() { private } else { sibling };
     let mut process = std::process::Command::new(executable);
     process
         .env("GST_PLUGIN_SYSTEM_PATH_1_0", runtime.join("plugins"))

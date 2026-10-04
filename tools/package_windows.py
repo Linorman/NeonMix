@@ -107,7 +107,11 @@ def stage(root, mingw, worker):
         directory.mkdir(parents=True)
     for name in BINARIES:
         shutil.copy2(RELEASE / f'{name}.exe', bin_dir / f'{name}.exe')
-    shutil.copy2(worker, bin_dir / 'neonmix-airplay-worker.exe')
+    # The MinGW worker keeps its own DLL set (same-named libraries differ from
+    # the MSVC GStreamer's); the Hub finds it under airplay/bin.
+    worker_dir = root / 'airplay/bin'
+    worker_dir.mkdir(parents=True)
+    shutil.copy2(worker, worker_dir / 'neonmix-airplay-worker.exe')
     for name in MEDIA_PLUGINS:
         source = msvc / 'lib/gstreamer-1.0' / f'gst{name}.dll'
         if not source.is_file():
@@ -121,9 +125,9 @@ def stage(root, mingw, worker):
 
     owner = {}
     msvc_roots = [bin_dir / f'{n}.exe' for n in BINARIES] + sorted((root / 'plugins').iterdir())
-    mingw_roots = [bin_dir / 'neonmix-airplay-worker.exe'] + sorted((root / 'airplay/plugins').iterdir())
+    mingw_roots = [worker_dir / 'neonmix-airplay-worker.exe'] + sorted((root / 'airplay/plugins').iterdir())
     collect(msvc_roots, [msvc / 'bin', msvc / 'lib'], bin_dir, owner)
-    collect(mingw_roots, [mingw / 'bin'], bin_dir, owner)
+    collect(mingw_roots, [mingw / 'bin'], worker_dir, {})
 
     # Launcher: GUI-subsystem, no console window.
     subprocess.run(['cl', '/nologo', '/O2', '/W3', '/WX', '/utf-8', f'/Fe:{root / "NeonMix.exe"}',
