@@ -39,4 +39,7 @@ if [ "$(uname -s)" = Darwin ] && [ -d "$NEONMIX_ROOT/.local/gstreamer/prefix" ];
   export GST_REGISTRY="$NEONMIX_ROOT/.local/gstreamer/registry.bin"
   export PATH="$NEONMIX_GST/bin:$PATH"
 fi
+if [ -d "$NEONMIX_ROOT/.local/airplay/plugins" ]; then
+  export NEONMIX_AIRPLAY_RUNTIME="$NEONMIX_ROOT/.local/airplay"
+fi
 exec "$@"

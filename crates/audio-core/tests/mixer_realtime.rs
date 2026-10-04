@@ -1,9 +1,13 @@
 use neonmix_core::{
     AudioBlock, AudioFormat, Discontinuity,
     mixer::{LaneMix, Mixer, MixerConfig},
+    signal::StereoSource,
 };
 use stats_alloc::{INSTRUMENTED_SYSTEM, Region, StatsAlloc};
-use std::{alloc::System, time::Instant};
+use std::{
+    alloc::System,
+    time::{Duration, Instant},
+};
 #[global_allocator]
 static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 #[test]
@@ -45,6 +49,37 @@ fn dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output() {
             control.apply(config).unwrap();
         }
         mixer.render_block(&mut frames);
+    }
+    let measured = region.change();
+    assert_eq!(measured.allocations, 0);
+    assert_eq!(measured.reallocations, 0);
+    assert_eq!(measured.deallocations, 0);
+
+    let origin = Instant::now();
+    let (mut timed, mut control, mut inputs, _) = Mixer::new(origin).unwrap();
+    let mut config = MixerConfig::default();
+    config.lanes[0] = LaneMix {
+        stream_id: 1,
+        epoch: 1,
+        ..LaneMix::default()
+    };
+    control.apply(config).unwrap();
+    let region = Region::new(GLOBAL);
+    for n in 0..1200u64 {
+        b.header.stream_epoch = 1;
+        b.header.source_sample_position = n * 480;
+        b.header.presentation_time_ns = Some(1_000_000_000 + n * 10_000_000);
+        inputs[0].push(b);
+        timed.set_presentation_time(origin + Duration::from_nanos(1_000_000_000 + n * 10_000_000));
+        if n == 400 {
+            config.lanes[0].muted = true;
+            control.apply(config).unwrap();
+        }
+        if n == 600 {
+            config.lanes[0].muted = false;
+            control.apply(config).unwrap();
+        }
+        timed.render_block(&mut frames);
     }
     let measured = region.change();
     assert_eq!(measured.allocations, 0);

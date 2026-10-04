@@ -1,0 +1,19 @@
+{
+  "package": "mdns-sd",
+  "version": "0.21.4",
+  "source": "https://crates.io/api/v1/crates/mdns-sd/0.21.4/download",
+  "upstream_repository": "https://github.com/keepsimple1/mdns-sd",
+  "archive_sha256": "1067efe2aadc6967f84c95977dca910e98f3edfd6403efc8fa8508d289ce012d",
+  "license": "Apache-2.0 OR MIT",
+  "patch": "vendor/patches/mdns-sd-0.21.4-ipv6-scope.patch",
+  "patch_sha256": "95d2cc7c88ba0a4d2789ef48ea13a0a76aac3147a88b5bf6566cce8809ce9b11",
+  "retained": "all Rust library source, original manifest/readme/license files; normalized Cargo.toml omits unretained upstream examples and integration test targets",
+  "usage": "Cargo alias mdns_sd_scoped in neonmix-identity speaker only; native discovery stays on registry mdns-sd",
+  "validation": "macOS only; no Windows/Linux runtime test",
+  "behavior_changes": [
+    "IPv6 link-local publication selects actual interface-owned IPs; global/ULA subnet and remote-querier matching unchanged",
+    "Reflected registered local address records do not rename the same publisher on another interface; other peer/service conflicts unchanged",
+    "Goodbye retransmissions retain service/hostname ownership; republishing cancels stale withdrawals for that owner without cancelling another receiver"
+  ],
+  "revision": 2
+}

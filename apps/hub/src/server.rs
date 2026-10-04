@@ -1,3 +1,7 @@
+#[path = "admission.rs"]
+mod admission;
+#[path = "airplay.rs"]
+mod airplay;
 use crate::connection::{AddressAcceptor, Connection};
 use crate::{Result, ServerConfig, emit};
 use axum::{
@@ -40,6 +44,12 @@ struct Resources {
     origin: Instant,
     pem: String,
     output_epoch: u64,
+    airplay_mix: [Option<(usize, LaneMix)>; 4],
+    admissions: admission::Admissions,
+    multi_receiver: bool,
+    pending_multi_capacity: bool,
+    native_reservation: Option<(Uuid, usize, Uuid, u64)>,
+    retiring: Vec<(usize, crate::media_worker::MediaWorker)>,
 }
 impl Resources {
     fn prepare(
@@ -75,6 +85,14 @@ impl Resources {
         ) -> std::io::Result<crate::media_worker::PreparedWorker>,
     ) -> std::result::Result<(), ControlError> {
         if !self.control.has_capacity() {
+            return Err(ControlError::Busy);
+        }
+        // Native IDs are randomly allocated independently of AirPlay. Reject a
+        // collision before preparing resources or committing authority/disk.
+        if self.admissions.claims.values().any(|claim| {
+            state.streams.contains_key(&claim.context.stream_id)
+                || state.streams.contains_key(&claim.context.session_id)
+        }) {
             return Err(ControlError::Busy);
         }
         let mut added = None;
@@ -125,6 +143,21 @@ impl Resources {
                 };
             }
         }
+        let native = state
+            .sessions
+            .values()
+            .filter(|s| s.status.active())
+            .count()
+            + usize::from(self.native_reservation.is_some());
+        if !self
+            .admissions
+            .native_capacity(native, self.multi_receiver || self.pending_multi_capacity)
+        {
+            return Err(ControlError::QuotaExceeded);
+        }
+        for (lane, mix) in self.airplay_mix.iter().flatten() {
+            config.lanes[*lane] = *mix;
+        }
         // Every fallible native/thread preparation precedes disk and audio
         // commit. No producer is moved until the transaction has succeeded.
         let staged = match added {
@@ -138,13 +171,14 @@ impl Resources {
         };
         before_commit()?;
         self.control.apply(config).map_err(|_| ControlError::Busy)?;
-        for lane in &mut self.lanes {
+        for (index, lane) in self.lanes.iter_mut().enumerate() {
             if lane
                 .session
                 .is_some_and(|id| state.sessions.get(&id).is_none_or(|s| !s.status.active()))
             {
                 if let Some(media) = lane.media.take() {
-                    lane.producer = media.close();
+                    media.revoke();
+                    self.retiring.push((index, media));
                 }
                 lane.session = None;
             }
@@ -168,6 +202,7 @@ pub(super) struct Engine {
     output_stats: Arc<neonmix_core::stats::AudioStats>,
     pub(super) authority: Authority,
     resources: Resources,
+    airplay: airplay::State,
     errors: Vec<String>,
     pub(super) state_path: Option<std::path::PathBuf>,
 }
@@ -182,7 +217,16 @@ pub(super) fn persist_saved(
         return Ok(());
     };
     let bytes = serde_json::to_vec_pretty(saved).map_err(|_| ControlError::Busy)?;
-    neonmix_identity::files::replace(path, &bytes).map_err(|_| ControlError::Busy)
+    match neonmix_identity::files::replace(path, &bytes) {
+        Ok(()) => Ok(()),
+        Err(_)
+            if neonmix_identity::files::read_private(path, bytes.len().saturating_add(1))
+                .is_ok_and(|actual| actual == bytes) =>
+        {
+            Ok(())
+        }
+        Err(_) => Err(ControlError::Busy),
+    }
 }
 pub(super) type Shared = Arc<Mutex<Engine>>;
 #[derive(Serialize, Deserialize, Debug)]
@@ -198,6 +242,7 @@ pub(super) struct ApiError(pub(super) ControlError);
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let status = match self.0 {
+            ControlError::UpgradeRequired => StatusCode::UPGRADE_REQUIRED,
             ControlError::Unauthenticated => StatusCode::UNAUTHORIZED,
             ControlError::PermissionDenied | ControlError::PlaybackBlocked => StatusCode::FORBIDDEN,
             ControlError::RevisionConflict
@@ -282,37 +327,191 @@ async fn command(
     headers: HeaderMap,
     Json(command): Json<Command>,
 ) -> std::result::Result<Json<StartResponse>, ApiError> {
-    let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
-    let principal = authenticate(&engine, &headers)?;
-    let path = engine.state_path.clone();
-    let Engine {
-        authority,
-        resources,
-        ..
-    } = &mut *engine;
-    let receipt = authority.execute_durable(principal, command, |state, saved| {
-        resources.prepare_with_commit(state, Some(remote), || persist_saved(path.as_ref(), saved))
-    })?;
-    let state = authority.snapshot();
+    execute_native(
+        &shared,
+        &headers,
+        command,
+        remote,
+        crate::media_worker::MediaWorker::prepare,
+        persist_saved,
+    )
+}
+struct NativeSetup {
+    lane: usize,
+    session: Session,
+    producer: Option<BlockProducer>,
+}
+fn execute_native(
+    shared: &Shared,
+    headers: &HeaderMap,
+    command: Command,
+    remote: Connection,
+    prepare_media: impl FnOnce(
+        Receiver,
+        UdpSocket,
+        usize,
+        Arc<MixerStats>,
+    ) -> std::io::Result<crate::media_worker::PreparedWorker>,
+    save: impl FnOnce(
+        Option<&std::path::PathBuf>,
+        &neonmix_control::PersistentState,
+    ) -> std::result::Result<(), ControlError>,
+) -> std::result::Result<Json<StartResponse>, ApiError> {
+    let (prepared, mut setup, path, pem, origin, stats) = {
+        let mut e = shared.lock().map_err(|_| ControlError::Busy)?;
+        let principal = authenticate(&e, headers)?;
+        let prepared = e.authority.prepare_transaction(principal, command)?;
+        let token = prepared.token();
+        let reserve = (|| -> std::result::Result<Option<NativeSetup>, ControlError> {
+            let state = prepared.snapshot();
+            let count = state
+                .sessions
+                .values()
+                .filter(|s| s.status.active())
+                .count();
+            if !e.resources.admissions.native_capacity(
+                count,
+                e.resources.multi_receiver || e.resources.pending_multi_capacity,
+            ) {
+                return Err(ControlError::QuotaExceeded);
+            }
+            if e.resources.admissions.claims.values().any(|claim| {
+                state.streams.contains_key(&claim.context.stream_id)
+                    || state.streams.contains_key(&claim.context.session_id)
+            }) {
+                return Err(ControlError::Busy);
+            }
+            if !e.resources.control.has_capacity() {
+                return Err(ControlError::Busy);
+            }
+            let added = state
+                .sessions
+                .values()
+                .find(|s| {
+                    s.status.active() && !e.resources.lanes.iter().any(|l| l.session == Some(s.id))
+                })
+                .cloned();
+            if let Some(session) = added {
+                let lane = e
+                    .resources
+                    .lanes
+                    .iter()
+                    .position(|l| l.session.is_none() && l.producer.is_some())
+                    .ok_or(ControlError::QuotaExceeded)?;
+                let producer = e.resources.lanes[lane].producer.take();
+                e.resources.native_reservation = Some((token, lane, session.id, session.stream_id));
+                Ok(Some(NativeSetup {
+                    lane,
+                    session,
+                    producer,
+                }))
+            } else {
+                Ok(None)
+            }
+        })();
+        let setup = match reserve {
+            Ok(setup) => setup,
+            Err(error) => {
+                let _ = e.authority.abort_transaction(token);
+                return Err(error.into());
+            }
+        };
+        (
+            prepared,
+            setup,
+            e.state_path.clone(),
+            e.resources.pem.clone(),
+            e.resources.origin,
+            e.resources.stats.clone(),
+        )
+    };
+    let token = prepared.token();
+    // Socket, certificates, DTLS/decoder initialization and the waiting media
+    // thread are prepared without Engine. Reserved producer/lane cannot be reused.
+    let preparation = (|| -> std::result::Result<_, ControlError> {
+        let fingerprint = certificate_fingerprint(&pem).map_err(|_| ControlError::Busy)?;
+        let worker = if let Some(setup) = setup.as_ref() {
+            let socket = remote
+                .media_socket(setup.session.offer.udp_port)
+                .map_err(|_| ControlError::Busy)?;
+            let receiver = Receiver::new(setup.session.clone(), &pem, origin)
+                .map_err(|_| ControlError::Busy)?;
+            Some(
+                prepare_media(receiver, socket, setup.lane, stats)
+                    .map_err(|_| ControlError::Busy)?,
+            )
+        } else {
+            None
+        };
+        Ok((worker, fingerprint))
+    })();
+    let (media, fingerprint) = match preparation {
+        Ok(value) => value,
+        Err(error) => {
+            abort_native(shared, token, &mut setup);
+            return Err(error.into());
+        }
+    };
+    // A route loss observed during slow preparation is a real cancellation.
+    if setup.is_some()
+        && !shared
+            .lock()
+            .map_err(|_| ControlError::Busy)?
+            .authority
+            .current()
+            .output
+            .available
+    {
+        drop(media);
+        abort_native(shared, token, &mut setup);
+        return Err(ControlError::PlaybackBlocked.into());
+    }
+    if let Err(error) = save(path.as_ref(), &prepared.persistent()) {
+        drop(media);
+        abort_native(shared, token, &mut setup);
+        return Err(error.into());
+    }
+    let mut e = shared.lock().map_err(|_| ControlError::Busy)?;
+    let receipt = e.authority.commit_transaction(prepared)?;
+    e.resources.native_reservation = None;
+    if let (Some(mut setup), Some(media)) = (setup, media) {
+        let lane = &mut e.resources.lanes[setup.lane];
+        lane.media = Some(media.activate(setup.producer.take().expect("reserved producer")));
+        lane.session = Some(setup.session.id);
+    }
+    let state = e.authority.snapshot();
+    // Persistence is already committed: transient Mixer saturation is retried
+    // from the current desired state and must not turn into a false failure.
+    e.airplay.mixer_dirty = e.resources.prepare(&state, None).is_err();
     let session = receipt
         .session_id
         .and_then(|id| state.sessions.get(&id))
         .cloned();
     let port = receipt
         .session_id
-        .and_then(|id| resources.lanes.iter().find(|l| l.session == Some(id)))
+        .and_then(|id| e.resources.lanes.iter().find(|l| l.session == Some(id)))
         .and_then(|l| l.media.as_ref())
-        .map(|media| media.port);
-    let response = StartResponse {
+        .map(|m| m.port);
+    Ok(Json(StartResponse {
         hub_id: Some(state.hub_id),
         receipt,
         session,
         media_port: port,
-        hub_certificate_sha256: certificate_fingerprint(&resources.pem)
-            .map_err(|_| ControlError::Busy)?,
-    };
-    Ok(Json(response))
+        hub_certificate_sha256: fingerprint,
+    }))
 }
+fn abort_native(shared: &Shared, token: Uuid, setup: &mut Option<NativeSetup>) {
+    if let Ok(mut e) = shared.lock() {
+        if e.resources.native_reservation.is_some_and(|r| r.0 == token) {
+            if let Some(setup) = setup.as_mut() {
+                e.resources.lanes[setup.lane].producer = setup.producer.take();
+            }
+            e.resources.native_reservation = None;
+        }
+        let _ = e.authority.abort_transaction(token);
+    }
+}
+
 #[derive(Deserialize)]
 struct Cursor {
     after: u64,
@@ -413,7 +612,7 @@ async fn diagnostics(
         let report=l.media.as_ref()?.latest()?;
         Some(serde_json::json!({"scheduling":report.scheduling,"pump_timing":report.timing,"receive_throttles":report.receive_throttles,"max_loop_gap_ns":report.max_loop_gap_ns,"max_pump_ns":report.max_pump_ns,"max_report_ns":report.max_report_ns}))
     }).collect();
-    let lane_stream_ids: Vec<_> = engine
+    let mut lane_stream_ids: Vec<_> = engine
         .resources
         .lanes
         .iter()
@@ -423,6 +622,9 @@ async fn diagnostics(
                 .map(|s| s.stream_id)
         })
         .collect();
+    for (lane, mix) in engine.resources.airplay_mix.iter().flatten() {
+        lane_stream_ids[*lane] = Some(mix.stream_id);
+    }
     let budget_drops: Vec<_> = engine
         .resources
         .lanes
@@ -466,12 +668,18 @@ async fn diagnostics(
         } else { 1.0 },
     });
     Ok(Json(
-        serde_json::json!({"meters":meters,"receivers":receivers,"media_workers":media_workers,"lane_stream_ids":lane_stream_ids,"packet_budget_drops":budget_drops,"pcm_queue_age_max_ns":stats.pcm_queue_age_max_ns.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"fifo_frames":stats.fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"sinc_delay_frames":stats.sinc_delay_frames.load(Relaxed),"output_stats":engine.output_stats.snapshot(),"output_frames":stats.output_frames.load(Relaxed),"limited_frames":stats.limited_frames.load(Relaxed),"underrun_frames":stats.underrun_frames.load(Relaxed),"last_underrun_output_frame":stats.last_underrun_output_frame.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_fifo_frames":stats.last_underrun_fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_needed_frames":stats.last_underrun_needed_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_source_end":stats.last_underrun_source_end.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"underrun_frames_by_lane":stats.underrun_frames_by_lane.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"filtered_queues":stats.filtered_queue_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"queues":stats.queue_frames.iter().map(|a| a.load(Relaxed)).collect::<Vec<_>>(),"drift_ppm":stats.drift_ppm_milli.iter().map(|a| a.load(Relaxed) as i64 as f64 / 1000.0).collect::<Vec<_>>(),"errors":engine.errors}),
+        serde_json::json!({"airplay":engine.airplay.diagnostic(),"timed_late_frames":stats.timed_late_frames.load(Relaxed),"timed_late_frames_by_lane":stats.timed_late_frames_by_lane.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_timed_late_stream_id":stats.last_timed_late_stream_id.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_timed_late_epoch":stats.last_timed_late_epoch.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_timed_late_output_frame":stats.last_timed_late_output_frame.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_timed_late_target_ns":stats.last_timed_late_target_ns.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_timed_late_presentation_ns":stats.last_timed_late_presentation_ns.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"timed_drift_ppm":stats.timed_drift_ppm_milli.iter().map(|a|a.load(Relaxed) as i64 as f64 /1000.0).collect::<Vec<_>>(),"timed_phase_error_ns":stats.timed_phase_error_ns.iter().map(|a|a.load(Relaxed) as i64).collect::<Vec<_>>(),"meters":meters,"receivers":receivers,"media_workers":media_workers,"lane_stream_ids":lane_stream_ids,"packet_budget_drops":budget_drops,"pcm_queue_age_max_ns":stats.pcm_queue_age_max_ns.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"fifo_frames":stats.fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"sinc_delay_frames":stats.sinc_delay_frames.load(Relaxed),"output_stats":engine.output_stats.snapshot(),"output_frames":stats.output_frames.load(Relaxed),"limited_frames":stats.limited_frames.load(Relaxed),"underrun_frames":stats.underrun_frames.load(Relaxed),"last_underrun_output_frame":stats.last_underrun_output_frame.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_fifo_frames":stats.last_underrun_fifo_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_needed_frames":stats.last_underrun_needed_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"last_underrun_source_end":stats.last_underrun_source_end.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"underrun_frames_by_lane":stats.underrun_frames_by_lane.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"filtered_queues":stats.filtered_queue_frames.iter().map(|a|a.load(Relaxed)).collect::<Vec<_>>(),"queues":stats.queue_frames.iter().map(|a| a.load(Relaxed)).collect::<Vec<_>>(),"drift_ppm":stats.drift_ppm_milli.iter().map(|a| a.load(Relaxed) as i64 as f64 / 1000.0).collect::<Vec<_>>(),"errors":engine.errors}),
     ))
 }
 fn worker(shared: Shared, stopped: Arc<AtomicBool>) {
     while !stopped.load(Acquire) {
         if let Ok(mut engine) = shared.lock() {
+            if engine.airplay.mixer_dirty {
+                let state = engine.authority.snapshot();
+                if engine.resources.prepare(&state, None).is_ok() {
+                    engine.airplay.mixer_dirty = false;
+                }
+            }
             let available = engine.authority.current().output.available;
             let transitions: Vec<_> = engine
                 .resources
@@ -514,27 +722,41 @@ fn worker(shared: Shared, stopped: Arc<AtomicBool>) {
                 let _ = engine.resources.prepare(&state, None);
             }
         }
+        let retiring = shared
+            .lock()
+            .ok()
+            .map(|mut e| std::mem::take(&mut e.resources.retiring))
+            .unwrap_or_default();
+        for (index, media) in retiring {
+            let producer = media.close();
+            if let Ok(mut e) = shared.lock() {
+                e.resources.lanes[index].producer = producer;
+            }
+        }
         std::thread::sleep(Duration::from_millis(20));
     }
 }
-pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
+pub async fn serve(
+    config: ServerConfig,
+    listen: SocketAddr,
+    profile_directory: std::path::PathBuf,
+) -> Result<()> {
+    if profile_directory.ancestors().any(|p| {
+        p.file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|n| n.starts_with(".neonmix-migration-") && n.ends_with(".staging"))
+    }) {
+        return Err("migration_incomplete: staging is not a runnable state directory".into());
+    }
     // One owner per persistent Hub. The lock file stays at a stable inode while
     // the data file is atomically replaced on successful control commits.
-    let _state_lock = if let Some(path) = &config.state_path {
-        let mut options = std::fs::OpenOptions::new();
-        options.create(true).read(true).write(true);
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::OpenOptionsExt;
-            options.mode(0o600);
-        }
-        let file = options.open(path.with_extension("lock"))?;
-        file.try_lock()
-            .map_err(|_| "Hub state is already owned by another process")?;
-        Some(file)
+    let owner_path = if let Some(path) = &config.state_path {
+        path.with_extension("lock")
     } else {
-        None
+        neonmix_identity::files::private_dir(&profile_directory)?;
+        profile_directory.join("hub-owner.lock")
     };
+    let _state_lock = neonmix_identity::profiles::operation_lock(&owner_path)?;
     neonmix_media::runtime_probe()?;
     let admin = config
         .devices
@@ -542,12 +764,23 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
         .filter(|d| d.role == neonmix_control::Role::Admin)
         .ok_or("first provisioned device must be admin")?;
     let mut authority = if let Some(path) = config.state_path.as_ref().filter(|p| p.exists()) {
-        let saved: neonmix_control::PersistentState = crate::read(path)?;
+        let saved: neonmix_control::PersistentState = if config.require_existing_state {
+            serde_json::from_slice(&neonmix_identity::files::read_private(
+                path,
+                neonmix_identity::profiles::MAX_STATE_BYTES,
+            )?)
+            .map_err(|_| "credential_corrupt")?
+        } else {
+            crate::read(path)?
+        };
         if saved.output.id != config.output {
             return Err("persisted output differs from explicitly selected device".into());
         }
         Authority::restore(saved)?
     } else {
+        if config.require_existing_state {
+            return Err("setup_incomplete: state file missing".into());
+        }
         let mut authority =
             Authority::new(config.output.clone(), admin.name.clone(), &admin.token)?;
         for device in &config.devices[1..] {
@@ -555,6 +788,21 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
         }
         authority
     };
+    if config.require_existing_state {
+        let principal = authority.authenticate(&admin.token)?;
+        let profile = neonmix_identity::profiles::token(&profile_directory.join("admin.json"))?;
+        if authority
+            .current()
+            .devices
+            .get(&principal.device_id())
+            .is_none_or(|d| d.role != neonmix_control::Role::Admin)
+            || profile.hub_id != authority.current().hub_id
+            || profile.device_id != Some(principal.device_id())
+            || profile.certificate != config.certificate
+        {
+            return Err("credential_kind_mismatch".into());
+        }
+    }
     let origin = Instant::now();
     let (mixer, control, inputs, stats) = Mixer::new(origin)?;
     let output_id = config.output.clone();
@@ -568,7 +816,8 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
             &config.output,
             neonmix_io::OpenOptions {
                 sample_rate: None,
-                period_frames: if cfg!(target_os = "linux") {
+                // PipeWire and WASAPI negotiate the device's supported period.
+                period_frames: if cfg!(any(target_os = "linux", target_os = "windows")) {
                     None
                 } else {
                     Some(256)
@@ -610,18 +859,31 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
             origin,
             pem: config.pem,
             output_epoch: 0,
+            airplay_mix: [None; 4],
+            admissions: Default::default(),
+            multi_receiver: false,
+            pending_multi_capacity: false,
+            native_reservation: None,
+            retiring: Vec::new(),
         },
+        airplay: airplay::State::new(profile_directory.join("airplay"), listen),
         errors: Vec::new(),
         state_path: config.state_path,
     }));
     let stopped = Arc::new(AtomicBool::new(false));
     let worker_shared = shared.clone();
     let worker_stop = stopped.clone();
+    airplay::load_existing(&shared)?;
     let app = Router::new()
         .route("/v1/identity", get(crate::pairing_api::identity))
         .route("/v1/pairing/invitations", post(crate::pairing_api::open))
         .route("/v1/pairing/cancel", post(crate::pairing_api::cancel))
         .route("/v1/pairing/complete", post(crate::pairing_api::complete))
+        .route("/v1/airplay", get(airplay::snapshot).post(airplay::command))
+        .route(
+            "/v2/airplay",
+            get(airplay::api::snapshot).post(airplay::api::command),
+        )
         .route("/v1/me", get(me))
         .route("/v1/hub", get(snapshot))
         .route("/v1/devices", get(devices))
@@ -689,10 +951,11 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
             result = &mut server => break result.map_err(Into::into),
             _ = &mut stop_signal, if !stop_requested => { stop_requested = true; shutdown.graceful_shutdown(Some(Duration::from_secs(1))); },
             _ = monitor.tick() => {
-                if let Some(position)=output.as_ref().and_then(|o|o.latest_position())&& let Ok(mut engine)=shared.lock()&& engine.resources.output_epoch!=position.epoch {engine.resources.output_epoch=position.epoch;let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}
+                if let Some(position)=output.as_ref().and_then(|o|o.latest_position())&& let Ok(engine)=shared.lock() {engine.airplay.output_latency_ns.store(position.device_timestamp_ns.saturating_sub(position.clock_timestamp_ns),Relaxed);}
+                if let Some(position)=output.as_ref().and_then(|o|o.latest_position())&& let Ok(mut engine)=shared.lock()&& engine.resources.output_epoch!=position.epoch {engine.resources.output_epoch=position.epoch;engine.airplay.output_epoch_changed();engine.resources.airplay_mix=[None; 4];let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}
                 if output.as_ref().is_some_and(|o|o.stats.snapshot().errors>0) {
                     if let Some(o)=output.take() {o.control.stop();drop(o);}
-                    if let Ok(mut engine)=shared.lock() {let _=engine.authority.set_output_available(false);let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}
+                    if let Ok(mut engine)=shared.lock() {let _=engine.authority.set_output_available(false);engine.airplay.output_epoch_changed();engine.resources.airplay_mix=[None; 4];let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}
                     emit(serde_json::json!({"event":"output_lost","device":output_id}))?;
                     retry_output=Instant::now()+Duration::from_secs(1);
                 }
@@ -701,13 +964,22 @@ pub async fn serve(config: ServerConfig, listen: SocketAddr) -> Result<()> {
                     if Instant::now()>=retry_output {
                         retry_output=Instant::now()+Duration::from_secs(1);
                         let source=crate::recoverable::RecoverableMixer {mixer:Some(mixer),returned:returned_to.clone()};
-                        if let Ok(running)=crate::backend().and_then(|b|b.open_output(&output_id,neonmix_io::OpenOptions {sample_rate:None,period_frames:if cfg!(target_os = "linux") {None} else {Some(256)}},source))
+                        if let Ok(running)=crate::backend().and_then(|b|b.open_output(&output_id,neonmix_io::OpenOptions {sample_rate:None,period_frames:if cfg!(any(target_os = "linux", target_os = "windows")) {None} else {Some(256)}},source))
                             && running.play().is_ok() {if let Ok(mut engine)=shared.lock() {engine.output_stats=running.stats.clone();let _=engine.authority.set_output_available(true);let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}output=Some(running);emit(serde_json::json!({"event":"output_reopened","device":output_id}))?;}
                     } else {let _=returned_to.try_send(mixer);}
                 }
             }
         }
     };
+    let airplay_thread = shared.lock().ok().map(|mut engine| {
+        engine.airplay.stop();
+        engine.airplay.take_threads()
+    });
+    if let Some(threads) = airplay_thread {
+        for thread in threads {
+            let _ = thread.join();
+        }
+    }
     stopped.store(true, Release);
     let _ = worker.join();
     drop(output);
@@ -785,8 +1057,221 @@ mod transaction_tests {
             origin,
             pem,
             output_epoch: 1,
+            airplay_mix: [None; 4],
+            admissions: Default::default(),
+            multi_receiver: false,
+            pending_multi_capacity: false,
+            native_reservation: None,
+            retiring: Vec::new(),
         };
         (resources, snapshot, mixer)
+    }
+    fn shared_fixture() -> (Shared, HeaderMap, Command, Mixer) {
+        let (resources, sample, mixer) = fixture();
+        let token = neonmix_identity::secret();
+        let authority = Authority::new("test-output".into(), "admin".into(), &token).unwrap();
+        let command = Command {
+            request_id: Uuid::new_v4(),
+            expected_revision: authority.current().revision,
+            operation: neonmix_control::Operation::Start {
+                offer: sample.sessions.values().next().unwrap().offer.clone(),
+            },
+        };
+        let shared = Arc::new(Mutex::new(Engine {
+            pairings: Default::default(),
+            pair_window: Instant::now(),
+            pair_attempts: 0,
+            room_name: "native-tx".into(),
+            certificate: String::new(),
+            event_slots: Arc::new(tokio::sync::Semaphore::new(8)),
+            output_stats: Default::default(),
+            authority,
+            resources,
+            airplay: airplay::State::new(
+                std::path::PathBuf::from("unused-native-fixture"),
+                "127.0.0.1:0".parse().unwrap(),
+            ),
+            errors: Vec::new(),
+            state_path: None,
+        }));
+        let mut headers = HeaderMap::new();
+        headers.insert("authorization", format!("Bearer {token}").parse().unwrap());
+        (shared, headers, command, mixer)
+    }
+    fn remote() -> Connection {
+        Connection {
+            remote: "127.0.0.1:54321".parse().unwrap(),
+            local: "127.0.0.1:0".parse().unwrap(),
+        }
+    }
+    #[test]
+    fn native_start_releases_engine_during_preparation_and_persistence() {
+        let (shared, headers, command, _mixer) = shared_fixture();
+        let Json(response) = execute_native(
+            &shared,
+            &headers,
+            command,
+            remote(),
+            |receiver, socket, lane, stats| {
+                let e = shared
+                    .try_lock()
+                    .expect("native SDK preparation must not hold Engine");
+                let (_, reserved_lane, _, _) = e.resources.native_reservation.unwrap();
+                assert_eq!(reserved_lane, lane);
+                assert!(e.resources.lanes[lane].producer.is_none());
+                drop(e);
+                crate::media_worker::MediaWorker::prepare(receiver, socket, lane, stats)
+            },
+            |_, _| {
+                let mut e = shared
+                    .try_lock()
+                    .expect("persistent write must not hold Engine");
+                assert!(e.resources.native_reservation.is_some());
+                // Health must remain observable while the durable transaction is staged.
+                e.authority.set_output_available(false).unwrap();
+                assert!(!e.authority.current().output.available);
+                Ok(())
+            },
+        )
+        .map_err(|error| error.0)
+        .unwrap();
+        let e = shared.lock().unwrap();
+        assert!(e.resources.native_reservation.is_none());
+        assert!(!e.authority.current().output.available);
+        assert_eq!(
+            e.authority.current().sessions[&response.receipt.session_id.unwrap()].status,
+            SessionStatus::OutputLost
+        );
+        assert!(response.media_port.is_some());
+    }
+    #[test]
+    fn native_external_preparation_failure_returns_the_reserved_lane_without_writing() {
+        let (shared, headers, command, _mixer) = shared_fixture();
+        let result = execute_native(
+            &shared,
+            &headers,
+            command,
+            remote(),
+            |_, _, _, _| {
+                assert!(shared.try_lock().is_ok());
+                Err(std::io::Error::other("injected SDK failure"))
+            },
+            |_, _| panic!("failed preparation must not write"),
+        );
+        assert!(matches!(result, Err(ApiError(ControlError::Busy))));
+        let mut e = shared.lock().unwrap();
+        assert!(e.authority.current().sessions.is_empty());
+        assert!(e.resources.native_reservation.is_none());
+        untouched(&mut e.resources);
+    }
+    #[test]
+    fn in_flight_native_start_owns_the_last_multi_source_slot() {
+        let (shared, headers, command, _mixer) = shared_fixture();
+        {
+            let mut e = shared.lock().unwrap();
+            e.resources.multi_receiver = true;
+            for index in 0..3 {
+                let owner = admission::Owner {
+                    receiver: Uuid::new_v4(),
+                    generation: 1,
+                    connection: 1,
+                    request: 1,
+                    source: format!("existing-{index}"),
+                };
+                e.resources
+                    .admissions
+                    .reserve(owner, 0, true, Some(index + 2), &[], Instant::now())
+                    .unwrap();
+            }
+        }
+        let barrier = std::sync::Barrier::new(2);
+        std::thread::scope(|scope| {
+            let native = scope.spawn(|| {
+                execute_native(
+                    &shared,
+                    &headers,
+                    command,
+                    remote(),
+                    |_, _, _, _| {
+                        barrier.wait();
+                        barrier.wait();
+                        Err(std::io::Error::other("release fixture reservation"))
+                    },
+                    |_, _| panic!("fixture deliberately aborts before disk"),
+                )
+            });
+            barrier.wait();
+            {
+                let mut e = shared
+                    .try_lock()
+                    .expect("in-flight native preparation cannot hold Engine");
+                let pending = usize::from(e.resources.native_reservation.is_some());
+                assert_eq!(pending, 1);
+                let owner = admission::Owner {
+                    receiver: Uuid::new_v4(),
+                    generation: 1,
+                    connection: 2,
+                    request: 2,
+                    source: "racing-airplay".into(),
+                };
+                assert_eq!(
+                    e.resources
+                        .admissions
+                        .reserve(owner, pending, true, Some(8), &[], Instant::now())
+                        .err(),
+                    Some("room_capacity_full")
+                );
+            }
+            barrier.wait();
+            assert!(native.join().unwrap().is_err());
+        });
+        let e = shared.lock().unwrap();
+        assert!(e.resources.native_reservation.is_none());
+        assert_eq!(e.resources.admissions.claims.len(), 3);
+    }
+    #[test]
+    fn native_failed_disk_write_aborts_candidate_and_returns_lane() {
+        let (shared, headers, command, _mixer) = shared_fixture();
+        let result = execute_native(
+            &shared,
+            &headers,
+            command,
+            remote(),
+            crate::media_worker::MediaWorker::prepare,
+            |_, _| {
+                assert!(shared.try_lock().is_ok());
+                Err(ControlError::Busy)
+            },
+        );
+        assert!(matches!(result, Err(ApiError(ControlError::Busy))));
+        let mut e = shared.lock().unwrap();
+        assert!(e.authority.current().sessions.is_empty());
+        assert!(e.resources.native_reservation.is_none());
+        untouched(&mut e.resources);
+    }
+    #[test]
+    fn native_ids_cannot_collide_with_reserved_airplay_context_before_prepare() {
+        let (mut resources, snapshot, _mixer) = fixture();
+        let owner = admission::Owner {
+            receiver: Uuid::new_v4(),
+            generation: 1,
+            connection: 1,
+            request: 1,
+            source: "source".into(),
+        };
+        let claim = resources
+            .admissions
+            .reserve(owner, 0, true, Some(2), &[], Instant::now())
+            .unwrap();
+        assert_eq!(claim.context.session_id, 1);
+        let result = resources.prepare_with_factory(
+            &snapshot,
+            Some(remote()),
+            || panic!("collision must not save"),
+            |_, _, _, _| panic!("collision must not prepare media"),
+        );
+        assert_eq!(result, Err(ControlError::Busy));
+        untouched(&mut resources);
     }
     fn untouched(resources: &mut Resources) {
         assert!(
@@ -825,6 +1310,7 @@ mod transaction_tests {
     fn disk_failure_closes_prepared_thread_and_retains_producer() {
         let (mut resources, snapshot, _mixer) = fixture();
         let began = Instant::now();
+        let mut rollback_began = None;
         assert_eq!(
             resources.prepare_with_commit(
                 &snapshot,
@@ -832,12 +1318,23 @@ mod transaction_tests {
                     remote: "127.0.0.1:54321".parse().unwrap(),
                     local: "127.0.0.1:0".parse().unwrap()
                 }),
-                || Err(ControlError::Busy)
+                || {
+                    // Native SDK/plugin preparation happens before disk commit;
+                    // only the failed commit's rollback has the five-second bound.
+                    rollback_began = Some(Instant::now());
+                    Err(ControlError::Busy)
+                }
             ),
             Err(ControlError::Busy)
         );
+        let rollback_began = rollback_began.expect("disk commit stage was not reached");
+        eprintln!(
+            "native preparation: {:?}; prepared rollback: {:?}",
+            rollback_began.duration_since(began),
+            rollback_began.elapsed()
+        );
         assert!(
-            began.elapsed() < Duration::from_secs(5),
+            rollback_began.elapsed() < Duration::from_secs(5),
             "prepared rollback blocked"
         );
         untouched(&mut resources);
@@ -931,7 +1428,17 @@ mod pairing_tests {
                     origin: Instant::now(),
                     pem,
                     output_epoch: 1,
+                    airplay_mix: [None; 4],
+                    admissions: Default::default(),
+                    multi_receiver: false,
+                    pending_multi_capacity: false,
+                    native_reservation: None,
+                    retiring: Vec::new(),
                 },
+                airplay: airplay::State::new(
+                    std::path::PathBuf::from(".local/tmp/airplay-tests"),
+                    "127.0.0.1:0".parse().unwrap(),
+                ),
                 errors: Vec::new(),
                 state_path: None,
             })),
@@ -1114,5 +1621,169 @@ mod pairing_tests {
             completion(shared, &grant, request).await.0,
             StatusCode::TOO_MANY_REQUESTS
         );
+    }
+    #[tokio::test]
+    async fn pairing_save_releases_engine_and_keeps_book_until_concurrent_retry_and_cancel() {
+        let (shared, issuer, _, _mixer) = shared();
+        let admin_token = neonmix_identity::secret();
+        let token = neonmix_identity::secret();
+        let (id, grant) = {
+            let mut e = shared.lock().unwrap();
+            e.authority
+                .add_device(
+                    "cancel admin".into(),
+                    neonmix_control::Role::Admin,
+                    &admin_token,
+                )
+                .unwrap();
+            e.pairings.open(issuer, 30, Instant::now()).unwrap()
+        };
+        let request = Request {
+            invitation_id: id,
+            request_id: Uuid::new_v4(),
+            name: "concurrent-paired".into(),
+            token_sha256: neonmix_identity::digest(&token),
+        };
+        let (started_tx, started_rx) = tokio::sync::oneshot::channel();
+        let (release_tx, release_rx) = std::sync::mpsc::channel();
+        let writing = shared.clone();
+        let first = tokio::spawn(crate::pairing_api::complete_with(
+            shared.clone(),
+            headers(&grant),
+            request.clone(),
+            move |path, saved| {
+                let e = writing
+                    .try_lock()
+                    .expect("pairing disk write must not hold Engine");
+                assert!(
+                    !e.authority
+                        .current()
+                        .devices
+                        .values()
+                        .any(|d| d.name == "concurrent-paired")
+                );
+                drop(e);
+                started_tx.send(()).unwrap();
+                release_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+                persist_saved(path, saved)
+            },
+        ));
+        started_rx.await.unwrap();
+        {
+            let mut e = shared.try_lock().unwrap();
+            let revision = e.authority.current().revision;
+            assert_eq!(
+                e.authority
+                    .execute(
+                        issuer,
+                        Command {
+                            request_id: Uuid::new_v4(),
+                            expected_revision: revision,
+                            operation: neonmix_control::Operation::Revoke {
+                                device_id: issuer.device_id()
+                            }
+                        },
+                        |_| panic!("frozen issuer change must not persist")
+                    )
+                    .unwrap_err(),
+                ControlError::Busy
+            );
+        }
+        let mut repeated = Box::pin(crate::pairing_api::complete(
+            State(shared.clone()),
+            headers(&grant),
+            Json(request.clone()),
+        ));
+        // Enqueue the exact retry before cancellation without relying on task scheduling.
+        assert!(matches!(
+            futures_util::poll!(repeated.as_mut()),
+            std::task::Poll::Pending
+        ));
+        let cancelled = tokio::spawn(crate::pairing_api::cancel(
+            State(shared.clone()),
+            headers(&admin_token),
+            Json(crate::pairing_api::Cancel { invitation_id: id }),
+        ));
+        tokio::task::yield_now().await;
+        assert!(
+            !cancelled.is_finished(),
+            "Book changes must wait outside Engine until finish"
+        );
+        release_tx.send(()).unwrap();
+        let Json(first) = first
+            .await
+            .unwrap()
+            .unwrap_or_else(|_| panic!("initial redemption failed"));
+        let Json(repeated) = repeated
+            .await
+            .unwrap_or_else(|_| panic!("concurrent exact retry failed"));
+        assert_eq!(first.device_id, repeated.device_id);
+        assert_eq!(first.revision, repeated.revision);
+        assert!(cancelled.await.unwrap().is_ok());
+        let e = shared.lock().unwrap();
+        assert_eq!(
+            e.authority.authenticate(&token).unwrap().device_id(),
+            first.device_id
+        );
+        assert!(matches!(
+            e.pairings.check(&grant, &request, Instant::now()),
+            Err(neonmix_identity::pairing::Error::Unauthorized)
+        ));
+    }
+
+    #[tokio::test]
+    async fn cancelled_http_redemption_still_finishes_book_and_durable_authority() {
+        let (shared, issuer, _, _mixer) = shared();
+        let token = neonmix_identity::secret();
+        let (id, grant) = shared
+            .lock()
+            .unwrap()
+            .pairings
+            .open(issuer, 30, Instant::now())
+            .unwrap();
+        let request = Request {
+            invitation_id: id,
+            request_id: Uuid::new_v4(),
+            name: "cancelled-http".into(),
+            token_sha256: neonmix_identity::digest(&token),
+        };
+        let (started_tx, started_rx) = tokio::sync::oneshot::channel();
+        let (release_tx, release_rx) = std::sync::mpsc::channel();
+        let task = tokio::spawn(crate::pairing_api::complete_with(
+            shared.clone(),
+            headers(&grant),
+            request.clone(),
+            move |path, saved| {
+                started_tx.send(()).unwrap();
+                release_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+                persist_saved(path, saved)
+            },
+        ));
+        started_rx.await.unwrap();
+        task.abort();
+        assert!(matches!(task.await, Err(error) if error.is_cancelled()));
+        release_tx.send(()).unwrap();
+        // Retry waits for the uncancellable commit owner, then gets its receipt.
+        let result = tokio::time::timeout(
+            Duration::from_secs(5),
+            crate::pairing_api::complete(
+                State(shared.clone()),
+                headers(&grant),
+                Json(request.clone()),
+            ),
+        )
+        .await
+        .unwrap();
+        let Json(done) =
+            result.unwrap_or_else(|_| panic!("cancelled caller abandoned its transaction"));
+        let e = shared.lock().unwrap();
+        assert_eq!(
+            e.authority.authenticate(&token).unwrap().device_id(),
+            done.device_id
+        );
+        assert!(matches!(
+            e.pairings.check(&grant, &request, Instant::now()),
+            Ok(Checked::Repeated(_))
+        ));
     }
 }

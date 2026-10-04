@@ -173,6 +173,13 @@ impl NativeBackend {
                         } else {
                             1.0
                         };
+                        let stamp = info.timestamp();
+                        let playback_lead = ns(stamp.playback).saturating_sub(ns(stamp.callback));
+                        source.set_presentation_time(
+                            began
+                                .checked_add(Duration::from_nanos(playback_lead))
+                                .unwrap_or(began),
+                        );
                         let mut peak = 0.0f32;
                         let mut silent_frames = 0u64;
                         let mut next = || {

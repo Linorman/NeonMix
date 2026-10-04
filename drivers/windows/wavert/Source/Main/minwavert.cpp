@@ -211,6 +211,7 @@ Arguments:
 --*/
 {
     UNREFERENCED_PARAMETER(PinId);
+    UNREFERENCED_PARAMETER(ResultantFormat);
 
     ULONG                   requiredSize;
 
@@ -1651,4 +1652,3 @@ exit:
 }
 
 #pragma code_seg()
-

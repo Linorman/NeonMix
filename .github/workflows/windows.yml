@@ -1,0 +1,129 @@
+name: Windows native acceptance
+
+on:
+  push:
+    branches: [main, 'codex/windows-*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Native checks to run
+        type: choice
+        default: all
+        options: [all, userland, driver, tests]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  CARGO_HOME: ${{ github.workspace }}/.local/cargo
+  RUSTUP_HOME: ${{ github.workspace }}/.local/rustup
+  CARGO_TARGET_DIR: ${{ github.workspace }}/target
+  NUGET_PACKAGES: ${{ github.workspace }}/.local/nuget
+  DOTNET_CLI_HOME: ${{ github.workspace }}/.local/dotnet
+  PYTHONUTF8: '1'
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  userland:
+    if: ${{ !startsWith(github.ref_name, 'codex/windows-driver-') && (github.event_name != 'workflow_dispatch' || inputs.scope != 'driver') }}
+    name: Windows x64 MSVC workspace and runtime
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Project-local environment
+        run: |
+          New-Item -ItemType Directory -Force .local/tmp, artifacts/windows | Out-Null
+          foreach ($name in @('TMPDIR', 'TMP', 'TEMP')) {
+            "$name=$env:GITHUB_WORKSPACE/.local/tmp" >> $env:GITHUB_ENV
+          }
+          Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsVersion, OsArchitecture | ConvertTo-Json > artifacts/windows/host.json
+          Get-Service Audiosrv, AudioEndpointBuilder | Select-Object Name, Status, StartType | ConvertTo-Json > artifacts/windows/audio-services.json
+      - name: Pinned project-local Rust
+        run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt --component clippy
+      - name: Project-local GStreamer MSVC SDK and runtime
+        run: ./tools/dev.ps1 python tools/prepare_windows_gstreamer.py
+      - name: Restore project-local Cargo cache
+        id: cargo-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .local/cargo/registry
+            .local/cargo/git
+            target
+          key: windows-msvc-1.95.0-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            windows-msvc-1.95.0-${{ hashFiles('Cargo.lock') }}-
+      - name: Full workspace checks
+        id: checks
+        if: ${{ !startsWith(github.ref_name, 'codex/windows-tests-') && inputs.scope != 'tests' && !contains(github.event.head_commit.message, '[windows-tests]') }}
+        run: ./tools/dev.ps1 python tools/check.py --native-media --keep-going
+      - name: Focused workspace checks
+        if: ${{ startsWith(github.ref_name, 'codex/windows-tests-') || inputs.scope == 'tests' || contains(github.event.head_commit.message, '[windows-tests]') }}
+        run: ./tools/dev.ps1 python tools/check.py --native-media --keep-going --only format clippy tests
+      - name: Windows runtime probes
+        if: ${{ !cancelled() && !startsWith(github.ref_name, 'codex/windows-tests-') && inputs.scope != 'tests' && !contains(github.event.head_commit.message, '[windows-tests]') }}
+        run: ./tools/dev.ps1 python tools/windows_runtime_probe.py
+      - name: Collect binaries, PDB and source hashes
+        if: ${{ !cancelled() && steps.checks.outputs.release == 'success' }}
+        run: ./tools/dev.ps1 python tools/collect_build.py --native-media
+      - name: Save project-local Cargo cache
+        if: ${{ !cancelled() && steps.cargo-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .local/cargo/registry
+            .local/cargo/git
+            target
+          key: ${{ steps.cargo-cache.outputs.cache-primary-key }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: neonmix-windows-x64-${{ github.sha }}
+          path: |
+            artifacts/
+            !artifacts/**/.credentials/**
+            !artifacts/**/runtime-key-*
+            !artifacts/**/.neonmix-migration-*/**
+            !artifacts/**/*.staging/**
+            !artifacts/**/staging/**
+            !artifacts/**/staging-*/**
+            !artifacts/**/credential-store-*/**
+            !artifacts/**/credential-migration-*/**
+          retention-days: 30
+
+  driver:
+    if: ${{ !startsWith(github.ref_name, 'codex/windows-tests-') && !contains(github.event.head_commit.message, '[windows-tests]') && (github.event_name != 'workflow_dispatch' || (inputs.scope != 'userland' && inputs.scope != 'tests')) }}
+    name: Windows x64 MSVC WDK build
+    # WDK 26100.6584 provides VS 2022 build tasks; windows-2025 now uses VS 2026.
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Project-local environment
+        run: |
+          New-Item -ItemType Directory -Force .local/tmp, artifacts/windows-driver | Out-Null
+          foreach ($name in @('TMPDIR', 'TMP', 'TEMP')) {
+            "$name=$env:GITHUB_WORKSPACE/.local/tmp" >> $env:GITHUB_ENV
+          }
+      - name: Pinned project-local Rust
+        run: rustup toolchain install 1.95.0 --profile minimal
+      - name: Restore locked project-local WDK and SDK
+        run: ./tools/dev.ps1 python tools/prepare_windows_driver.py
+      - name: Build unsigned WaveRT driver
+        run: ./tools/dev.ps1 powershell -File tools/build_windows_driver.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: neonmix-windows-driver-${{ github.sha }}
+          path: artifacts/windows-driver/
+          retention-days: 30

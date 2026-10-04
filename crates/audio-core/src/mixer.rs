@@ -32,6 +32,9 @@ const MIN_RESERVE_FRAMES: usize = MAX_BLOCK_FRAMES * 6;
 pub const TARGET_WATER_FRAMES: usize = MAX_BLOCK_FRAMES * 7;
 pub const MAX_WATER_FRAMES: usize = FIFO + PCM_QUEUE_BLOCKS * MAX_BLOCK_FRAMES;
 const GAIN_RAMP_FRAMES: usize = 240; // 5 ms at 48 kHz, independent of gain level.
+// Match the small callback phase variation covered by timed SRC quality tests.
+// Larger changes still reacquire the observed deadline and account for lost PCM.
+const TIMED_START_JITTER_NS: u64 = 1_000_000;
 /// Latest complete 50 ms window on the internal 48 kHz sample clock.
 pub const METER_WINDOW_FRAMES: usize = 2400;
 
@@ -238,6 +241,19 @@ pub struct MixerStats {
     pub pcm_queue_age_max_ns: [AtomicU64; LANES],
     pub fifo_frames: [AtomicU64; LANES],
     pub sinc_delay_frames: AtomicU64,
+    pub timed_late_frames: AtomicU64,
+    /// Physical-lane lifetime counters; preserve across stream/epoch changes.
+    pub timed_late_frames_by_lane: [AtomicU64; LANES],
+    pub last_timed_late_stream_id: [AtomicU64; LANES],
+    pub last_timed_late_epoch: [AtomicU64; LANES],
+    pub last_timed_late_output_frame: [AtomicU64; LANES],
+    /// First buffered PCM deadline and the output timestamp that skipped it.
+    pub last_timed_late_target_ns: [AtomicU64; LANES],
+    pub last_timed_late_presentation_ns: [AtomicU64; LANES],
+    /// Timed SRC rate relative to 48 kHz, signed milli-ppm encoded as i64.
+    pub timed_drift_ppm_milli: [AtomicU64; LANES],
+    /// Filtered deadline phase error, signed nanoseconds encoded as i64.
+    pub timed_phase_error_ns: [AtomicU64; LANES],
 }
 
 /// Long-window source/output slope plus filtered queue correction. A five-second
@@ -293,6 +309,236 @@ impl DriftController {
     }
 }
 
+// Centered FIR support is fetched from the existing short handoff queue. Its
+// 32-frame (0.667 ms) lookahead compensates group delay: cursor is the source
+// sample due at the speaker, never the sample fed into a delayed causal filter.
+const TIMED_TAPS: usize = 64;
+const TIMED_PHASES: usize = 512;
+const TIMED_SUPPORT: usize = TIMED_TAPS / 2;
+type TimedKernel = Vec<[f32; TIMED_TAPS]>;
+fn timed_kernel() -> Arc<TimedKernel> {
+    let mut table = Vec::with_capacity(TIMED_PHASES + 1);
+    for phase in 0..=TIMED_PHASES {
+        let fraction = phase as f64 / TIMED_PHASES as f64;
+        let mut weights = [0.; TIMED_TAPS];
+        let mut total = 0.;
+        for (tap, weight) in weights.iter_mut().enumerate() {
+            let x = tap as f64 - (TIMED_SUPPORT - 1) as f64 - fraction;
+            let r = x / TIMED_SUPPORT as f64;
+            let window = 0.35875
+                + 0.48829 * (std::f64::consts::PI * r).cos()
+                + 0.14128 * (std::f64::consts::TAU * r).cos()
+                + 0.01168 * (3. * std::f64::consts::PI * r).cos();
+            let argument = std::f64::consts::PI * 0.95 * x;
+            let sinc = if argument.abs() < 1e-12 {
+                0.95
+            } else {
+                0.95 * argument.sin() / argument
+            };
+            *weight = (sinc * window) as f32;
+            total += f64::from(*weight);
+        }
+        for weight in &mut weights {
+            *weight /= total as f32;
+        }
+        table.push(weights);
+    }
+    Arc::new(table)
+}
+
+/// Deadline-controlled asynchronous SRC, separate from native queue feedback.
+/// Callback timestamps are observations of phase, not commands to seek PCM.
+struct TimedPlayback {
+    kernel: Arc<TimedKernel>,
+    fifo: [[f32; 2]; FIFO],
+    head: usize,
+    count: usize,
+    base: u64,
+    end: u64,
+    anchor: Option<(u64, u64)>,
+    slope_anchor: Option<(u64, u64)>,
+    start_anchor: Option<(u64, u64)>,
+    waiting_anchor: Option<(u64, u64)>,
+    source_rate: f64,
+    slope_known: bool,
+    position: Option<f64>,
+    filtered_error: f64,
+    step: f64,
+    starved: bool,
+}
+impl TimedPlayback {
+    fn new(kernel: Arc<TimedKernel>) -> Self {
+        Self {
+            kernel,
+            fifo: [[0.; 2]; FIFO],
+            head: 0,
+            count: 0,
+            base: 0,
+            end: 0,
+            anchor: None,
+            slope_anchor: None,
+            start_anchor: None,
+            waiting_anchor: None,
+            source_rate: 1.,
+            slope_known: false,
+            position: None,
+            filtered_error: 0.,
+            step: 1.,
+            starved: false,
+        }
+    }
+    fn reset(&mut self) {
+        self.head = 0;
+        self.count = 0;
+        self.base = 0;
+        self.end = 0;
+        self.anchor = None;
+        self.slope_anchor = None;
+        self.start_anchor = None;
+        self.waiting_anchor = None;
+        self.source_rate = 1.;
+        self.slope_known = false;
+        self.position = None;
+        self.filtered_error = 0.;
+        self.step = 1.;
+        self.starved = false;
+    }
+    fn append(&mut self, block: &AudioBlock) {
+        let h = block.header;
+        let at = h.presentation_time_ns.expect("validated timed PCM");
+        if self.anchor.is_none() {
+            self.base = h.source_sample_position;
+            self.end = self.base;
+            self.slope_anchor = Some((self.base, at));
+            self.start_anchor = Some((self.base, at));
+        }
+        if let Some((position, time)) = self.slope_anchor {
+            let ns = at.saturating_sub(time);
+            if ns >= 500_000_000 && h.source_sample_position >= position {
+                let rate =
+                    (h.source_sample_position - position) as f64 * 1e9 / (ns as f64 * 48000.);
+                if (0.99..=1.01).contains(&rate) {
+                    if self.slope_known {
+                        let seconds = ns as f64 / 1e9;
+                        self.source_rate += (rate - self.source_rate) * seconds / (2. + seconds);
+                    } else {
+                        self.source_rate = rate;
+                        self.slope_known = true;
+                    }
+                }
+                self.slope_anchor = Some((h.source_sample_position, at));
+            }
+        }
+        self.anchor = Some((h.source_sample_position, at));
+        for frame in block.frames() {
+            self.fifo[(self.head + self.count) % FIFO] = [finite(frame[0]), finite(frame[1])];
+            self.count += 1;
+        }
+        self.end = h
+            .source_sample_position
+            .saturating_add(u64::from(h.frame_count));
+    }
+    fn desired_position(&self, presentation_ns: u64) -> Option<f64> {
+        self.anchor.map(|(position, time)| {
+            position as f64
+                + (presentation_ns as i128 - time as i128) as f64 * 48000. * self.source_rate / 1e9
+        })
+    }
+    fn next(
+        &mut self,
+        presentation_ns: u64,
+        output: u64,
+        index: usize,
+        config: LaneMix,
+        stats: &MixerStats,
+    ) -> Option<[f32; 2]> {
+        let desired = self.desired_position(presentation_ns)?;
+        let position = if let Some(position) = self.position {
+            position
+        } else {
+            let (first, at) = self.start_anchor.expect("PCM start anchor");
+            // PCM observed before its deadline already has a place on the
+            // output sample grid. Advance that grid while waiting instead of
+            // seeking at each callback phase observation. The raw observation
+            // still drives the phase servo below. A first packet seen late, or
+            // a clock jump larger than the jitter budget, retains real seeking.
+            let start_presentation_ns = if let Some((frame, time)) = self.waiting_anchor {
+                let predicted = time.saturating_add(crate::clock::frames_to_ns(
+                    output.saturating_sub(frame),
+                    48_000,
+                ));
+                if predicted.abs_diff(presentation_ns) <= TIMED_START_JITTER_NS {
+                    predicted
+                } else {
+                    self.waiting_anchor = Some((output, presentation_ns));
+                    presentation_ns
+                }
+            } else {
+                presentation_ns
+            };
+            let start = first as f64
+                + (start_presentation_ns as i128 - at as i128) as f64 * 48000. * self.source_rate
+                    / 1e9;
+            if start < self.base as f64 {
+                self.waiting_anchor.get_or_insert((output, presentation_ns));
+                return None;
+            }
+            self.waiting_anchor = None;
+            // Only acquiring/reacquiring a genuinely elapsed timeline seeks.
+            let late = (start.floor() as u64)
+                .saturating_sub(self.base)
+                .min(self.count as u64);
+            stats.timed_late_frames.fetch_add(late, Relaxed);
+            if late > 0 {
+                stats.timed_late_frames_by_lane[index].fetch_add(late, Relaxed);
+                stats.last_timed_late_stream_id[index].store(config.stream_id, Relaxed);
+                stats.last_timed_late_epoch[index].store(config.epoch, Relaxed);
+                stats.last_timed_late_output_frame[index].store(output, Relaxed);
+                stats.last_timed_late_target_ns[index].store(at, Relaxed);
+                stats.last_timed_late_presentation_ns[index].store(presentation_ns, Relaxed);
+            }
+            self.position = Some(start);
+            start
+        };
+        // 100 ms phase filtering rejects callback jitter. A 0.5 s phase servo
+        // and bounded 1000 ppm/s slew keep the cursor continuous, including at
+        // new packet anchors. Long-window PTS slope supplies rate feed-forward.
+        self.filtered_error += (desired - position - self.filtered_error) / 4800.;
+        let target = (self.source_rate + self.filtered_error / 24000.).clamp(0.999, 1.001);
+        self.step += (target - self.step).clamp(-0.001 / 48000., 0.001 / 48000.);
+        self.position = Some(position + self.step);
+        let center = position.floor() as u64;
+        // Preserve past FIR support while evicting only samples already used.
+        let keep = center.saturating_sub(TIMED_SUPPORT as u64);
+        let discard = keep.saturating_sub(self.base).min(self.count as u64) as usize;
+        self.head = (self.head + discard) % FIFO;
+        self.count -= discard;
+        self.base += discard as u64;
+        if self.count == 0 || center < self.base || position >= self.end as f64 - 0.0001 {
+            self.starved = true;
+            return None;
+        }
+        self.starved = false;
+        let fraction = (position - position.floor()) * TIMED_PHASES as f64;
+        let phase = (fraction.floor() as usize).min(TIMED_PHASES - 1);
+        let blend = (fraction - phase as f64) as f32;
+        let mut result = [0.; 2];
+        // Endpoint extension covers stream start/end without an added delay.
+        // Refill ensures ordinary packet seams have real past/future support.
+        for tap in 0..TIMED_TAPS {
+            let sample = (i128::from(center) + tap as i128 - (TIMED_SUPPORT - 1) as i128)
+                .clamp(i128::from(self.base), i128::from(self.end - 1))
+                as u64;
+            let frame = self.fifo[(self.head + (sample - self.base) as usize) % FIFO];
+            let weight = self.kernel[phase][tap]
+                + (self.kernel[phase + 1][tap] - self.kernel[phase][tap]) * blend;
+            result[0] += frame[0] * weight;
+            result[1] += frame[1] * weight;
+        }
+        Some(result)
+    }
+}
+
 struct Lane {
     input: BlockConsumer,
     resampler: SincFixedOut<f32>,
@@ -312,9 +558,11 @@ struct Lane {
     have_source: bool,
     started: bool,
     drift: DriftController,
+    timed: TimedPlayback,
+    timed_mode: bool,
 }
 impl Lane {
-    fn new(input: BlockConsumer) -> Result<Self, AudioError> {
+    fn new(input: BlockConsumer, kernel: Arc<TimedKernel>) -> Result<Self, AudioError> {
         let resampler = SincFixedOut::<f32>::new(
             1.0,
             1.01,
@@ -350,6 +598,8 @@ impl Lane {
             have_source: false,
             started: false,
             drift: DriftController::default(),
+            timed: TimedPlayback::new(kernel),
+            timed_mode: false,
         })
     }
     fn reset(&mut self) {
@@ -365,6 +615,86 @@ impl Lane {
         self.have_source = false;
         self.started = false;
         self.drift.reset();
+        self.timed.reset();
+        self.timed_mode = false;
+    }
+    fn timed_next(
+        &mut self,
+        now_ns: u64,
+        presentation_ns: Option<u64>,
+        output: u64,
+        index: usize,
+        stats: &MixerStats,
+    ) -> [f32; 2] {
+        let Some(presentation_ns) = presentation_ns else {
+            return [0.0; 2];
+        };
+        self.timed_mode = true;
+        // Bounded copies occur only at FIFO refill. Capacity and age bounds are
+        // unchanged; lookahead crosses variable-sized packet boundaries.
+        if self.timed.count < MAX_BLOCK_FRAMES + 2 * TIMED_SUPPORT {
+            for _ in 0..PCM_QUEUE_BLOCKS {
+                if self.timed.count + MAX_BLOCK_FRAMES > FIFO {
+                    break;
+                }
+                let Some(block) = self.input.pop_fresh(now_ns, 80_000_000) else {
+                    break;
+                };
+                let h = block.header;
+                if h.stream_id != self.config.stream_id
+                    || h.stream_epoch != self.config.epoch
+                    || h.format != AudioFormat::INTERNAL
+                    || h.frame_count == 0
+                    || usize::from(h.frame_count) > MAX_BLOCK_FRAMES
+                    || h.presentation_time_ns.is_none()
+                {
+                    stats.rejected_blocks.fetch_add(1, Relaxed);
+                    continue;
+                }
+                if self.timed.anchor.is_some()
+                    && (self.timed.starved
+                        || h.source_sample_position != self.timed.end
+                        || h.discontinuity_flags.0 != 0)
+                {
+                    // After PCM starvation (e.g. between AirPlay tracks), the
+                    // free-running cursor no longer describes the next decoded
+                    // frame. Reacquire its deadline instead of correcting a
+                    // multi-second gap with the drift servo. next() still waits
+                    // for future audio and skips genuinely elapsed samples.
+                    self.timed.reset();
+                    self.gain.restart_from_zero();
+                    stats.discontinuities.fetch_add(1, Relaxed);
+                }
+                self.timed.append(&block);
+            }
+        }
+        let frame = self
+            .timed
+            .next(presentation_ns, output, index, self.config, stats);
+        if output.is_multiple_of(MAX_BLOCK_FRAMES as u64) {
+            stats.timed_drift_ppm_milli[index].store(
+                ((self.timed.step - 1.) * 1e9).round() as i64 as u64,
+                Relaxed,
+            );
+            stats.timed_phase_error_ns[index].store(
+                (self.timed.filtered_error / 48000. * 1e9).round() as i64 as u64,
+                Relaxed,
+            );
+        }
+        let Some(frame) = frame else {
+            // A future first deadline is intentional silence. After playback
+            // has started, exhausted PCM is an underrun, just like native lanes.
+            if self.started && self.timed.starved {
+                stats.underrun_frames.fetch_add(1, Relaxed);
+                stats.underrun_frames_by_lane[index].fetch_add(1, Relaxed);
+            }
+            return [0.; 2];
+        };
+        self.started = true;
+        let gain = self.gain.next();
+        let rendered = [finite(frame[0]) * gain, finite(frame[1]) * gain];
+        self.last_rendered = rendered;
+        rendered
     }
     fn accept(&mut self, block: AudioBlock, stats: &MixerStats) {
         let h = block.header;
@@ -478,7 +808,17 @@ impl Lane {
             }
         }
     }
-    fn next(&mut self, now_ns: u64, output: u64, index: usize, stats: &MixerStats) -> [f32; 2] {
+    fn next(
+        &mut self,
+        now_ns: u64,
+        presentation_ns: Option<u64>,
+        output: u64,
+        index: usize,
+        stats: &MixerStats,
+    ) -> [f32; 2] {
+        if self.timed_mode || self.input.next_is_timed() {
+            return self.timed_next(now_ns, presentation_ns, output, index, stats);
+        }
         if self.cursor >= self.available {
             self.refill(now_ns, output, index, stats);
         }
@@ -513,6 +853,7 @@ pub struct Mixer {
     origin: Instant,
     output: u64,
     now_ns: u64,
+    presentation_anchor: Option<(u64, u64)>,
     master: GainRamp,
     limiter: f32,
     lane_meter_windows: [MeterWindow; LANES],
@@ -524,10 +865,11 @@ impl Mixer {
     pub fn new(origin: Instant) -> Result<MixerParts, AudioError> {
         let mut lanes = Vec::with_capacity(LANES);
         let mut inputs = Vec::with_capacity(LANES);
+        let timed_kernel = timed_kernel();
         for _ in 0..LANES {
             let (p, c) = block_queue(PCM_QUEUE_BLOCKS, Arc::new(AudioStats::default()))?;
             inputs.push(p);
-            lanes.push(Lane::new(c)?);
+            lanes.push(Lane::new(c, timed_kernel.clone())?);
         }
         let (p, c) = RingBuffer::new(8);
         let stats = Arc::new(MixerStats::default());
@@ -547,6 +889,7 @@ impl Mixer {
                 origin,
                 output: 0,
                 now_ns: 0,
+                presentation_anchor: None,
                 master: GainRamp::new(db_gain(-12.0)),
                 limiter: 1.0,
                 lane_meter_windows: [MeterWindow::default(); LANES],
@@ -628,6 +971,11 @@ impl Mixer {
     }
 }
 impl StereoSource for Mixer {
+    fn set_presentation_time(&mut self, at: Instant) {
+        self.presentation_anchor = at
+            .checked_duration_since(self.origin)
+            .map(|d| (self.output, d.as_nanos().min(u128::from(u64::MAX)) as u64));
+    }
     fn next_frame(&mut self) -> [f32; 2] {
         if self.output.is_multiple_of(MAX_BLOCK_FRAMES as u64) {
             self.now_ns = self.origin.elapsed().as_nanos().min(u128::from(u64::MAX)) as u64;
@@ -640,9 +988,15 @@ impl StereoSource for Mixer {
             }
         }
         let now_ns = self.now_ns;
+        let presentation_ns = self.presentation_anchor.map(|(frame, at)| {
+            at.saturating_add(crate::clock::frames_to_ns(
+                self.output.saturating_sub(frame),
+                48_000,
+            ))
+        });
         let mut sum = [0.0f32; 2];
         for (i, lane) in self.lanes.iter_mut().enumerate() {
-            let f = lane.next(now_ns, self.output, i, &self.stats);
+            let f = lane.next(now_ns, presentation_ns, self.output, i, &self.stats);
             if lane.config.stream_id != 0 {
                 self.lane_meter_windows[i].observe(f);
             }

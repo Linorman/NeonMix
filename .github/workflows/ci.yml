@@ -1,6 +1,7 @@
 name: E00-E04 (native media on macOS)
 on:
   push:
+    branches-ignore: ['codex/windows-*']
   pull_request:
   workflow_dispatch:
 permissions:
@@ -62,5 +63,14 @@ jobs:
         if: always()
         with:
           name: neonmix-${{ matrix.os }}
-          path: artifacts/
+          path: |
+            artifacts/
+            !artifacts/**/.credentials/**
+            !artifacts/**/runtime-key-*
+            !artifacts/**/.neonmix-migration-*/**
+            !artifacts/**/*.staging/**
+            !artifacts/**/staging/**
+            !artifacts/**/staging-*/**
+            !artifacts/**/credential-store-*/**
+            !artifacts/**/credential-migration-*/**
           retention-days: 30

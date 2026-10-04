@@ -111,6 +111,16 @@ pub enum Request {
         expected_revision: u64,
         operation: Operation,
     },
+    Airplay {
+        credential: PathBuf,
+        hub: Option<String>,
+        command: Option<neonmix_airplay_adapter::control::AirplayCommand>,
+    },
+    AirplayV2 {
+        credential: PathBuf,
+        hub: Option<String>,
+        command: Option<neonmix_airplay_adapter::control::AirplayCommandV2>,
+    },
     Diagnostics {
         credential: PathBuf,
         hub: Option<String>,

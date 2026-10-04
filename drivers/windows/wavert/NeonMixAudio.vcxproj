@@ -52,6 +52,9 @@
     <Inf Include="Source\Main\NeonMixAudio.inx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
   <Target Name="NeonMixArchitectureGate" BeforeTargets="PrepareForBuild">
     <Error Condition="'$(Platform)'!='x64'" Text="NeonMix E06 Windows supports x64 only." />
   </Target>

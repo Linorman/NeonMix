@@ -85,6 +85,10 @@ pub struct BlockHeader {
     pub capture_timestamp_ns: u64,
     /// Process monotonic arrival time; used only for bounded-age queue eviction.
     pub arrival_ns: u64,
+    /// Optional first-frame speaker presentation deadline, in the Mixer's
+    /// process monotonic origin. None preserves the native capture path.
+    #[serde(default)]
+    pub presentation_time_ns: Option<u64>,
 }
 
 /// Fixed storage, no heap allocation or destructor in a callback. Unused tail is not audio.
@@ -105,6 +109,7 @@ impl AudioBlock {
                 discontinuity_flags: Discontinuity::START,
                 capture_timestamp_ns: 0,
                 arrival_ns: 0,
+                presentation_time_ns: None,
             },
             pcm: [[0.0; 2]; MAX_BLOCK_FRAMES],
         }

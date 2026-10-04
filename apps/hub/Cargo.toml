@@ -6,6 +6,8 @@ rust-version.workspace = true
 license.workspace = true
 [dependencies]
 neonmix-core.workspace = true
+neonmix-airplay-ipc = { path = "../../crates/airplay-ipc" }
+neonmix-airplay-adapter = { path = "../../crates/airplay-adapter" }
 neonmix-io.workspace = true
 neonmix-output-binding = { path = "../../crates/output-binding" }
 neonmix-identity = { path = "../../crates/identity" }

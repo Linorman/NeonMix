@@ -1,4 +1,10 @@
 mod animation;
+mod icons;
+mod pages;
+mod palette;
+mod shell;
+#[cfg(feature = "screenshot")]
+mod shot;
 mod theme;
 mod tray;
 mod widgets;
@@ -28,10 +34,10 @@ struct Args {
     #[arg(long, requires = "preview_page")]
     preview_data: Option<PathBuf>,
     /// Open a page without connecting to a background (visual verification only).
-    #[arg(long, value_parser = ["hub", "sender", "mixer", "devices", "diagnostics"])]
+    #[arg(long, value_parser = ["hub", "sender", "mixer", "devices", "diagnostics", "airplay"])]
     preview_page: Option<String>,
 }
-#[derive(Clone, Copy, PartialEq, Hash)]
+#[derive(Clone, Copy, PartialEq, Hash, Debug)]
 enum Page {
     Hub,
     Sender,
@@ -40,6 +46,15 @@ enum Page {
     Diagnostics,
 }
 impl Page {
+    fn icon(self) -> icons::Icon {
+        match self {
+            Self::Hub => icons::Icon::Room,
+            Self::Sender => icons::Icon::Sender,
+            Self::Mixer => icons::Icon::Mixer,
+            Self::Devices => icons::Icon::Devices,
+            Self::Diagnostics => icons::Icon::Pulse,
+        }
+    }
     const ALL: [(Self, &'static str); 5] = [
         (Self::Hub, "Hub 设置"),
         (Self::Sender, "Sender"),
@@ -58,6 +73,7 @@ struct PollData {
     status: ServiceStatus,
     snapshot: Option<Snapshot>,
     diagnostics: Option<Value>,
+    airplay: Option<Value>,
     error: Option<String>,
 }
 enum Work {
@@ -105,6 +121,7 @@ fn worker(
                         status,
                         snapshot: None,
                         diagnostics: None,
+                        airplay: None,
                         error: None,
                     };
                     if data
@@ -133,7 +150,22 @@ fn worker(
                             Err(e) => data.error = Some(e),
                         }
                         if data.snapshot.is_some() {
-                            match call(&client, &Request::Diagnostics { credential, hub }) {
+                            data.airplay = call(
+                                &client,
+                                &Request::AirplayV2 {
+                                    credential: credential.clone(),
+                                    hub: hub.clone(),
+                                    command: None,
+                                },
+                            )
+                            .ok();
+                            match call(
+                                &client,
+                                &Request::Diagnostics {
+                                    credential: credential.clone(),
+                                    hub: hub.clone(),
+                                },
+                            ) {
                                 Ok(v) => data.diagnostics = Some(v),
                                 Err(e) => data.error = Some(e),
                             }
@@ -149,6 +181,21 @@ fn worker(
         }
     });
     (tx, rx)
+}
+/// A write the user made while the previous one was still in flight. Only
+/// the latest intent is kept and it is sent against the next fresh revision,
+/// so rapid input neither conflicts nor greys out the controls.
+#[derive(Clone)]
+enum Write {
+    Control(Operation),
+    Airplay(neonmix_airplay_adapter::control::AirplayActionV2),
+}
+/// The last mixer change, offered as 还原 (restore) for a few seconds. Named
+/// apart from 撤销 (revoke a pairing) so the two can never be confused.
+struct Undo {
+    label: String,
+    inverse: Write,
+    at: Instant,
 }
 struct Confirmation {
     label: String,
@@ -176,8 +223,9 @@ impl Confirmation {
 }
 struct Desktop {
     page: Page,
-    prev_page: Option<Page>,
-    page_transition_start: Option<Instant>,
+    page_since: Instant,
+    shown_message: String,
+    message_since: Instant,
     client: Client,
     worker: Option<SyncSender<Work>>,
     results: Option<Receiver<Result<Outcome, String>>>,
@@ -198,7 +246,16 @@ struct Desktop {
     status: Option<ServiceStatus>,
     snapshot: Option<Snapshot>,
     diagnostics: Option<Value>,
+    airplay: Option<Value>,
     fresh: Option<Instant>,
+    /// Last authoritative snapshot; unlike `fresh` our own writes do not clear
+    /// it, so controls stay enabled (and do not flash) while a write settles.
+    synced: Option<Instant>,
+    queued_write: Option<Write>,
+    /// Which action is in flight, so only its button shows progress.
+    inflight: Option<&'static str>,
+    poll_error: bool,
+    copied_at: Option<Instant>,
     last_poll: Instant,
     devices: Vec<DeviceInfo>,
     room: String,
@@ -207,6 +264,8 @@ struct Desktop {
     sender_name: String,
     invitation: String,
     show_invitation: bool,
+    show_airplay_pin: bool,
+    airplay_name_drafts: std::collections::BTreeMap<String, String>,
     issued_invitation: String,
     invite_id: Option<uuid::Uuid>,
     invite_expiry: Option<u64>,
@@ -221,9 +280,22 @@ struct Desktop {
     focus_after_modal: bool,
     exiting: bool,
     preview: bool,
+    preview_airplay_only: bool,
     gain_drafts: std::collections::BTreeMap<u64, f32>,
+    /// Mixer lane under keyboard control, keyed by the actual stream id.
+    selected_lane: Option<u64>,
+    lane_details: std::collections::BTreeSet<u64>,
+    /// User choices for collapsible panels; absent keys follow data defaults.
+    panels: std::collections::HashMap<&'static str, bool>,
+    device_filter: usize,
+    /// Panel to bring into view on the next frame (stepper / tile clicks).
+    scroll_to: Option<&'static str>,
+    palette: Option<palette::Palette>,
+    undo: Option<Undo>,
     tray: Option<tray::Tray>,
     tray_attempted: bool,
+    #[cfg(feature = "screenshot")]
+    shot: Option<shot::Shot>,
 }
 impl Desktop {
     fn new(cc: &eframe::CreationContext<'_>, args: Args) -> Self {
@@ -235,6 +307,7 @@ impl Desktop {
         );
         app.repaint = cc.egui_ctx.clone();
         if let Some(page) = args.preview_page {
+            app.preview_airplay_only = page == "airplay";
             app.page = match page.as_str() {
                 "sender" => Page::Sender,
                 "mixer" => Page::Mixer,
@@ -247,6 +320,41 @@ impl Desktop {
             app.worker = Some(tx);
             app.results = Some(rx);
             app.queue(Work::Boot);
+        }
+        #[cfg(feature = "screenshot")]
+        if app.preview {
+            app.shot = shot::Shot::from_env();
+            if let Ok(key) = std::env::var("NEONMIX_SCREENSHOT_BUSY") {
+                app.inflight = ["discover", "hub-start", "pair", "invite", "sender-start"]
+                    .into_iter()
+                    .find(|k| *k == key);
+            }
+            if std::env::var_os("NEONMIX_SCREENSHOT_PALETTE").is_some() {
+                app.palette = Some(Default::default());
+            }
+            if std::env::var_os("NEONMIX_SCREENSHOT_UNDO").is_some() {
+                app.selected_lane = app
+                    .snapshot
+                    .as_ref()
+                    .and_then(|s| s.streams.keys().next().copied());
+                app.undo = Some(Undo {
+                    label: "「E07 合成 B」音量 0.0 → +3.5 dB".into(),
+                    inverse: Write::Control(Operation::OutputMix {
+                        gain_db: None,
+                        muted: None,
+                    }),
+                    at: Instant::now() + Duration::from_secs(30),
+                });
+            }
+            if std::env::var_os("NEONMIX_SCREENSHOT_CONFIRM").is_some() {
+                app.confirmation(
+                    "退出后台".into(),
+                    "停止本实例的共享、发送和全部音频连接。关闭窗口不会停止音频；退出后台会。"
+                        .into(),
+                    Request::Shutdown,
+                    egui::Id::new("preview-confirm"),
+                );
+            }
         }
         if app.preview {
             app.message = "视觉验证模式".into();
@@ -271,8 +379,20 @@ impl Desktop {
                             .and_then(Value::as_str)
                             .map(str::to_owned);
                         app.diagnostics = data.get("diagnostics").cloned();
+                        app.airplay = data.get("airplay").cloned();
+                        #[cfg(feature = "screenshot")]
+                        {
+                            app.airplay_name_drafts =
+                                serde_json::from_value(data["preview_name_drafts"].clone())
+                                    .unwrap_or_default();
+                            if let Some(error) = data["preview_error"].as_str() {
+                                app.error = true;
+                                app.message = error.into();
+                            }
+                        }
                         app.binding = app.status.as_ref().and_then(|s| s.output_binding.clone());
                         app.fresh = Some(Instant::now());
+                        app.synced = app.fresh;
                     }
                     None => {
                         app.error = true;
@@ -286,8 +406,9 @@ impl Desktop {
     fn empty(client: Client, cjk: bool, preview: bool) -> Self {
         Self {
             page: Page::Hub,
-            prev_page: None,
-            page_transition_start: None,
+            page_since: Instant::now() - Duration::from_secs(5),
+            shown_message: String::new(),
+            message_since: Instant::now() - Duration::from_secs(5),
             client,
             worker: None,
             results: None,
@@ -308,7 +429,13 @@ impl Desktop {
             status: None,
             snapshot: None,
             diagnostics: None,
+            airplay: None,
             fresh: None,
+            synced: None,
+            queued_write: None,
+            inflight: None,
+            poll_error: false,
+            copied_at: None,
             last_poll: Instant::now() - Duration::from_secs(5),
             devices: vec![],
             room: "客厅".into(),
@@ -317,6 +444,8 @@ impl Desktop {
             sender_name: "我的电脑".into(),
             invitation: String::new(),
             show_invitation: false,
+            show_airplay_pin: false,
+            airplay_name_drafts: Default::default(),
             issued_invitation: String::new(),
             invite_id: None,
             invite_expiry: None,
@@ -331,9 +460,19 @@ impl Desktop {
             focus_after_modal: false,
             exiting: false,
             preview,
+            preview_airplay_only: false,
             gain_drafts: std::collections::BTreeMap::new(),
+            selected_lane: None,
+            lane_details: Default::default(),
+            panels: Default::default(),
+            device_filter: 0,
+            scroll_to: None,
+            palette: None,
+            undo: None,
             tray: None,
             tray_attempted: false,
+            #[cfg(feature = "screenshot")]
+            shot: None,
         }
     }
     fn queue(&mut self, work: Work) {
@@ -343,6 +482,10 @@ impl Desktop {
         let polling = matches!(&work, Work::Poll { .. });
         let starting = matches!(&work, Work::Action(Request::SenderStart { .. }));
         let stopping = matches!(&work, Work::Action(Request::SenderStop));
+        let key = match &work {
+            Work::Action(request) => Some(request_key(request)),
+            _ => None,
+        };
         if self
             .worker
             .as_ref()
@@ -352,7 +495,16 @@ impl Desktop {
             self.polling = polling;
             self.inflight_start = starting;
             self.inflight_stop = stopping;
+            self.inflight = key;
         }
+    }
+    /// The action a button represents is queued or running.
+    fn pending(&self, key: &str) -> bool {
+        self.inflight == Some(key)
+            || self
+                .pending_action
+                .as_ref()
+                .is_some_and(|r| request_key(r) == key)
     }
     fn action_busy(&self) -> bool {
         (self.busy && !self.polling) || self.pending_action.is_some() || self.pending_stop
@@ -468,6 +620,8 @@ impl Desktop {
         if let Some(outcome) = outcome {
             let completed_start = self.inflight_start;
             let completed_stop = self.inflight_stop;
+            let was_poll = self.polling;
+            self.inflight = None;
             self.inflight_start = false;
             self.inflight_stop = false;
             if completed_stop {
@@ -481,7 +635,14 @@ impl Desktop {
                     self.message = user_error(e);
                     self.error = true;
                     self.fresh = None;
-                    self.diagnostics = None;
+                    // A failed poll keeps the last readings on screen (marked
+                    // stale by age) instead of blanking meters and cards.
+                    if was_poll {
+                        self.poll_error = true;
+                    } else {
+                        self.gain_drafts.clear();
+                        self.queued_write = None;
+                    }
                 }
                 Ok(Outcome::Boot) => {
                     self.online = true;
@@ -524,12 +685,21 @@ impl Desktop {
                         .filter(|_| data.credential == self.credential && data.hub == self.hub())
                     {
                         self.snapshot = Some(snapshot);
+                        self.airplay = data.airplay;
                         self.fresh = Some(Instant::now());
+                        self.synced = self.fresh;
+                        if self.poll_error && data.error.is_none() {
+                            self.poll_error = false;
+                            self.error = false;
+                            self.message = "已重新取得房间状态".into();
+                        }
                         self.diagnostics = data
                             .diagnostics
                             .map(|v| v.get("remote").cloned().unwrap_or(v));
                     } else {
                         self.fresh = None;
+                        self.synced = None;
+                        self.airplay = None;
                         self.diagnostics = None;
                     }
                     if let Some(e) = data.error {
@@ -539,10 +709,44 @@ impl Desktop {
                     }
                 }
                 Ok(Outcome::Action(request, data)) => {
-                    self.message = "操作已完成".into();
+                    // Mixer and AirPlay writes show their result in the control
+                    // itself; a status line per click is noise.
+                    if !matches!(request, Request::Control { .. } | Request::AirplayV2 { .. }) {
+                        self.message = "操作已完成".into();
+                    }
                     self.error = false;
                     self.last_poll = Instant::now() - Duration::from_secs(5);
                     match request {
+                        Request::AirplayV2 { command, .. } => {
+                            if let Some(command) = command {
+                                self.airplay_name_saved(&command.operation);
+                            }
+                            match data["outcome"].as_str() {
+                                Some("configuration_partial") => {
+                                    self.message =
+                                        "部分入口身份已保存，但配置尚未完成；请检查入口后重试。"
+                                            .into();
+                                    self.error = true;
+                                }
+                                Some("saved_session_ended") => {
+                                    self.message =
+                                        "设备设置已保存；原会话已结束，未操作新的连接。".into()
+                                }
+                                _ => {}
+                            }
+                            if let Some(warning) = data["warning"].as_str() {
+                                self.message = if warning == "profile_durability_unconfirmed" {
+                                    "配置已写入，但磁盘同步未确认；请检查存储状态。"
+                                } else {
+                                    "设置已保存，但入口未完成更新；请检查诊断和入口状态。"
+                                }
+                                .into();
+                                self.error = true;
+                            } else if data["media_pending"].as_bool() == Some(true) {
+                                self.message = "设置已保存，正在同步到音频引擎。".into();
+                            }
+                            self.airplay = Some(data);
+                        }
                         Request::Devices => match serde_json::from_value(data) {
                             Ok(devices) => self.devices = devices,
                             Err(e) => {
@@ -591,6 +795,7 @@ impl Desktop {
                         Request::ForgetCredential { .. } => {
                             self.snapshot = None;
                             self.fresh = None;
+                            self.synced = None;
                             self.invitation.clear();
                             self.message =
                                 "本机配对已删除，输出已禁用；重新配对后手动启用或重新添加输出。"
@@ -600,6 +805,7 @@ impl Desktop {
                             self.credential = PathBuf::from("profiles/sender.json");
                             self.invitation.clear();
                             self.snapshot = None;
+                            self.synced = None;
                         }
                         _ => {}
                     }
@@ -618,12 +824,25 @@ impl Desktop {
         {
             self.request(request);
         }
+        if self.ready()
+            && let Some(write) = self.queued_write.take()
+        {
+            self.dispatch(write);
+        }
         if self.online
             && !self.busy
             && !self.pending_stop
-            && self.last_poll.elapsed() > Duration::from_secs(1)
+            && self.last_poll.elapsed() > self.poll_interval()
         {
             self.poll();
+        }
+    }
+    /// Meters need a faster cadence than settings; other pages poll at 1 Hz.
+    fn poll_interval(&self) -> Duration {
+        if self.page == Page::Mixer {
+            Duration::from_millis(250)
+        } else {
+            Duration::from_secs(1)
         }
     }
     fn ready(&self) -> bool {
@@ -646,8 +865,15 @@ impl Desktop {
             .filter(|d| !d.revoked)
             .map(|d| d.role)
     }
+    /// Controls are interactive while the last authoritative state is recent.
+    /// Writes themselves are gated by `ready()` and queued meanwhile.
+    fn writable(&self) -> bool {
+        self.synced
+            .is_some_and(|t| t.elapsed() < Duration::from_secs(4))
+            && !self.pending_stop
+    }
     fn sender_allowed(&self) -> bool {
-        if !self.ready() || self.credential.as_path() == std::path::Path::new("hub/admin.json") {
+        if !self.writable() || self.credential.as_path() == std::path::Path::new("hub/admin.json") {
             return false;
         }
         let Some(id) = self
@@ -670,14 +896,62 @@ impl Desktop {
         self.role() == Some(Role::Admin)
     }
     fn operation(&mut self, operation: Operation) {
-        if let Some(state) = &self.snapshot {
-            self.request(Request::Control {
+        self.write(Write::Control(operation));
+    }
+    fn write(&mut self, write: Write) {
+        if self.ready() {
+            self.dispatch(write);
+        } else if self.writable() {
+            self.queued_write = Some(write);
+        }
+    }
+    fn dispatch(&mut self, write: Write) {
+        let request = match write {
+            Write::Control(operation) => self.snapshot.as_ref().map(|state| Request::Control {
                 credential: self.credential.clone(),
                 hub: self.hub(),
                 expected_revision: state.revision,
                 operation,
-            });
+            }),
+            Write::Airplay(operation) => self.airplay_request(operation),
+        };
+        if let Some(request) = request {
+            self.request(request);
+            // Our own write makes the snapshot stale until the next poll.
             self.fresh = None;
+        }
+    }
+    fn panel_open(&self, key: &'static str, default: bool) -> bool {
+        self.panels.get(key).copied().unwrap_or(default)
+    }
+    fn toggle_panel(&mut self, key: &'static str, open: bool) {
+        self.panels.insert(key, !open);
+    }
+    /// A mixer change the user can restore with one click or ⌘Z.
+    fn mix_change(&mut self, label: String, write: Write, inverse: Write) {
+        if !self.writable() {
+            return;
+        }
+        self.write(write);
+        self.undo = Some(Undo {
+            label,
+            inverse,
+            at: Instant::now(),
+        });
+    }
+    fn undo_available(&self) -> bool {
+        self.undo
+            .as_ref()
+            .is_some_and(|u| u.at.elapsed() < Duration::from_secs(8))
+    }
+    fn restore_last(&mut self) {
+        if !self.undo_available() {
+            return;
+        }
+        if let Some(undo) = self.undo.take() {
+            self.write(undo.inverse);
+            self.message = format!("已还原：{}", undo.label);
+            self.error = false;
         }
     }
     fn confirmation(
@@ -695,1792 +969,43 @@ impl Desktop {
             _origin: origin,
         });
     }
-    fn show(&mut self, ctx: &egui::Context) {
-        self.process();
-
-        // 顶部导航栏
-        egui::TopBottomPanel::top("navigation")
-            .frame(
-                egui::Frame::new()
-                    .fill(theme::SURFACE_2)
-                    .inner_margin(egui::Margin::symmetric(24, 16)),
-            )
-            .show(ctx, |ui| {
-                ui.horizontal(|ui| {
-                    ui.label(
-                        RichText::new("NeonMix")
-                            .size(22.0)
-                            .strong()
-                            .color(theme::TEXT_PRIMARY),
-                    );
-                    ui.add_space(24.0);
-
-                    for (page, title) in Page::ALL {
-                        let is_current = self.page == page;
-                        let tab_id = ui.id().with(page);
-
-                        // 标签页激活动画
-                        let active_anim =
-                            animation::animate_bool(ui, tab_id.with("active"), is_current);
-
-                        // 悬停动画
-                        let hovered = ui.ctx().memory(|mem| {
-                            mem.data
-                                .get_temp::<bool>(tab_id.with("hovered"))
-                                .unwrap_or(false)
-                        });
-                        let hover_anim = animation::animate_bool(
-                            ui,
-                            tab_id.with("hover"),
-                            hovered && !is_current,
-                        );
-
-                        // 组合背景色：激活状态优先
-                        let bg_color = if is_current {
-                            animation::lerp_color(
-                                egui::Color32::TRANSPARENT,
-                                theme::ACCENT.gamma_multiply(0.15),
-                                active_anim,
-                            )
-                        } else {
-                            animation::lerp_color(
-                                egui::Color32::TRANSPARENT,
-                                theme::SURFACE_3,
-                                hover_anim,
-                            )
-                        };
-
-                        let text_color = animation::lerp_color(
-                            theme::TEXT_SECONDARY,
-                            theme::ACCENT,
-                            active_anim,
-                        );
-
-                        let button =
-                            egui::Button::new(RichText::new(title).size(14.0).color(text_color))
-                                .fill(bg_color)
-                                .stroke(egui::Stroke::NONE)
-                                .corner_radius(egui::CornerRadius::same(8));
-
-                        let response = ui.add(button);
-
-                        // 更新悬停状态
-                        ui.ctx().memory_mut(|mem| {
-                            mem.data
-                                .insert_temp(tab_id.with("hovered"), response.hovered());
-                        });
-
-                        if self.focus_after_modal && self.confirm.is_none() && self.page == page {
-                            response.request_focus();
-                            self.focus_after_modal = false;
-                        }
-                        if response.clicked() {
-                            if self.page != page {
-                                animation::reset_page_transition(ctx, page);
-                                self.prev_page = Some(self.page);
-                                self.page = page;
-                                self.page_transition_start = Some(Instant::now());
-                            }
-                        }
-                    }
-
-                    // 右侧状态信息
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        // Hub 状态
-                        if self.status.as_ref().is_some_and(|s| s.hub.running) {
-                            if let Some(snapshot) = &self.snapshot {
-                                let active_streams = snapshot.streams.len();
-                                let total_devices = snapshot.devices.len();
-
-                                ui.add_space(8.0);
-                                ui.label(
-                                    RichText::new(format!(
-                                        "{}设备 · {}通道",
-                                        total_devices, active_streams
-                                    ))
-                                    .size(13.0)
-                                    .color(theme::TEXT_MUTED),
-                                );
-                            }
-                            ui.add_space(8.0);
-                            widgets::status_indicator(ui, true, "Hub");
-                        }
-
-                        // Sender 状态
-                        if self.status.as_ref().is_some_and(|s| s.sender.running) {
-                            ui.add_space(8.0);
-                            widgets::status_indicator(ui, true, "发送");
-                        }
-
-                        // 连接状态
-                        ui.add_space(8.0);
-                        if self.online {
-                            widgets::status_indicator(ui, true, "在线");
-                        } else {
-                            widgets::status_indicator(ui, false, "离线");
-                        }
-                    });
-                });
-            });
-        // 底部状态栏
-        egui::TopBottomPanel::bottom("status")
-            .frame(
-                egui::Frame::new()
-                    .fill(theme::SURFACE_2)
-                    .inner_margin(egui::Margin::symmetric(24, 12)),
-            )
-            .show(ctx, |ui| {
-                ui.horizontal_wrapped(|ui| {
-                    if self.busy {
-                        ui.spinner();
-                        ui.add_space(8.0);
-                    }
-                    ui.label(
-                        RichText::new(&self.message)
-                            .size(13.0)
-                            .color(if self.error {
-                                theme::DANGER
-                            } else {
-                                theme::TEXT_SECONDARY
-                            }),
-                    );
-
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        let response = ui.add_enabled(
-                            !self.action_busy(),
-                            egui::Button::new(RichText::new("退出后台").size(13.0))
-                                .fill(theme::DANGER.gamma_multiply(0.3))
-                                .stroke(egui::Stroke::new(1.0, theme::DANGER))
-                                .corner_radius(egui::CornerRadius::same(255))
-                                .min_size(egui::vec2(0.0, 32.0)),
-                        );
-                        if response.clicked() {
-                            self.confirmation(
-                                "退出后台".into(),
-                                "停止本实例的共享、发送和全部音频连接。".into(),
-                                Request::Shutdown,
-                                response.id,
-                            );
-                        }
-
-                        ui.add_space(8.0);
-
-                        if self.status.as_ref().is_some_and(|s| s.sender.running) {
-                            if widgets::secondary_button(ui, "停止发送").clicked() {
-                                self.stop_sender();
-                            }
-                            ui.add_space(8.0);
-                        }
-
-                        if widgets::secondary_button(ui, "隐藏窗口").clicked() {
-                            if self.tray.is_some() {
-                                ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
-                            } else {
-                                ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(true));
-                            }
-                        }
-                    });
-                });
-            });
-        // 主内容区域
-        egui::CentralPanel::default()
-            .frame(
-                egui::Frame::new()
-                    .fill(theme::SURFACE_1)
-                    .inner_margin(egui::Margin::symmetric(24, 20)),
-            )
-            .show(ctx, |ui| {
-                // 页面过渡动画
-                let transition = animation::page_transition(ui, self.page);
-
-                egui::ScrollArea::vertical()
-                    .id_salt(self.page.title())
-                    .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
-                    .auto_shrink([false, false])
-                    .show(ui, |ui| {
-                        // 应用淡入效果
-                        let _alpha = (transition * 255.0) as u8;
-                        ui.style_mut().visuals.widgets.inactive.fg_stroke.color = ui
-                            .style()
-                            .visuals
-                            .widgets
-                            .inactive
-                            .fg_stroke
-                            .color
-                            .linear_multiply(transition);
-                        ui.style_mut().visuals.widgets.active.fg_stroke.color = ui
-                            .style()
-                            .visuals
-                            .widgets
-                            .active
-                            .fg_stroke
-                            .color
-                            .linear_multiply(transition);
-
-                        // 垂直偏移动画（从上方滑入）
-                        let offset = (1.0 - transition) * 20.0;
-                        ui.add_space(offset + 8.0);
-
-                        ui.label(
-                            RichText::new(self.page.title())
-                                .size(28.0)
-                                .strong()
-                                .color(theme::TEXT_PRIMARY.linear_multiply(transition)),
-                        );
-                        ui.add_space(16.0);
-
-                        if !self.cjk {
-                            widgets::card(ui, "cjk-warning", |ui| {
-                                ui.colored_label(
-                                    theme::WARNING,
-                                    "中文字体未找到，请配置 NEONMIX_CJK_FONT 后重新打开。",
-                                );
-                            });
-                        }
-                        if self.preview {
-                            widgets::card(ui, "preview-mode", |ui| {
-                                ui.colored_label(
-                                    theme::INFO,
-                                    "视觉验证模式 · 不启动后台或播放音频",
-                                );
-                            });
-                        }
-
-                        ui.add_enabled_ui(!self.action_busy(), |ui| {
-                            // 计算页面切换动画进度
-                            let fade_alpha = if let Some(start) = self.page_transition_start {
-                                let elapsed = start.elapsed().as_secs_f32();
-                                let duration = 0.2; // 200ms 过渡时间
-                                if elapsed < duration {
-                                    ctx.request_repaint();
-                                    (elapsed / duration).min(1.0)
-                                } else {
-                                    self.page_transition_start = None;
-                                    1.0
-                                }
-                            } else {
-                                1.0
-                            };
-
-                            // 应用淡入淡出效果
-                            ui.scope(|ui| {
-                                ui.set_opacity(fade_alpha);
-                                match self.page {
-                                    Page::Hub => self.hub_page(ui),
-                                    Page::Sender => self.sender_page(ui),
-                                    Page::Mixer => self.mixer_page(ui),
-                                    Page::Devices => self.devices_page(ui),
-                                    Page::Diagnostics => self.diagnostics_page(ui),
-                                }
-                            });
-                        });
-                    });
-            });
-        // 确认对话框
-        if let Some(mut confirmation) = self.confirm.take() {
-            let mut keep = true;
-            let mut execute = false;
-            let response = egui::Modal::new(egui::Id::new("confirm")).show(ctx, |ui| {
-                ui.set_max_width((ctx.screen_rect().width() - 64.0).min(480.0));
-
-                ui.add_space(8.0);
-                ui.label(
-                    RichText::new(&confirmation.label)
-                        .size(20.0)
-                        .strong()
-                        .color(theme::TEXT_PRIMARY),
-                );
-                ui.add_space(12.0);
-
-                ui.label(
-                    RichText::new(&confirmation.consequence)
-                        .size(14.0)
-                        .color(theme::TEXT_SECONDARY),
-                );
-                ui.add_space(20.0);
-
-                ui.horizontal(|ui| {
-                    if widgets::secondary_button(ui, "取消").clicked() {
-                        keep = false;
-                    }
-                    if confirmation.focus {
-                        ui.memory_mut(|m| m.request_focus(ui.next_auto_id()));
-                        confirmation.focus = false;
-                    }
-
-                    ui.add_space(8.0);
-                    if ui
-                        .add_enabled(
-                            !self.action_busy(),
-                            egui::Button::new(
-                                RichText::new(confirmation.action_label())
-                                    .color(theme::SURFACE_0)
-                                    .size(15.0),
-                            )
-                            .fill(theme::DANGER)
-                            .stroke(egui::Stroke::NONE)
-                            .corner_radius(egui::CornerRadius::same(255))
-                            .min_size(egui::vec2(0.0, 36.0)),
-                        )
-                        .clicked()
-                    {
-                        execute = true;
-                        keep = false;
-                    }
-                });
-                ui.add_space(8.0);
-            });
-            if response.should_close() {
-                keep = false;
-            }
-            if keep {
-                self.confirm = Some(confirmation)
-            } else {
-                self.focus_after_modal = true;
-                if execute {
-                    self.request(confirmation.request);
-                }
-            }
-        }
-        ctx.request_repaint_after(Duration::from_millis(200));
-    }
-    fn hub_page(&mut self, ui: &mut egui::Ui) {
-        widgets::note(ui, "配置房间、选择输出设备、管理配对邀请");
-        ui.add_space(16.0);
-
-        widgets::card(ui, "hub-settings", |ui| {
-            ui.label(
-                RichText::new("房间设置")
-                    .size(18.0)
-                    .strong()
-                    .color(theme::TEXT_PRIMARY),
-            );
-            ui.add_space(12.0);
-
-            widgets::field(ui, "房间名称", &mut self.room, false);
-            ui.add_space(8.0);
-
-            // 输出设备选择
-            ui.vertical(|ui| {
-                ui.add_space(4.0);
-                ui.label(
-                    RichText::new("实体输出设备")
-                        .color(theme::TEXT_SECONDARY)
-                        .size(13.0),
-                );
-                ui.add_space(2.0);
-                ui.horizontal(|ui| {
-                    let label = ui.label("");
-                    let response = egui::ComboBox::from_id_salt("output")
-                        .width(ui.available_width().min(480.0) - 120.0)
-                        .selected_text(
-                            self.devices
-                                .iter()
-                                .find(|d| d.id == self.output)
-                                .map_or("请选择设备", |d| d.name.as_str()),
-                        )
-                        .show_ui(ui, |ui| {
-                            for device in &self.devices {
-                                if device.output.is_some() && !virtual_device(device) {
-                                    widgets::select_value(
-                                        ui,
-                                        &mut self.output,
-                                        device.id.clone(),
-                                        &device.name,
-                                    );
-                                }
-                            }
-                        })
-                        .response
-                        .labelled_by(label.id);
-                    widgets::label_combo(&response, "实体输出");
-
-                    if widgets::secondary_button(ui, "刷新设备").clicked() {
-                        self.request(Request::Devices);
-                    }
-                });
-            });
-
-            if !self.output.is_empty() {
-                ui.add_space(4.0);
-                ui.label(
-                    RichText::new(&self.output)
-                        .monospace()
-                        .size(11.5)
-                        .color(theme::TEXT_MUTED),
-                );
-            }
-
-            ui.add_space(16.0);
-            widgets::divider(ui);
-            ui.add_space(8.0);
-
-            // 操作按钮
-            ui.horizontal_wrapped(|ui| {
-                if ui
-                    .add_enabled(
-                        !self.output.is_empty(),
-                        egui::Button::new(RichText::new("播放测试音").size(15.0))
-                            .fill(theme::SURFACE_3)
-                            .stroke(egui::Stroke::new(1.0, theme::SURFACE_4))
-                            .corner_radius(egui::CornerRadius::same(255))
-                            .min_size(egui::vec2(0.0, 36.0)),
-                    )
-                    .on_hover_text("−36 dBFS / 2 秒低音量测试")
-                    .clicked()
-                {
-                    self.request(Request::TestTone {
-                        output: self.output.clone(),
-                    });
-                }
-
-                let configured = self
-                    .status
-                    .as_ref()
-                    .is_some_and(|s| s.hub_settings.is_some());
-                let running = self.status.as_ref().is_some_and(|s| s.hub.running);
-
-                if ui
-                    .add_enabled(
-                        !running && !self.room.trim().is_empty() && !self.output.is_empty(),
-                        egui::Button::new(
-                            RichText::new(if configured {
-                                "保存设置"
-                            } else {
-                                "创建房间"
-                            })
-                            .size(15.0),
-                        )
-                        .fill(theme::SURFACE_3)
-                        .stroke(egui::Stroke::new(1.0, theme::SURFACE_4))
-                        .corner_radius(egui::CornerRadius::same(255))
-                        .min_size(egui::vec2(0.0, 36.0)),
-                    )
-                    .clicked()
-                {
-                    let settings = HubSettings {
-                        name: self.room.trim().into(),
-                        output: self.output.clone(),
-                    };
-                    self.request(if configured {
-                        Request::HubSettings { settings }
-                    } else {
-                        Request::HubSetup { settings }
-                    });
-                }
-
-                if !running && configured {
-                    if widgets::primary_button(ui, "开始共享").clicked() {
-                        self.request(Request::HubStart);
-                    }
-                }
-                if running {
-                    if widgets::danger_button(ui, "停止共享").clicked() {
-                        self.request(Request::HubStop);
-                    }
-                }
-            });
-
-            ui.add_space(8.0);
-            widgets::note(
-                ui,
-                "输出按设备身份绑定，修改设置前需停止共享。共享仅面向局域网。",
-            );
-
-            // 状态显示
-            if let Some(status) = &self.status {
-                ui.add_space(12.0);
-                if status.hub.running {
-                    widgets::status_badge(ui, "Hub 正在共享", widgets::BadgeStatus::Success);
-                } else {
-                    widgets::status_badge(ui, "Hub 已停止", widgets::BadgeStatus::Neutral);
-                }
-                if let Some(e) = &status.hub.error {
-                    ui.add_space(8.0);
-                    ui.colored_label(theme::DANGER, e);
-                }
-            }
-        });
-
-        self.profile_picker(ui);
-
-        widgets::card(ui, "pairing", |ui| {
-            ui.label(
-                RichText::new("配对邀请")
-                    .size(18.0)
-                    .strong()
-                    .color(theme::TEXT_PRIMARY),
-            );
-            ui.add_space(8.0);
-            widgets::note(
-                ui,
-                "邀请允许一台设备加入房间，有效期 120 秒。将邀请私下交给目标设备。",
-            );
-            ui.add_space(12.0);
-
-            if widgets::primary_button(ui, "创建一次性邀请")
-                .on_disabled_hover_text("请选择已连接的本地管理员身份")
-                .clicked()
-                && self.ready()
-                && self.admin()
-            {
-                self.request(Request::Invite {
-                    credential: self.credential.clone(),
-                    hub: self.hub(),
-                    out: PathBuf::from(format!("invitations/{}.json", uuid::Uuid::new_v4())),
-                    seconds: 120,
-                });
-            }
-
-            if !self.issued_invitation.is_empty() {
-                ui.add_space(16.0);
-                ui.checkbox(&mut self.show_invitation, "显示邀请内容");
-                ui.add_space(4.0);
-                ui.add(
-                    egui::TextEdit::singleline(&mut self.issued_invitation)
-                        .password(!self.show_invitation)
-                        .font(egui::TextStyle::Monospace)
-                        .desired_width(ui.available_width())
-                        .interactive(false),
-                );
-
-                if let Some(expiry) = self.invite_expiry {
-                    let now = std::time::SystemTime::now()
-                        .duration_since(std::time::UNIX_EPOCH)
-                        .unwrap_or_default()
-                        .as_secs();
-                    ui.add_space(4.0);
-                    widgets::note(ui, format!("剩余 {} 秒", expiry.saturating_sub(now)));
-                }
-
-                ui.add_space(12.0);
-                ui.horizontal(|ui| {
-                    if widgets::secondary_button(ui, "复制邀请").clicked() {
-                        ui.ctx().copy_text(self.issued_invitation.clone());
-                    }
-                    if let Some(invitation_id) = self.invite_id {
-                        if widgets::secondary_button(ui, "取消邀请").clicked() {
-                            self.request(Request::CancelInvite {
-                                credential: self.credential.clone(),
-                                hub: self.hub(),
-                                invitation_id,
-                            });
-                        }
-                    }
-                });
-            }
-        });
-
-        // 已配对设备列表
-        if let Some(state) = self.snapshot.clone() {
-            widgets::card(ui, "paired-devices", |ui| {
-                ui.label(
-                    RichText::new("已配对设备")
-                        .size(18.0)
-                        .strong()
-                        .color(theme::TEXT_PRIMARY),
-                );
-                ui.add_space(12.0);
-
-                if state.devices.is_empty() {
-                    widgets::empty_state(
-                        ui,
-                        "📱",
-                        "暂无设备",
-                        "创建邀请后，设备配对成功将显示在此处。",
-                    );
-                } else {
-                    egui::Grid::new("device_grid")
-                        .num_columns(1)
-                        .spacing([0.0, 8.0])
-                        .show(ui, |ui| {
-                            for device in state.devices.values().take(5) {
-                                // 设备信息卡片
-                                egui::Frame::new()
-                                    .fill(theme::SURFACE_3)
-                                    .corner_radius(egui::CornerRadius::same(6))
-                                    .inner_margin(egui::Margin::same(12))
-                                    .show(ui, |ui| {
-                                        ui.horizontal(|ui| {
-                                            // 左侧：状态和名称
-                                            let is_active = state
-                                                .streams
-                                                .values()
-                                                .any(|s| s.device_id == device.id);
-                                            let (status_text, status_color) = if device.revoked {
-                                                ("已撤销", theme::DANGER)
-                                            } else if !device.playback_allowed {
-                                                ("已断开", theme::WARNING)
-                                            } else if is_active {
-                                                ("活动中", theme::SUCCESS)
-                                            } else {
-                                                ("空闲", theme::TEXT_MUTED)
-                                            };
-
-                                            // 状态指示器
-                                            let (rect, _) = ui.allocate_exact_size(
-                                                egui::vec2(10.0, 10.0),
-                                                egui::Sense::hover(),
-                                            );
-                                            ui.painter().circle_filled(
-                                                rect.center(),
-                                                5.0,
-                                                status_color,
-                                            );
-
-                                            ui.vertical(|ui| {
-                                                ui.spacing_mut().item_spacing.y = 4.0;
-
-                                                ui.label(
-                                                    RichText::new(&device.name)
-                                                        .size(15.0)
-                                                        .strong()
-                                                        .color(theme::TEXT_PRIMARY),
-                                                );
-
-                                                ui.horizontal(|ui| {
-                                                    ui.spacing_mut().item_spacing.x = 8.0;
-
-                                                    ui.label(
-                                                        RichText::new(status_text)
-                                                            .size(12.0)
-                                                            .color(status_color),
-                                                    );
-
-                                                    ui.label(
-                                                        RichText::new("·")
-                                                            .size(12.0)
-                                                            .color(theme::TEXT_MUTED),
-                                                    );
-
-                                                    ui.label(
-                                                        RichText::new(match device.role {
-                                                            Role::Admin => "管理员",
-                                                            Role::Controller => "控制者",
-                                                            Role::Member => "成员",
-                                                        })
-                                                        .size(12.0)
-                                                        .color(theme::TEXT_MUTED),
-                                                    );
-                                                });
-                                            });
-
-                                            // 右侧：活动通道数
-                                            ui.with_layout(
-                                                egui::Layout::right_to_left(egui::Align::Center),
-                                                |ui| {
-                                                    if is_active {
-                                                        let stream_count = state
-                                                            .streams
-                                                            .values()
-                                                            .filter(|s| s.device_id == device.id)
-                                                            .count();
-                                                        ui.label(
-                                                            RichText::new(format!(
-                                                                "{} 通道",
-                                                                stream_count
-                                                            ))
-                                                            .size(13.0)
-                                                            .color(theme::ACCENT),
-                                                        );
-                                                    }
-                                                },
-                                            );
-                                        });
-                                    });
-                                ui.end_row();
-                            }
-                        });
-
-                    if state.devices.len() > 5 {
-                        ui.add_space(8.0);
-                        widgets::note(
-                            ui,
-                            format!(
-                                "还有 {} 台设备，前往设备页面查看全部",
-                                state.devices.len() - 5
-                            ),
-                        );
-                    }
-                }
-            });
-        }
-    }
-    fn profile_picker(&mut self, ui: &mut egui::Ui) {
-        let previous = self.credential.clone();
-        ui.horizontal_wrapped(|ui| {
-            let label = ui.label("控制身份");
-            let response = egui::ComboBox::from_id_salt("credential")
-                .selected_text(
-                    self.status
-                        .as_ref()
-                        .and_then(|s| s.profiles.iter().find(|p| p.credential == self.credential))
-                        .map_or("未配对", |p| {
-                            if p.role == Some(Role::Admin) {
-                                "本地管理员"
-                            } else {
-                                p.name.as_deref().unwrap_or("已配对设备")
-                            }
-                        }),
-                )
-                .show_ui(ui, |ui| {
-                    if let Some(status) = &self.status {
-                        for p in &status.profiles {
-                            if !p.pending {
-                                widgets::select_value(
-                                    ui,
-                                    &mut self.credential,
-                                    p.credential.clone(),
-                                    p.name.as_deref().unwrap_or("已配对设备"),
-                                );
-                            }
-                        }
-                    }
-                })
-                .response
-                .labelled_by(label.id);
-            widgets::label_combo(&response, "控制身份");
-            ui.label(match self.role() {
-                Some(Role::Admin) => "管理员",
-                Some(Role::Controller) => "房间控制者",
-                Some(Role::Member) => "成员",
-                None => "身份未验证",
-            });
-        });
-        if previous != self.credential {
-            self.snapshot = None;
-            self.diagnostics = None;
-            self.fresh = None;
-            self.last_poll = Instant::now() - Duration::from_secs(5);
-        }
-        egui::CollapsingHeader::new("连接地址（故障排查）").show(ui, |ui| {
-            let before = self.hub_address.clone();
-            widgets::field(ui, "HTTPS 地址（可留空）", &mut self.hub_address, false);
-            if before != self.hub_address {
-                self.fresh = None;
-                self.last_poll = Instant::now() - Duration::from_secs(5);
-            }
-            widgets::note(
-                ui,
-                "留空使用自动发现；任何地址都必须匹配已配对的证书和房间身份。",
-            );
-        });
-        if self.snapshot.is_some() && !self.ready() {
-            ui.colored_label(
-                theme::DANGER,
-                "状态正在刷新或已过期；取得最新状态后才能修改。",
-            );
-        }
-    }
-    fn sender_page(&mut self, ui: &mut egui::Ui) {
-        widgets::note(
-            ui,
-            "发送范围：系统选择到此虚拟输出的所有应用声音。停止发送始终可从底部或托盘执行。",
-        );
-        if let Some(device) = self
-            .status
-            .as_ref()
-            .and_then(|s| s.profiles.iter().find(|p| p.credential == self.credential))
-            .and_then(|p| p.device_id)
-            .and_then(|id| self.snapshot.as_ref()?.devices.get(&id))
-        {
-            if device.revoked {
-                ui.colored_label(
-                    theme::DANGER,
-                    "配对已撤销；删除本机配对后，使用新邀请重新配对。",
-                );
-            } else if !device.playback_allowed {
-                ui.colored_label(
-                    theme::DANGER,
-                    "管理员已断开；需要 Hub 重新允许播放，然后手动开始发送。",
-                );
-            }
-        }
-        if let Some(room) = &self.remote_room {
-            ui.label(format!("目标房间：{room}"));
-        }
-        widgets::card(ui, "discover", |ui| {
-            if ui.button("发现局域网房间").clicked() {
-                self.request(Request::Discover { seconds: 3 });
-            }
-            if self.candidates.is_empty() {
-                ui.label("尚未发现房间。确保 Hub 正在共享且位于同一局域网，然后重新发现。");
-            }
-            for candidate in &self.candidates {
-                ui.label(
-                    candidate
-                        .get("room_name")
-                        .or_else(|| candidate.get("name"))
-                        .and_then(Value::as_str)
-                        .unwrap_or("未命名房间"),
-                );
-                widgets::note(
-                    ui,
-                    format!(
-                        "Hub {} · 发现身份尚未信任",
-                        candidate.get("hub_id").unwrap_or(&Value::Null)
-                    ),
-                );
-            }
-        });
-        widgets::card(ui, "pair", |ui| {
-            widgets::field(ui, "设备名称", &mut self.sender_name, false);
-            ui.label("粘贴 Hub 给出的一次性邀请");
-            ui.add(
-                egui::TextEdit::singleline(&mut self.invitation)
-                    .password(!self.show_invitation)
-                    .desired_width(ui.available_width()),
-            );
-            ui.checkbox(&mut self.show_invitation, "显示邀请");
-            if ui
-                .add_enabled(
-                    !self.invitation.trim().is_empty() && !self.sender_name.trim().is_empty(),
-                    egui::Button::new("配对房间"),
-                )
-                .clicked()
-            {
-                self.request(Request::PairText {
-                    invitation: self.invitation.trim().into(),
-                    name: self.sender_name.trim().into(),
-                    hub: self.manual_hub(),
-                });
-            }
-        });
-        if self.status.as_ref().is_some_and(|s| {
-            s.profiles
-                .iter()
-                .any(|p| p.credential == std::path::Path::new("profiles/sender.json"))
-        }) {
-            let forget = ui.button("删除本机配对…");
-            if forget.clicked() {
-                self.confirmation("删除本机配对".into(),"停止发送并禁用本地输出，删除本机的配对凭证；需要新邀请才能重新配对。Hub 中的设备记录保留。".into(),Request::ForgetCredential{credential:"profiles/sender.json".into()},forget.id);
-            }
-        }
-        self.profile_picker(ui);
-        widgets::card(ui, "binding", |ui| {
-            widgets::field(ui, "虚拟输出名称", &mut self.binding_name, false);
-            ui.label("虚拟输出提供者");
-            let response = egui::ComboBox::from_id_salt("provider")
-                .selected_text(if self.provider == "blackhole" {
-                    "BlackHole（外部提供者）"
-                } else {
-                    "NeonMix 虚拟输出"
-                })
-                .show_ui(ui, |ui| {
-                    widgets::select_value(
-                        ui,
-                        &mut self.provider,
-                        "neonmix".into(),
-                        "NeonMix 虚拟输出",
-                    );
-                    if cfg!(target_os = "macos") {
-                        widgets::select_value(
-                            ui,
-                            &mut self.provider,
-                            "blackhole".into(),
-                            "BlackHole（外部提供者）",
-                        );
-                    }
-                });
-            widgets::label_combo(&response.response, "虚拟输出提供者");
-            if self.binding.is_none() {
-                if ui
-                    .add_enabled(
-                        self.ready()
-                            && self.role().is_some()
-                            && self.credential.as_path() != std::path::Path::new("hub/admin.json")
-                            && !self.binding_name.trim().is_empty(),
-                        egui::Button::new("添加虚拟输出"),
-                    )
-                    .clicked()
-                {
-                    self.request(Request::Output {
-                        directory: PathBuf::from("output"),
-                        action: OutputAction::Add {
-                            credential: self.credential.clone(),
-                            hub: self.hub(),
-                            name: self.binding_name.clone(),
-                            provider: self.provider.clone(),
-                            device: None,
-                        },
-                    });
-                }
-                if ui.button("读取已添加输出").clicked() {
-                    self.request(Request::Output {
-                        directory: PathBuf::from("output"),
-                        action: OutputAction::Show,
-                    });
-                }
-                widgets::note(
-                    ui,
-                    "需要已配对的 Sender 身份及已安装的虚拟设备。缺少驱动时请按 E06 安装说明处理。",
-                );
-            }
-            if let Some(binding) = self.binding.clone() {
-                let revision = binding.get("revision").and_then(Value::as_u64).unwrap_or(0);
-                let enabled = binding
-                    .get("enabled")
-                    .and_then(Value::as_bool)
-                    .unwrap_or(false);
-                ui.label(format!(
-                    "{} · {}",
-                    binding
-                        .get("display_name")
-                        .and_then(Value::as_str)
-                        .unwrap_or("虚拟输出"),
-                    if enabled { "已启用" } else { "已禁用" }
-                ));
-                widgets::note(
-                    ui,
-                    format!(
-                        "设备 {} · 房间 {}",
-                        binding.get("device_id").unwrap_or(&Value::Null),
-                        binding.get("hub_id").unwrap_or(&Value::Null)
-                    ),
-                );
-                ui.horizontal_wrapped(|ui| {
-                    if ui.button("保存输出名称").clicked() {
-                        self.request(Request::Output {
-                            directory: PathBuf::from("output"),
-                            action: OutputAction::Rename {
-                                expected_revision: revision,
-                                name: self.binding_name.clone(),
-                            },
-                        });
-                    }
-                    if ui
-                        .button(if enabled {
-                            "禁用输出"
-                        } else {
-                            "启用输出"
-                        })
-                        .clicked()
-                    {
-                        self.request(Request::Output {
-                            directory: PathBuf::from("output"),
-                            action: if enabled {
-                                OutputAction::Disable {
-                                    expected_revision: revision,
-                                }
-                            } else {
-                                OutputAction::Enable {
-                                    expected_revision: revision,
-                                }
-                            },
-                        });
-                    }
-                    let remove = ui.button("删除绑定…");
-                    if remove.clicked() {
-                        self.confirmation(
-                            "删除输出绑定".into(),
-                            "停止此绑定的发送，保留系统音频驱动；需要重新添加后才能发送。".into(),
-                            Request::Output {
-                                directory: PathBuf::from("output"),
-                                action: OutputAction::Remove {
-                                    expected_revision: revision,
-                                },
-                            },
-                            remove.id,
-                        );
-                    }
-                });
-                widgets::note(
-                    ui,
-                    "发送范围：系统选到此虚拟输出的所有应用声音。请在系统声音设置中主动选择该设备。",
-                );
-                let running = self.status.as_ref().is_some_and(|s| s.sender.running);
-                ui.horizontal(|ui| {
-                    if ui
-                        .add_enabled(
-                            enabled && !running && self.sender_allowed(),
-                            egui::Button::new("开始发送"),
-                        )
-                        .clicked()
-                    {
-                        self.request(Request::SenderStart {
-                            options: SenderOptions {
-                                credential: self.credential.clone(),
-                                hub: self.hub(),
-                                output_binding: PathBuf::from("output"),
-                            },
-                        });
-                    }
-                    if ui
-                        .add_enabled(running, egui::Button::new("停止发送"))
-                        .clicked()
-                    {
-                        self.stop_sender();
-                    }
-                });
-            }
-            if let Some(status) = &self.status {
-                ui.label(if status.sender.running {
-                    if status
-                        .sender
-                        .metrics
-                        .as_ref()
-                        .and_then(|m| m["control_connected"].as_bool())
-                        == Some(false)
-                    {
-                        "控制重连中 · 音频进程运行"
-                    } else if status
-                        .sender
-                        .metrics
-                        .as_ref()
-                        .and_then(|m| m["encoded_media_packets"].as_u64())
-                        .unwrap_or(0)
-                        > 0
-                    {
-                        "Sender 正在发送"
-                    } else {
-                        "Sender 连接 / 准备采集中"
-                    }
-                } else {
-                    "Sender 已停止"
-                });
-                if let Some(e) = &status.sender.error {
-                    ui.colored_label(theme::DANGER, e);
-                }
-                if let Some(metrics) = &status.sender.metrics {
-                    widgets::note(
-                        ui,
-                        format!(
-                            "采集帧：{}",
-                            metrics
-                                .pointer("/capture_stats/frames")
-                                .unwrap_or(&Value::Null)
-                        ),
-                    );
-                }
-            }
-        });
-    }
-    fn mixer_page(&mut self, ui: &mut egui::Ui) {
-        self.profile_picker(ui);
-        let Some(state) = self.snapshot.clone() else {
-            widgets::empty_state(
-                ui,
-                "🎚️",
-                "尚未连接房间",
-                "创建并开始共享，或在 Sender 页面配对房间后查看混音状态。",
-            );
-            return;
-        };
-
-        widgets::note(
-            ui,
-            format!("房间 {} · 状态版本 {}", state.hub_id, state.revision),
-        );
-        ui.add_space(16.0);
-
-        // 房间总控
-        widgets::card(ui, "master", |ui| {
-            ui.label(
-                RichText::new("房间总控")
-                    .size(18.0)
-                    .strong()
-                    .color(theme::TEXT_PRIMARY),
-            );
-            ui.add_space(4.0);
-            ui.label(
-                RichText::new(&state.output.id)
-                    .size(13.0)
-                    .monospace()
-                    .color(theme::TEXT_MUTED),
-            );
-            ui.add_space(8.0);
-
-            if state.output.available {
-                widgets::status_badge(ui, "输出可用", widgets::BadgeStatus::Success);
-            } else {
-                widgets::status_badge(ui, "输出丢失 · 等待设备恢复", widgets::BadgeStatus::Warning);
-            }
-
-            ui.add_space(12.0);
-
-            let meter = self
-                .diagnostics
-                .as_ref()
-                .and_then(|v| v.pointer("/meters/output"));
-            widgets::meter(
-                ui,
-                meter.and_then(|v| v["peak"].as_f64()),
-                meter.and_then(|v| v["rms"].as_f64()),
-            );
-
-            let limiter = self
-                .diagnostics
-                .as_ref()
-                .and_then(|v| v.pointer("/meters/limiter_gain"))
-                .and_then(Value::as_f64);
-            ui.add_space(4.0);
-            widgets::note(
-                ui,
-                limiter.map_or_else(
-                    || "限幅数据未取得".into(),
-                    |g| format!("限幅增益：{:.1} dB", 20.0 * g.max(1e-6).log10()),
-                ),
-            );
-
-            // 添加房间统计信息
-            ui.add_space(8.0);
-            let active_count = state.streams.len();
-            let total_devices = state.devices.len();
-            let muted_count = state.streams.values().filter(|s| s.mix.muted).count();
-            let solo_count = state.streams.values().filter(|s| s.mix.solo).count();
-
-            let mut stats = vec![
-                ("活动通道", format!("{}", active_count)),
-                ("设备数", format!("{}", total_devices)),
-            ];
-            if muted_count > 0 {
-                stats.push(("静音", format!("{}", muted_count)));
-            }
-            if solo_count > 0 {
-                stats.push(("Solo", format!("{}", solo_count)));
-            }
-            widgets::stat_row(ui, &stats);
-
-            ui.add_space(16.0);
-            widgets::divider(ui);
-            ui.add_space(8.0);
-
-            ui.add_enabled_ui(self.ready() && self.controls_room(), |ui| {
-                if let Some(gain) =
-                    gain_input(ui, &mut self.gain_drafts, 0, state.output.gain_db, "总音量")
-                {
-                    self.operation(Operation::OutputMix {
-                        gain_db: Some(gain),
-                        muted: None,
-                    });
-                }
-
-                ui.add_space(12.0);
-                if let Some(db) = widgets::volume_presets(ui, state.output.gain_db) {
-                    self.operation(Operation::OutputMix {
-                        gain_db: Some(db),
-                        muted: None,
-                    });
-                }
-
-                ui.add_space(8.0);
-                ui.horizontal(|ui| {
-                    if state.output.muted {
-                        if widgets::primary_button(ui, "取消总静音").clicked() {
-                            self.operation(Operation::OutputMix {
-                                gain_db: None,
-                                muted: Some(false),
-                            });
-                        }
-                    } else {
-                        if widgets::secondary_button(ui, "总静音").clicked() {
-                            self.operation(Operation::OutputMix {
-                                gain_db: None,
-                                muted: Some(true),
-                            });
-                        }
-                    }
-                });
-            });
-        });
-
-        // 输入通道
-        if state.streams.is_empty() {
-            widgets::empty_state(
-                ui,
-                "🔇",
-                "暂无输入",
-                "Sender 配对并开始发送后，通道将显示在此处。",
-            );
-        } else {
-            ui.label(
-                RichText::new("输入通道")
-                    .size(20.0)
-                    .strong()
-                    .color(theme::TEXT_PRIMARY),
-            );
-            ui.add_space(12.0);
-        }
-
-        let my_device = self
-            .status
-            .as_ref()
-            .and_then(|s| s.profiles.iter().find(|p| p.credential == self.credential))
-            .and_then(|p| p.device_id);
-
-        // 将streams收集到Vec中以便按列分配
-        let mut streams_vec: Vec<_> = state.streams.values().collect();
-        streams_vec.sort_by_key(|s| s.id);
-
-        let stream_count = streams_vec.len();
-        if stream_count > 0 {
-            let grid_width = ui.available_width();
-            let columns = ((grid_width + 16.0) / (360.0 + 16.0)).floor().max(1.0) as usize;
-
-            widgets::responsive_grid(ui, "streams_grid", 360.0, |column_ui, col_idx| {
-                let available_width = column_ui.available_width();
-
-                // 为每一列分配streams
-                for (idx, stream) in streams_vec.iter().enumerate() {
-                    if idx % columns != col_idx {
-                        continue;
-                    }
-
-                    let stream = *stream;
-                    let card_id = format!("stream_{}", stream.id);
-
-                    column_ui.push_id(card_id.clone(), |ui| {
-                        ui.set_width(available_width);
-
-                        widgets::card(ui, &card_id, |ui| {
-                            let device = state.devices.get(&stream.device_id);
-                            let name = device.map_or("未知设备", |d| d.name.as_str());
-
-                            // 设备信息卡片
-                            if let Some(device) = device {
-                                let role_str = match device.role {
-                                    Role::Admin => "Admin",
-                                    Role::Controller => "Controller",
-                                    Role::Member => "Member",
-                                };
-                                widgets::device_card(
-                                    ui,
-                                    name,
-                                    role_str,
-                                    !device.revoked && device.playback_allowed,
-                                    true,
-                                );
-                                ui.add_space(8.0);
-                                ui.label(
-                                    RichText::new(format!("通道 {}", stream.id))
-                                        .size(13.0)
-                                        .color(theme::TEXT_MUTED),
-                                );
-                            } else {
-                                // 降级显示：设备信息不可用
-                                ui.horizontal(|ui| {
-                                    ui.label(
-                                        RichText::new(name)
-                                            .size(18.0)
-                                            .strong()
-                                            .color(theme::TEXT_PRIMARY),
-                                    );
-                                    ui.with_layout(
-                                        egui::Layout::right_to_left(egui::Align::Center),
-                                        |ui| {
-                                            ui.label(
-                                                RichText::new(format!("通道 {}", stream.id))
-                                                    .size(13.0)
-                                                    .color(theme::TEXT_MUTED)
-                                                    .monospace(),
-                                            );
-                                        },
-                                    );
-                                });
-                            }
-
-                            ui.add_space(12.0);
-
-                            // 状态徽章
-                            let status = state.sessions.get(&stream.session_id).map(|s| s.status);
-                            let status_text = if !state.output.available {
-                                "输出丢失"
-                            } else if stream.mix.muted {
-                                "静音"
-                            } else if state.streams.values().any(|s| s.mix.solo) && !stream.mix.solo
-                            {
-                                "因其他通道 Solo 静音"
-                            } else {
-                                status_text(status)
-                            };
-
-                            let badge_status = match status_text {
-                                "播放中" => widgets::BadgeStatus::Success,
-                                "缓冲中" => widgets::BadgeStatus::Info,
-                                "网络降级" => widgets::BadgeStatus::Warning,
-                                _ => widgets::BadgeStatus::Neutral,
-                            };
-                            widgets::status_badge(ui, status_text, badge_status);
-
-                            ui.add_space(16.0);
-
-                            // 电平表
-                            let meter = self
-                                .diagnostics
-                                .as_ref()
-                                .and_then(|v| v.pointer("/meters/lanes"))
-                                .and_then(Value::as_array)
-                                .and_then(|lanes| {
-                                    lanes
-                                        .iter()
-                                        .find(|v| v["stream_id"].as_u64() == Some(stream.id))
-                                });
-                            widgets::meter(
-                                ui,
-                                meter.and_then(|v| v["peak"].as_f64()),
-                                meter.and_then(|v| v["rms"].as_f64()),
-                            );
-
-                            // 显示网络质量和延迟信息
-                            ui.add_space(8.0);
-                            if let Some(session) = state.sessions.get(&stream.session_id) {
-                                let mut stats = Vec::new();
-
-                                // 延迟估计
-                                if let Some(diag) = &self.diagnostics {
-                                    if let Some(queues) =
-                                        diag.get("queues").and_then(Value::as_array)
-                                    {
-                                        if let Some(queue_frames) =
-                                            queues.get(stream.id as usize).and_then(Value::as_f64)
-                                        {
-                                            let latency_ms = queue_frames / 48.0;
-                                            stats.push(("缓冲", format!("{:.1} ms", latency_ms)));
-                                        }
-                                    }
-                                }
-
-                                // 网络状态
-                                let net_status = match session.status {
-                                    SessionStatus::Playing => "良好",
-                                    SessionStatus::Buffering => "缓冲",
-                                    SessionStatus::NetworkDegraded => "降级",
-                                    _ => "连接中",
-                                };
-                                stats.push(("网络", net_status.to_string()));
-
-                                if !stats.is_empty() {
-                                    widgets::stat_row(ui, &stats);
-                                }
-                            }
-
-                            ui.add_space(12.0);
-                            widgets::divider(ui);
-                            ui.add_space(12.0);
-
-                            ui.add_enabled_ui(
-                                self.ready()
-                                    && (self.controls_room()
-                                        || my_device == Some(stream.device_id)),
-                                |ui| {
-                                    if let Some(gain) = gain_input(
-                                        ui,
-                                        &mut self.gain_drafts,
-                                        stream.id,
-                                        stream.mix.gain_db,
-                                        "输入音量",
-                                    ) {
-                                        self.operation(Operation::StreamMix {
-                                            stream_id: stream.id,
-                                            gain_db: Some(gain),
-                                            muted: None,
-                                            solo: None,
-                                        });
-                                    }
-
-                                    ui.add_space(12.0);
-                                    if let Some(db) =
-                                        widgets::volume_presets(ui, stream.mix.gain_db)
-                                    {
-                                        self.operation(Operation::StreamMix {
-                                            stream_id: stream.id,
-                                            gain_db: Some(db),
-                                            muted: None,
-                                            solo: None,
-                                        });
-                                    }
-
-                                    ui.add_space(8.0);
-                                    ui.horizontal_wrapped(|ui| {
-                                        if stream.mix.muted {
-                                            if widgets::primary_button(ui, "取消 Mute").clicked()
-                                            {
-                                                self.operation(Operation::StreamMix {
-                                                    stream_id: stream.id,
-                                                    gain_db: None,
-                                                    muted: Some(false),
-                                                    solo: None,
-                                                });
-                                            }
-                                        } else {
-                                            if widgets::secondary_button(ui, "Mute").clicked() {
-                                                self.operation(Operation::StreamMix {
-                                                    stream_id: stream.id,
-                                                    gain_db: None,
-                                                    muted: Some(true),
-                                                    solo: None,
-                                                });
-                                            }
-                                        }
-
-                                        if self.controls_room() {
-                                            if stream.mix.solo {
-                                                if widgets::primary_button(ui, "取消 Solo")
-                                                    .clicked()
-                                                {
-                                                    self.operation(Operation::StreamMix {
-                                                        stream_id: stream.id,
-                                                        gain_db: None,
-                                                        muted: None,
-                                                        solo: Some(false),
-                                                    });
-                                                }
-                                            } else {
-                                                if widgets::secondary_button(ui, "Solo").clicked() {
-                                                    self.operation(Operation::StreamMix {
-                                                        stream_id: stream.id,
-                                                        gain_db: None,
-                                                        muted: None,
-                                                        solo: Some(true),
-                                                    });
-                                                }
-                                            }
-                                        }
-
-                                        if self.admin() {
-                                            if widgets::danger_button(ui, "断开设备").clicked()
-                                            {
-                                                self.operation(Operation::Disconnect {
-                                                    device_id: stream.device_id,
-                                                });
-                                            }
-                                        }
-                                    });
-                                },
-                            );
-                        });
-                    });
-                }
-            });
-        }
-
-        widgets::note(
-            ui,
-            "电平：最新 50 ms 双声道窗口；每路在 Mute/Solo 和增益之后、总控之前，总控在限幅之后。数据随诊断刷新。",
-        );
-    }
-    fn devices_page(&mut self, ui: &mut egui::Ui) {
-        self.profile_picker(ui);
-        ui.horizontal(|ui| {
-            widgets::field(ui, "搜索设备", &mut self.search, false);
-            if !self.search.is_empty() && ui.button("清除").clicked() {
-                self.search.clear();
-            }
-        });
-        if let Some(state) = self.snapshot.clone() {
-            let mut count = 0;
-            for device in state
-                .devices
-                .values()
-                .filter(|d| {
-                    self.search.is_empty()
-                        || d.name.contains(&self.search)
-                        || d.id.to_string().contains(&self.search)
-                })
-                .cloned()
-                .collect::<Vec<_>>()
-            {
-                count += 1;
-                widgets::card(ui, device.id, |ui| {
-                    // 使用device_card组件显示设备信息
-                    let role_str = match device.role {
-                        Role::Admin => "Admin",
-                        Role::Controller => "Controller",
-                        Role::Member => "Member",
-                    };
-                    widgets::device_card(
-                        ui,
-                        &device.name,
-                        role_str,
-                        !device.revoked && device.playback_allowed,
-                        !device.revoked,
-                    );
-
-                    ui.add_space(12.0);
-
-                    // 显示设备详细信息
-                    let mut device_stats = Vec::new();
-                    device_stats.push(("设备ID", device.id.to_string()));
-
-                    // 查找该设备的活动流
-                    let active_streams = state
-                        .streams
-                        .values()
-                        .filter(|s| s.device_id == device.id)
-                        .count();
-                    if active_streams > 0 {
-                        device_stats.push(("活动流", format!("{}", active_streams)));
-                    }
-
-                    // 权限状态
-                    let permission = if device.revoked {
-                        "已撤销"
-                    } else if device.playback_allowed {
-                        "播放已授权"
-                    } else {
-                        "播放已禁止"
-                    };
-                    device_stats.push(("权限", permission.to_string()));
-
-                    widgets::stat_row(ui, &device_stats);
-
-                    ui.add_space(12.0);
-                    widgets::divider(ui);
-                    ui.add_space(8.0);
-
-                    ui.add_enabled_ui(self.ready() && self.admin() && !device.revoked, |ui| {
-                        ui.horizontal_wrapped(|ui| {
-                            if !device.playback_allowed && ui.button("重新允许播放").clicked()
-                            {
-                                self.operation(Operation::AllowPlayback {
-                                    device_id: device.id,
-                                });
-                            }
-                            if device.playback_allowed
-                                && device.role != Role::Admin
-                                && ui.button("断开设备").clicked()
-                            {
-                                self.operation(Operation::Disconnect {
-                                    device_id: device.id,
-                                });
-                            }
-                            let revoke = ui.add_enabled(
-                                device.role != Role::Admin,
-                                egui::Button::new("撤销配对…"),
-                            );
-                            if revoke.clicked() {
-                                self.confirmation(
-                                    format!("撤销 {} 的配对", device.name),
-                                    "立即结束该设备的媒体和控制连接；旧凭证将失效，需要重新配对。"
-                                        .into(),
-                                    Request::Control {
-                                        credential: self.credential.clone(),
-                                        hub: self.hub(),
-                                        expected_revision: state.revision,
-                                        operation: Operation::Revoke {
-                                            device_id: device.id,
-                                        },
-                                    },
-                                    revoke.id,
-                                );
-                            }
-                        });
-                    });
-                });
-            }
-            if count == 0 {
-                if self.search.is_empty() {
-                    widgets::empty_state(ui, "📱", "暂无设备", "Sender 配对后，设备将显示在此处。");
-                } else {
-                    widgets::empty_state(
-                        ui,
-                        "🔍",
-                        "无匹配结果",
-                        "未找到匹配的设备，尝试清除搜索条件。",
-                    );
-                }
-            }
-        } else {
-            widgets::empty_state(ui, "🔌", "未连接房间", "请先连接到 Hub 以查看设备列表。");
-        }
-        egui::CollapsingHeader::new("本机音频设备身份").show(ui, |ui| {
-            if ui.button("刷新设备").clicked() {
-                self.request(Request::Devices);
-            }
-            for device in &self.devices {
-                ui.label(&device.name);
-                widgets::note(ui, &device.id);
-            }
-            if self.devices.is_empty() {
-                ui.label("未取得本机音频设备。");
-            }
-        });
-    }
-    fn diagnostics_page(&mut self, ui: &mut egui::Ui) {
-        self.profile_picker(ui);
-        widgets::card(ui, "health", |ui| {
-            ui.heading("连接与进程");
-            if let Some(status) = &self.status {
-                ui.label(format!(
-                    "本地后台 PID {} · Hub {} · Sender {}",
-                    status.pid,
-                    if status.hub.running {
-                        "运行"
-                    } else {
-                        "停止"
-                    },
-                    if status.sender.running {
-                        "运行"
-                    } else {
-                        "停止"
-                    }
-                ));
-            }
-            ui.label(match self.fresh {
-                Some(t) => format!("房间状态距上次更新 {:.1} 秒", t.elapsed().as_secs_f32()),
-                None => "未取得有效房间状态；请检查共享状态、发现或配对身份。".into(),
-            });
-        });
-        if let Some(diagnostics) = self.diagnostics.clone() {
-            widgets::card(ui, "output-stats", |ui| {
-                ui.heading("播放与输出");
-                for (label, pointer) in [
-                    ("播放帧（累计）", "/output_frames"),
-                    ("输出错误（累计）", "/output_stats/errors"),
-                    (
-                        "输出回调超预算（累计）",
-                        "/output_stats/callback_over_budget",
-                    ),
-                    ("欠载帧（累计）", "/underrun_frames"),
-                    ("限幅帧（累计）", "/limited_frames"),
-                ] {
-                    ui.label(format!(
-                        "{label}：{}",
-                        diagnostics
-                            .pointer(pointer)
-                            .map_or("未取得".into(), |v| v.to_string())
-                    ));
-                }
-                if let Some(errors) = diagnostics.get("errors") {
-                    ui.label(format!("输出故障：{errors}"));
-                }
-            });
-            widgets::card(ui, "buffer", |ui| {
-                ui.heading("缓冲与媒体网络");
-                let ids = diagnostics.get("lane_stream_ids").and_then(Value::as_array);
-                if let Some(queues) = diagnostics.get("queues").and_then(Value::as_array) {
-                    for (index, q) in queues.iter().enumerate() {
-                        if ids
-                            .and_then(|i| i.get(index))
-                            .is_some_and(|id| !id.is_null())
-                        {
-                            ui.label(format!(
-                                "通道 {} · Mixer 队列估计 {:.1} ms",
-                                ids.unwrap()[index],
-                                q.as_f64().unwrap_or(0.0) / 48.0
-                            ));
-                        }
-                    }
-                }
-                widgets::note(
-                    ui,
-                    "估计口径：队列帧 / 48 kHz；不含设备、网络与模拟端，不是端到端声音延迟。",
-                );
-                if let Some(receivers) = diagnostics.get("receivers").and_then(Value::as_array) {
-                    for (i, r) in receivers.iter().enumerate() {
-                        ui.label(format!("媒体接收器 {}", i + 1));
-                        for (label, key) in [
-                            ("丢包", "lost_packets"),
-                            ("迟到包", "late_packets"),
-                            ("PLC 样本", "plc_samples"),
-                            ("PCM 缺口", "pcm_timing_gap_count"),
-                            ("PCM 队列丢弃", "queue_drops"),
-                        ] {
-                            ui.label(format!(
-                                "{label}（累计）：{}",
-                                r.get(key).map_or("未取得".into(), |v| v.to_string())
-                            ));
-                        }
-                    }
-                }
-            });
-            if ui.button("导出脱敏诊断").clicked() {
-                self.request(Request::ExportDiagnostics {
-                    credential: self.credential.clone(),
-                    hub: self.hub(),
-                });
-            }
-            widgets::note(
-                ui,
-                format!(
-                    "导出到 {}/diagnostics-redacted.json；仅保留诊断白名单数值和状态。",
-                    self.client.state_dir().display()
-                ),
-            );
-        } else {
-            ui.label("诊断未取得。控制断线、未配对与输出设备故障需要分别处理。");
-        }
-        if let Some(status) = &self.status {
-            widgets::card(ui, "capture", |ui| {
-                ui.heading("Sender 采集");
-                if let Some(metrics) = &status.sender.metrics {
-                    for (label, pointer) in [
-                        ("采集帧", "/capture_stats/frames"),
-                        ("静音帧", "/capture_stats/silent_frames"),
-                        ("无数据间隔", "/capture_stats/no_data_intervals"),
-                        ("采集错误", "/capture_stats/errors"),
-                        ("发送包", "/sent_packets"),
-                        ("发包队列丢弃", "/queue_drops"),
-                    ] {
-                        ui.label(format!(
-                            "{label}（累计）：{}",
-                            metrics
-                                .pointer(pointer)
-                                .map_or("未取得".into(), |v| v.to_string())
-                        ));
-                    }
-                    widgets::meter(
-                        ui,
-                        metrics
-                            .pointer("/capture_stats/peak")
-                            .and_then(Value::as_f64),
-                        None,
-                    );
-                    widgets::note(
-                        ui,
-                        "采集 Peak 为本次会话累计最大值，RMS 未取得；Mixer 页面显示近期窗口。",
-                    );
-                } else {
-                    ui.label("当前没有采集统计。开始发送后刷新。");
-                }
-                if let Some(error) = &status.sender.error {
-                    ui.colored_label(theme::DANGER, error);
-                }
-            });
-        }
+}
+fn request_key(request: &Request) -> &'static str {
+    match request {
+        Request::HubSetup { .. } | Request::HubSettings { .. } => "hub-settings",
+        Request::HubStart => "hub-start",
+        Request::HubStop => "hub-stop",
+        Request::TestTone { .. } => "test-tone",
+        Request::Discover { .. } => "discover",
+        Request::PairText { .. } => "pair",
+        Request::Invite { .. } => "invite",
+        Request::SenderStart { .. } => "sender-start",
+        Request::Output { .. } => "output",
+        Request::ExportDiagnostics { .. } => "export",
+        Request::Devices => "devices",
+        _ => "other",
     }
 }
 fn user_error(error: String) -> String {
     match error.as_str() {
-        "revision_conflict" => "房间状态已被其他操作更新；正在刷新，请核对后重试。".into(),
+        "revision_conflict" | "stale_revision" => {
+            "房间状态已被其他操作更新；正在刷新，请核对后重试。".into()
+        }
         "permission_denied" => "当前身份无权执行此操作；请刷新设备权限。".into(),
         "unauthenticated" => "配对凭证不可用；检查是否已被撤销，必要时重新配对。".into(),
         "invalid_argument" => "参数无效；请检查字段和所选设备。".into(),
         "not_found" => "目标设备或通道已不存在；请刷新状态。".into(),
-        "quota_exceeded" => "房间已达到设备或通道上限。".into(),
+        "quota_exceeded" | "room_capacity_full" => "房间已达到设备或通道上限。".into(),
+        "receiver_busy" => "这个入口已被占用；请选择空闲入口。".into(),
+        "source_already_active" => "此来源已在房间播放；先断开旧连接再更换入口。".into(),
+        "source_blocked" => "此来源已被禁止播放，请由管理员重新允许。".into(),
+        "pairing_revoked" => "此来源的配对已撤销，需要管理员重新开放配对。".into(),
+        "session_changed" => "此来源的会话已变化；正在刷新，请核对后重试。".into(),
+        "worker_unavailable" => "此入口的接收引擎不可用，请检查诊断后重新开启。".into(),
+        "output_unavailable" => "实体输出不可用，请检查声卡连接。".into(),
+        "upgrade_required" => "此房间使用多路 AirPlay，请更新桌面客户端。".into(),
         _ => error,
     }
-}
-fn gain_input(
-    ui: &mut egui::Ui,
-    drafts: &mut std::collections::BTreeMap<u64, f32>,
-    id: u64,
-    current: f32,
-    label: &str,
-) -> Option<f32> {
-    let mut result = None;
-    let mut gain = drafts.get(&id).copied().unwrap_or(current);
-
-    // 音量预设按钮
-    if let Some(preset_gain) = widgets::volume_presets(ui, gain) {
-        gain = preset_gain;
-        result = Some(gain);
-        drafts.remove(&id);
-    }
-
-    ui.add_space(8.0);
-
-    // 音量滑块
-    let response = widgets::gain_slider(ui, &mut gain, label);
-    if response.changed() {
-        drafts.insert(id, gain);
-    }
-    if response.drag_stopped() || response.changed() && !response.dragged() {
-        drafts.remove(&id);
-        result = Some(gain);
-    }
-
-    result
 }
 fn virtual_device(device: &DeviceInfo) -> bool {
     device.id.contains("com.neonmix.")
@@ -2553,6 +1078,10 @@ impl eframe::App for Desktop {
             }
         }
         self.show(ctx);
+        #[cfg(feature = "screenshot")]
+        if let Some(shot) = &mut self.shot {
+            shot.update(ctx);
+        }
     }
 }
 fn main() -> eframe::Result {
@@ -2572,9 +1101,53 @@ fn main() -> eframe::Result {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn themed() -> egui::Context {
+        let ctx = egui::Context::default();
+        theme::install_style(&ctx);
+        theme::fallback_fonts(&ctx);
+        ctx
+    }
+
+    #[test]
+    fn named_fields_publish_accessible_labels_without_exposing_password_text() {
+        let ctx = egui::Context::default();
+        ctx.enable_accesskit();
+        for secret in [false, true] {
+            let mut value = "private-test-value".to_owned();
+            let output = ctx.run(egui::RawInput::default(), |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    widgets::field(ui, "受测字段", &mut value, secret);
+                });
+            });
+            let tree = output.platform_output.accesskit_update.unwrap();
+            let field = tree
+                .nodes
+                .iter()
+                .map(|(_, node)| node)
+                .find(|node| {
+                    matches!(
+                        node.role(),
+                        egui::accesskit::Role::TextInput | egui::accesskit::Role::PasswordInput
+                    )
+                })
+                .expect("field absent from accessibility tree");
+            assert!(!field.labelled_by().is_empty());
+            assert!(
+                field
+                    .labelled_by()
+                    .iter()
+                    .all(|label| tree.nodes.iter().any(|(id, _)| id == label))
+            );
+            if secret {
+                assert_ne!(field.value(), Some(value.as_str()));
+            }
+        }
+    }
+
     #[test]
     fn pages_handle_missing_loading_failed_and_stale_states() {
-        let ctx = egui::Context::default();
+        let ctx = themed();
         let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, true);
         for (page, _) in Page::ALL {
             app.page = page;
@@ -2597,6 +1170,117 @@ mod tests {
         assert!(!app.ready());
         assert!(!app.admin());
         assert!(!app.controls_room());
+    }
+    #[test]
+    fn airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions() {
+        let mut authority =
+            neonmix_control::Authority::new("speaker".into(), "admin".into(), &"a".repeat(64))
+                .unwrap();
+        let admin = authority.snapshot().devices.values().next().unwrap().id;
+        let member = authority
+            .add_device("Member".into(), Role::Member, &"b".repeat(64))
+            .unwrap();
+        let snapshot = authority.snapshot();
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.snapshot = Some(snapshot.clone());
+        app.fresh = Some(Instant::now());
+        app.airplay = Some(
+            serde_json::json!({"revision":7,"enabled":true,"multi_receiver":true,
+            "receivers":[{"receiver_id":"receiver-1","name":"Input 1","ready":true,"active":true}],
+            "sources":[{"source_id":"source-digest","last_name":"Studio iPhone","blocked":false,"revoked":false}],
+            "sessions":[{"receiver_id":"receiver-1","source_id":"source-digest","source_name":"Studio iPhone","session_id":77,"stream_id":88}],
+            "capacity":{"limit":4,"active":1}}),
+        );
+        app.status = Some(ServiceStatus {
+            version: 1,
+            pid: 1,
+            hub: Default::default(),
+            sender: Default::default(),
+            hub_settings: None,
+            profiles: vec![neonmix_desktop_service::ProfileInfo {
+                credential: app.credential.clone(),
+                device_id: Some(admin),
+                hub_id: Some(snapshot.hub_id),
+                name: Some("admin".into()),
+                role: Some(Role::Admin),
+                pending: false,
+            }],
+            sender_options: None,
+            output_binding: None,
+        });
+        for (query, visible) in [
+            ("", true),
+            ("iphone", true),
+            ("AIRPLAY", true),
+            ("source-digest", true),
+            ("no-match", false),
+        ] {
+            app.search = query.into();
+            let ctx = themed();
+            ctx.enable_accesskit();
+            let output = ctx.run(egui::RawInput::default(), |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| app.devices_page(ui));
+            });
+            let tree = output.platform_output.accesskit_update.unwrap();
+            let has_name = tree
+                .nodes
+                .iter()
+                .any(|(_, node)| node.value() == Some("Studio iPhone"));
+            assert_eq!(has_name, visible, "query {query}");
+            if visible {
+                assert!(
+                    tree.nodes
+                        .iter()
+                        .any(|(_, node)| node.label() == Some("断开 AirPlay 来源"))
+                );
+            }
+        }
+        assert!(
+            app.airplay_request(
+                neonmix_airplay_adapter::control::AirplayActionV2::DisconnectSource {
+                    source_id: "source-digest".into(),
+                    session_id: 76
+                }
+            )
+            .is_none()
+        );
+        assert!(
+            app.airplay_request(
+                neonmix_airplay_adapter::control::AirplayActionV2::DisconnectSource {
+                    source_id: "different-source".into(),
+                    session_id: 77
+                }
+            )
+            .is_none()
+        );
+        app.status.as_mut().unwrap().profiles[0].device_id = Some(member);
+        app.search.clear();
+        let ctx = themed();
+        ctx.enable_accesskit();
+        let output = ctx.run(egui::RawInput::default(), |ctx| {
+            egui::CentralPanel::default().show(ctx, |ui| app.devices_page(ui));
+        });
+        let tree = output.platform_output.accesskit_update.unwrap();
+        assert!(
+            tree.nodes
+                .iter()
+                .any(|(_, node)| node.value() == Some("Studio iPhone"))
+        );
+        assert!(
+            !tree
+                .nodes
+                .iter()
+                .any(|(_, node)| node.label() == Some("断开 AirPlay 来源"))
+        );
+        assert!(
+            app.airplay_request(
+                neonmix_airplay_adapter::control::AirplayActionV2::DisconnectSource {
+                    source_id: "source-digest".into(),
+                    session_id: 77
+                }
+            )
+            .is_none()
+        );
     }
     #[test]
     fn commands_use_authoritative_revision_and_duplicate_submission_is_blocked() {
@@ -2770,7 +1454,7 @@ mod tests {
     }
     #[test]
     fn cancel_modal_keeps_accesskit_focus_in_the_published_tree() {
-        let ctx = egui::Context::default();
+        let ctx = themed();
         ctx.enable_accesskit();
         let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, true);
         app.confirmation(
@@ -2802,5 +1486,329 @@ mod tests {
         }
         assert!(app.confirm.is_none());
         assert!(!app.focus_after_modal);
+    }
+
+    /// User-reported flicker: an in-flight write used to disable (fade) the
+    /// whole page and grey every control until the next poll. Controls must
+    /// stay enabled, and a second write made meanwhile is kept and sent
+    /// against the next authoritative revision instead of being dropped.
+    #[test]
+    fn inflight_write_keeps_controls_enabled_and_sends_latest_intent_later() {
+        let authority =
+            neonmix_control::Authority::new("speaker".into(), "admin".into(), &"a".repeat(64))
+                .unwrap();
+        let mut snapshot = authority.snapshot();
+        let admin = snapshot.devices.values().next().unwrap().id;
+        let status = ServiceStatus {
+            version: 1,
+            pid: 1,
+            hub: Default::default(),
+            sender: Default::default(),
+            hub_settings: None,
+            profiles: vec![neonmix_desktop_service::ProfileInfo {
+                credential: "hub/admin.json".into(),
+                device_id: Some(admin),
+                hub_id: Some(snapshot.hub_id),
+                name: Some("admin".into()),
+                role: Some(Role::Admin),
+                pending: false,
+            }],
+            sender_options: None,
+            output_binding: None,
+        };
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.page = Page::Mixer;
+        app.online = true;
+        app.snapshot = Some(snapshot.clone());
+        app.status = Some(status.clone());
+        app.fresh = Some(Instant::now());
+        app.synced = app.fresh;
+        app.last_poll = Instant::now();
+        let (tx, rx) = mpsc::sync_channel(1);
+        app.worker = Some(tx);
+        let (done, results) = mpsc::sync_channel(1);
+        app.results = Some(results);
+
+        app.operation(Operation::OutputMix {
+            gain_db: None,
+            muted: Some(true),
+        });
+        assert!(matches!(
+            rx.try_recv(),
+            Ok(Work::Action(Request::Control { .. }))
+        ));
+        assert!(!app.ready() && app.writable());
+
+        let ctx = themed();
+        ctx.enable_accesskit();
+        let output = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1100.0, 760.0),
+                )),
+                ..Default::default()
+            },
+            |ctx| app.show(ctx),
+        );
+        let tree = output.platform_output.accesskit_update.unwrap();
+        let mute = tree
+            .nodes
+            .iter()
+            .map(|(_, node)| node)
+            .find(|node| node.label() == Some("总静音"))
+            .expect("master mute absent");
+        assert!(!mute.is_disabled(), "controls must not grey out mid-write");
+
+        app.operation(Operation::OutputMix {
+            gain_db: Some(-6.0),
+            muted: None,
+        });
+        assert!(rx.try_recv().is_err(), "second write must wait, not race");
+        assert!(app.queued_write.is_some());
+
+        done.send(Ok(Outcome::Action(Request::Status, Value::Null)))
+            .unwrap();
+        app.process();
+        assert!(matches!(rx.try_recv(), Ok(Work::Poll { .. })));
+        snapshot.revision += 1;
+        done.send(Ok(Outcome::Poll(Box::new(PollData {
+            credential: "hub/admin.json".into(),
+            hub: None,
+            room_name: None,
+            status,
+            snapshot: Some(snapshot.clone()),
+            diagnostics: None,
+            airplay: None,
+            error: None,
+        }))))
+        .unwrap();
+        app.process();
+        match rx.try_recv() {
+            Ok(Work::Action(Request::Control {
+                expected_revision,
+                operation,
+                ..
+            })) => {
+                assert_eq!(expected_revision, snapshot.revision);
+                assert_eq!(
+                    operation,
+                    Operation::OutputMix {
+                        gain_db: Some(-6.0),
+                        muted: None
+                    }
+                );
+            }
+            _ => panic!("queued write was not sent"),
+        }
+    }
+
+    fn pointer(pos: egui::Pos2, pressed: Option<bool>, time: f64) -> egui::RawInput {
+        let mut events = vec![egui::Event::PointerMoved(pos)];
+        if let Some(pressed) = pressed {
+            events.push(egui::Event::PointerButton {
+                pos,
+                button: egui::PointerButton::Primary,
+                pressed,
+                modifiers: egui::Modifiers::NONE,
+            });
+        }
+        egui::RawInput {
+            events,
+            time: Some(time),
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(400.0, 100.0),
+            )),
+            ..Default::default()
+        }
+    }
+
+    /// A live room must not jump level because someone clicked the track;
+    /// only a drag moves the fader. Double-click is the explicit reset.
+    #[test]
+    fn fader_click_never_jumps_gain_and_double_click_resets_to_unity() {
+        let ctx = themed();
+        let mut gain = -30.0_f32;
+        let frame = |input: egui::RawInput, gain: &mut f32| {
+            let _ = ctx.run(input, |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    widgets::fader(ui, "test", gain, "受测音量", widgets::FaderSize::Row);
+                });
+            });
+        };
+        let far = egui::pos2(380.0, 20.0);
+        frame(pointer(far, None, 0.0), &mut gain);
+        frame(pointer(far, Some(true), 0.1), &mut gain);
+        frame(pointer(far, Some(false), 0.15), &mut gain);
+        assert_eq!(gain, -30.0, "a click on the track must not move the fader");
+        frame(pointer(far, Some(true), 0.2), &mut gain);
+        frame(pointer(far, Some(false), 0.25), &mut gain);
+        frame(pointer(far, None, 0.3), &mut gain);
+        assert_eq!(gain, 0.0, "double-click returns to 0 dB");
+    }
+
+    /// Enter that confirms an IME candidate belongs to the input method; it
+    /// must not run the highlighted palette action.
+    #[test]
+    fn palette_enter_during_ime_composition_does_not_run_an_action() {
+        let ctx = themed();
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, true);
+        app.page = Page::Sender;
+        app.open_palette();
+        let enter = egui::Event::Key {
+            key: egui::Key::Enter,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::NONE,
+        };
+        let run = |app: &mut Desktop, events| {
+            let _ = ctx.run(
+                egui::RawInput {
+                    events,
+                    ..Default::default()
+                },
+                |ctx| app.show(ctx),
+            );
+        };
+        run(&mut app, vec![]);
+        run(
+            &mut app,
+            vec![
+                egui::Event::Ime(egui::ImeEvent::Enabled),
+                egui::Event::Ime(egui::ImeEvent::Preedit("qian".into())),
+                enter.clone(),
+            ],
+        );
+        assert!(app.palette.is_some(), "palette stays open while composing");
+        assert_eq!(app.page, Page::Sender);
+        run(
+            &mut app,
+            vec![egui::Event::Ime(egui::ImeEvent::Commit("前往".into()))],
+        );
+        run(&mut app, vec![enter]);
+        assert!(
+            app.palette.is_none(),
+            "plain Enter runs the highlighted action"
+        );
+        assert_eq!(app.page, Page::Hub);
+    }
+
+    /// 还原 sends the inverse of the last mixer change, against the next
+    /// authoritative revision rather than the one the change was made on.
+    #[test]
+    fn restore_sends_the_inverse_change_against_a_fresh_revision() {
+        let authority =
+            neonmix_control::Authority::new("speaker".into(), "admin".into(), &"a".repeat(64))
+                .unwrap();
+        let mut snapshot = authority.snapshot();
+        let admin = snapshot.devices.values().next().unwrap().id;
+        let status = ServiceStatus {
+            version: 1,
+            pid: 1,
+            hub: Default::default(),
+            sender: Default::default(),
+            hub_settings: None,
+            profiles: vec![neonmix_desktop_service::ProfileInfo {
+                credential: "hub/admin.json".into(),
+                device_id: Some(admin),
+                hub_id: Some(snapshot.hub_id),
+                name: Some("admin".into()),
+                role: Some(Role::Admin),
+                pending: false,
+            }],
+            sender_options: None,
+            output_binding: None,
+        };
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.online = true;
+        app.snapshot = Some(snapshot.clone());
+        app.status = Some(status.clone());
+        app.fresh = Some(Instant::now());
+        app.synced = app.fresh;
+        app.last_poll = Instant::now();
+        let (tx, rx) = mpsc::sync_channel(1);
+        app.worker = Some(tx);
+        let (done, results) = mpsc::sync_channel(1);
+        app.results = Some(results);
+
+        app.master_mute(true);
+        assert!(matches!(
+            rx.try_recv(),
+            Ok(Work::Action(Request::Control { .. }))
+        ));
+        assert!(app.undo_available());
+        app.restore_last();
+        assert!(
+            rx.try_recv().is_err(),
+            "restore waits for the fresh revision"
+        );
+        done.send(Ok(Outcome::Action(Request::Status, Value::Null)))
+            .unwrap();
+        app.process();
+        assert!(matches!(rx.try_recv(), Ok(Work::Poll { .. })));
+        snapshot.revision += 1;
+        snapshot.output.muted = true;
+        done.send(Ok(Outcome::Poll(Box::new(PollData {
+            credential: "hub/admin.json".into(),
+            hub: None,
+            room_name: None,
+            status,
+            snapshot: Some(snapshot.clone()),
+            diagnostics: None,
+            airplay: None,
+            error: None,
+        }))))
+        .unwrap();
+        app.process();
+        match rx.try_recv() {
+            Ok(Work::Action(Request::Control {
+                expected_revision,
+                operation,
+                ..
+            })) => {
+                assert_eq!(expected_revision, snapshot.revision);
+                assert_eq!(
+                    operation,
+                    Operation::OutputMix {
+                        gain_db: None,
+                        muted: Some(false)
+                    }
+                );
+            }
+            _ => panic!("restore was not sent"),
+        }
+    }
+    #[test]
+    fn long_error_at_minimum_width_keeps_page_content_on_screen() {
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, true);
+        app.page = Page::Devices;
+        app.error = true;
+        app.message =
+            "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。".repeat(3);
+        let ctx = themed();
+        ctx.enable_accesskit();
+        let output = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(600.0, 440.0),
+                )),
+                ..Default::default()
+            },
+            |ctx| app.show(ctx),
+        );
+        let tree = output.platform_output.accesskit_update.unwrap();
+        let header = tree
+            .nodes
+            .iter()
+            .find(|(_, node)| node.value() == Some("设备管理"))
+            .expect("page title must remain visible");
+        let bounds = header.1.bounds().expect("page title bounds");
+        assert!(
+            bounds.y0 >= 0.0 && bounds.y1 < 440.0,
+            "status message displaced page title"
+        );
     }
 }

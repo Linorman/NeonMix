@@ -7,7 +7,7 @@ use serde_json::json;
 use std::{
     io::{Read, Write},
     os::unix::{fs::PermissionsExt, net::UnixStream},
-    path::PathBuf,
+    path::{Path, PathBuf},
     time::Duration,
 };
 
@@ -29,7 +29,37 @@ impl Fixture {
     fn write(&self, relative: &str, value: serde_json::Value) {
         let path = self.0.join(relative);
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
-        std::fs::write(path, serde_json::to_vec(&value).unwrap()).unwrap();
+        let mut value = value;
+        if value.get("secret_ref").is_some() {
+            value["version"] = json!(2);
+            value["credential_store"] = json!("file");
+            value["profile_kind"] = json!(if relative == "hub/admin.json" {
+                "admin"
+            } else {
+                "member"
+            });
+            value["secret_ref"] = json!(uuid::Uuid::new_v4());
+            if value.get("hub_id").is_none() {
+                value["hub_id"] = json!(uuid::Uuid::new_v4());
+            }
+            if value.get("device_id").is_none() {
+                value["device_id"] = json!(uuid::Uuid::new_v4());
+            }
+            value["request_id"] = json!(uuid::Uuid::new_v4());
+            value["certificate"] = json!("fixture-public-certificate");
+            value["name"] = json!("fixture");
+            value["pending"] = json!(false);
+            value["invitation_id"] = json!(null);
+        }
+        if value.get("private_key_ref").is_some() {
+            value["version"] = json!(2);
+            value["credential_store"] = json!("file");
+            value["private_key_ref"] = json!(uuid::Uuid::new_v4());
+            value["admin_token_ref"] = json!(uuid::Uuid::new_v4());
+            value["certificate"] = json!("fixture-public-certificate");
+            value["state_path"] = json!("state.json");
+        }
+        neonmix_identity::files::write_new(&path, &serde_json::to_vec(&value).unwrap()).unwrap();
     }
     fn child(&self) -> PathBuf {
         let path = self.0.join("fixture-child");
@@ -121,10 +151,10 @@ async fn ui_disconnect_reopen_stop_shutdown_and_failed_media_are_authoritative()
     let binary = fixture.child();
     fixture.write(
         "hub/server.json",
-        json!({"private_key_ref":"vault-ref","room_name":"房间","output":"physical"}),
+        json!({"private_key_ref":"fixture-tls","room_name":"房间","output":"physical"}),
     );
-    fixture.write("hub/admin.json",json!({"secret_ref":"vault-admin","hub_id":uuid::Uuid::new_v4(),"device_id":uuid::Uuid::new_v4(),"pending":false}));
-    fixture.write("profiles/sender.json",json!({"secret_ref":"vault-sender","hub_id":uuid::Uuid::new_v4(),"device_id":uuid::Uuid::new_v4(),"pending":false}));
+    fixture.write("hub/admin.json",json!({"secret_ref":"fixture-admin","hub_id":uuid::Uuid::new_v4(),"device_id":uuid::Uuid::new_v4(),"pending":false}));
+    fixture.write("profiles/sender.json",json!({"secret_ref":"fixture-member","hub_id":uuid::Uuid::new_v4(),"device_id":uuid::Uuid::new_v4(),"pending":false}));
     let directory = fixture.0.clone();
     let daemon = tokio::spawn(daemon::serve_with_binaries(
         directory,
@@ -369,9 +399,9 @@ async fn urgent_stop_interrupts_a_hung_read_only_query_and_reaps_its_process() {
     let binary = fixture.child();
     fixture.write(
         "hub/server.json",
-        json!({"private_key_ref":"vault-ref","room_name":"Room","output":"physical"}),
+        json!({"private_key_ref":"fixture-tls","room_name":"Room","output":"physical"}),
     );
-    fixture.write("hub/admin.json", json!({"secret_ref":"vault-admin"}));
+    fixture.write("hub/admin.json", json!({"secret_ref":"fixture-admin"}));
     let directory = fixture.0.clone();
     let server = tokio::spawn(daemon::serve_with_binaries(
         directory,
@@ -427,7 +457,7 @@ async fn urgent_stop_interrupts_a_hung_read_only_query_and_reaps_its_process() {
 async fn invitations_are_ephemeral_repeatable_and_export_contains_no_untrusted_strings() {
     let fixture = Fixture::new();
     let binary = fixture.child();
-    fixture.write("hub/admin.json", json!({"secret_ref":"vault-admin"}));
+    fixture.write("hub/admin.json", json!({"secret_ref":"fixture-admin"}));
     fixture.write(
         "output/binding.json",
         json!({"revision":5,"display_name":"Persisted output","enabled":true}),
@@ -570,6 +600,94 @@ async fn forgetting_a_sender_stops_media_disables_persisted_binding_and_removes_
     );
     assert!(!fixture.0.join("profiles/sender.json").exists());
     assert!(fixture.0.join("hub/admin.json").exists());
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn metadata_versions_and_admin_aliases_fail_closed_without_loading_secrets() {
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    fixture.write("hub/admin.json", json!({"secret_ref":"fixture"}));
+    fixture.write("profiles/member.json", json!({"secret_ref":"fixture"}));
+    let admin: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(fixture.0.join("hub/admin.json")).unwrap()).unwrap();
+    let mut alias = admin.clone();
+    alias["profile_kind"] = json!("member");
+    neonmix_identity::files::write_new(
+        &fixture.0.join("profiles/alias.json"),
+        &serde_json::to_vec(&alias).unwrap(),
+    )
+    .unwrap();
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary,
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let legacy_hub = fixture.0.join("hub/server.json");
+    neonmix_identity::files::write_new(
+        &legacy_hub,
+        &serde_json::to_vec(&json!({"version":1,"private_key_ref":uuid::Uuid::new_v4()})).unwrap(),
+    )
+    .unwrap();
+    let setup = request(
+        &client,
+        Request::HubSetup {
+            settings: HubSettings {
+                name: "room".into(),
+                output: "fixture-output".into(),
+            },
+        },
+    )
+    .await;
+    assert!(!setup.ok);
+    assert!(setup.error.as_deref().unwrap().contains("离线迁移"));
+    assert!(legacy_hub.exists());
+    let rejected = request(
+        &client,
+        Request::ForgetCredential {
+            credential: "profiles/alias.json".into(),
+        },
+    )
+    .await;
+    assert!(!rejected.ok);
+    assert!(fixture.0.join("profiles/alias.json").exists());
+    let path = fixture.0.join("profiles/member.json");
+    let member: serde_json::Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+    let mut legacy = member.clone();
+    legacy["version"] = json!(1);
+    legacy.as_object_mut().unwrap().remove("credential_store");
+    legacy.as_object_mut().unwrap().remove("profile_kind");
+    let mut unsupported = member.clone();
+    unsupported["version"] = json!(99);
+    let mut mixed = member;
+    mixed["token"] = json!("must-not-leak");
+    for value in [legacy, unsupported, mixed] {
+        neonmix_identity::files::replace(&path, &serde_json::to_vec(&value).unwrap()).unwrap();
+        let reply = request(
+            &client,
+            Request::Diagnostics {
+                credential: "profiles/member.json".into(),
+                hub: None,
+            },
+        )
+        .await;
+        assert!(!reply.ok);
+        assert!(
+            !serde_json::to_string(&reply)
+                .unwrap()
+                .contains("must-not-leak")
+        );
+        assert!(
+            status(&client)
+                .await
+                .profiles
+                .iter()
+                .all(|p| p.credential != Path::new("profiles/member.json"))
+        );
+    }
     assert!(request(&client, Request::Shutdown).await.ok);
     server.await.unwrap().unwrap();
 }

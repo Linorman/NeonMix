@@ -347,6 +347,9 @@ pub struct ReceiveStats {
     pub plc_samples: u64,
     pub retimed_loss_events: u64,
     pub overflow_plc_packets: u64,
+    pub jitter_queued_packets: usize,
+    pub jitter_peak_packets: usize,
+    pub jitter_capacity_exhausted: bool,
     pub last_loss_duration_ns: u64,
     pub pcm_frames: u64,
     pub pcm_peak: f32,
@@ -372,12 +375,14 @@ pub struct Receiver {
     endpoint: Endpoint,
     pcm: AppSink,
     jitter: gst::Element,
+    jitter_budget: Arc<Mutex<JitterBudget>>,
     decoder: gst::Element,
     timeline: Arc<Mutex<RtpTimeline>>,
     session: Session,
     next_position: u64,
     origin: Instant,
     pcm_frames: u64,
+    pending_pcm: VecDeque<AudioBlock>,
     pump_exhausted: bool,
     pcm_peak: f32,
     silent_pcm_frames: u64,
@@ -385,6 +390,43 @@ pub struct Receiver {
     last_lost: u64,
     last_received: u64,
 }
+// Packet deadlines and queue capacity are different limits. GStreamer's
+// drop-on-latency evicts by queued RTP span, even when the output task was
+// merely descheduled and every packet arrived before its deadline.
+const MAX_JITTER_PACKETS: usize = 32;
+#[derive(Default)]
+struct JitterBudget {
+    packets: VecDeque<u64>,
+    highest: u64,
+    retired: Option<u64>,
+    peak: usize,
+    exhausted: bool,
+}
+impl JitterBudget {
+    fn admit(&mut self, sequence: u64) -> bool {
+        self.highest = self.highest.max(sequence);
+        // Authenticated reordering can deliver an already retired packet. Let
+        // jitterbuffer count it as late without occupying a queue slot.
+        if self.retired.is_some_and(|retired| sequence <= retired) {
+            return true;
+        }
+        if self.packets.len() == MAX_JITTER_PACKETS {
+            self.exhausted = true;
+            return false;
+        }
+        self.packets.push_back(sequence);
+        self.peak = self.peak.max(self.packets.len());
+        true
+    }
+    fn retire(&mut self, sequence: u16, packets: u64) {
+        let extended = protocol::extend(u64::from(sequence), self.highest, 16);
+        let retired = extended.saturating_add(packets.saturating_sub(1));
+        let retired = self.retired.map_or(retired, |old| old.max(retired));
+        self.retired = Some(retired);
+        self.packets.retain(|sequence| *sequence > retired);
+    }
+}
+
 struct SourceAnchors {
     first: Option<u64>,
     highest: u64,
@@ -445,7 +487,7 @@ impl Receiver {
         let jitter = gst::ElementFactory::make("rtpjitterbuffer")
             .name("jitter")
             .property("latency", 40u32)
-            .property("drop-on-latency", true)
+            .property("drop-on-latency", false)
             .property("do-lost", true)
             .property("do-retransmission", false)
             .property_from_str("mode", "slave")
@@ -534,6 +576,7 @@ impl Receiver {
             pcm.upcast_ref(),
         ])
         .map_err(native)?;
+        let jitter_budget = Arc::new(Mutex::new(JitterBudget::default()));
         let source_anchors = Arc::new(Mutex::new(SourceAnchors {
             first: None,
             highest: 0,
@@ -554,6 +597,7 @@ impl Receiver {
         let loss_anchors = source_anchors.clone();
         let retimed_events = retimed_loss_events.clone();
         let last_loss = last_loss_duration_ns.clone();
+        let loss_budget = jitter_budget.clone();
         jitter
             .static_pad("src")
             .ok_or_else(|| native("jitter src"))?
@@ -573,6 +617,11 @@ impl Receiver {
                     last_loss.store(original, std::sync::atomic::Ordering::Relaxed);
                     let packets = original.saturating_add(5_000_000) / 10_000_000;
                     let duration = packets.max(1).saturating_mul(10_000_000);
+                    if let Ok(sequence) = structure.get::<u32>("seqnum")
+                        && let Ok(mut budget) = loss_budget.lock()
+                    {
+                        budget.retire(sequence as u16, packets.max(1));
+                    }
                     let timestamp = if let Ok(mut anchors) = loss_anchors.lock() {
                         let timestamp = anchors.pts_origin_ns.map(|origin| {
                             origin.saturating_add(neonmix_core::clock::frames_to_ns(
@@ -598,6 +647,7 @@ impl Receiver {
                 gst::PadProbeReturn::Ok
             });
         let jitter_time = authenticated_to_jitter_max_ns.clone();
+        let output_budget = jitter_budget.clone();
         jitter
             .static_pad("src")
             .ok_or_else(|| native("jitter src"))?
@@ -611,6 +661,9 @@ impl Receiver {
                 let timestamp = rtp.timestamp();
                 let sequence = rtp.seq();
                 drop(rtp);
+                if let Ok(mut budget) = output_budget.lock() {
+                    budget.retire(sequence, 1);
+                }
                 let Some(pts) = buffer.pts() else {
                     return gst::PadProbeReturn::Drop;
                 };
@@ -663,6 +716,7 @@ impl Receiver {
         let timeline = Arc::new(Mutex::new(RtpTimeline::default()));
         let tracked = timeline.clone();
         let wire_time = wire_to_authenticated_max_ns.clone();
+        let input_budget = jitter_budget.clone();
         let pipeline = endpoint.pipeline.downgrade();
         dec.static_pad("rtp_src")
             .ok_or_else(|| native("rtp_src"))?
@@ -687,6 +741,17 @@ impl Receiver {
                     return gst::PadProbeReturn::Drop;
                 }
                 if !t.observe(rtp.seq(), rtp.timestamp()) {
+                    return gst::PadProbeReturn::Drop;
+                }
+                let sequence = protocol::extend(u64::from(rtp.seq()), t.stats.highest_sequence, 16);
+                if input_budget
+                    .lock()
+                    .ok()
+                    .is_none_or(|mut budget| !budget.admit(sequence))
+                {
+                    // Fail this context explicitly instead of building an
+                    // unbounded native queue or silently concealing good audio.
+                    gate.revoke();
                     return gst::PadProbeReturn::Drop;
                 }
                 let now = origin.elapsed().as_nanos().min(u128::from(u64::MAX)) as u64;
@@ -729,12 +794,14 @@ impl Receiver {
             endpoint,
             pcm,
             jitter,
+            jitter_budget,
             decoder,
             timeline,
             session,
             next_position: 0,
             origin,
             pcm_frames: 0,
+            pending_pcm: VecDeque::with_capacity(12),
             pump_exhausted: false,
             pcm_peak: 0.0,
             silent_pcm_frames: 0,
@@ -763,6 +830,10 @@ impl Receiver {
         let mut count = 0;
         self.pump_exhausted = true;
         for _ in 0..4 {
+            count += drain_pending_pcm(&mut self.pending_pcm, producer, &mut self.queue_drops);
+            if !self.pending_pcm.is_empty() {
+                return Ok(count);
+            }
             let Some(sample) = self.pcm.try_pull_sample(gst::ClockTime::ZERO) else {
                 self.pump_exhausted = false;
                 break;
@@ -846,17 +917,24 @@ impl Receiver {
                         self.silent_pcm_frames += 1;
                     }
                 }
-                if !producer.push(block) {
-                    self.queue_drops += u64::from(block.header.frame_count);
-                }
-                count += usize::from(block.header.frame_count);
+                // One legal PLC sample can contain 12 blocks, exceeding the
+                // entire 8-block mixer queue. Stage this sample and resume only
+                // as the consumer frees slots; a full push invalidates all
+                // previously queued audio, amplifying a brief input burst.
+                self.pending_pcm.push_back(block);
             }
             self.last_buffer_rms = (energy / (map.len() / 4).max(1) as f64).sqrt();
         }
+        count += drain_pending_pcm(&mut self.pending_pcm, producer, &mut self.queue_drops);
         Ok(count)
     }
     pub fn stats(&self) -> ReceiveStats {
         let jitter = self.jitter.property::<gst::Structure>("stats");
+        let (jitter_queued_packets, jitter_peak_packets, jitter_capacity_exhausted) = self
+            .jitter_budget
+            .lock()
+            .map(|budget| (budget.packets.len(), budget.peak, budget.exhausted))
+            .unwrap_or_default();
         let decoder = self.decoder.property::<gst::Structure>("stats");
         ReceiveStats {
             native_scheduling: self.endpoint.scheduling.snapshot(),
@@ -892,6 +970,9 @@ impl Receiver {
                     .overflow_plc_packets
                     .load(std::sync::atomic::Ordering::Relaxed),
             late_packets: jitter.get::<u64>("num-late").unwrap_or(0),
+            jitter_queued_packets,
+            jitter_peak_packets,
+            jitter_capacity_exhausted,
             plc_samples: decoder.get::<u64>("plc-num-samples").unwrap_or(0),
             retimed_loss_events: self
                 .retimed_loss_events
@@ -940,6 +1021,27 @@ impl Receiver {
             .map_err(native)?;
         Ok(())
     }
+}
+
+// Only this producer can occupy slots; its concurrent consumer only frees them.
+// Keep at most the remainder of one decoded sample (120 ms / 12 blocks).
+fn drain_pending_pcm(
+    pending: &mut VecDeque<AudioBlock>,
+    producer: &mut BlockProducer,
+    queue_drops: &mut u64,
+) -> usize {
+    let mut frames = 0;
+    while producer.remaining_capacity() > 0 {
+        let Some(block) = pending.pop_front() else {
+            break;
+        };
+        if producer.push(block) {
+            frames += usize::from(block.header.frame_count);
+        } else {
+            *queue_drops += u64::from(block.header.frame_count);
+        }
+    }
+    frames
 }
 
 pub struct Sender {
@@ -1222,11 +1324,8 @@ mod duration_tests {
         format!("{}{}", cert.pem(), signing_key.serialize_pem())
     }
 
-    #[test]
-    fn authenticated_twenty_ms_opus_cannot_enter_a_ten_ms_stream() {
-        let sender_pem = pem();
-        let hub_pem = pem();
-        let session = Session {
+    fn session(sender_pem: &str) -> Session {
+        Session {
             created_revision: 0,
             media_ttl_seconds: neonmix_control::MEDIA_TTL_SECONDS,
             id: uuid::Uuid::new_v4(),
@@ -1244,9 +1343,242 @@ mod duration_tests {
                 ssrc: 123,
                 stream_epoch: 1,
                 udp_port: 5000,
-                certificate_sha256: certificate_fingerprint(&sender_pem).unwrap(),
+                certificate_sha256: certificate_fingerprint(sender_pem).unwrap(),
             },
-        };
+        }
+    }
+
+    #[test]
+    fn jitter_capacity_tracks_reordering_rollover_loss_and_late_packets() {
+        let mut budget = JitterBudget::default();
+        // Accepted input can arrive out of order across the RTP rollover.
+        assert!(budget.admit(65534));
+        assert!(budget.admit(65536));
+        assert!(budget.admit(65535));
+        budget.retire(65534, 1);
+        assert_eq!(budget.packets.len(), 2);
+        budget.retire(65535, 2);
+        assert!(budget.packets.is_empty());
+        assert_eq!(budget.retired, Some(65536));
+        assert!(budget.admit(65535));
+        assert!(budget.packets.is_empty(), "late input consumed capacity");
+        for sequence in 65537..65537 + MAX_JITTER_PACKETS as u64 {
+            assert!(budget.admit(sequence));
+        }
+        assert!(!budget.admit(65537 + MAX_JITTER_PACKETS as u64));
+        assert!(budget.exhausted);
+        assert_eq!(budget.packets.len(), MAX_JITTER_PACKETS);
+        assert_eq!(budget.peak, MAX_JITTER_PACKETS);
+    }
+
+    #[test]
+    fn exhausted_jitter_capacity_revokes_the_authenticated_context() {
+        let sender_pem = pem();
+        let hub_pem = pem();
+        let s = session(&sender_pem);
+        let receiver = Receiver::new(s.clone(), &hub_pem, Instant::now()).unwrap();
+        let mut sender =
+            Sender::new(&s, &sender_pem, &certificate_fingerprint(&hub_pem).unwrap()).unwrap();
+        let start = Instant::now();
+        while !sender.gate().authorized() || !receiver.gate().authorized() {
+            assert!(start.elapsed() < Duration::from_secs(3));
+            for packet in sender.outgoing() {
+                receiver.ingest(&packet).unwrap();
+            }
+            for packet in receiver.outgoing() {
+                sender.ingest(&packet).unwrap();
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let held = Arc::new(AtomicBool::new(false));
+        let hold = held.clone();
+        receiver.jitter.static_pad("src").unwrap().add_probe(
+            gst::PadProbeType::BUFFER,
+            move |_, _| {
+                if !hold.swap(true, std::sync::atomic::Ordering::AcqRel) {
+                    // Finite hold also guarantees pipeline cleanup after a failed assertion.
+                    std::thread::sleep(Duration::from_millis(650));
+                }
+                gst::PadProbeReturn::Ok
+            },
+        );
+        for _ in 0..45 {
+            sender.push_frames(&[[0.01; 2]; 480]).unwrap();
+            std::thread::sleep(Duration::from_millis(10));
+            for packet in sender.outgoing() {
+                if receiver.gate().authorized() {
+                    receiver.ingest(&packet).unwrap();
+                }
+            }
+            if !receiver.gate().authorized() {
+                break;
+            }
+        }
+        let stats = receiver.stats();
+        assert!(held.load(Acquire));
+        assert!(stats.jitter_capacity_exhausted);
+        assert_eq!(stats.jitter_peak_packets, MAX_JITTER_PACKETS);
+        assert_eq!(stats.jitter_queued_packets, MAX_JITTER_PACKETS);
+        assert!(!receiver.gate().authorized());
+        assert!(matches!(receiver.check(), Err(MediaError::Inactive)));
+        assert_eq!(stats.overflow_plc_packets, 0);
+    }
+
+    #[test]
+    fn scheduled_jitter_output_delay_preserves_authenticated_packets() {
+        let sender_pem = pem();
+        let hub_pem = pem();
+        let s = session(&sender_pem);
+        let mut receiver = Receiver::new(s.clone(), &hub_pem, Instant::now()).unwrap();
+        let mut sender =
+            Sender::new(&s, &sender_pem, &certificate_fingerprint(&hub_pem).unwrap()).unwrap();
+        let start = Instant::now();
+        while !sender.gate().authorized() || !receiver.gate().authorized() {
+            assert!(start.elapsed() < Duration::from_secs(3));
+            for packet in sender.outgoing() {
+                receiver.ingest(&packet).unwrap();
+            }
+            for packet in receiver.outgoing() {
+                sender.ingest(&packet).unwrap();
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let delayed = Arc::new(AtomicBool::new(false));
+        let delay = delayed.clone();
+        receiver.jitter.static_pad("src").unwrap().add_probe(
+            gst::PadProbeType::BUFFER,
+            move |_, _| {
+                if !delay.swap(true, std::sync::atomic::Ordering::AcqRel) {
+                    std::thread::sleep(Duration::from_millis(35));
+                }
+                gst::PadProbeReturn::Ok
+            },
+        );
+        let (mut producer, mut consumer) =
+            block_queue(16, Arc::new(AudioStats::default())).unwrap();
+        let mut next_pcm = 0;
+        for _ in 0..30 {
+            sender.push_frames(&[[0.01; 2]; 480]).unwrap();
+            std::thread::sleep(Duration::from_millis(10));
+            for packet in sender.outgoing() {
+                receiver.ingest(&packet).unwrap();
+            }
+            receiver.pump_pcm(&mut producer).unwrap();
+            while let Some(block) = consumer.pop_fresh(0, u64::MAX) {
+                assert_eq!(block.header.source_sample_position, next_pcm);
+                next_pcm += u64::from(block.header.frame_count);
+            }
+        }
+        std::thread::sleep(Duration::from_millis(80));
+        receiver.pump_pcm(&mut producer).unwrap();
+        let stats = receiver.stats();
+        println!(
+            "received={} pcm={} lost={} overflow={} late={}",
+            stats.packets.received,
+            stats.pcm_frames,
+            stats.lost_packets,
+            stats.overflow_plc_packets,
+            stats.late_packets
+        );
+        assert!(delayed.load(Acquire));
+        assert!(stats.packets.received >= 29);
+        assert_eq!(stats.lost_packets, 0);
+        assert_eq!(stats.overflow_plc_packets, 0);
+        assert_eq!(stats.pcm_timing_gap_count, 0);
+        assert_eq!(stats.pcm_sink_dropped, 0);
+        assert_eq!(stats.queue_drops, 0);
+    }
+
+    #[test]
+    fn maximum_plc_sample_resumes_without_invalidating_the_mixer_queue() {
+        let identity = pem();
+        let mut receiver = Receiver::new(session(&identity), &identity, Instant::now()).unwrap();
+        // Isolate PCM transfer from authentication/network timing. Feed a real
+        // appsink with one maximum legal 120 ms PLC-sized decoded sample.
+        receiver.endpoint.gate.ready.store(true, Release);
+        receiver.endpoint.gate.verified.store(true, Release);
+        let pipeline = gst::Pipeline::new();
+        let source = gst::ElementFactory::make("appsrc")
+            .property("format", gst::Format::Time)
+            .build()
+            .unwrap()
+            .downcast::<AppSrc>()
+            .unwrap();
+        let sink = make_sink("pcm_fixture", 8).unwrap();
+        pipeline
+            .add_many([source.upcast_ref::<gst::Element>(), sink.upcast_ref()])
+            .unwrap();
+        source.link(&sink).unwrap();
+        receiver.pcm = sink;
+        pipeline.set_state(gst::State::Playing).unwrap();
+        let mut pcm = Vec::new();
+        for index in 0..12 {
+            for _ in 0..MAX_BLOCK_FRAMES * 2 {
+                pcm.extend_from_slice(&(index as f32 / 16.0).to_le_bytes());
+            }
+        }
+        let mut buffer = gst::Buffer::from_mut_slice(pcm);
+        let buffer_mut = buffer.get_mut().unwrap();
+        buffer_mut.set_pts(gst::ClockTime::ZERO);
+        receiver.pcm_queue_trace.tag(buffer_mut).unwrap();
+        source.push_buffer(buffer).unwrap();
+        let stats = Arc::new(AudioStats::default());
+        let (mut producer, mut consumer) = block_queue(8, stats.clone()).unwrap();
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while receiver.pcm_frames == 0 {
+            assert!(Instant::now() < deadline);
+            receiver.pump_pcm(&mut producer).unwrap();
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert_eq!(receiver.pcm_frames, 5760);
+        assert_eq!(receiver.pending_pcm.len(), 4);
+        assert_eq!(receiver.pump_pcm(&mut producer).unwrap(), 0);
+        assert!(receiver.pump_budget_exhausted());
+        for index in 0..8 {
+            let block = consumer.pop_fresh(0, u64::MAX).unwrap();
+            assert_eq!(block.header.source_sample_position, index * 480);
+            assert_eq!(block.frames()[0], [index as f32 / 16.0; 2]);
+            assert!(
+                !block
+                    .header
+                    .discontinuity_flags
+                    .contains(Discontinuity::GAP)
+            );
+        }
+        assert_eq!(receiver.pump_pcm(&mut producer).unwrap(), 1920);
+        assert!(receiver.pending_pcm.is_empty());
+        for index in 8..12 {
+            let block = consumer.pop_fresh(0, u64::MAX).unwrap();
+            assert_eq!(block.header.source_sample_position, index * 480);
+            assert_eq!(block.frames()[0], [index as f32 / 16.0; 2]);
+            assert!(
+                !block
+                    .header
+                    .discontinuity_flags
+                    .contains(Discontinuity::GAP)
+            );
+        }
+        assert_eq!(receiver.queue_drops, 0);
+        assert_eq!(
+            stats
+                .dropped_frames
+                .load(std::sync::atomic::Ordering::Relaxed),
+            0
+        );
+        assert_eq!(
+            stats
+                .stale_frames
+                .load(std::sync::atomic::Ordering::Relaxed),
+            0
+        );
+        pipeline.set_state(gst::State::Null).unwrap();
+    }
+
+    #[test]
+    fn authenticated_twenty_ms_opus_cannot_enter_a_ten_ms_stream() {
+        let sender_pem = pem();
+        let hub_pem = pem();
+        let session = session(&sender_pem);
         let mut receiver = Receiver::new(session.clone(), &hub_pem, Instant::now()).unwrap();
         let mut sender = Sender::new(
             &session,

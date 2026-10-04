@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-exclude = ["vendor/cpal", "vendor/tympan-aspl"]
+exclude = ["apps/airplay-worker", "apps/credential-migrate", "vendor/cpal", "vendor/tympan-aspl", "vendor/mdns-sd-scoped"]
 members = ["crates/*", "adapters/*", "apps/*", "drivers/macos/hal"]
 default-members = ["apps/audio"]
 

@@ -1,0 +1,446 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -49,26 +49,6 @@
+ name = "mdns_sd"
+ path = "src/lib.rs"
+ 
+-[[example]]
+-name = "query"
+-path = "examples/query.rs"
+-
+-[[example]]
+-name = "register"
+-path = "examples/register.rs"
+-
+-[[test]]
+-name = "addr_parse"
+-path = "tests/addr_parse.rs"
+-
+-[[test]]
+-name = "mdns_test"
+-path = "tests/mdns_test.rs"
+-
+-[[test]]
+-name = "shutdown_test"
+-path = "tests/shutdown_test.rs"
+-
+ [dependencies.fastrand]
+ version = "2.4"
+ 
+--- a/src/service_info.rs
++++ b/src/service_info.rs
+@@ -419,7 +419,15 @@
+     pub(crate) fn get_addrs_on_my_intf_v6(&self, my_intf: &MyIntf) -> Vec<IpAddr> {
+         self.addresses
+             .iter()
+-            .filter(|a| a.is_ipv6() && my_intf.addrs.iter().any(|x| valid_ip_on_intf(a, x)))
++            .filter(|a| match a {
++                // Link-local addresses are meaningful only on their owning
++                // link. A shared fe80::/64 prefix does not establish ownership.
++                IpAddr::V6(addr) if is_unicast_link_local(addr) => {
++                    my_intf.addrs.iter().any(|x| x.ip() == **a)
++                }
++                IpAddr::V6(_) => my_intf.addrs.iter().any(|x| valid_ip_on_intf(a, x)),
++                IpAddr::V4(_) => false,
++            })
+             .copied()
+             .collect()
+     }
+@@ -1518,6 +1526,113 @@
+     use if_addrs::{IfAddr, IfOperStatus, Ifv4Addr, Ifv6Addr, Interface};
+     use std::net::{Ipv4Addr, Ipv6Addr};
+ 
++    fn scoped_test_interface(name: &str, index: u32, addresses: &[(&str, u8)]) -> super::MyIntf {
++        super::MyIntf {
++            name: name.into(),
++            index,
++            addrs: addresses
++                .iter()
++                .map(|(ip, prefixlen)| {
++                    IfAddr::V6(Ifv6Addr {
++                        ip: ip.parse().unwrap(),
++                        netmask: Ipv6Addr::from(u128::MAX << (128 - u32::from(*prefixlen))),
++                        broadcast: None,
++                        prefixlen: *prefixlen,
++                    })
++                })
++                .collect(),
++            max_packet_size_v4: 1500,
++            max_packet_size_v6: 1500,
++        }
++    }
++
++    #[test]
++    fn scoped_link_local_publication_uses_interface_ownership() {
++        use std::{collections::HashSet, net::IpAddr};
++        let service = ServiceInfo::new(
++            "_test._tcp.local.",
++            "scoped",
++            "scoped.local.",
++            "fe80::100,fe80::200,fe80::1,::1,2001:db8:1::10,fd00:1::10,fd00:2::10,192.0.2.10",
++            7000,
++            None,
++        )
++        .unwrap();
++        let cases = [
++            (
++                "en0",
++                18,
++                vec![("fe80::100", 64), ("2001:db8:1::1", 64), ("fd00:1::1", 64)],
++                vec!["fe80::100", "2001:db8:1::10", "fd00:1::10"],
++            ),
++            (
++                "en11",
++                32,
++                vec![("fe80::200", 64), ("fd00:2::1", 64)],
++                vec!["fe80::200", "fd00:2::10"],
++            ),
++            (
++                "lo0",
++                1,
++                vec![("fe80::1", 64), ("::1", 128)],
++                vec!["fe80::1", "::1"],
++            ),
++        ];
++        for (name, index, owned, expected) in cases {
++            let intf = scoped_test_interface(name, index, &owned);
++            let actual: HashSet<IpAddr> =
++                service.get_addrs_on_my_intf_v6(&intf).into_iter().collect();
++            let expected: HashSet<IpAddr> =
++                expected.into_iter().map(|a| a.parse().unwrap()).collect();
++            assert_eq!(actual, expected, "publication on {name}");
++        }
++    }
++
++    #[test]
++    fn scoped_publication_does_not_change_remote_querier_matching() {
++        let intf = scoped_test_interface("en0", 18, &[("fe80::100", 64)]);
++        let remote = "fe80::999".parse().unwrap();
++        // A remote peer on this link has a different IP from the publisher.
++        // Keep the upstream subnet test used to handle its DNS questions.
++        assert!(intf
++            .addrs
++            .iter()
++            .any(|a| super::valid_ip_on_intf(&remote, a)));
++        let service = ServiceInfo::new(
++            "_test._tcp.local.",
++            "remote",
++            "remote.local.",
++            "fe80::999",
++            7000,
++            None,
++        )
++        .unwrap();
++        assert!(service.get_addrs_on_my_intf_v6(&intf).is_empty());
++    }
++
++    #[test]
++    fn scoped_publication_follows_interface_address_changes() {
++        let service = ServiceInfo::new(
++            "_test._tcp.local.",
++            "changed",
++            "changed.local.",
++            "fe80::100,fe80::200",
++            7000,
++            None,
++        )
++        .unwrap();
++        let mut intf = scoped_test_interface("en0", 18, &[("fe80::100", 64)]);
++        assert_eq!(
++            service.get_addrs_on_my_intf_v6(&intf),
++            vec!["fe80::100".parse::<std::net::IpAddr>().unwrap()]
++        );
++        intf.addrs = scoped_test_interface("en0", 18, &[("fe80::200", 64)]).addrs;
++        assert_eq!(
++            service.get_addrs_on_my_intf_v6(&intf),
++            vec!["fe80::200".parse::<std::net::IpAddr>().unwrap()]
++        );
++    }
++
+     /// RFC 6762 section 6: the same record must not be multicast on an
+     /// interface more than once per second, but is allowed again after a
+     /// second has elapsed.
+--- a/src/service_daemon.rs
++++ b/src/service_daemon.rs
+@@ -2242,6 +2242,16 @@
+             return;
+         }
+ 
++        // A quick hide/show transition must not let a queued old TTL=0
++        // packet erase the new advertisement. Include hostname because an
++        // AirPlay receiver's RAOP/AirPlay pair shares address records.
++        self.retransmissions.retain(|rerun| {
++            !matches!(&rerun.command,
++                Command::UnregisterResend(_, _, _, fullname, hostname)
++                if fullname.eq_ignore_ascii_case(info.get_fullname())
++                    || hostname.eq_ignore_ascii_case(info.get_hostname()))
++        });
++
+         if info.is_addr_auto() {
+             let selected_intfs =
+                 self.selected_intfs(my_ip_interfaces_inner(true, self.include_apple_p2p));
+@@ -3254,6 +3264,25 @@
+             // check against possible multicast forwarding
+             if answer.get_type() == RRType::A || answer.get_type() == RRType::AAAA {
+                 if let Some(answer_addr) = answer.any().downcast_ref::<DnsAddress>() {
++                    let ip = answer_addr.address().to_ip_addr();
++                    // Another local NIC on the same LAN may reflect our own
++                    // scoped AAAA set while this interface is still probing.
++                    // Only accept addresses both owned locally and explicitly
++                    // registered for this hostname; unrelated peer addresses
++                    // and service SRV/TXT conflicts retain upstream handling.
++                    let locally_owned = self
++                        .my_intfs
++                        .values()
++                        .any(|intf| intf.addrs.iter().any(|addr| addr.ip() == ip));
++                    let registered_here = self.my_services.values().any(|service| {
++                        service.get_addresses().contains(&ip)
++                            && probe.records.iter().any(|record| {
++                                record.get_record().get_original_name() == service.get_hostname()
++                            })
++                    });
++                    if locally_owned && registered_here {
++                        continue;
++                    }
+                     if answer_addr.interface_id.index != if_index {
+                         debug!(
+                             "conflict handler: answer addr {:?} not in the subnet of intf {}",
+@@ -3751,7 +3780,9 @@
+                         instance_name.to_string(),
+                     );
+                     match sender.send(event) {
+-                        Ok(()) => debug!("notify_service_removal: sent ServiceRemoved to listener of {ty_domain}: {instance_name}"),
++                        Ok(()) => debug!(
++                            "notify_service_removal: sent ServiceRemoved to listener of {ty_domain}: {instance_name}"
++                        ),
+                         Err(e) => debug!("Failed to send event: {}", e),
+                     }
+                 }
+@@ -3795,7 +3826,7 @@
+                 self.exec_command_unregister(repeating, fullname, resp_s);
+             }
+ 
+-            Command::UnregisterResend(packet, if_index, is_ipv4) => {
++            Command::UnregisterResend(packet, if_index, is_ipv4, _, _) => {
+                 self.exec_command_unregister_resend(packet, if_index, is_ipv4);
+             }
+ 
+@@ -4057,7 +4088,13 @@
+                             let next_time = current_time_millis() + 120;
+                             self.retransmissions.push(ReRun {
+                                 next_time,
+-                                command: Command::UnregisterResend(packet, *if_index, true),
++                                command: Command::UnregisterResend(
++                                    packet,
++                                    *if_index,
++                                    true,
++                                    fullname.clone(),
++                                    info.get_hostname().to_string(),
++                                ),
+                             });
+                             timers.push(next_time);
+                         }
+@@ -4070,7 +4107,13 @@
+                             let next_time = current_time_millis() + 120;
+                             self.retransmissions.push(ReRun {
+                                 next_time,
+-                                command: Command::UnregisterResend(packet, *if_index, false),
++                                command: Command::UnregisterResend(
++                                    packet,
++                                    *if_index,
++                                    false,
++                                    fullname.clone(),
++                                    info.get_hostname().to_string(),
++                                ),
+                             });
+                             timers.push(next_time);
+                         }
+@@ -4559,7 +4602,7 @@
+     RegisterResend(String, u32), // (fullname)
+ 
+     /// Resend unregister packet.
+-    UnregisterResend(Vec<u8>, u32, bool), // (packet content, if_index, is_ipv4)
++    UnregisterResend(Vec<u8>, u32, bool, String, String), // packet, interface, IPv4, fullname, hostname
+ 
+     /// Stop browsing a service type
+     StopBrowse(String), // (ty_domain)
+@@ -4612,7 +4655,7 @@
+             Self::StopBrowse(_) => write!(f, "Command StopBrowse"),
+             Self::StopResolveHostname(_) => write!(f, "Command StopResolveHostname"),
+             Self::Unregister(_, _) => write!(f, "Command Unregister"),
+-            Self::UnregisterResend(_, _, _) => write!(f, "Command UnregisterResend"),
++            Self::UnregisterResend(_, _, _, _, _) => write!(f, "Command UnregisterResend"),
+             Self::Resolve(_, _) => write!(f, "Command Resolve"),
+             Self::Verify(_, _) => write!(f, "Command VerifyResource"),
+             Self::InvalidIntfAddrs(_) => write!(f, "Command InvalidIntfAddrs"),
+@@ -5436,6 +5479,170 @@
+             broadcast: None,
+             prefixlen: 64,
+         })
++    }
++
++    #[test]
++    fn scoped_reflected_local_address_does_not_rename_hostname() {
++        let signal = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
++        let signal_addr = signal.local_addr().unwrap();
++        signal.set_nonblocking(true).unwrap();
++        let port = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0))
++            .unwrap()
++            .local_addr()
++            .unwrap()
++            .port();
++        let (sender, _receiver) = flume::bounded(100);
++        let mut daemon = super::Zeroconf::new(
++            mio::net::UdpSocket::from_std(signal),
++            mio::Poll::new().unwrap(),
++            port,
++            sender,
++            signal_addr,
++        );
++        let host = "scoped-reflection.local.";
++        let own = "fe80::100".parse::<IpAddr>().unwrap();
++        let other_nic = "fe80::200".parse::<IpAddr>().unwrap();
++        daemon.my_intfs.clear();
++        for (name, index, ip) in [("en0", 18, own), ("en11", 32, other_nic)] {
++            daemon.my_intfs.insert(
++                index,
++                MyIntf {
++                    name: name.into(),
++                    index,
++                    addrs: HashSet::from([test_ifaddr_v6(match ip {
++                        IpAddr::V6(ip) => ip,
++                        _ => unreachable!(),
++                    })]),
++                    max_packet_size_v4: 1500,
++                    max_packet_size_v6: 1500,
++                },
++            );
++        }
++        let service = ServiceInfo::new(
++            "_test._tcp.local.",
++            "reflection",
++            host,
++            "fe80::100,fe80::200",
++            7000,
++            None,
++        )
++        .unwrap();
++        daemon
++            .my_services
++            .insert(service.get_fullname().into(), service);
++        let mut registry = crate::service_info::DnsRegistry::new();
++        let mut probe = crate::service_info::Probe::new(crate::current_time_millis());
++        let intf_id = InterfaceId {
++            name: "en0".into(),
++            index: 18,
++        };
++        probe.insert_record(Box::new(DnsAddress::new(
++            host,
++            RRType::AAAA,
++            CLASS_IN,
++            120,
++            own,
++            intf_id.clone(),
++        )));
++        registry.probing.insert(host.into(), probe);
++        daemon.dns_registry_map.clear();
++        daemon.dns_registry_map.insert(18, registry);
++        let incoming = |ip| {
++            let mut out = DnsOutgoing::new(FLAGS_QR_RESPONSE | FLAGS_AA);
++            out.add_answer_at_time(
++                DnsAddress::new(host, RRType::AAAA, CLASS_IN, 120, ip, intf_id.clone()),
++                0,
++            );
++            DnsIncoming::new(out.to_data_on_wire(1500, false).remove(0), intf_id.clone()).unwrap()
++        };
++        daemon.conflict_handler(&incoming(other_nic), 18);
++        assert!(daemon.dns_registry_map[&18].name_changes.is_empty());
++        assert!(daemon.dns_registry_map[&18].probing.contains_key(host));
++        // A different remote publisher still causes the original conflict.
++        daemon.conflict_handler(&incoming("fe80::999".parse().unwrap()), 18);
++        assert!(!daemon.dns_registry_map[&18].name_changes.is_empty());
++    }
++
++    #[test]
++    fn test_republish_cancels_old_goodbye_for_service_pair_only() {
++        let signal = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
++        let signal_addr = signal.local_addr().unwrap();
++        signal.set_nonblocking(true).unwrap();
++        let port = UdpSocket::bind((Ipv4Addr::LOCALHOST, 0))
++            .unwrap()
++            .local_addr()
++            .unwrap()
++            .port();
++        let (sender, _receiver) = flume::bounded(100);
++        let mut daemon = super::Zeroconf::new(
++            mio::net::UdpSocket::from_std(signal),
++            mio::Poll::new().unwrap(),
++            port,
++            sender,
++            signal_addr,
++        );
++        // Use loopback and a private port; never touch the running room.
++        let loopback = my_ip_interfaces(true)
++            .into_iter()
++            .find(|intf| intf.ip() == IpAddr::V4(Ipv4Addr::LOCALHOST))
++            .unwrap();
++        let index = loopback.index.unwrap();
++        daemon.my_intfs.retain(|key, _| *key == index);
++        daemon.dns_registry_map.retain(|key, _| *key == index);
++        let service = |kind, name, host| {
++            let mut info = ServiceInfo::new(kind, name, host, "127.0.0.1", 8080, None).unwrap();
++            info.set_interfaces(vec![IfKind::Addr(IpAddr::V4(Ipv4Addr::LOCALHOST))]);
++            info
++        };
++        let raop = service("_raop._tcp.local.", "entry-a", "entry-a.local.");
++        let airplay = service("_airplay._tcp.local.", "entry-a", "entry-a.local.");
++        let other = service("_airplay._tcp.local.", "entry-b", "entry-b.local.");
++        for info in [&raop, &airplay, &other] {
++            daemon.register_service(info.clone());
++        }
++        for info in [&raop, &airplay, &other] {
++            let (sender, receiver) = flume::bounded(1);
++            daemon.exec_command_unregister(false, info.get_fullname().to_lowercase(), sender);
++            assert!(matches!(
++                receiver.recv().unwrap(),
++                super::UnregisterStatus::OK
++            ));
++        }
++        let goodbyes = |daemon: &super::Zeroconf| {
++            daemon
++                .retransmissions
++                .iter()
++                .filter_map(|rerun| {
++                    if let super::Command::UnregisterResend(_, _, _, fullname, _) = &rerun.command {
++                        Some(fullname.clone())
++                    } else {
++                        None
++                    }
++                })
++                .collect::<Vec<_>>()
++        };
++        let pending = goodbyes(&daemon);
++        assert!(pending.contains(&raop.get_fullname().to_lowercase()));
++        assert!(pending.contains(&airplay.get_fullname().to_lowercase()));
++        assert!(pending.contains(&other.get_fullname().to_lowercase()));
++        // No sleep: reverse well inside the 120ms resend window. Registering
++        // either sibling invalidates all old goodbye packets for their host.
++        daemon.register_service(raop.clone());
++        let remaining = goodbyes(&daemon);
++        assert!(!remaining.is_empty());
++        assert!(remaining
++            .iter()
++            .all(|name| name == &other.get_fullname().to_lowercase()));
++        daemon.register_service(airplay.clone());
++        assert_eq!(goodbyes(&daemon), remaining);
++        assert_eq!(daemon.my_services.len(), 2);
++        // Repeated withdrawal is confirmed absent, rather than an error.
++        let (sender, receiver) = flume::bounded(1);
++        daemon.exec_command_unregister(false, other.get_fullname().to_lowercase(), sender);
++        assert!(matches!(
++            receiver.recv().unwrap(),
++            super::UnregisterStatus::NotFound
++        ));
+     }
+ 
+     #[test]

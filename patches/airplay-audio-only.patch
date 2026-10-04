@@ -1,0 +1,1723 @@
+--- a/lib/crypto.c
++++ b/lib/crypto.c
+@@ -242,26 +242,14 @@
+     }
+ }
+ 
+-void x25519_derive_secret(unsigned char secret[X25519_KEY_SIZE], const x25519_key_t *ours, const x25519_key_t *theirs) {
+-    EVP_PKEY_CTX *pctx;
+-
+-    assert(ours);
+-    assert(theirs);
+-
+-    pctx = EVP_PKEY_CTX_new(ours->pkey, NULL);
+-    if (!pctx) {
+-        handle_error(__func__);
+-    }
+-    if (!EVP_PKEY_derive_init(pctx)) {
+-        handle_error(__func__);
+-    }
+-    if (!EVP_PKEY_derive_set_peer(pctx, theirs->pkey)) {
+-        handle_error(__func__);
+-    }
+-    if (!EVP_PKEY_derive(pctx, secret, &(size_t) {X25519_KEY_SIZE})) {
+-        handle_error(__func__);
+-    }
++int x25519_derive_secret(unsigned char secret[X25519_KEY_SIZE], const x25519_key_t *ours, const x25519_key_t *theirs) {
++    if (!ours || !theirs) return -1;
++    EVP_PKEY_CTX *pctx = EVP_PKEY_CTX_new(ours->pkey, NULL);
++    size_t size = X25519_KEY_SIZE;
++    int ok = pctx && EVP_PKEY_derive_init(pctx) > 0 &&
++        EVP_PKEY_derive_set_peer(pctx, theirs->pkey) > 0 && EVP_PKEY_derive(pctx, secret, &size) > 0;
+     EVP_PKEY_CTX_free(pctx);
++    return ok ? 0 : -1;
+ }
+ 
+ // GCM AES 128
+@@ -348,66 +336,93 @@
+     EVP_PKEY *pkey;
+ };
+ 
++/* The Hub owns the persisted identity. Accept the unencrypted Ed25519
++ * PKCS#8 envelopes produced by OpenSSL (v1) and ring (v2), including ring's
++ * legacy explicit public-key tag. Do not discard a v2 public key: it must
++ * match the seed, otherwise a corrupt identity would silently change peers.
++ * Fixed DER layouts intentionally reject attributes, parameters and trailing
++ * objects; this is an identity loader, not a general ASN.1 key importer. */
++static EVP_PKEY *ed25519_identity_from_der(const unsigned char *der, long len) {
++    static const unsigned char prefix[] = {
++        0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06,
++        0x03, 0x2b, 0x65, 0x70, 0x04, 0x22, 0x04, 0x20
++    };
++    const unsigned char *public_key = NULL;
++    if (!der || (len != 48 && len != 83 && len != 85) ||
++        der[0] != 0x30 || der[1] != len - 2 ||
++        memcmp(der + 2, prefix + 2, 2) ||
++        der[4] != (len == 48 ? 0 : 1) ||
++        memcmp(der + 5, prefix + 5, sizeof(prefix) - 5)) return NULL;
++    if (len == 83) {
++        static const unsigned char tag[] = {0x81, 0x21, 0x00};
++        if (memcmp(der + 48, tag, sizeof(tag))) return NULL;
++        public_key = der + 51;
++    } else if (len == 85) {
++        static const unsigned char tag[] = {0xa1, 0x23, 0x03, 0x21, 0x00};
++        if (memcmp(der + 48, tag, sizeof(tag))) return NULL;
++        public_key = der + 53;
++    }
++    EVP_PKEY *pkey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL,
++                                               der + sizeof(prefix), ED25519_KEY_SIZE);
++    if (pkey && public_key) {
++        unsigned char derived[ED25519_KEY_SIZE];
++        size_t size = sizeof(derived);
++        if (EVP_PKEY_get_raw_public_key(pkey, derived, &size) <= 0 ||
++            size != sizeof(derived) || CRYPTO_memcmp(derived, public_key, size)) {
++            EVP_PKEY_free(pkey);
++            return NULL;
++        }
++    }
++    return pkey;
++}
++
++static int identity_space(unsigned char ch) {
++    return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
++}
++
+ ed25519_key_t *ed25519_key_generate(const char *device_id, const char *keyfile, int *result) {
+-    EVP_PKEY_CTX *pctx = NULL;
+-    BIO *bp = NULL;
+-    FILE *file = NULL;
+-    bool new_pk = false;
+-    bool use_keyfile = strlen(keyfile);
+-
+-    *result = 0;
+-
++    (void) device_id;
++    if (result) *result = 0;
++    if (!keyfile || !keyfile[0]) return NULL;
++    FILE *file = fopen(keyfile, "rb");
++    if (!file) return NULL;
++    unsigned char pem[4096];
++    size_t size = fread(pem, 1, sizeof(pem), file);
++    int readable = !ferror(file) && feof(file);
++    fclose(file);
++    EVP_PKEY *pkey = NULL;
++    BIO *bio = NULL;
++    char *name = NULL, *header = NULL;
++    unsigned char *der = NULL;
++    long der_len = 0;
++    size_t first = 0;
++    while (first < size && identity_space(pem[first])) first++;
++    static const char begin[] = "-----BEGIN PRIVATE KEY-----";
++    if (!readable || size - first < sizeof(begin) - 1 ||
++        memcmp(pem + first, begin, sizeof(begin) - 1)) goto done;
++    /* Never pass our CRT's FILE* to OpenSSL: MSVC OpenSSL + MinGW otherwise
++     * reaches OPENSSL_Uplink/no OPENSSL_Applink on Windows. */
++    bio = BIO_new_mem_buf(pem + first, (int)(size - first));
++    if (!bio || PEM_read_bio(bio, &name, &header, &der, &der_len) != 1 ||
++        strcmp(name, "PRIVATE KEY") || header[0]) goto done;
++    char tail;
++    while (BIO_read(bio, &tail, 1) > 0) {
++        if (!identity_space((unsigned char) tail)) goto done;
++    }
++    pkey = ed25519_identity_from_der(der, der_len);
++ done:
++    OPENSSL_clear_free(der, der_len > 0 ? (size_t) der_len : 0);
++    OPENSSL_free(name);
++    OPENSSL_free(header);
++    BIO_free(bio);
++    OPENSSL_cleanse(pem, sizeof(pem));
++    if (!pkey) return NULL;
+     ed25519_key_t *key = (ed25519_key_t *) calloc(1, sizeof(ed25519_key_t));
+-    assert(key);
+-   
+-    if (use_keyfile) {
+-        file = fopen(keyfile, "r");
+-        if (file) {
+-            bp = BIO_new_fp(file, BIO_NOCLOSE);
+-            key->pkey = PEM_read_PrivateKey(file, NULL, NULL, NULL);
+-            BIO_free(bp);
+-            fclose(file);
+-            if (!key->pkey) {
+-                new_pk = true;
+-            }
+-        } else {
+-            new_pk = true;
+-        }
+-    } else {
+-        /* generate (insecure) persistent keypair using device_id */
+-        unsigned char hash[SHA512_DIGEST_LENGTH] = {0};
+-        char salt[] = SALT_PK;
+-        sha_ctx_t *ctx = sha_init();
+-        sha_update(ctx, (const unsigned char *) salt, (unsigned int) strlen(salt));
+-        sha_update(ctx, (const unsigned char *) device_id, (unsigned int) strlen(device_id));
+-        sha_final(ctx, hash, NULL);
+-        sha_destroy(ctx);
+-        key->pkey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, (const unsigned char *) hash, ED25519_KEY_SIZE);
+-    }
+-
+-    if (new_pk) {
+-        pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
+-        if (!pctx) {
+-            handle_error(__func__);
+-        }
+-        if (!EVP_PKEY_keygen_init(pctx)) {
+-            handle_error(__func__);
+-        }
+-        if (!EVP_PKEY_keygen(pctx, &key->pkey)) {
+-            handle_error(__func__);
+-        }
+-        EVP_PKEY_CTX_free(pctx);
+-        if (use_keyfile) {
+-            file = fopen(keyfile, "w");
+-            if (file) {
+-                bp = BIO_new_fp(file, BIO_NOCLOSE);
+-                PEM_write_bio_PrivateKey(bp, key->pkey, NULL, NULL, 0, NULL, NULL);
+-                BIO_free(bp);
+-                fclose(file);
+-                *result = 1;
+-            }
+-        }
+-    }
++    if (!key) {
++        EVP_PKEY_free(pkey);
++        return NULL;
++    }
++    key->pkey = pkey;
+     return key;
+ }
+ 
+--- a/lib/crypto.h
++++ b/lib/crypto.h
+@@ -69,7 +69,7 @@
+ int get_random_bytes(unsigned char *buf, int num);
+ void pk_to_base64(const unsigned char *pk, int pk_len, char *pk_base64, int len);
+   
+-void x25519_derive_secret(unsigned char secret[X25519_KEY_SIZE], const x25519_key_t *ours, const x25519_key_t *theirs);
++int x25519_derive_secret(unsigned char secret[X25519_KEY_SIZE], const x25519_key_t *ours, const x25519_key_t *theirs);
+ 
+ // GCM AES 128
+ 
+--- a/lib/dnssd.h
++++ b/lib/dnssd.h
+@@ -47,6 +47,7 @@
+ DNSSD_API const char *dnssd_get_hw_addr(dnssd_t *dnssd, int *length);
+ DNSSD_API void dnssd_set_airplay_features(dnssd_t *dnssd, int bit, int val);
+ DNSSD_API uint64_t dnssd_get_airplay_features(dnssd_t *dnssd);
++DNSSD_API void dnssd_set_receiver_uuid(dnssd_t *dnssd, const char *uuid);
+ DNSSD_API void dnssd_set_pk(dnssd_t *dnssd, char * pk_str);
+ 
+ DNSSD_API void dnssd_destroy(dnssd_t *dnssd);
+--- a/lib/dnssdint.h
++++ b/lib/dnssdint.h
+@@ -29,22 +29,22 @@
+ #define RAOP_CN "0,1,2,3"       /* Audio codec: PCM, ALAC, AAC, AAC ELD */
+ #define RAOP_ET "0,3,5"         /* Encryption type: None, FairPlay, FairPlay SAPv2.5 */
+ #define RAOP_VV "2"
+-#define FEATURES_1 "0x5A7FFEE6" /* first 32 bits of features, with bit 27 ("supports legacy pairing") ON */
++#define FEATURES_1 "0x481C5A00" /* first 32 bits of features, with bit 27 ("supports legacy pairing") ON */
+ //#define FEATURES_1 "0x527FFEE6" /* first 32 bits of features, with bit 27 ("supports legacy pairing") OFF */
+ #define FEATURES_2  "0x0"        /* second 32 bits of features */
+ #define RAOP_RHD "5.6.0.0"
+-#define RAOP_SF "0x4"
++#define RAOP_SF "0xC"
+ #define RAOP_SV "false"
+ #define RAOP_DA "true"
+ #define RAOP_SR "44100"         /* Sample rate: 44100 */
+ #define RAOP_SS "16"            /* Sample size: 16 */
+ #define RAOP_VS GLOBAL_VERSION  /* defined in global.h */
+ #define RAOP_TP "UDP"           /* Transport protocol. Possible values: UDP or TCP or TCP,UDP */
+-#define RAOP_MD "0,1,2"         /* Metadata: text, artwork, progress */
++#define RAOP_MD "0"         /* Metadata: text, artwork, progress */
+ #define RAOP_VN "65537"
+ 
+ #define AIRPLAY_SRCVERS GLOBAL_VERSION /*defined in global.h */
+-#define AIRPLAY_FLAGS "0x84"
++#define AIRPLAY_FLAGS "0xC"
+ #define AIRPLAY_VV "2"
+ #define AIRPLAY_PI "2e388006-13ba-4041-9a67-25dd4a43d536"
+ 
+--- a/lib/fairplay_playfair.c
++++ b/lib/fairplay_playfair.c
+@@ -56,6 +56,7 @@
+     }
+ 
+     int mode = req[14];
++    if (mode > 3) return -1;
+     memcpy(res, reply_message[mode], 142);
+     fp->keymsglen = 0;
+     return 0;
+@@ -71,6 +72,7 @@
+         return -1;
+     }
+ 
++    if (req[12] > 3) return -1;
+     memcpy(fp->keymsg, req, 164);
+     fp->keymsglen = 164;
+ 
+--- a/lib/http_handlers.h
++++ b/lib/http_handlers.h
+@@ -932,7 +932,7 @@
+     logger_log(raop->logger, LOGGER_ERR, "Could not find valid Plist Data for POST/play request, Unhandled");
+     http_response_init(response, "HTTP/1.1", 400, "Bad Request");
+     http_response_set_disconnect(response, 1);
+-    raop->callbacks.conn_reset(raop->callbacks.cls, 2);
++    raop->callbacks.conn_reset(raop->callbacks.cls, conn->connection_id, 2);
+ }
+ 
+ /* the HLS handler handles http requests GET /[uri] on the HLS channel from the media player to the Server, asking for
+--- a/lib/http_request.c
++++ b/lib/http_request.c
+@@ -39,6 +39,10 @@
+     char *data;
+     int datalen;
+ 
++    size_t received_bytes;
++    char first_line[4096];
++    size_t first_line_len;
++    bool first_line_done;
+     int complete;
+ };
+ 
+@@ -54,7 +58,7 @@
+     request->url[urllen] = '\0';
+     strncat(request->url, at, length);
+ 
+-    strncpy(request->protocol, at + length + 1, 8);
++    /* Protocol is parsed from a bounded assembled first line, not past a URL fragment. */
+ 
+     return 0;
+ }
+@@ -138,6 +142,12 @@
+     http_request_t *request = parser->data;
+ 
+     request->method = llhttp_method_name(request->parser.method);
++    char *protocol = strrchr(request->first_line, ' ');
++    if (protocol) {
++        ++protocol;
++        size_t len = strcspn(protocol, "\r\n");
++        if (len == 8) { memcpy(request->protocol, protocol, 8); request->protocol[8] = '\0'; }
++    }
+     request->complete = 1;
+     return 0;
+ }
+@@ -182,6 +192,19 @@
+ {
+     assert(request);
+ 
++    if (datalen < 0 || request->received_bytes + (size_t)datalen > 65536) {
++        llhttp_set_error_reason(&request->parser, "request exceeds 64 KiB");
++        request->parser.error = HPE_USER; return HPE_USER;
++    }
++    request->received_bytes += (size_t)datalen;
++    for (int i = 0; i < datalen && !request->first_line_done; ++i) {
++        if (request->first_line_len + 1 >= sizeof(request->first_line)) {
++            request->parser.error = HPE_USER; return HPE_USER;
++        }
++        request->first_line[request->first_line_len++] = data[i];
++        request->first_line[request->first_line_len] = '\0';
++        if (data[i] == '\n') request->first_line_done = true;
++    }
+     int ret = llhttp_execute(&request->parser, data, datalen);
+ 
+     /* support for "Upgrade" to reverse http ("PTTH/1.0") protocol */
+--- a/lib/http_response.c
++++ b/lib/http_response.c
+@@ -21,6 +21,7 @@
+ #include "compat.h"
+ 
+ struct http_response_s {
++    int status;
+     int complete;
+     int disconnect;
+ 
+@@ -72,6 +73,7 @@
+ http_response_init(http_response_t *response, const char *protocol, int code, const char *message)
+ {
+     assert(response);
++    response->status = code;
+     response->data_length = 0;    /* can be used to reinitialize a previously-initialized response */
+     char codestr[4] = {0};
+ 
+@@ -195,3 +197,5 @@
+     *datalen = response->data_length;
+     return response->data;
+ }
++
++int http_response_get_status(http_response_t *response) { return response ? response->status : 0; }
+--- a/lib/http_response.h
++++ b/lib/http_response.h
+@@ -20,6 +20,7 @@
+ 
+ typedef struct http_response_s http_response_t;
+ 
++int http_response_get_status(http_response_t *response);
+ http_response_t *http_response_create();
+ void http_response_init(http_response_t *response, const char *protocol, int code, const char *message);
+ void http_response_reverse_request_init(http_response_t *request, const char *method, const char *url,
+--- a/lib/httpd.c
++++ b/lib/httpd.c
+@@ -21,6 +21,8 @@
+ #include <assert.h>
+ #include <stdbool.h>
+ #include <errno.h>
++#include <stdint.h>
++#include <time.h>
+ 
+ #include "httpd.h"
+ #include "netutils.h"
+@@ -56,6 +58,7 @@
+     char nohold;
+ 
+     /* These variables only edited mutex locked */
++    uint64_t remove_connection_id;
+     int running;
+     int joined;
+     thread_handle_t thread;
+@@ -205,9 +208,12 @@
+ }
+ 
+ static void
+-httpd_remove_connection(httpd_t *httpd, http_connection_t *connection, int sock_err)
++httpd_remove_connection(httpd_t *httpd, http_connection_t *connection, int sock_err, const char *reason)
+ {
+     int socket_fd = connection->socket_fd;
++    if (!reason) reason = connection->pending_remove ? "requested" : sock_err ? "recv_error" : "peer_closed";
++    if (connection->user_data && httpd->callbacks.conn_close)
++        httpd->callbacks.conn_close(connection->user_data, reason);
+     if (sock_err) {
+         logger_log(httpd->logger, LOGGER_ERR, "httpd: recv error %d on socket %d: %s",
+                    sock_err, socket_fd, SOCKET_ERROR_STRING(sock_err));
+@@ -334,6 +340,14 @@
+     return (httpd->nohold ? true: false);
+ }
+ 
++/* Commands enqueue an immutable connection id; only the HTTP thread walks and
++ * closes its connection table, so a recycled table slot is never targeted. */
++void httpd_remove_connection_id(httpd_t *httpd, uint64_t id) {
++    MUTEX_LOCK(httpd->run_mutex);
++    httpd->remove_connection_id = id;
++    MUTEX_UNLOCK(httpd->run_mutex);
++}
++
+ void
+ httpd_remove_known_connections(httpd_t *httpd) {
+     for (int i = 0; i < httpd->max_connections; i++) {
+@@ -354,6 +368,53 @@
+         }
+         connection->pending_remove = 1;
+     }
++}
++
++/* Nonblocking sends have one absolute two-second budget. Restore the accepted
++ * socket's blocking mode before returning; receive behavior stays unchanged. */
++static uint64_t transport_millis(void) {
++#ifdef WIN32
++    return GetTickCount64();
++#else
++    struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
++    return (uint64_t)ts.tv_sec * 1000 + (uint64_t)ts.tv_nsec / 1000000;
++#endif
++}
++static int transport_nonblocking(int fd, int enabled) {
++#ifdef WIN32
++    u_long mode = enabled; return ioctlsocket(fd, FIONBIO, &mode);
++#else
++    int mode = enabled; return ioctl(fd, FIONBIO, &mode);
++#endif
++}
++static const char *transport_send(int fd, const char *data, int bytes, unsigned *sent) {
++    *sent = 0;
++    if (transport_nonblocking(fd, 1)) return "send_error";
++    const char *outcome = "complete";
++    uint64_t deadline = transport_millis() + 2000;
++    while (*sent < (unsigned)bytes) {
++        uint64_t now = transport_millis();
++        if (now >= deadline) { outcome = "send_timeout"; break; }
++        uint64_t remaining = deadline - now;
++        struct timeval timeout = {(long)(remaining / 1000), (long)((remaining % 1000) * 1000)};
++        fd_set writable; FD_ZERO(&writable); FD_SET(fd, &writable);
++        int ready = select(fd + 1, NULL, &writable, NULL, &timeout);
++        if (!ready) { outcome = "send_timeout"; break; }
++        if (ready < 0) {
++            if (SOCKET_GET_ERROR() == SOCKET_ERRORNAME(EINTR)) continue;
++            outcome = "send_error"; break;
++        }
++        int ret = send(fd, data + *sent, bytes - (int)*sent, 0);
++        if (!ret) { outcome = "send_closed"; break; }
++        if (ret < 0) {
++            int error = SOCKET_GET_ERROR();
++            if (error == SOCKET_ERRORNAME(EINTR) || error == SOCKET_ERRORNAME(EAGAIN) || error == SOCKET_ERRORNAME(EWOULDBLOCK)) continue;
++            outcome = "send_error"; break;
++        }
++        *sent += (unsigned)ret;
++    }
++    if (transport_nonblocking(fd, 0)) outcome = "send_error";
++    return outcome;
+ }
+ 
+ static THREAD_RETVAL
+@@ -366,6 +427,7 @@
+ 
+     bool logger_debug = (logger_get_level(httpd->logger) >= LOGGER_DEBUG);
+     assert(httpd);
++    const char *shutdown_reason = "shutdown";
+ 
+     while (1) {
+         fd_set rfds;
+@@ -380,6 +442,17 @@
+         }
+         MUTEX_UNLOCK(httpd->run_mutex);
+ 
++        MUTEX_LOCK(httpd->run_mutex);
++        uint64_t remove_id = httpd->remove_connection_id;
++        httpd->remove_connection_id = 0;
++        MUTEX_UNLOCK(httpd->run_mutex);
++        if (remove_id && httpd->callbacks.connection_id) {
++            for (int i = 0; i < httpd->max_connections; i++) {
++                http_connection_t *c = &httpd->connections[i];
++                if (c->connected && httpd->callbacks.connection_id(c->user_data) == remove_id)
++                    c->pending_remove = 1;
++            }
++        }
+         /* Set timeout value to 5ms */
+         tv.tv_sec = 1;
+         tv.tv_usec = 5000;
+@@ -406,7 +479,7 @@
+                 continue;
+             }
+             if (httpd->connections[i].pending_remove) {
+-                httpd_remove_connection(httpd, &httpd->connections[i], 0);
++                httpd_remove_connection(httpd, &httpd->connections[i], 0, NULL);
+                 continue;
+             }
+             socket_fd = httpd->connections[i].socket_fd;
+@@ -424,6 +497,7 @@
+             int sock_err = SOCKET_GET_ERROR();
+             logger_log(httpd->logger, LOGGER_ERR,
+                        "httpd error in select: %d %s", sock_err, SOCKET_ERROR_STRING(sock_err));
++            shutdown_reason = "select_error";
+             break;
+         }
+ 
+@@ -503,13 +577,13 @@
+                     if (ret == 0) {
+                         logger_log(httpd->logger, LOGGER_DEBUG, "client closed connection on socket %d",
+                                    connection->socket_fd);
+-                        httpd_remove_connection(httpd, connection, 0);
++                        httpd_remove_connection(httpd, connection, 0, NULL);
+                         break;
+                     } else if (ret == -1) {
+                         if (errno == SOCKET_ERRORNAME(EAGAIN) || errno == SOCKET_ERRORNAME(EWOULDBLOCK) || errno == SOCKET_ERRORNAME(EINTR)) {
+                             continue;
+                         } else {
+-                            httpd_remove_connection(httpd, connection, SOCKET_GET_ERROR());
++                            httpd_remove_connection(httpd, connection, SOCKET_GET_ERROR(), NULL);
+                             break;
+                         }
+                     } else {
+@@ -527,13 +601,13 @@
+             } else {
+                 int ret = recv(connection->socket_fd, buffer, sizeof(buffer), 0);
+                 if (ret == 0) {
+-                    httpd_remove_connection(httpd, connection, 0);
++                    httpd_remove_connection(httpd, connection, 0, NULL);
+                     continue;
+                 } else if (ret == -1) {
+                     if (errno == SOCKET_ERRORNAME(EAGAIN) || errno == SOCKET_ERRORNAME(EWOULDBLOCK) || errno == SOCKET_ERRORNAME(EINTR)) {
+                         continue;
+                     } else {
+-                        httpd_remove_connection(httpd, connection, SOCKET_GET_ERROR());
++                        httpd_remove_connection(httpd, connection, SOCKET_GET_ERROR(), NULL);
+                         continue;
+                     }
+                 } else {
+@@ -550,7 +624,7 @@
+                                " on socket %d:\n%s\n", connection->socket_fd, buffer);
+                 }
+                 if (recv_datalen == 0) {
+-                    httpd_remove_connection(httpd, connection, 0);
++                    httpd_remove_connection(httpd, connection, 0, NULL);
+                 }
+                 continue;
+             }
+@@ -564,7 +638,7 @@
+                            http_request_get_error_description(connection->request),
+                            data);
+                 free (data);
+-                httpd_remove_connection(httpd, connection, 0);
++                httpd_remove_connection(httpd, connection, 0, "parse_error");
+                 continue;
+             }
+ 
+@@ -581,35 +655,21 @@
+                                connection->socket_fd, i, method, url, protocol);
+                 }
+                 httpd->callbacks.conn_request(connection->user_data, connection->request, &response);
++                unsigned sent = 0; int datalen = 0;
++                const char *outcome = "no_response";
++                if (response) {
++                    const char *data = http_response_get_data(response, &datalen);
++                    outcome = transport_send(connection->socket_fd, data, datalen, &sent);
++                }
++                if (httpd->callbacks.conn_response)
++                    httpd->callbacks.conn_response(connection->user_data, connection->request, response,
++                                                    (unsigned)datalen, sent, outcome);
+                 http_request_destroy(connection->request);
+                 connection->request = NULL;
+-
+-                if (response) {
+-                    const char *data;
+-                    int datalen;
+-                    int written;
+-                    int ret;
+-
+-                    /* Get response data and datalen */
+-                    data = http_response_get_data(response, &datalen);
+-
+-                    written = 0;
+-                    while (written < datalen) {
+-                        ret = send(connection->socket_fd, data+written, datalen-written, 0);
+-                        if (ret == -1) {
+-                            logger_log(httpd->logger, LOGGER_ERR, "httpd error in sending data");
+-                            break;
+-                        }
+-                        written += ret;
+-                    }
+-
+-                    if (http_response_get_disconnect(response)) {
+-                        logger_log(httpd->logger, LOGGER_INFO, "Disconnecting on software request");
+-                        httpd_remove_connection(httpd, connection, 0);
+-                    }
+-                } else {
+-                    logger_log(httpd->logger, LOGGER_WARNING, "httpd didn't get response");
+-                }
++                if (response && strcmp(outcome,"complete"))
++                    httpd_remove_connection(httpd, connection, 0, outcome);
++                else if (response && http_response_get_disconnect(response))
++                    httpd_remove_connection(httpd, connection, 0, "software");
+                 http_response_destroy(response);
+             } else {
+                 logger_log(httpd->logger, LOGGER_DEBUG, "Request not complete, waiting for more data...");
+@@ -625,7 +685,7 @@
+             continue;
+         }
+         logger_log(httpd->logger, LOGGER_INFO, "Removing connection for socket %d", connection->socket_fd);
+-        httpd_remove_connection(httpd, connection, 0);
++        httpd_remove_connection(httpd, connection, 0, shutdown_reason);
+     }
+ 
+     /* Close server sockets since they are not used any more */
+@@ -705,6 +765,7 @@
+ int
+ httpd_is_running(httpd_t *httpd)
+ {
++    uint64_t remove_connection_id;
+     int running;
+ 
+     assert(httpd);
+--- a/lib/httpd.h
++++ b/lib/httpd.h
+@@ -30,14 +30,19 @@
+ } connection_type_t;
+ 
+ struct httpd_callbacks_s {
++    uint64_t (*connection_id)(void *ptr);
+     void* opaque;
+     void* (*conn_init)(void *opaque, unsigned char *local, int locallen, unsigned char *remote,
+                        int remotelen, unsigned int zone_id);
+     void  (*conn_request)(void *ptr, http_request_t *request, http_response_t **response);
+     void  (*conn_destroy)(void *ptr);
++    void  (*conn_response)(void *ptr, http_request_t *request, http_response_t *response,
++                           unsigned response_bytes, unsigned sent_bytes, const char *outcome);
++    void  (*conn_close)(void *ptr, const char *reason);
+ };
+ typedef struct httpd_callbacks_s httpd_callbacks_t;
+ bool httpd_nohold(httpd_t *httpd);
++void httpd_remove_connection_id(httpd_t *httpd, uint64_t id);
+ void httpd_remove_known_connections(httpd_t *httpd);
+ void httpd_remove_connections_by_type(httpd_t *httpd, connection_type_t type);
+ 
+--- a/lib/pairing.c
++++ b/lib/pairing.c
+@@ -96,6 +96,10 @@
+     }
+ 
+     pairing->ed = ed25519_key_generate(device_id, keyfile, result);
++    if (!pairing->ed) {
++        free(pairing);
++        return NULL;
++    }
+ 
+     return pairing;
+ }
+@@ -168,12 +168,15 @@
+         return -1;
+     }
+ 
++    x25519_key_destroy(session->ecdh_theirs);
++    ed25519_key_destroy(session->ed_theirs);
++    x25519_key_destroy(session->ecdh_ours);
+     session->ecdh_theirs = x25519_key_from_raw(ecdh_key);
+     session->ed_theirs = ed25519_key_from_raw(ed_key);
+ 
+     session->ecdh_ours = x25519_key_generate();
+ 
+-    x25519_derive_secret(session->ecdh_secret, session->ecdh_ours, session->ecdh_theirs);
++    if (x25519_derive_secret(session->ecdh_secret, session->ecdh_ours, session->ecdh_theirs) < 0) return -2;
+ 
+     session->status = STATUS_HANDSHAKE;
+     return 0;
+@@ -500,7 +503,7 @@
+ int
+ srp_new_user(pairing_session_t *session, pairing_t *pairing, const char *device_id, const char *pin,
+              const char **salt, int *len_salt, const char **pk, int *len_pk) {
+-    if (strlen(device_id) > SRP_USERNAME_SIZE) {
++    if (strlen(device_id) >= SRP_USERNAME_SIZE) {
+         return -1;
+     }
+ 
+@@ -530,18 +533,19 @@
+                                        (const unsigned char **) &srp_s, &len_s,
+                                        (const unsigned char **) &srp_v, &len_v,
+                                        NULL, NULL);
+-    if (len_s != SRP_SALT_SIZE || len_v != SRP_VERIFIER_SIZE) {
+-        return -3;
+-    }
+-
+-    memcpy(session->srp->salt, srp_s, SRP_SALT_SIZE);
+-    memcpy(session->srp->verifier, srp_v, SRP_VERIFIER_SIZE);
++    if (len_s < 1 || len_s > SRP_SALT_SIZE || len_v < 1 || len_v > SRP_VERIFIER_SIZE) {
++        free(srp_s); free(srp_v); return -3;
++    }
++
++    memcpy(session->srp->salt + SRP_SALT_SIZE - len_s, srp_s, len_s);
++    memcpy(session->srp->verifier + SRP_VERIFIER_SIZE - len_v, srp_v, len_v);
++    free(srp_s); free(srp_v);
+ 
+     *salt = (char *) session->srp->salt;
+-    *len_salt = len_s;
++    *len_salt = SRP_SALT_SIZE;
+ 
+     srp_create_server_ephemeral_key(SRP_SHA, SRP_NG,
+-                                    srp_v, len_v,
++                                    session->srp->verifier, SRP_VERIFIER_SIZE,
+                                     srp_b, len_b,
+                                     (const unsigned char **) &srp_B, &len_B,
+                                     NULL, NULL, 1);
+@@ -557,6 +561,7 @@
+                     int len_A, unsigned char *proof, int client_proof_len, int proof_len) {
+     int authenticated  = 0;
+     const unsigned char *B =  NULL;
++    if (!session->srp || (client_proof_len != 20 && client_proof_len != 64) || proof_len < 20) return -1;
+     const unsigned char *b = session->srp->private_key;
+     int len_b = SRP_PRIVATE_KEY_SIZE;
+     int len_B = 0;
+@@ -571,6 +576,7 @@
+                                                     b, len_b,
+                                                     &B, &len_B, NULL, NULL, 1);
+ 
++    if (!verifier) { free(session->srp); session->srp = NULL; return -1; }
+     srp_verifier_verify_session(verifier, proof, &M2);
+     authenticated = srp_verifier_is_authenticated(verifier);
+     if (authenticated == 0) {
+@@ -585,13 +591,15 @@
+         return -2;
+     }
+     memcpy(session->srp->session_key, session_key, len_K);
+-    memcpy(proof, M2, proof_len);
++    if (proof_len < 20) { srp_verifier_delete(verifier); return -1; }
++    memcpy(proof, M2, 20);
+     srp_verifier_delete(verifier);
+     return 0;
+ }
+ int
+ srp_confirm_pair_setup(pairing_session_t *session, pairing_t *pairing,
+                        unsigned char *epk, unsigned char *auth_tag) {
++    if (!session->srp) return -1;
+     unsigned char aesKey[16] = {0}, aesIV[16] = {0};
+     unsigned char hash[SHA512_DIGEST_LENGTH] = {0};
+     unsigned char pk[ED25519_KEY_SIZE] = {0};
+--- a/lib/raop.c
++++ b/lib/raop.c
+@@ -19,6 +19,7 @@
+ #include <string.h>
+ #include <assert.h>
+ 
++#include <stdatomic.h>
+ #include "raop.h"
+ #include "raop_rtp.h"
+ #include "pairing.h"
+@@ -52,6 +53,7 @@
+     /* Pairing, HTTP daemon and RSA key */
+     pairing_t *pairing;
+     httpd_t *httpd;
++    uint64_t next_connection_id;
+ 
+     dnssd_t *dnssd;
+ 
+@@ -75,11 +77,12 @@
+     int audio_delay_micros;
+ 
+      /* for temporary storage of pin during pair-pin start */
+-    unsigned short pin;
++    atomic_ushort pin;
+     bool use_pin;
+   
+      /* public key as string */
+     char pk_str[2*ED25519_KEY_SIZE + 1];
++    char receiver_uuid[37];
+ 
+     /* place to store media_data_store */
+     airplay_video_t *airplay_video[MAX_AIRPLAY_VIDEO];
+@@ -100,6 +103,7 @@
+ 
+ struct raop_conn_s {
+     raop_t *raop;
++    uint64_t connection_id;
+     raop_ntp_t *raop_ntp;
+     raop_rtp_t *raop_rtp;
+     raop_rtp_mirror_t *raop_rtp_mirror;
+@@ -118,12 +122,18 @@
+ 
+     char *client_session_id;
+     bool authenticated;
++    bool pin_verified;
++    bool verified;
++    bool audio_admitted;
++    char verified_pk[48];
++    char pin_pk[48];
++    unsigned srp_phase;
+     bool have_active_remote;
+ };
+ typedef struct raop_conn_s raop_conn_t;
+ 
+ #include "raop_handlers.h"
+-#include "http_handlers.h"
++/* Video/HLS handlers are deliberately absent from this build. */
+ 
+ static void *
+ conn_init(void *opaque, unsigned char *local, int locallen, unsigned char *remote, int remotelen, unsigned int zone_id) {
+@@ -137,6 +147,7 @@
+         return NULL;
+     }
+     conn->raop = raop;
++    conn->connection_id = ++raop->next_connection_id;
+     conn->raop_rtp = NULL;
+     conn->raop_rtp_mirror = NULL;
+     conn->raop_ntp = NULL;
+@@ -183,7 +194,60 @@
+         raop->callbacks.conn_init(raop->callbacks.cls);
+     }
+ 
++    if (raop->callbacks.protocol_transport) {
++        raop_transport_t meta = {.connection_id=conn->connection_id, .event="open", .protocol="none",
++            .method="OTHER", .route="other", .outcome="opened"};
++        raop->callbacks.protocol_transport(raop->callbacks.cls, &meta);
++    }
+     return conn;
++}
++
++static void conn_response(void *ptr, http_request_t *request, http_response_t *response,
++                          unsigned response_bytes, unsigned sent_bytes, const char *outcome) {
++    raop_conn_t *conn = ptr; raop_t *raop = conn->raop;
++    if (!raop->callbacks.protocol_trace && !raop->callbacks.protocol_transport) return;
++    const char *method = http_request_get_method(request), *url = http_request_get_url(request);
++    if (!method) method = ""; if (!url) url = "";
++    const char *safe_method = "OTHER", *route = "other";
++    const char *methods[] = {"GET", "POST", "PUT", "OPTIONS", "SETUP", "RECORD", "GET_PARAMETER", "SET_PARAMETER", "FLUSH", "TEARDOWN", "ANNOUNCE"};
++    for (unsigned i = 0; i < sizeof(methods)/sizeof(methods[0]); ++i) if (!strcmp(method, methods[i])) safe_method = methods[i];
++    if (!strncmp(url, "/info", 5)) route = "info";
++    else if (!strcmp(url, "/pair-pin-start")) route = "pair_pin_start";
++    else if (!strcmp(url, "/pair-setup-pin")) route = "pair_setup_pin";
++    else if (!strcmp(url, "/pair-setup")) route = "pair_setup";
++    else if (!strcmp(url, "/pair-verify")) route = "pair_verify";
++    else if (!strcmp(url, "/fp-setup")) route = "fp_setup";
++    else if (!strcmp(url, "/feedback")) route = "feedback";
++    else if (!strcmp(url, "/audioMode")) route = "audio_mode";
++    else if (!strcmp(url, "/setRateAnchorTime")) route = "rate_anchor";
++    else if (!strcmp(url, "/setRate")) route = "set_rate";
++    else if (!strcmp(url, "/setProperty")) route = "set_property";
++    else if (!strcmp(url, "*")) route = "options";
++    else if (!strncmp(url, "rtsp://", 7)) route = "audio";
++    else if (!strcmp(url, "/play") || !strcmp(url, "/reverse") || !strcmp(url, "/action") || !strcmp(url, "/photo")) route = "video";
++    unsigned status = (unsigned)http_response_get_status(response);
++    if (raop->callbacks.protocol_trace) raop->callbacks.protocol_trace(raop->callbacks.cls, safe_method, route, status);
++    if (raop->callbacks.protocol_transport) {
++        const char *protocol = http_request_get_protocol(request), *safe_protocol = "other";
++        if (protocol && !strcmp(protocol,"RTSP/1.0")) safe_protocol = "RTSP/1.0";
++        else if (protocol && !strcmp(protocol,"HTTP/1.1")) safe_protocol = "HTTP/1.1";
++        int body_bytes = 0; http_request_get_data(request, &body_bytes);
++        raop_transport_t meta = {.connection_id=conn->connection_id, .event="response", .protocol=safe_protocol,
++            .method=safe_method, .route=route, .outcome=outcome, .body_bytes=(unsigned)(body_bytes>0?body_bytes:0),
++            .status=status, .response_bytes=response_bytes, .sent_bytes=sent_bytes,
++            .cseq_present=http_request_get_header(request,"CSeq")!=NULL,
++            .session_present=http_request_get_header(request,"X-Apple-Session-ID")!=NULL};
++        raop->callbacks.protocol_transport(raop->callbacks.cls, &meta);
++    }
++}
++
++static void conn_close(void *ptr, const char *reason) {
++    raop_conn_t *conn = ptr; raop_t *raop = conn->raop;
++    if (raop->callbacks.protocol_transport) {
++        raop_transport_t meta = {.connection_id=conn->connection_id, .event="close", .protocol="none",
++            .method="OTHER", .route="other", .outcome=reason};
++        raop->callbacks.protocol_transport(raop->callbacks.cls, &meta);
++    }
+ }
+ 
+ static void
+@@ -257,10 +321,32 @@
+         ble = true;
+     }
+ 
+- /* this rejects messages from _airplay._tcp for video streaming protocol unless bool raop->hls_support is true*/   
+-    if (!cseq && !raop->hls_support && !ble) {
+-        logger_log(raop->logger, LOGGER_INFO, "ignoring AirPlay video streaming request (use option -hls to activate HLS support)");
++    /* Reject unsupported media before connection classification can stop audio. */
++    if ((!cseq && !ble) || !strcmp(url, "/play") || !strcmp(url, "/reverse") ||
++        !strcmp(url, "/action") || !strcmp(url, "/photo") || !strcmp(url, "/stream") ||
++        !strcmp(url, "/fp-setup2")) {
++        *response = http_response_create();
++        http_response_init(*response, protocol, 415, "Audio Only");
++        if (cseq) http_response_add_header(*response, "CSeq", cseq);
++        http_response_finish(*response, NULL, 0);
+         return;
++    }
++
++    if (!strcmp(method, "TEARDOWN")) {
++        int len = 0; const char *data = http_request_get_data(request, &len);
++        plist_t root = NULL; if (len) plist_from_bin(data, len, &root);
++        plist_t streams = root ? plist_dict_get_item(root, "streams") : NULL;
++        bool unsupported = streams && !PLIST_IS_ARRAY(streams);
++        for (unsigned i = 0; PLIST_IS_ARRAY(streams) && i < plist_array_get_size(streams); ++i) {
++            uint64_t type = 0; plist_get_uint_val(plist_dict_get_item(plist_array_get_item(streams, i), "type"), &type);
++            if (type != 96) unsupported = true;
++        }
++        if (root) plist_free(root);
++        if (unsupported) {
++            *response = http_response_create(); http_response_init(*response, protocol, 415, "Audio Only");
++            if (cseq) http_response_add_header(*response, "CSeq", cseq);
++            http_response_finish(*response, NULL, 0); return;
++        }
+     }
+ 
+     const char *client_session_id = http_request_get_header(request, "X-Apple-Session-ID");
+@@ -331,6 +417,10 @@
+     /* this response code and message  will be modified by the handler if necessary */
+     *response = http_response_create();
+     http_response_init(*response, protocol, 200, "OK");
++    if ((!strcmp(method, "RECORD") || !strcmp(method, "FLUSH") || !strcmp(method, "SET_PARAMETER") ||
++         !strcmp(method, "TEARDOWN") || !strcmp(url, "/feedback")) && !conn->verified) {
++        http_response_init(*response, protocol, 403, "Pair Verify Required"); goto finish;
++    }
+ 
+     /* is this really necessary? or is it obsolete? (added for all RTSP requests EXCEPT "RECORD") */
+     if (cseq && strcmp(method, "RECORD")) {
+@@ -440,39 +530,8 @@
+         } else {
+             http_response_init(*response, protocol, 501, "Not Implemented");
+         }
+-    } else if (!hls_request && !strcmp(protocol, "HTTP/1.1")) {
+-        if (!strcmp(method, "POST")) {
+-            if (!strcmp(url, "/reverse")) {
+-                handler = &http_handler_reverse;
+-            } else if (!strcmp(url, "/play")) {
+-                handler = &http_handler_play;
+-            } else if (!strncmp (url, "/getProperty?", strlen("/getProperty?"))) {
+-                handler = &http_handler_get_property;
+-            } else if (!strncmp(url, "/scrub?", strlen("/scrub?"))) {
+-                handler = &http_handler_scrub;
+-            } else if (!strncmp(url, "/rate?", strlen("/rate?"))) {
+-                handler = &http_handler_rate;
+-            } else if (!strcmp(url, "/stop")) {
+-                handler = &http_handler_stop;
+-            } else if (!strcmp(url, "/action")) {
+-                handler = &http_handler_action;
+-            } else if (!strcmp(url, "/fp-setup2")) {
+-                handler = &http_handler_fpsetup2;
+-            }
+-        } else if (!strcmp(method, "GET")) {
+-            if (!strcmp(url, "/server-info")) {
+-                raop->hls_pending = true;
+-                handler = &http_handler_server_info;
+-            } else if (!strcmp(url, "/playback-info")) {
+-                handler = &http_handler_playback_info;
+-            }
+-        } else if (!strcmp(method, "PUT")) {
+-            if (!strncmp (url, "/setProperty?", strlen("/setProperty?"))) {
+-                handler = &http_handler_set_property;
+-            }
+-        }
+-    } else if (hls_request) {
+-        handler = &http_handler_hls;
++    } else {
++        http_response_init(*response, protocol, 415, "Audio Only");
+     }
+ 
+     if (handler != NULL) {
+@@ -543,6 +602,8 @@
+     }
+ }
+ 
++static uint64_t conn_id(void *ptr) { return ((raop_conn_t *)ptr)->connection_id; }
++
+ static void
+ conn_destroy(void *ptr) {
+     raop_conn_t *conn = ptr;
+@@ -550,7 +611,7 @@
+     logger_log(raop->logger, LOGGER_DEBUG, "Destroying connection");
+ 
+     if (raop->callbacks.conn_destroy) {
+-        raop->callbacks.conn_destroy(raop->callbacks.cls);
++        raop->callbacks.conn_destroy(raop->callbacks.cls, conn->connection_id);
+     }
+ 
+     if (conn->raop_rtp) {
+@@ -590,8 +651,7 @@
+     }
+ 
+     /* Validate the callbacks structure */
+-    if (!callbacks->audio_process ||
+-        !callbacks->video_process) {
++    if (!callbacks->audio_process) {
+         return NULL;
+     }
+ 
+@@ -679,6 +739,9 @@
+     httpd_cbs.conn_init = &conn_init;
+     httpd_cbs.conn_request = &conn_request;
+     httpd_cbs.conn_destroy = &conn_destroy;
++    httpd_cbs.connection_id = &conn_id;
++    httpd_cbs.conn_response = &conn_response;
++    httpd_cbs.conn_close = &conn_close;
+ 
+     /* Initialize the http daemon, (this will take a copy of httpd_cbs) */
+     httpd = httpd_init(raop->logger, &httpd_cbs, nohold);
+@@ -697,9 +760,8 @@
+ raop_destroy(raop_t *raop) {
+     if (raop) {
+         raop_destroy_airplay_video(raop, -1);
+-        raop_stop_httpd(raop);
+-        pairing_destroy(raop->pairing);
+-        httpd_destroy(raop->httpd);
++        if (raop->httpd) { raop_stop_httpd(raop); httpd_destroy(raop->httpd); }
++        if (raop->pairing) pairing_destroy(raop->pairing);
+         logger_destroy(raop->logger);
+         if (raop->nonce) {
+             free(raop->nonce);
+@@ -849,6 +911,10 @@
+     httpd_stop(raop->httpd);
+ }
+ 
++void raop_remove_connection_id(raop_t *raop, uint64_t id) {
++    httpd_remove_connection_id(raop->httpd, id);
++}
++
+ void raop_remove_known_connections(raop_t * raop) {
+     httpd_remove_known_connections(raop->httpd);
+ }
+@@ -887,3 +953,7 @@
+ uint64_t get_local_time() {
+     return raop_ntp_get_local_time();
+ }
++
++const char *raop_get_public_key(raop_t *raop) { return raop->pk_str; }
++
++void raop_set_receiver_uuid(raop_t *raop, const char *uuid) { snprintf(raop->receiver_uuid, sizeof(raop->receiver_uuid), "%s", uuid); }
+--- a/lib/raop.h
++++ b/lib/raop.h
+@@ -68,37 +68,52 @@
+     RESET_TYPE_RTP_TO_HLS_TEARDOWN
+ } reset_type_t;
+ 
++/* Whitelisted metadata only; no payload, credentials or network addresses. */
++typedef struct raop_transport_s {
++    uint64_t connection_id;
++    const char *event, *protocol, *method, *route, *outcome;
++    unsigned body_bytes, status, response_bytes, sent_bytes;
++    bool cseq_present, session_present;
++} raop_transport_t;
++
+ struct raop_callbacks_s {
++    uint64_t connection_id; /* copied into each RTP session */
+     void* cls;
+ 
+-    void  (*audio_process)(void *cls, raop_ntp_t *ntp, audio_decode_struct *data);
++    void  (*audio_process)(void *cls, uint64_t connection_id, raop_ntp_t *ntp, audio_decode_struct *data);
+     void  (*video_process)(void *cls, raop_ntp_t *ntp, video_decode_struct *data);
+     void  (*video_pause)(void *cls);
+     void  (*video_resume)(void *cls);
+     void  (*conn_feedback) (void *cls);
+-    void  (*conn_reset) (void *cls, int reason);
++    void  (*conn_reset) (void *cls, uint64_t connection_id, int reason);
+     void  (*video_reset) (void *cls, reset_type_t reset_type);
+   
+   
+     /* Optional but recommended callback functions (probably not optional, check this)*/
+     void  (*conn_init)(void *cls);
+-    void  (*conn_destroy)(void *cls);
++    void  (*conn_destroy)(void *cls, uint64_t connection_id);
+   //void  (*conn_teardown)(void *cls, bool *teardown_96, bool *teardown_110 ); /*not used */
+-    void  (*audio_flush)(void *cls);
++    void  (*audio_flush)(void *cls, uint64_t connection_id);
+     void  (*video_flush)(void *cls);
+     double (*audio_set_client_volume)(void *cls);
+-    void  (*audio_set_volume)(void *cls, float volume);
++    void  (*audio_set_volume)(void *cls, uint64_t connection_id, float volume);
+     void  (*audio_set_metadata)(void *cls, const void *buffer, int buflen);
+     void  (*audio_set_coverart)(void *cls, const void *buffer, int buflen);
+     void  (*audio_stop_coverart_rendering) (void* cls);
+     void  (*audio_remote_control_id)(void *cls, const char *dacp_id, const char *active_remote_header);
+     void  (*audio_set_progress)(void *cls, uint32_t *start, uint32_t *curr, uint32_t *end);
+-    void  (*audio_get_format)(void *cls, unsigned char *ct, unsigned short *spf, bool *usingScreen, bool *isMedia, uint64_t *audioFormat);
++    void  (*audio_get_format)(void *cls, uint64_t connection_id, unsigned char *ct, unsigned short *spf, bool *usingScreen, bool *isMedia, uint64_t *audioFormat);
+     void  (*video_report_size)(void *cls, float *width_source, float *height_source, float *width, float *height);
+     void  (*mirror_video_running)(void *cls, bool is_running);
+-    void  (*report_client_request) (void *cls, char *deviceid, char *model, char *name, bool *admit);
++    void  (*report_client_request) (void *cls, uint64_t connection_id, char *deviceid, char *model, char *name, bool *admit);
++    void (*pairing_detail)(void *cls, const char *stage, unsigned a_bytes, unsigned proof_bytes, const char *reason);
++    void (*protocol_trace)(void *cls, const char *method, const char *route, unsigned status);
++    void (*protocol_transport)(void *cls, const raop_transport_t *metadata);
++    bool (*client_allowed)(void *cls, uint64_t connection_id, const char *pk);
++    void  (*verified_client)(void *cls, uint64_t connection_id, const char *pk);
++    bool (*pairing_allowed)(void *cls, uint64_t connection_id, bool new_attempt);
+     void  (*display_pin) (void *cls, char * pin);
+-    void  (*register_client) (void *cls, const char *device_id, const char *pk_str, const char *name);
++    void  (*register_client) (void *cls, uint64_t connection_id, const char *device_id, const char *pk_str, const char *name);
+     bool  (*check_register) (void *cls, const char *pk_str);
+     const char*  (*passwd) (void *cls, int *len);
+     void  (*export_dacp) (void *cls, const char *active_remote, const char *dacp_id);
+@@ -122,6 +137,8 @@
+ uint64_t get_local_time();
+ void raop_handle_eos(raop_t *raop);
+ 
++RAOP_API void raop_set_receiver_uuid(raop_t *raop, const char *uuid);
++RAOP_API const char *raop_get_public_key(raop_t *raop);
+ RAOP_API raop_t *raop_init(raop_callbacks_t *callbacks);
+ RAOP_API int raop_init2(raop_t *raop, int nohold, const char *device_id, const char *keyfile);
+ RAOP_API void raop_set_log_level(raop_t *raop, int level);
+@@ -138,7 +155,8 @@
+ RAOP_API void raop_stop_httpd(raop_t *raop);
+ RAOP_API void raop_set_dnssd(raop_t *raop, dnssd_t *dnssd);
+ RAOP_API void raop_destroy(raop_t *raop);
+-RAOP_API void raop_remove_known_connections(raop_t * raop);
++RAOP_API void raop_remove_connection_id(raop_t *raop, uint64_t id);
++void raop_remove_known_connections(raop_t * raop);
+ RAOP_API void raop_remove_hls_connections(raop_t * raop);
+ RAOP_API void raop_destroy_airplay_video(raop_t *raop, int id);
+ RAOP_API void raop_playlist_remove(raop_t *raop, void *airplay_video, float position);
+--- a/lib/raop_handlers.h
++++ b/lib/raop_handlers.h
+@@ -139,7 +139,7 @@
+     plist_t name_node = plist_new_string(name);
+     plist_dict_set_item(res_node, "name", name_node);
+ 
+-    plist_t pi_node = plist_new_string(AIRPLAY_PI);
++    plist_t pi_node = plist_new_string(raop->receiver_uuid);
+     plist_dict_set_item(res_node, "pi", pi_node);
+ 
+     plist_t vv_node = plist_new_uint(strtol(AIRPLAY_VV, NULL, 10));
+@@ -195,8 +195,8 @@
+     plist_t audio_formats_node = plist_new_array();
+     plist_t audio_format_0_node = plist_new_dict();
+     plist_t audio_format_0_type_node = plist_new_uint(100);
+-    plist_t audio_format_0_audio_input_formats_node = plist_new_uint(0x3fffffc);
+-    plist_t audio_format_0_audio_output_formats_node = plist_new_uint(0x3fffffc);
++    plist_t audio_format_0_audio_input_formats_node = plist_new_uint(0x1440004);
++    plist_t audio_format_0_audio_output_formats_node = plist_new_uint(0x1440004);
+     plist_dict_set_item(audio_format_0_node, "audioOutputFormats", audio_format_0_audio_output_formats_node);
+     plist_dict_set_item(audio_format_0_node, "type", audio_format_0_type_node);
+     plist_dict_set_item(audio_format_0_node, "audioInputFormats", audio_format_0_audio_input_formats_node);
+@@ -204,43 +204,14 @@
+ 
+     plist_t audio_format_1_node = plist_new_dict();
+     plist_t audio_format_1_type_node = plist_new_uint(101);
+-    plist_t audio_format_1_audio_input_formats_node = plist_new_uint(0x3fffffc);
+-    plist_t audio_format_1_audio_output_formats_node = plist_new_uint(0x3fffffc);
++    plist_t audio_format_1_audio_input_formats_node = plist_new_uint(0x1440004);
++    plist_t audio_format_1_audio_output_formats_node = plist_new_uint(0x1440004);
+     plist_dict_set_item(audio_format_1_node, "audioOutputFormats", audio_format_1_audio_output_formats_node);
+     plist_dict_set_item(audio_format_1_node, "type", audio_format_1_type_node);
+     plist_dict_set_item(audio_format_1_node, "audioInputFormats", audio_format_1_audio_input_formats_node);
+     plist_array_append_item(audio_formats_node, audio_format_1_node);
+     plist_dict_set_item(res_node, "audioFormats", audio_formats_node);
+ 
+-    plist_t displays_node = plist_new_array();
+-    plist_t displays_0_node = plist_new_dict();
+-    plist_t displays_0_width_physical_node = plist_new_uint(0);
+-    plist_t displays_0_height_physical_node = plist_new_uint(0);
+-    plist_t displays_0_uuid_node = plist_new_string("e0ff8a27-6738-3d56-8a16-cc53aacee925");
+-    plist_t displays_0_width_node = plist_new_uint(raop->width);
+-    plist_t displays_0_height_node = plist_new_uint(raop->height);
+-    plist_t displays_0_width_pixels_node = plist_new_uint(raop->width);
+-    plist_t displays_0_height_pixels_node = plist_new_uint(raop->height);
+-    plist_t displays_0_rotation_node = plist_new_bool(0); /* set to true in AppleTV gen 3 (which has features bit 8  set */
+-    plist_t displays_0_refresh_rate_node = plist_new_real((double) 1.0 / raop->refreshRate);  /* set as real 0.166666  = 60hz in AppleTV gen 3 */
+-    plist_t displays_0_max_fps_node = plist_new_uint(raop->maxFPS);
+-    plist_t displays_0_overscanned_node = plist_new_bool(raop->overscanned);
+-    plist_t displays_0_features = plist_new_uint(14);
+-
+-    plist_dict_set_item(displays_0_node, "uuid", displays_0_uuid_node);
+-    plist_dict_set_item(displays_0_node, "widthPhysical", displays_0_width_physical_node);
+-    plist_dict_set_item(displays_0_node, "heightPhysical", displays_0_height_physical_node);
+-    plist_dict_set_item(displays_0_node, "width", displays_0_width_node);
+-    plist_dict_set_item(displays_0_node, "height", displays_0_height_node);
+-    plist_dict_set_item(displays_0_node, "widthPixels", displays_0_width_pixels_node);
+-    plist_dict_set_item(displays_0_node, "heightPixels", displays_0_height_pixels_node);
+-    plist_dict_set_item(displays_0_node, "rotation", displays_0_rotation_node);    
+-    plist_dict_set_item(displays_0_node, "refreshRate", displays_0_refresh_rate_node);
+-    plist_dict_set_item(displays_0_node, "maxFPS", displays_0_max_fps_node);
+-    plist_dict_set_item(displays_0_node, "overscanned", displays_0_overscanned_node);
+-    plist_dict_set_item(displays_0_node, "features", displays_0_features);
+-    plist_array_append_item(displays_node, displays_0_node);
+-    plist_dict_set_item(res_node, "displays", displays_node);
+ 
+  finished:
+     plist_to_bin(res_node, response_data, (uint32_t *) response_datalen);
+@@ -253,6 +224,10 @@
+                           http_request_t *request, http_response_t *response,
+                           char **response_data, int *response_datalen) {
+     raop_t *raop = conn->raop;
++    if (raop->callbacks.pairing_allowed && !raop->callbacks.pairing_allowed(raop->callbacks.cls, conn->connection_id, false)) {
++        http_response_init(response, "RTSP/1.0", 403, "Pairing Disabled"); return;
++    }
++
+     logger_log(raop->logger, LOGGER_INFO, "client sent PAIR-PIN-START request");
+     int pin_4 = 0;
+     if (raop->pin > 9999) {
+@@ -278,6 +253,10 @@
+                            http_request_t *request, http_response_t *response,
+                            char **response_data, int *response_datalen) {
+     raop_t *raop = conn->raop;
++    if (raop->callbacks.pairing_allowed && !raop->callbacks.pairing_allowed(raop->callbacks.cls, conn->connection_id, false)) {
++        http_response_init(response, "RTSP/1.0", 403, "Pairing Disabled"); return;
++    }
++
+     const char *request_data = NULL;;
+     int request_datalen = 0;
+     bool data_is_plist = false;
+@@ -308,6 +287,11 @@
+     plist_t req_authtag_node = plist_dict_get_item(req_root_node, "authTag");
+   
+     if (PLIST_IS_STRING(req_method_node) && PLIST_IS_STRING(req_user_node)) {
++        /* Each fresh SRP challenge counts toward the PIN attempt bound. */
++        if (raop->callbacks.pairing_allowed && !raop->callbacks.pairing_allowed(raop->callbacks.cls, conn->connection_id, true)) {
++            plist_free(req_root_node); http_response_init(response, "RTSP/1.0", 403, "PIN Attempt Limit"); return;
++        }
++        conn->pin_verified = false; conn->srp_phase = 1;
+         /* this is the initial pair-setup-pin request */
+         const char *salt = NULL;
+         char pin[6] = { '\0' };
+@@ -316,7 +300,7 @@
+         char *method = NULL;
+         char *user = NULL;
+         plist_get_string_val(req_method_node, &method);
+-        if (strncmp(method, "pin", strlen (method))) {
++        if (strcmp(method, "pin")) {
+             logger_log(raop->logger, LOGGER_ERR, "error, required method is \"pin\", client requested \"%s\"", method);
+             free (method);
+             plist_free (req_root_node);
+@@ -342,6 +326,7 @@
+         plist_t res_root_node = plist_new_dict();
+         plist_t res_salt_node = plist_new_data(salt, len_salt);
+         plist_t res_pk_node = plist_new_data(pk, len_pk);
++        free((void*)pk);
+         plist_dict_set_item(res_root_node, "pk", res_pk_node);	
+         plist_dict_set_item(res_root_node, "salt", res_salt_node);
+         plist_to_bin(res_root_node, response_data, (uint32_t*) response_datalen);
+@@ -358,7 +343,16 @@
+         uint64_t client_proof_len = 0;
+         plist_get_data_val(req_pk_node, &client_pk, &client_pk_len); 
+         plist_get_data_val(req_proof_node, &client_proof, &client_proof_len);
+-        if (client_proof_len != sizeof(proof)) {
++        if (raop->callbacks.pairing_detail) raop->callbacks.pairing_detail(raop->callbacks.cls, "srp_proof", (unsigned)client_pk_len, (unsigned)client_proof_len, "received");
++        if (conn->srp_phase != 1) {
++            if (raop->callbacks.pairing_detail) raop->callbacks.pairing_detail(raop->callbacks.cls, "srp_proof", (unsigned)client_pk_len, (unsigned)client_proof_len, "invalid_phase");
++            free(client_pk); free(client_proof); plist_free(req_root_node); goto authentication_failed;
++        }
++        conn->srp_phase = 0;
++        /* SHA-1 M is exactly 20 bytes. Older senders may pad it to 64 bytes. */
++        if (client_pk_len == 0 || client_pk_len > 256 || (client_proof_len != 20 && client_proof_len != 64)) {
++            if (raop->callbacks.pairing_detail) raop->callbacks.pairing_detail(raop->callbacks.cls, "srp_proof", (unsigned)client_pk_len, (unsigned)client_proof_len, "invalid_length");
++            free(client_pk); free(client_proof); plist_free(req_root_node);
+             logger_log(raop->logger, LOGGER_ERR, "Client Authentication Failure (client_proof_len %d invalid)", (int) client_proof_len);
+             goto authentication_failed;
+         }
+@@ -367,13 +361,14 @@
+             logger_log(raop->logger, LOGGER_DEBUG, "client SRP6a proof <M> :\n%s", str);	    
+             free (str);
+         }
+-        memcpy(proof, client_proof, sizeof(proof));
++        memcpy(proof, client_proof, 20);
+         free (client_proof);
+         int ret = srp_validate_proof(conn->session, raop->pairing, (const unsigned char *) client_pk,
+                                      (int) client_pk_len, proof, (int) client_proof_len, (int) sizeof(proof));
+         free (client_pk);
+         plist_free(req_root_node);
+         if (ret < 0) {
++            if (raop->callbacks.pairing_detail) raop->callbacks.pairing_detail(raop->callbacks.cls, "srp_proof", (unsigned)client_pk_len, (unsigned)client_proof_len, "proof_rejected");
+             logger_log(raop->logger, LOGGER_ERR, "Client Authentication Failure (client proof not validated)");
+             goto authentication_failed;
+         }
+@@ -383,6 +378,8 @@
+             free (str);
+         }
+         plist_t res_root_node = plist_new_dict();
++        conn->srp_phase = 2;
++        if (raop->callbacks.pairing_detail) raop->callbacks.pairing_detail(raop->callbacks.cls, "srp_proof", (unsigned)client_pk_len, (unsigned)client_proof_len, "verified");
+         plist_t res_proof_node = plist_new_data((const char *) proof, 20);
+         plist_dict_set_item(res_root_node, "proof", res_proof_node);	
+         plist_to_bin(res_root_node, response_data, (uint32_t*) response_datalen);
+@@ -390,6 +387,8 @@
+         http_response_add_header(response, "Content-Type", "application/x-apple-binary-plist");
+         return;
+     } else if (PLIST_IS_DATA(req_epk_node) && PLIST_IS_DATA(req_authtag_node)) {
++        if (conn->srp_phase != 2) { plist_free(req_root_node); goto authentication_failed; }
++        conn->srp_phase = 0;
+         /* this is the third part of pair-setup-pin request */
+         char *client_epk = NULL;
+         char *client_authtag = NULL;
+@@ -400,6 +399,9 @@
+         int ret = 0;
+         plist_get_data_val(req_epk_node, &client_epk, &client_epk_len); 
+         plist_get_data_val(req_authtag_node, &client_authtag, &client_authtag_len);
++        if (client_epk_len != 32 || client_authtag_len != 16) {
++            free(client_epk); free(client_authtag); plist_free(req_root_node); goto authentication_failed;
++        }
+ 
+         if (logger_debug) {
+             char *str = utils_data_to_string((const unsigned char *) client_epk, client_epk_len, 16);
+@@ -421,6 +423,15 @@
+         } else {
+             logger_log(raop->logger, LOGGER_DEBUG, "pair-pin-setup success\n");
+         }
++        conn->pin_verified = true;
++        char *paired_user = NULL, *paired_pk = NULL;
++        get_pairing_session_client_data(conn->session, &paired_user, &paired_pk);
++        if (!paired_pk || (raop->callbacks.client_allowed && !raop->callbacks.client_allowed(raop->callbacks.cls, conn->connection_id, paired_pk))) {
++            free(paired_pk); conn->pin_verified = false; goto authentication_failed;
++        }
++        snprintf(conn->pin_pk, sizeof(conn->pin_pk), "%s", paired_pk);
++        if (raop->callbacks.register_client) raop->callbacks.register_client(raop->callbacks.cls, conn->connection_id, paired_user, paired_pk, "AirPlay");
++        free(paired_pk);
+         pairing_session_set_setup_status(conn->session);
+         plist_t res_root_node = plist_new_dict();
+         plist_t res_epk_node = plist_new_data((const char *) epk, 32);
+@@ -470,15 +481,7 @@
+                         char **response_data, int *response_datalen)
+ {
+     raop_t *raop = conn->raop;
+-    bool register_check = false;  
+-    if (pairing_session_check_handshake_status(conn->session)) {
+-        if (raop->use_pin) {
+-            pairing_session_set_setup_status(conn->session);
+-            register_check = true;
+-        } else {
+-            return;
+-        }
+-    }
++    bool register_check = true;
+     unsigned char public_key[X25519_KEY_SIZE];
+     unsigned char signature[PAIRING_SIG_SIZE];
+     const unsigned char *data = NULL;
+@@ -491,12 +494,15 @@
+     }
+     switch (data[0]) {
+     case 1:
++        conn->verified = false;
++        pairing_session_set_setup_status(conn->session);
+         if (datalen != 4 + X25519_KEY_SIZE + ED25519_KEY_SIZE) {
+             logger_log(raop->logger, LOGGER_ERR, "Invalid pair-verify data");
+             return;
+         }
+         /* We can fall through these errors, the result will just be garbage... */
+         if (pairing_session_handshake(conn->session, data + 4, data + 4 + X25519_KEY_SIZE)) {
++            http_response_init(response, "RTSP/1.0", 400, "Invalid ECDH Key"); return;
+             logger_log(raop->logger, LOGGER_ERR, "Error initializing pair-verify handshake");
+         }
+         if (pairing_session_get_public_key(conn->session, public_key)) {
+@@ -506,16 +512,20 @@
+             logger_log(raop->logger, LOGGER_ERR, "Error getting ED25519 signature");
+         }
+         if (register_check) {
+-            bool registered_client = true;
++            bool registered_client = false;
+             if (raop->callbacks.check_register) {
+                 const unsigned char *pk = data + 4 + X25519_KEY_SIZE;
+                 char *pk64 = NULL;
+                 ed25519_pk_to_base64(pk, &pk64);
+-                registered_client = raop->callbacks.check_register(raop->callbacks.cls, pk64);
++                registered_client = (conn->pin_verified && !strcmp(conn->pin_pk, pk64)) || raop->callbacks.check_register(raop->callbacks.cls, pk64);
++                if (raop->callbacks.client_allowed && !raop->callbacks.client_allowed(raop->callbacks.cls, conn->connection_id, pk64)) registered_client = false;
++                if (registered_client) snprintf(conn->verified_pk, sizeof(conn->verified_pk), "%s", pk64);
+                 free (pk64);
+             }
+ 
+             if (!registered_client) {
++                http_response_init(response, "RTSP/1.0", 403, "PIN Required");
++                http_response_set_disconnect(response, 1);
+                 return;
+             }
+         }
+@@ -528,6 +538,9 @@
+         }
+         break;
+     case 0:
++        if (raop->callbacks.client_allowed && !raop->callbacks.client_allowed(raop->callbacks.cls, conn->connection_id, conn->verified_pk)) {
++            http_response_init(response, "RTSP/1.0", 403, "Revoked Client"); return;
++        }
+         logger_log(raop->logger, LOGGER_DEBUG, "2nd pair-verify step: checking signature");
+         if (datalen != 4 + PAIRING_SIG_SIZE) {
+             logger_log(raop->logger, LOGGER_ERR, "Invalid pair-verify data");
+@@ -535,10 +548,13 @@
+         }
+ 
+         if (pairing_session_finish(conn->session, data + 4)) {
++            http_response_init(response, "RTSP/1.0", 403, "Invalid Signature");
+             logger_log(raop->logger, LOGGER_ERR, "Incorrect pair-verify signature");
+             http_response_set_disconnect(response, 1);
+             return;
+         }
++        conn->verified = true;
++        if (raop->callbacks.verified_client) raop->callbacks.verified_client(raop->callbacks.cls, conn->connection_id, conn->verified_pk);
+         logger_log(raop->logger, LOGGER_DEBUG, "pair-verify: signature is verified");	    
+         http_response_add_header(response, "Content-Type", "application/octet-stream");
+         break;
+@@ -590,7 +606,7 @@
+                      http_request_t *request, http_response_t *response,
+                      char **response_data, int *response_datalen)
+ {
+-    http_response_add_header(response, "Public", "SETUP, RECORD, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER");
++    http_response_add_header(response, "Public", "SETUP, RECORD, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER, GET, POST");
+ }
+ 
+ static void
+@@ -606,6 +622,48 @@
+     const char *data = NULL;
+     int data_len = 0;
+     data = http_request_get_data(request, &data_len);
++
++    /* Inspect all requested streams before creating timing/media resources. */
++    plist_t preflight = NULL;
++    plist_from_bin(data, data_len, &preflight);
++    if (!preflight || !PLIST_IS_DICT(preflight)) {
++        if (preflight) plist_free(preflight);
++        http_response_init(response, "RTSP/1.0", 400, "Invalid SETUP"); return;
++    }
++    plist_t streams = plist_dict_get_item(preflight, "streams");
++    if (streams && !PLIST_IS_ARRAY(streams)) {
++        plist_free(preflight); http_response_init(response, "RTSP/1.0", 400, "Invalid Streams"); return;
++    }
++    for (unsigned i = 0; streams && i < plist_array_get_size(streams); ++i) {
++        plist_t stream = plist_array_get_item(streams, i);
++        uint64_t type = 0, ct = 0, af = 0; uint8_t screen = 0;
++        plist_get_uint_val(plist_dict_get_item(stream, "type"), &type);
++        plist_get_uint_val(plist_dict_get_item(stream, "ct"), &ct);
++        plist_get_uint_val(plist_dict_get_item(stream, "audioFormat"), &af);
++        plist_get_bool_val(plist_dict_get_item(stream, "usingScreen"), &screen);
++        if (type != 96 || screen || (ct != 1 && ct != 2 && ct != 4 && ct != 8) ||
++            (af && af != 4 && af != 262144 && af != 4194304 && af != 16777216)) {
++            plist_free(preflight); http_response_init(response, "RTSP/1.0", 415, "Audio Only"); return;
++        }
++    }
++    plist_t iv = plist_dict_get_item(preflight, "eiv"), ek = plist_dict_get_item(preflight, "ekey");
++    uint64_t ivlen = 0, eklen = 0; const char *ignore = NULL;
++    if (iv) ignore = plist_get_data_ptr(iv, &ivlen);
++    if (ek) ignore = plist_get_data_ptr(ek, &eklen);
++    if ((iv || ek) && (ivlen != 16 || eklen != 72)) {
++        plist_free(preflight); http_response_init(response, "RTSP/1.0", 400, "Invalid Key Length"); return;
++    }
++    if (iv && conn->raop_rtp) {
++        plist_free(preflight); http_response_init(response, "RTSP/1.0", 455, "Initial SETUP Already Complete"); return;
++    }
++    bool has_streams = streams != NULL;
++    plist_free(preflight);
++    if (!conn->verified) {
++        http_response_init(response, "RTSP/1.0", 403, "Pair Verify Required"); return;
++    }
++    if (has_streams && !conn->raop_rtp) {
++        http_response_init(response, "RTSP/1.0", 455, "Initial SETUP Required"); return;
++    }
+ 
+     dacp_id = http_request_get_header(request, "DACP-ID");
+     active_remote_header = http_request_get_header(request, "Active-Remote");
+@@ -755,14 +813,14 @@
+         plist_t req_name_node = plist_dict_get_item(req_root_node, "name");
+         plist_get_string_val(req_name_node, &name);  
+         if (raop->callbacks.report_client_request) {
+-            raop->callbacks.report_client_request(raop->callbacks.cls, deviceID, model, name, &admit_client);
++            raop->callbacks.report_client_request(raop->callbacks.cls, conn->connection_id, deviceID, model, name, &admit_client);
+         }
+         if (admit_client && deviceID && name && raop->callbacks.register_client) {
+             char *client_device_id = NULL;
+             char *client_pk = NULL;   /* encoded as null-terminated  base64 string, must be freed*/
+             get_pairing_session_client_data(conn->session, &client_device_id, &client_pk);
+             if (client_pk && !strcmp(deviceID, client_device_id)) { 
+-                raop->callbacks.register_client(raop->callbacks.cls, client_device_id, client_pk, name); 
++                raop->callbacks.register_client(raop->callbacks.cls, conn->connection_id, client_device_id, client_pk, name); 
+                 free (client_pk);
+             }
+         }
+@@ -772,7 +830,9 @@
+         model = NULL;
+         plist_mem_free(name);
+         name = NULL;
++        conn->audio_admitted = admit_client;
+         if (admit_client == false) {
++            http_response_init(response, "RTSP/1.0", 403, "Admission Denied");
+             /* client is not authorized to connect */
+             plist_free(res_root_node);
+             plist_free(req_root_node);
+@@ -802,6 +862,12 @@
+             free (str);
+         }
+         int ret = fairplay_decrypt(conn->fairplay, (unsigned char*) eaeskey, aeskey);
++        if (ret < 0) {
++            conn->audio_admitted = false;
++            if (raop->callbacks.conn_destroy) raop->callbacks.conn_destroy(raop->callbacks.cls, conn->connection_id);
++            plist_free(res_root_node); plist_free(req_root_node);
++            http_response_init(response, "RTSP/1.0", 403, "FairPlay Setup Required"); return;
++        }
+         logger_log(raop->logger, LOGGER_DEBUG, "fairplay_decrypt ret = %d", ret);
+         if (logger_debug) {
+             char *str = utils_data_to_string(aeskey, 16, 16);
+@@ -920,10 +986,11 @@
+         conn->raop_ntp = raop_ntp_init(raop->logger, &raop->callbacks, remote,
+                                        conn->remotelen, (unsigned short) timing_rport, &time_protocol);
+         raop_ntp_start(conn->raop_ntp, &timing_lport);
+-        conn->raop_rtp = raop_rtp_init(raop->logger, &raop->callbacks, conn->raop_ntp,
++        raop_callbacks_t audio_callbacks = raop->callbacks;
++        audio_callbacks.connection_id = conn->connection_id;
++        conn->raop_rtp = raop_rtp_init(raop->logger, &audio_callbacks, conn->raop_ntp,
+                                        remote, conn->remotelen, aeskey, aesiv);
+-        conn->raop_rtp_mirror = raop_rtp_mirror_init(raop->logger, &raop->callbacks,
+-                                                     conn->raop_ntp, remote, conn->remotelen, aeskey);
++        /* No mirror receiver is created in the audio worker. */
+ 
+         /* the event port is not used in mirror mode or audio mode */
+         unsigned short event_port = 0;
+@@ -949,34 +1016,6 @@
+             logger_log(raop->logger, LOGGER_DEBUG, "type = %llu", type);
+ 
+             switch (type) {
+-            case 110: {
+-                // Mirroring
+-                raop_destroy_airplay_video(raop, -1);  //cleanup any hls data still present when mirror video starts
+-                unsigned short dport = raop->mirror_data_lport;
+-                plist_t stream_id_node = plist_dict_get_item(req_stream_node, "streamConnectionID");
+-                uint64_t stream_connection_id = 0;
+-                plist_get_uint_val(stream_id_node, &stream_connection_id);
+-                logger_log(raop->logger, LOGGER_DEBUG, "streamConnectionID (needed for AES-CTR video decryption"
+-                           " key and iv): %llu", stream_connection_id);
+-
+-                if (conn->raop_rtp_mirror) {
+-                    raop_rtp_mirror_init_aes(conn->raop_rtp_mirror, &stream_connection_id);
+-                    raop_rtp_mirror_start(conn->raop_rtp_mirror, &dport, raop->clientFPSdata);
+-                    logger_log(raop->logger, LOGGER_DEBUG, "Mirroring initialized successfully");
+-                } else {
+-                    logger_log(raop->logger, LOGGER_ERR, "Mirroring not initialized at SETUP, playing will fail!");
+-                    http_response_set_disconnect(response, 1);
+-                }
+-
+-                plist_t res_stream_node = plist_new_dict();
+-                plist_t res_stream_data_port_node = plist_new_uint(dport);
+-                plist_t res_stream_type_node = plist_new_uint(110);
+-                plist_dict_set_item(res_stream_node, "dataPort", res_stream_data_port_node);
+-                plist_dict_set_item(res_stream_node, "type", res_stream_type_node);
+-                plist_array_append_item(res_streams_node, res_stream_node);
+-
+-                break;
+-                }
+             case 96: {
+                 // Audio
+                 unsigned short cport = raop->control_lport, dport = raop->data_lport; 
+@@ -992,6 +1031,10 @@
+                 plist_t req_stream_ct_node = plist_dict_get_item(req_stream_node, "ct");
+                 plist_get_uint_val(req_stream_ct_node, &uint_val);
+                 ct = (unsigned char) uint_val;
++
++                /* Re-SETUP is a fresh media transport on the verified owner.
++                 * Join the old reader before rebuilding decoder and sockets. */
++                if (conn->raop_rtp) raop_rtp_stop(conn->raop_rtp);
+ 
+                 if (raop->callbacks.audio_get_format) {
+                     /* get additional audio format parameters  */
+@@ -1024,7 +1067,7 @@
+                         usingScreen = false;
+                     }
+ 
+-                    raop->callbacks.audio_get_format(raop->callbacks.cls, &ct, &spf, &usingScreen, &isMedia, &audioFormat);
++                    raop->callbacks.audio_get_format(raop->callbacks.cls, conn->connection_id, &ct, &spf, &usingScreen, &isMedia, &audioFormat);
+                 }
+ 
+                 if (conn->raop_rtp) {
+@@ -1147,7 +1190,7 @@
+                     raop_rtp_set_volume(conn->raop_rtp, vol);
+                 } else if (raop->callbacks.audio_set_volume) {
+                     /* set volume in playbin (hls) */
+-                    raop->callbacks.audio_set_volume(raop->callbacks.cls, vol);
++                    raop->callbacks.audio_set_volume(raop->callbacks.cls, conn->connection_id, vol);
+                 }
+             } else if ((datalen >= 10) && !strncmp(datastr, "progress: ", 10)) {
+                 uint32_t start = 0, curr = 0, end = 0;
+@@ -1206,7 +1249,7 @@
+     raop_t *raop = conn->raop;
+     logger_log(raop->logger, LOGGER_DEBUG, "raop_handler_feedback");
+     /* register receipt of client's "heartbeat" signal  */
+-    raop->callbacks.conn_feedback(raop->callbacks.cls);
++    if (raop->callbacks.conn_feedback) raop->callbacks.conn_feedback(raop->callbacks.cls);
+ }
+ 
+ static void
+--- a/lib/raop_ntp.c
++++ b/lib/raop_ntp.c
+@@ -72,6 +72,8 @@
+     int64_t sync_offset;
+     int64_t sync_dispersion;
+     int64_t sync_delay;
++    uint64_t sync_uncertainty_ns;
++    uint64_t sync_sample_time;
+ 
+     // Socket address of the AirPlay client
+     struct sockaddr_storage remote_saddr;
+@@ -324,9 +326,7 @@
+ 	    } else {
+                 recv_time = raop_ntp_get_local_time();
+                 client_ref_time = byteutils_get_long_be(response, 24);
+-                if (!raop_ntp->client_time_received) {
+-                    raop_ntp->client_time_received = true;
+-                }
++                if (response_len < 32 || (response[1] & 0x7f) != 0x53 || memcmp(response + 8, request + 24, 8)) continue;
+                 //local time of the server when the NTP response packet returns
+                 int64_t t3 = (int64_t) recv_time;
+ 
+@@ -377,6 +377,9 @@
+                 raop_ntp->sync_offset = offset;
+                 raop_ntp->sync_dispersion = dispersion;
+                 raop_ntp->sync_delay = delay;
++                raop_ntp->sync_uncertainty_ns = (data_sorted[0].delay > 0 ? (uint64_t)data_sorted[0].delay / 2 : 0) + data_sorted[0].dispersion;
++                raop_ntp->sync_sample_time = data_sorted[0].time;
++                raop_ntp->client_time_received = true;
+                 MUTEX_UNLOCK(raop_ntp->sync_params_mutex);
+ 
+                 logger_log(raop_ntp->logger, LOGGER_DEBUG, "raop_ntp sync correction = %lld", correction);
+@@ -507,10 +510,8 @@
+  * Returns the current time in nano seconds according to the remote wall clock.
+  */
+ uint64_t raop_ntp_get_remote_time(raop_ntp_t *raop_ntp) {
+-    if  (!raop_ntp->client_time_received) {
+-        return 0;
+-    }
+     MUTEX_LOCK(raop_ntp->sync_params_mutex);
++    if (!raop_ntp->client_time_received) { MUTEX_UNLOCK(raop_ntp->sync_params_mutex); return 0; }
+     int64_t offset = raop_ntp->sync_offset;
+     MUTEX_UNLOCK(raop_ntp->sync_params_mutex);
+     return (uint64_t) ((int64_t) raop_ntp_get_local_time() + offset);
+@@ -520,10 +521,8 @@
+  * Returns the local wall clock time in nano seconds for the given point in remote clock time
+  */
+ uint64_t raop_ntp_convert_remote_time(raop_ntp_t *raop_ntp, uint64_t remote_time) {
+-    if  (!raop_ntp->client_time_received) {
+-        return 0;
+-    }
+     MUTEX_LOCK(raop_ntp->sync_params_mutex);
++    if (!raop_ntp->client_time_received) { MUTEX_UNLOCK(raop_ntp->sync_params_mutex); return 0; }
+     int64_t offset = raop_ntp->sync_offset;
+     MUTEX_UNLOCK(raop_ntp->sync_params_mutex);
+     return (uint64_t) ((int64_t) remote_time - offset);
+@@ -533,11 +532,21 @@
+  * Returns the remote wall clock time in nano seconds for the given point in local clock time
+  */
+ uint64_t raop_ntp_convert_local_time(raop_ntp_t *raop_ntp, uint64_t local_time) {
+-    if  (!raop_ntp->client_time_received) {
+-        return 0;
+-    }
+     MUTEX_LOCK(raop_ntp->sync_params_mutex);
++    if (!raop_ntp->client_time_received) { MUTEX_UNLOCK(raop_ntp->sync_params_mutex); return 0; }
+     int64_t offset = raop_ntp->sync_offset;
+     MUTEX_UNLOCK(raop_ntp->sync_params_mutex);
+     return (uint64_t) ((int64_t) local_time + offset);
+ }
++
++uint64_t raop_ntp_get_uncertainty_ns(raop_ntp_t *ntp) {
++    if (!ntp) return UINT64_MAX;
++    uint64_t now = raop_ntp_get_local_time();
++    MUTEX_LOCK(ntp->sync_params_mutex);
++    uint64_t value = UINT64_MAX;
++    if (ntp->client_time_received && ntp->sync_sample_time && now >= ntp->sync_sample_time) {
++        value = ntp->sync_uncertainty_ns + (now - ntp->sync_sample_time) / 1000000ULL * 15ULL;
++    }
++    MUTEX_UNLOCK(ntp->sync_params_mutex);
++    return value;
++}
+--- a/lib/raop_ntp.h
++++ b/lib/raop_ntp.h
+@@ -38,6 +38,7 @@
+ uint64_t raop_ntp_timestamp_to_nano_seconds(uint64_t ntp_timestamp, bool account_for_epoch_diff);
+ uint64_t raop_remote_timestamp_to_nano_seconds(raop_ntp_t *raop_ntp, uint64_t timestamp);
+ 
++uint64_t raop_ntp_get_uncertainty_ns(raop_ntp_t *raop_ntp);
+ uint64_t raop_ntp_get_local_time();
+ uint64_t raop_ntp_get_remote_time(raop_ntp_t *raop_ntp);
+ uint64_t raop_ntp_convert_remote_time(raop_ntp_t *raop_ntp, uint64_t remote_time);
+--- a/lib/raop_rtp.c
++++ b/lib/raop_rtp.c
+@@ -312,14 +312,14 @@
+     if (volume_changed) {
+         //raop_buffer_flush(raop_rtp->buffer, flush); /* seems to be unnecessary, may cause audio artefacts */
+         if (raop_rtp->callbacks.audio_set_volume) {
+-            raop_rtp->callbacks.audio_set_volume(raop_rtp->callbacks.cls, volume);
++            raop_rtp->callbacks.audio_set_volume(raop_rtp->callbacks.cls, raop_rtp->callbacks.connection_id, volume);
+         }
+     }
+ 
+     /* Handle flush if requested */
+     if (flush != NO_FLUSH) {
+         if (raop_rtp->callbacks.audio_flush) {
+-            raop_rtp->callbacks.audio_flush(raop_rtp->callbacks.cls);
++            raop_rtp->callbacks.audio_flush(raop_rtp->callbacks.cls, raop_rtp->callbacks.connection_id);
+         }
+     }
+ 
+@@ -616,6 +616,7 @@
+                     audio_data.data_len = payload_size;
+                     audio_data.data = payload;
+                     audio_data.ct = raop_rtp->ct;
++                    audio_data.source_rate = (uint32_t) (1000000000.0 / raop_rtp->rtp_clock_rate + 0.5);
+                     audio_data.ntp_time_remote = rtp_time_to_client_ntp(raop_rtp, rtp_timestamp);
+                     audio_data.ntp_time_local  = raop_ntp_convert_remote_time(raop_rtp->ntp, audio_data.ntp_time_remote);
+ 
+@@ -628,7 +629,7 @@
+                                    (double) audio_data.ntp_time_remote /SEC, rtp_timestamp, seqnum, type, payload_size);
+                     }
+ 
+-                    raop_rtp->callbacks.audio_process(raop_rtp->callbacks.cls, raop_rtp->ntp, &audio_data);
++                    raop_rtp->callbacks.audio_process(raop_rtp->callbacks.cls, raop_rtp->callbacks.connection_id, raop_rtp->ntp, &audio_data);
+                     free(payload);
+                 }
+ 
+@@ -666,8 +667,13 @@
+         return;
+     }
+ 
++    /* A restarted stream must wait for its own RTP/NTP sync. */
++    raop_rtp->initial_sync = false;
++    raop_rtp->rtp_sync = 0;
++    raop_rtp->client_ntp_sync = 0;
++    raop_rtp->flush = NO_FLUSH;
+     raop_rtp->ct = *ct;
+-    raop_rtp->rtp_clock_rate = SECOND_IN_NSECS / *sr;
++    raop_rtp->rtp_clock_rate = (double) SECOND_IN_NSECS / (double) *sr;
+ 
+     /* Initialize ports and sockets */
+     raop_rtp->control_lport = *control_lport;
+--- a/lib/stream.h
++++ b/lib/stream.h
+@@ -33,6 +33,7 @@
+ typedef struct {
+     unsigned char *data;
+     unsigned char ct;
++    uint32_t source_rate;
+     int data_len;
+     int sync_status;
+     uint64_t ntp_time_local;

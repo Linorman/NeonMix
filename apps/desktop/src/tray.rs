@@ -57,9 +57,12 @@ impl Tray {
             let _ = tx.send(action);
             ctx.request_repaint();
         }));
-        let icon = TrayIconBuilder::new()
-            .with_tooltip("NeonMix · 后台音频")
-            .with_icon_templated(icon)
+        let builder = TrayIconBuilder::new().with_tooltip("NeonMix · 后台音频");
+        #[cfg(target_os = "macos")]
+        let builder = builder.with_icon_templated(icon);
+        #[cfg(not(target_os = "macos"))]
+        let builder = builder.with_icon(icon);
+        let icon = builder
             .with_menu(Box::new(menu))
             .build()
             .map_err(|e| e.to_string())?;

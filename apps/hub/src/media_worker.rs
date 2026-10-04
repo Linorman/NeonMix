@@ -255,7 +255,12 @@ impl MediaWorker {
         })
     }
     pub fn latest(&self) -> Option<Report> {
-        self.report.lock().ok().map(|r| r.clone())
+        // Diagnostic/control readers may hold Engine; never wait on publication.
+        self.report.try_lock().ok().map(|r| r.clone())
+    }
+    /// Revoke immediately; join and producer recovery belong outside Engine.
+    pub fn revoke(&self) {
+        self.gate.revoke();
     }
     pub fn close(mut self) -> Option<BlockProducer> {
         self.gate.revoke();
@@ -314,18 +319,21 @@ mod tests {
             MediaWorker::prepare(receiver, socket, 0, Arc::new(MixerStats::default())).unwrap();
         let report = prepared.worker.report.clone();
         let reading = report.lock().unwrap();
+        let diagnostic_busy = prepared.worker.latest().is_none();
         prepared.worker.gate.revoke();
         let worker = prepared.activate(producer);
         thread::sleep(Duration::from_millis(50));
-        assert!(
-            !worker.thread.as_ref().unwrap().is_finished(),
-            "terminal state was discarded"
-        );
-        assert!(
-            consumer.pop_fresh(0, u64::MAX).is_none(),
-            "revoked PCM backlog remained playable"
-        );
+        let terminal_waiting = !worker.thread.as_ref().unwrap().is_finished();
+        let backlog_invalidated = consumer.pop_fresh(0, u64::MAX).is_none();
+        // Release the diagnostic lock before an assertion can unwind and join
+        // the worker, which must acquire this lock to publish its terminal state.
         drop(reading);
+        assert!(
+            diagnostic_busy,
+            "diagnostic read must not wait on a busy report"
+        );
+        assert!(terminal_waiting, "terminal state was discarded");
+        assert!(backlog_invalidated, "revoked PCM backlog remained playable");
         let start = Instant::now();
         while !worker.thread.as_ref().unwrap().is_finished() {
             assert!(start.elapsed() < Duration::from_secs(3));

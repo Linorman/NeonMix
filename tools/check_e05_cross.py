@@ -73,7 +73,9 @@ def windows_headers():
             return sysroot/'usr/share/mingw-w64/include',dependency
     raise RuntimeError('Ubuntu index has no mingw-w64-common package')
 
-report={'host':'macOS','foreign_programs_executed':False,'targets':{}}
+dependency_tree=subprocess.check_output(['cargo','tree','--locked','-p','neonmix-identity','-p','neonmix-control'],cwd=ROOT,text=True)
+if 'keyring v' in dependency_tree:raise RuntimeError('default E05 dependency graph includes native credential store')
+report={'native_credential_dependency':False,'host':'macOS','foreign_programs_executed':False,'targets':{}}
 for name in ('windows','linux'):
     if args.target not in ('all',name):continue
     target='x86_64-pc-windows-gnu' if name=='windows' else 'x86_64-unknown-linux-gnu'
