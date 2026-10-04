@@ -13,8 +13,16 @@ fn main() {
     };
     let hash = git(&["rev-parse", "--short=9", "HEAD"]).unwrap_or_else(|| "unknown".into());
     println!("cargo:rustc-env=NEONMIX_GIT_HASH={hash}");
-    if let Some(head) = git(&["rev-parse", "--git-path", "HEAD"]) {
-        println!("cargo:rerun-if-changed={head}");
+    // HEAD only names the branch; the commit moves in the ref file it points to.
+    for git_path in ["HEAD", "packed-refs"] {
+        if let Some(path) = git(&["rev-parse", "--git-path", git_path]) {
+            println!("cargo:rerun-if-changed={path}");
+        }
+    }
+    if let Some(reference) = git(&["symbolic-ref", "-q", "HEAD"])
+        && let Some(path) = git(&["rev-parse", "--git-path", &reference])
+    {
+        println!("cargo:rerun-if-changed={path}");
     }
     println!("cargo:rerun-if-changed=build.rs");
 }
