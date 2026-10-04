@@ -1,0 +1,42 @@
+{
+  "worker-identity": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "identity",
+      "--probe",
+      ".local/airplay/build/neonmix-airplay-identity-probe.exe",
+      "--worker",
+      ".local/airplay/build/neonmix-airplay-worker.exe",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r05\\artifacts\\platform-delivery-20261004\\windows\\identity.json"
+    ],
+    "seconds": 10.72
+  },
+  "worker-protocol": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "protocol-harness.py",
+      "probe"
+    ],
+    "seconds": 2.16
+  },
+  "worker-pairing": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "protocol-harness.py",
+      "pairing_probe"
+    ],
+    "seconds": 6.16
+  },
+  "worker-codecs": {
+    "exit_code": 0,
+    "command": [
+      ".local/airplay/build/neonmix-airplay-audio-probe.exe"
+    ],
+    "seconds": 0.83
+  }
+}

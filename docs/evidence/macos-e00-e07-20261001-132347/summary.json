@@ -1,0 +1,585 @@
+{
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "output": "/Volumes/projects-mac/NeonMix/docs/evidence/macos-e00-e07-20261001-132347",
+  "checks": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.338
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 101,
+      "seconds": 8.065
+    },
+    "doctor": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/doctor.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.223,
+      "evidence": []
+    },
+    "workspace-tests": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 38.439,
+      "evidence": []
+    },
+    "release-build": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 54.125,
+      "evidence": []
+    },
+    "simulate": {
+      "command": [
+        "tools/dev",
+        "target/release/neonmix-audio",
+        "simulate"
+      ],
+      "exit_code": 0,
+      "seconds": 0.487,
+      "evidence": []
+    },
+    "devices": {
+      "command": [
+        "tools/dev",
+        "target/release/neonmix-audio",
+        "devices"
+      ],
+      "exit_code": 0,
+      "seconds": 0.109,
+      "evidence": []
+    },
+    "hal-abi": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/macos_hal_abi.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.08,
+      "evidence": []
+    },
+    "hal-build": {
+      "command": [
+        "tools/dev",
+        "sh",
+        "tools/build_macos_hal.sh"
+      ],
+      "exit_code": 0,
+      "seconds": 1.211,
+      "evidence": []
+    },
+    "hal-bundle-host": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/macos_hal_bundle_probe.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.482,
+      "evidence": []
+    },
+    "hal-vendor-tests": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "test",
+        "--manifest-path",
+        "vendor/tympan-aspl/Cargo.toml",
+        "--locked",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit_code": 0,
+      "seconds": 1.967,
+      "evidence": []
+    },
+    "media-runtime": {
+      "command": [
+        "tools/dev",
+        "target/release/neonmix-hub",
+        "runtime"
+      ],
+      "exit_code": 0,
+      "seconds": 0.419,
+      "evidence": []
+    },
+    "media-dual": {
+      "command": [
+        "tools/dev",
+        "target/release/neonmix-hub",
+        "probe",
+        "--seconds",
+        "5",
+        "--streams",
+        "2"
+      ],
+      "exit_code": 0,
+      "seconds": 5.136,
+      "evidence": []
+    },
+    "media-loss-replay": {
+      "command": [
+        "tools/dev",
+        "target/release/neonmix-hub",
+        "probe",
+        "--seconds",
+        "5",
+        "--streams",
+        "1",
+        "--drop-every",
+        "17",
+        "--replay"
+      ],
+      "exit_code": 0,
+      "seconds": 5.064,
+      "evidence": []
+    },
+    "media-reject": {
+      "command": [
+        "tools/dev",
+        "target/release/neonmix-hub",
+        "probe",
+        "--seconds",
+        "2",
+        "--streams",
+        "1",
+        "--wrong-fingerprint"
+      ],
+      "exit_code": 0,
+      "seconds": 2.074,
+      "evidence": []
+    },
+    "drift-injection": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "-p",
+        "neonmix-core",
+        "--test",
+        "drift_stability",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.042,
+      "evidence": []
+    },
+    "blackhole-44100": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/probe.py",
+        "--release",
+        "--device",
+        "coreaudio:BlackHole2ch_UID",
+        "--rate",
+        "44100"
+      ],
+      "exit_code": 0,
+      "seconds": 5.384,
+      "evidence": [
+        "docs/evidence/macos-e00-e07-20261001-132347/blackhole-44100/virtual-probe"
+      ]
+    },
+    "blackhole-48000": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/probe.py",
+        "--release",
+        "--device",
+        "coreaudio:BlackHole2ch_UID",
+        "--rate",
+        "48000"
+      ],
+      "exit_code": 0,
+      "seconds": 5.331,
+      "evidence": [
+        "docs/evidence/macos-e00-e07-20261001-132347/blackhole-48000/virtual-probe"
+      ]
+    },
+    "blackhole-96000": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/probe.py",
+        "--release",
+        "--device",
+        "coreaudio:BlackHole2ch_UID",
+        "--rate",
+        "96000"
+      ],
+      "exit_code": 0,
+      "seconds": 5.39,
+      "evidence": [
+        "docs/evidence/macos-e00-e07-20261001-132347/blackhole-96000/virtual-probe"
+      ]
+    },
+    "capture-lifecycle": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/macos_runtime_probe.py",
+        "--device",
+        "coreaudio:BlackHole2ch_UID"
+      ],
+      "exit_code": 0,
+      "seconds": 32.357,
+      "evidence": []
+    },
+    "media-control": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e02_e04_probe.py",
+        "--device",
+        "coreaudio:BlackHole2ch_UID"
+      ],
+      "exit_code": 0,
+      "seconds": 21.158,
+      "evidence": [
+        "artifacts/e02-e04/20261001-132627"
+      ]
+    },
+    "media-faults": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e02_e04_completion_probe.py",
+        "--device",
+        "coreaudio:BlackHole2ch_UID"
+      ],
+      "exit_code": 0,
+      "seconds": 56.303,
+      "evidence": [
+        "artifacts/completion/20261001-132649"
+      ]
+    },
+    "discovery-pairing": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e05_probe.py"
+      ],
+      "exit_code": 0,
+      "seconds": 64.914,
+      "evidence": [
+        "artifacts/e05/20261001-132745"
+      ]
+    },
+    "hal-binding": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e06_binding_probe.py",
+        "--provider",
+        "neonmix"
+      ],
+      "exit_code": 0,
+      "seconds": 12.011,
+      "evidence": [
+        "artifacts/e06-binding/20261001-132850"
+      ]
+    },
+    "hal-app-volume": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e06_blackhole_probe.py",
+        "--provider",
+        "neonmix",
+        "--output",
+        "coreaudio:BlackHole2ch_UID"
+      ],
+      "exit_code": 0,
+      "seconds": 47.359,
+      "evidence": [
+        "artifacts/e06-macos-hal/20261001-132902"
+      ]
+    },
+    "background": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e07_background_probe.py",
+        "--release",
+        "--evidence",
+        "/Volumes/projects-mac/NeonMix/docs/evidence/macos-e00-e07-20261001-132347/background.json"
+      ],
+      "exit_code": 0,
+      "seconds": 6.684,
+      "evidence": []
+    },
+    "mixer": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e07_mixer_probe.py"
+      ],
+      "exit_code": 0,
+      "seconds": 10.228,
+      "evidence": [
+        "docs/evidence/macos-e00-e07-20261001-132347/mixer/mixer-macos.json",
+        "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+      ]
+    },
+    "native-ui": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/e07_native_ui_probe.py"
+      ],
+      "exit_code": 1,
+      "seconds": 1.428,
+      "evidence": [
+        "docs/evidence/macos-e00-e07-20261001-132347/native-ui/native-ui-macos.json",
+        "docs/evidence/macos-e00-e07-20261001-132347/native-ui/native-ui-final.log"
+      ]
+    },
+    "dual-soak-300s": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/hub_soak_probe.py",
+        "--device",
+        "coreaudio:BlackHole2ch_UID",
+        "--seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "seconds": 304.137,
+      "evidence": [
+        "artifacts/hub-soak/20261001-133007"
+      ]
+    }
+  },
+  "binary_sha256": {
+    "neonmix-audio": "29c459fe9847aac9662ad892e6d008a5916924cea7f8db5b8421805c5d89c230",
+    "neonmix-desktop": "1e142aa0a8f66120e5f8121365f8a9b2fd6bbde316c29be167377b4292e1f5c3",
+    "neonmix-hub": "bd7bac2f9e2926d7bafa4a40c7ee545f017c78df2f8065cd9771c658f7101ff7",
+    "neonmix-background": "4c09f7b4186f38da85ba499fcd86dd322c46028c20c90d360f460b091718434e"
+  },
+  "source_sha256": {
+    "apps/desktop/Cargo.toml": "df3f5bf020c3375e89cba982077f7c14de7691e8391a125b0e838da4ef2e0b95",
+    "apps/audio/Cargo.toml": "1ddfc69a292d0d90a6b2e03aa6837f3e50e3f6581ee465a2dc8a89b04039583d",
+    "apps/hub/Cargo.toml": "12dc7cd29784acc8a9a8b1ecc597f72169c3123365a1bb7d83064010418d0663",
+    "apps/hub/build.rs": "ffa3a45c91a3fe05ec828c6e5e2af014ba57111c0e88dc0060db0ef000c38d1e",
+    "apps/hub/src/control_client.rs": "3a01a25b1b10a1a35bd59975898b1b4b031014625a2504dd83da1fd9d39c7e30",
+    "apps/hub/src/pairing_api.rs": "5189846771ff242af9f173dba5dd656e1e80c97b56cca2e5b2985486a1e0b382",
+    "apps/hub/src/media_log.rs": "66d74141b1fd784cdd320c10f6880f5698615322c2239dfa29c3fdeb44f605d6",
+    "apps/hub/src/pump_timing.rs": "d8fb725d9542b56e4b1c3a3f7a96e56028031b905452b3dc97f68160f6ca1f99",
+    "apps/hub/src/qos.rs": "4e899e2db226553116aea66fd2f9db91baf3d5c53f933548a5e7f61334bb49f6",
+    "apps/hub/src/sender.rs": "167c4a4670926cdfbb65645ca4717ae7df94c38d730bb1a74f3cffecbdb732fe",
+    "apps/hub/src/server.rs": "790dc50ecb648b2ee347a21fe1d3c33045bb7b993c8ecaac979f76e80ac05544",
+    "apps/hub/src/identity.rs": "f70b5882f2c7e2746eb028c3cd69fc885231d4ea24e041d58adad9b909b78c5e",
+    "apps/hub/src/media_wait.rs": "60eb4caf5ee66195c8515f390d6d9e50967bdc576e66ab2dd3ab7507ecd0daa6",
+    "apps/hub/src/media_worker.rs": "e73cdeb4ecd7fe83049f23de867eec568369216ac1e2055ca5cae11f108b4296",
+    "apps/hub/src/binding.rs": "58168e4d0ebfcbe151db03beb6c19e24d737c8ac256f8103312c0f8ce286b1ba",
+    "apps/hub/src/main.rs": "8eb6060e7a06d7bb3ff6132fefec51fc487dbb37e7eff4b2732e7457c0ebe77e",
+    "apps/hub/src/recoverable.rs": "2c64a03ca6842e9e661d706cc0bad3891690b99777b149c1f9422fb9da8eca9c",
+    "apps/hub/src/framer.rs": "7fe08ad4f7c83155a7ee3bb64a4902f9abf61931d9dc9462ebd8ffd6adacb021",
+    "apps/hub/src/probe.rs": "06b1dd0b92ff409871bf94266e0edb35ca4fe3cfddcdfb4e6e0b47dc7e059ea3",
+    "apps/hub/src/connection.rs": "69fbdba05d21b098740399aba8877b8929a2e8259f07ba823c22b4061fa3afd1",
+    "apps/hub/src/virtual_output.rs": "26507023bc86acdd4198dbc470706519b1b7b829212b21433cbaf9cfaaef2cba",
+    "apps/audio/tests/output_reopen.rs": "aa475bd6d5c164659033f382a7f8e0b377c8c682b1489b06eefc019fb4c052da",
+    "apps/audio/tests/cli.rs": "094b92cbd8d272086031e02465a3f03b7d8a7720ffda818b2abb5cb7a15452c5",
+    "apps/audio/src/measurement.rs": "cfbd689c3afd3be16b9307a20b530ba5ce000828c8d06b2d79be180075d716a6",
+    "apps/audio/src/main.rs": "fd29896d1e50fc0601c1e0ebd02d309527618fef6eeff9edbcfabfe6f3901cf2",
+    "apps/audio/src/virtual_output.rs": "bbf7f4dd7c31b1ba31ef340a5d69008f47f45a12ec45cda7cda1e05cdaf126e2",
+    "apps/desktop/src/theme.rs": "1dce580a8b111fac1d1b49c35bfbb5139a000ae060e001cdb13e018c6aed9dd0",
+    "apps/desktop/src/tray.rs": "5042afeaa0ac0d6602737d9149629d616efc1686d62bd3deca09545ea730a4f8",
+    "apps/desktop/src/main.rs": "80495a56b6ed1b0dbf8d0562547ab489e0aaa8c97855de8e09f71c8a7b7fb6ae",
+    "apps/desktop/src/widgets.rs": "bbb563a643a423b77b8a1e964a9f35b1b663562e5fa80dfe53a2f7e2925ea572",
+    "apps/desktop/src/animation.rs": "e0b08985526d0b4f667d89898ecdbb7550b0766e3b687ed45405cf898acee91c",
+    "crates/identity/Cargo.toml": "1ca29eaf5e9a1458b1ee69d8c6cf446d87292758f825d0acb725174ae0c6c1b5",
+    "crates/audio-core/Cargo.toml": "29056aa2185573052009fbafe6211e689abbd7f9958c2219e415367a06447230",
+    "crates/output-binding/Cargo.toml": "d95be42485cee5532b8a9b4381bb67267021690fde243a0311235bea22f075c4",
+    "crates/desktop-service/Cargo.toml": "761634597bfe20ba5b420098adbd4c7a880af7d579fecc17905c3f12f3fecda4",
+    "crates/audio-io/Cargo.toml": "7add72dc6e89a0eab150a5d45b4518a08a7a5e19b4a9c892dd05779d2f02baa6",
+    "crates/control/Cargo.toml": "15eae055e94306447a33943626b2aef30f6b0e409337933245924cbcbfd7e516",
+    "crates/media/Cargo.toml": "61911e4d5ef3e436a28adb3d0516f6a7a80bccfff6838b12df0c426d7a9b5cfe",
+    "crates/media/tests/security.rs": "2e1b79086a33a047ab3a6c0559b41aff9236322bd4cadb5ecee51e459d4f851e",
+    "crates/media/tests/protocol.rs": "38d3c53ce824acb05bcd8cd50762bce7f1ae57d0cf416e65902db1d995c1ca33",
+    "crates/media/src/protocol.rs": "47093959bfd58953c7ea4ab2442376c1ffb24866ccdc57dd2c76d2e50f42d7fc",
+    "crates/media/src/transport.rs": "abacd1c0a3549f811e3994c9a58643e06af3c7126a57007dd84c3567249b35b5",
+    "crates/media/src/lib.rs": "f20589c97eb19f0554346c95eca414d85b48160af479cdd6108b3b5e13903d9c",
+    "crates/media/src/scheduling.rs": "ddb558d3a404e8b8caafbe306e7ffc31829743f737d5b75d2729b9dde2cb2199",
+    "crates/media/src/thread_priority.rs": "73e226c12a5ce921bc0f1a7d7ec75854725b518a0294ddec7f22eec13c6ad365",
+    "crates/media/src/queue_trace.rs": "7c10eadb9c468dc5906901797d013d873d96ad1e409c2c93e063c41ee52f517e",
+    "crates/control/tests/authority.rs": "ea2ef83ec1d36411ae4903cc78125e24558ef673aeed3db9b7f720e21cebb7e1",
+    "crates/control/src/lib.rs": "bdf716c94aab2fc1c1244a56565b18579712717e355b4ccdc43a6b3356b4a147",
+    "crates/audio-io/tests/pipewire_buffer.rs": "74b97ac7560d6b0d10468135c7ef2e98b323fcd4cb518c3f15b97e971e254491",
+    "crates/audio-io/src/lib.rs": "739d97c6d7fd0d78473509dbef6f4d45428520dd8cb9b35eacc478954ddc26d5",
+    "crates/desktop-service/tests/windows_native_ipc.rs": "eb2ad5890e656dbcd5e735960c3c42fd636294552cc799bb04c5471189c6cb3f",
+    "crates/desktop-service/tests/lifecycle.rs": "c6e39498ae3fd35a4cf83551235d9a27f69f3dd531d294a10aa340b599e96b3f",
+    "crates/desktop-service/src/linux_owner.rs": "d8ea88fbe62909bf0e0bdae6dcf4ac1f190ad0a02967826f07fc06b651eb022a",
+    "crates/desktop-service/src/transport.rs": "473d1698c001613876075f575ab0a1f3c8bd648bdf9fe44b127f5d900c07718b",
+    "crates/desktop-service/src/lib.rs": "a53a73cf5a07241b05a3c4c049f1debe3953b0ac1cb6d5d5f21a3bd740ded04c",
+    "crates/desktop-service/src/daemon.rs": "2362c70cfecb05c2cb7e99b2a7cc7f3c1cc7138ce04f36bc0836c15423e6b8d0",
+    "crates/desktop-service/src/transport_windows.rs": "61c86850ecf694ed7179281754be39c3a7d0fa8a45bc3552dc9b9e88987a55b5",
+    "crates/desktop-service/src/bin/neonmix-background.rs": "d52c9b0dd2e0bd80dee65da1593bfc8c2437397416e2f6ebc112f369c4ad74e4",
+    "crates/output-binding/tests/persistence.rs": "64ff8e5de07166a171627d9fabba283bfbb1c6c400d99aeb24209443bc0aa7b0",
+    "crates/output-binding/src/lib.rs": "6ce14da7ce13f4946031a4084a1a098eb1fe021938ca19cacd935bba864c8ecc",
+    "crates/audio-core/tests/drift_stability.rs": "ff8820b0d29a25dcb0f35cdb1f139aa4961c9de4d8a5a8cbb7fe9241216f86f6",
+    "crates/audio-core/tests/mixer_realtime.rs": "1594f48a44f20feec777e40cd5ad98381e232c8a46554e30f5ca5603db94f526",
+    "crates/audio-core/tests/realtime.rs": "e6229a089f44888844608074af45b12e43489c43b87e3b11b4f96bde1ad014be",
+    "crates/audio-core/tests/audio_contract.rs": "823cac3f6bc564ed4f94c8dbf83a5fa4d11c01dbd3f42dd6c0d9b314d7856978",
+    "crates/audio-core/tests/mixer.rs": "2d0b3532b1f69dfe36ece3a8306d107c0dfac99a9463d830cf82d897cf0cbac5",
+    "crates/audio-core/src/device.rs": "352737a777c9b5b13a65e0a313194448dc3caff7208d8dc54643fa3a115f94ca",
+    "crates/audio-core/src/clock.rs": "b1cc7b8413e5491455b1ae6f4efd3d3cd44e5d37feeebdd50d9c1760c3984ba4",
+    "crates/audio-core/src/signal.rs": "b55004716b60a7e30399c4e6ad88f3f2a535ec9883be85de976f5a1b74aefe4b",
+    "crates/audio-core/src/lib.rs": "215f949ccc3e72e5f7a117b1025e13647f9a4d0b188ee4c9a977a4fd21017144",
+    "crates/audio-core/src/resample.rs": "63c86893d0d71bc7f07889322590dc0a93a109ec65feb11fb36f3da3ff8deef2",
+    "crates/audio-core/src/queue.rs": "0ddb29a5f50ae83cc3bbc8b80f0d854428e01276fdee855d311c5d9ca23067c6",
+    "crates/audio-core/src/block.rs": "7f4611d376c88e4c76729fa46977ac0943069eec85b978ff7c36d516f0534d54",
+    "crates/audio-core/src/mixer.rs": "c2a36a45112ac72bad18ca025490b162ee125e478c19aa39676cb3698303c471",
+    "crates/audio-core/src/stats.rs": "a8e1cb45d3854e6444d473ad9baef7c1ce3572aa4d247d456e5aac54f0152eea",
+    "crates/audio-core/src/position.rs": "7b5943a4edeb666d1e3e5f86220802f5081885e778f8e99f06f0d2412412418a",
+    "crates/audio-core/src/epoch.rs": "7af8a164c6b7e17d73805fd564d44c993029a9dbce72eecb2e1cc2423e5fce7f",
+    "crates/audio-core/src/capture.rs": "50619b12ce7cb47161847ba3fe8cb4754eab25a6f7d6bd26420250f4d16f0a62",
+    "crates/identity/tests/native_vault.rs": "df93eb81afa99befa867a063ae79798255f2958ccc95e3e39bb0c1bff058b181",
+    "crates/identity/src/discovery.rs": "19d8a4ee637a6ebd15408e6dc88dc10e8e5a1effa17be8bb753305f1abe3522e",
+    "crates/identity/src/lib.rs": "d001e0995902698f0cbe60b7ffb3e65115bc4b4be702fa95feb2b7114c1c48ad",
+    "crates/identity/src/files.rs": "e6cff9f1e95d07b7cccf9113083ec9614c5d43e73a89f8bbbbd03972b95ca6e2",
+    "crates/identity/src/files_windows.rs": "2fd6e925b674c30cd628d0451c1c3a05eed3abd7d70e0f4835dd3024446f87e0",
+    "crates/identity/src/speaker.rs": "e144792c5a9e0fccb650801217262a8ce7c673ac5627a7011ccee7891785b1c1",
+    "crates/identity/src/pairing.rs": "60367537c4aed4b827f8684dc1a64933210c6619dada17eab5ce9036b11269ad",
+    "crates/identity/src/trust.rs": "664ba78f983483bdba4e535e36dcb082d3de1ee642e34dcb27dcf7bb1503fdce",
+    "crates/identity/src/vault.rs": "bc395ae29f0e476eacfc8cce122ea32f3012a4a70bed8a9835a1d9374d7305fd",
+    "adapters/macos/Cargo.toml": "f992d42451cf75a7dc860093de71e850eb47934be7e55771c0b52b8fff6cd58a",
+    "adapters/linux/Cargo.toml": "ee5e19b1ceb300d0f8aa525412a6c350167868d3f29dade49bfd1191c47c0115",
+    "adapters/windows/Cargo.toml": "7f17dc6ac11af70d7977d20e39b3a818229310f0a6d4380aa5443d6ab6f3dac3",
+    "adapters/windows/src/lib.rs": "d94557d620fcfd6b132048e740f958e920ce2d6515477baad718909df0498698",
+    "adapters/windows/src/virtual_output.rs": "7cd9fb74a9a7b8717f0c1f2160c89809c540f772d5f9a3cf37563f1c5370144e",
+    "adapters/linux/src/lib.rs": "3ed2ac3ec6b980e8cf9a6066898754034b358e6bc0d330541f8302e33fc6e0ca",
+    "adapters/linux/src/owned_sink.rs": "fe914267f4f2e0746f75d93073f0f688e690645cfe5f27350b8f217a42e4fede",
+    "adapters/macos/src/lib.rs": "67c3d2af3f11301d88c6e8ad9d44b397063edacf9ee4afffa06393be65fd1f97",
+    "adapters/macos/src/name.rs": "b7c2f7ee548cc44ed4c8d26dba7941b11b60acdadb9c835b45d9e84f8e26f345",
+    "tools/hub_soak_probe.py": "46ea975d544cda799a31e2c5e476b208dab8801d27f79594d703b405362fe69a",
+    "tools/e06_binding_probe.py": "1e95953b6c794b156f33e0df6b481a63a4aa2c7b3569bf363baef4b1e7f3e727",
+    "tools/e06_linux_probe.py": "cb5dbe2dc964bf5a64abd7972fdab3f1eb3c6d7ba2554ffb02f6f43d0d700166",
+    "tools/e06_macos_sleep_probe.py": "dc720cf552ada4118c92b8e55b7f084a3e814b5d3a78dd83f4aee21602ff1de2",
+    "tools/capture_control_isolation_probe.py": "0e4ec37422dc7ef31e6c2cc8748ccd3593a193dd036064e6853fa843d38c6293",
+    "tools/linux_runtime_probe.py": "0f3476dc829a48c40d23fb11711c37b8bd5ca14f30d9cace5b274d3825ced7ba",
+    "tools/e02_e04_completion_probe.py": "46894762d1ff5a9ee1d2188f374e6fc3fc046e3b46ffb94e6195aad3c7e1a4b5",
+    "tools/pack_linux_lab.py": "1c9bd0364557e1b0b666e28af3d16352eb6ae559eb069dde24bba55792cc79a2",
+    "tools/collect_build.py": "f59875a63d06d6e30e83eec900911ba79e3099c5289a2aff672578a50dbb58ed",
+    "tools/prepare_windows_driver.py": "b6859395ac8b536e509e0768d606cbe74e0c98433ea9e7bdac56ca59e47d5a9c",
+    "tools/lan_fault_gateway.py": "2d7fe012598cac1a8f84d81fbf7762255582a9207d96767c9154c47090ccceca",
+    "tools/e07_background_probe.py": "40a736e3ff205362e37782d0a051726723feaa04be1c8f14c181f16eda303fd7",
+    "tools/prepare_gstreamer.py": "8ed53a5666108e7a7fa3dc453274816524516f3bd5399fa19560f19ee4562317",
+    "tools/check.py": "305ef3abd7fa7ddbf02ed13090c4c715787a5278d54d504cf489528a2d958ebd",
+    "tools/macos_runtime_probe.py": "1258dfb1bc9711234e4a94533f5ad13559716a8a2533caff1d6330df860748c3",
+    "tools/e06_linux_binding_probe.py": "6f7e7ddcb4d66ddcbc8b1cfabfc8ce14bd4dea2cee4a57ef4b5e8bdf8059face",
+    "tools/macos_service_recovery_probe.py": "068e9589e1df6c3f9cc280efc747e420066d7b798df399a65b16ebebaa47eb22",
+    "tools/e02_e04_probe.py": "2282154835522bf16624992bcbd83f82333db29e96e1363b4b86bf5020638c57",
+    "tools/pyproject.toml": "ba2796dff9d5a3e61c2902910d67aad3d5b7d175dfafe932ed0a4aa30805a61d",
+    "tools/e05_probe.py": "d0ae52a36e7641e298b3f9b9cd9013691d66038ea4e22cf7453d6f65467c1161",
+    "tools/e06_blackhole_probe.py": "24828fc6774d10244e963090b264fe3e827230cdbb3b927b042d8bf7fae1dac7",
+    "tools/downloads.py": "2126f9d5f191429aa69b8dd9cb363d07bcf6c6286a7766b734b806ec9aeba301",
+    "tools/e06_linux_permissions_probe.py": "5f7e1ab6caecd32883a4726bc86a341a63642bc4e1a8872231abdf68be444c48",
+    "tools/package_macos_hal.py": "a85011891a5ff43b10a4a5bb617b88e9b78495c38d92511f6c4aeff39d06b340",
+    "tools/windows_driver_header_check.py": "a47c657956814bb44bbc14a460fffa0e2268699ddb8967c8e0150aa14d8567a6",
+    "tools/hotplug_probe.py": "29294d3bb1dd81999288cc82968beed6e0455aee4778b584ca0892628db76cb7",
+    "tools/linux_timer_probe.py": "ba14b2e3b17e5aee995020a890d4bc45b33e8b2e7c3fa82289ba76b84c44b28c",
+    "tools/probe.py": "8e898e07c53c48deeb8a0b866bb057e96e9edcaf1c725774b724109d333ebafc",
+    "tools/cross_linux_check.py": "91ec733d6a3b430498335f78d274c64f797a4eb066409391c47a1cc5a77fdcd8",
+    "tools/macos_hal_abi.py": "1d17b450a4ee57cf0cf42459cff5a8fd96de5cfd4b0f081f141539305123be84",
+    "tools/macos_hal_bundle_probe.py": "825ffe686e8108400d7c3c2282f9e566d5427e8bb0b0895488cc7e72d107a06f",
+    "tools/check_e05_cross.py": "ac16ed609b05e8d4579f49f4bf2139721bc710774a520f873fb6bec1912a05b6",
+    "tools/macos_audio_controls.py": "928d4858267d7cf5f8796482a9a57dd0606b81fdda507416c5b8eb5798979518",
+    "tools/e07_mixer_probe.py": "b755814eb1b81e907fcc18a86b0e9db21ef42292942fae5167c090bbc796006f",
+    "tools/linux_vm.py": "5b43b388c93dc2b0f0b6db828071a64897520d101dd2ef985e29cf8ad0bc447b",
+    "tools/capture_sender_probe.py": "98a0b76830dfcbbba65bc5817de48ef1b76993a3a82918b4e51c89049acfbdb7",
+    "tools/macos_process_stats.py": "d88009049cbb6892b02cf18121c7a20f83b2365f8e379e1c89b1af27d6b63528",
+    "tools/soak_probe.py": "bd8f6c12cffeb59101e9637c375a9151370eeee8bd2638340a24ccb2c92b0e40",
+    "tools/doctor.py": "4b689fb4da7a609b79fbd817075ed7eacb2c5e087e3947551c51355ca31b3c4e",
+    "tools/e07_native_ui_probe.py": "c3fe1bc27f36a2567d9b84a8ca5eca91b50f825d72df807b5de86d615ee8a66f",
+    "tools/macos_acceptance_run.py": "f39cd00d3ae601dc4b32cccbe908e1ab7ad52dd550ce7085b1f728ac2cf9b7b2",
+    "tools/mirror_switch.py": "73d1a47e02c131504381cb44a40002d308be8d9120435129b6b52db822d4a0a1",
+    "tools/check_virtual_output_sources.py": "24d7609546ce232f1e55200fc33adb9bdc9fb9152806562c72c26965a46ab18c",
+    "tools/e06_linux_recovery_probe.py": "dfce4ab6dc42bb54b2e0a38687f2e8530260f79c9340f4f94dff4549358c4773"
+  },
+  "followups": {
+    "drift_snapshot": {
+      "exit_code": 0,
+      "scope": "separate source snapshot; mixer differs from the initial source hash",
+      "log": "drift-snapshot.log"
+    },
+    "physical_output_formats": {
+      "passed": true,
+      "count": 6
+    },
+    "same_process_output_reopen": {
+      "passed": true
+    },
+    "quit_ui": {
+      "passed": true,
+      "scenarios": {
+        "escape_keeps_hub": true,
+        "confirmed_exit_ends_ui_background_and_hub": true
+      }
+    },
+    "sender_ui": {
+      "passed": false,
+      "binary_sha256": "1e142aa0a8f66120e5f8121365f8a9b2fd6bbde316c29be167377b4292e1f5c3",
+      "scenarios": {
+        "native_discovery_shows_actual_room": false,
+        "native_invitation_paste_pair_commits_member_identity": true,
+        "native_provider_selection_and_binding_add": true,
+        "native_binding_rename_keeps_identity": true,
+        "native_start_stop_sender_retains_hub": true,
+        "native_disable_enable_does_not_autostart": true
+      },
+      "failure": "probe condition timed out: False",
+      "keychain_cleanup": [
+        true,
+        true,
+        true
+      ]
+    },
+    "ui_visual": {
+      "capture_and_basic_interaction_passed": true,
+      "visual_acceptance_passed": false
+    },
+    "overall_acceptance_passed": false
+  }
+}

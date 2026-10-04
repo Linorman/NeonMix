@@ -1,0 +1,35 @@
+{
+  "scope": "Native Windows SSH session 0; not console interaction",
+  "pages": {
+    "hub": {
+      "timeout": true,
+      "exit_code": 1,
+      "screenshot": false,
+      "bytes": 0
+    },
+    "sender": {
+      "timeout": true,
+      "exit_code": 1,
+      "screenshot": false,
+      "bytes": 0
+    },
+    "mixer": {
+      "timeout": true,
+      "exit_code": 1,
+      "screenshot": false,
+      "bytes": 0
+    },
+    "devices": {
+      "timeout": true,
+      "exit_code": 1,
+      "screenshot": false,
+      "bytes": 0
+    },
+    "diagnostics": {
+      "timeout": true,
+      "exit_code": 1,
+      "screenshot": false,
+      "bytes": 0
+    }
+  }
+}

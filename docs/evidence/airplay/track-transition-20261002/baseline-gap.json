@@ -1,0 +1,70 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "native_start_order": "hot",
+  "prefetch_blocks": 0,
+  "codec": "alac",
+  "playback_mode": "low_latency",
+  "protocol_lead_ms": 2000,
+  "pause_seconds": 2.0,
+  "pause_cycles": 1,
+  "resume_lead_ms": 250,
+  "resume_reset": "none",
+  "track_gap": true,
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; receiver private file-store fixture entry",
+  "binary_sha256": {
+    "neonmix-hub": "ac2ebecbc842f609d66923997049d2110b9d2f8047794a4b845ad1aefe3ec252",
+    "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+  },
+  "passed": false,
+  "scenarios": {
+    "playback_mode_admin_permission_and_persistence": true,
+    "receiver_key_and_trust_survive_worker_restart": true,
+    "room_source_identity_visible_without_control_credentials": true,
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "pause_resume_cycles": [],
+  "failure_phase": "pause and resume with changed protocol lead",
+  "failure_type": "AssertionError",
+  "failure_counters": {
+    "enabled": true,
+    "ready": true,
+    "active": true,
+    "error": null,
+    "failure_stage": null,
+    "received_blocks": 677,
+    "rejected_blocks": 1,
+    "released_blocks": 669,
+    "ingress": {
+      "accepted_packets": 676,
+      "clock_resets": 0,
+      "future_packets": 0,
+      "identity_rejections": 0,
+      "last_mapping_id": 1,
+      "last_presentation_time_ns": 8399396564,
+      "last_source_rate": 44100,
+      "last_source_sample_position": 4295292973,
+      "last_uncertainty_ns": 8725759,
+      "late_packets": 1,
+      "latency_advance_ns": 1819907238,
+      "malformed_packets": 0,
+      "output_latency_ns": 5312500,
+      "overflow_packets": 0,
+      "pending_bytes": 27552,
+      "pending_frames": 2682,
+      "playout_lead_ns": 120416814,
+      "protocol_lead_ns": 1940324052,
+      "released_packets": 669,
+      "timeline_rejections": 0
+    }
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

@@ -1,0 +1,9 @@
+{
+  "url": "https://192.168.100.186:17446",
+  "pid": 43208,
+  "fixture": "E:\\Desktop\\NeonMix-test\\r06\\.local\\windows-lan",
+  "output": "VB-Audio Virtual Cable",
+  "unix_time": 1791049551.2813506,
+  "lifecycle_budget_seconds": 3600,
+  "ready_utc": "2026-10-03T17:45:51.281905+00:00"
+}

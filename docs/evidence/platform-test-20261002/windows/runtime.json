@@ -1,0 +1,17 @@
+{
+  "media-runtime": {
+    "exit_code": 0
+  },
+  "media-dual": {
+    "exit_code": 0
+  },
+  "media-loss": {
+    "exit_code": 0
+  },
+  "media-reject": {
+    "exit_code": 0
+  },
+  "credentials": {
+    "exit_code": 1
+  }
+}

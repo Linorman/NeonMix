@@ -1,0 +1,5 @@
+hub {'timeout': True, 'exit_code': 1, 'screenshot': False, 'bytes': 0}
+sender {'timeout': True, 'exit_code': 1, 'screenshot': False, 'bytes': 0}
+mixer {'timeout': True, 'exit_code': 1, 'screenshot': False, 'bytes': 0}
+devices {'timeout': True, 'exit_code': 1, 'screenshot': False, 'bytes': 0}
+diagnostics {'timeout': True, 'exit_code': 1, 'screenshot': False, 'bytes': 0}

@@ -1,0 +1,15 @@
+{
+  "local_zip": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-windows-x64-20261004-source322fda1b.zip",
+  "zip_bytes": 65450836,
+  "zip_sha256": "46823171e47bf939c70cad966b522fbb61989587ed41cad20786480dd5dfdfd7",
+  "remote_hash_matches": true,
+  "manifest_file_count": 984,
+  "manifest_mismatches": [],
+  "binary_mismatches": [],
+  "source_snapshot": {
+    "created_epoch": 1791043344.738656,
+    "files": 522,
+    "canonical_manifest_sha256": "322fda1b52872be7e880f750a02ef01fe0034895ecba6aa10741c504078de860",
+    "archive_sha256": "3cc83620794eceb5fabf635853d9ff56e194330a89e51ac69f4db76bffb08faa"
+  }
+}

@@ -1,0 +1,24 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.17s
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-12bb0775a2c01d48)
+
+running 16 tests
+test pages::airplay::name_tests::alias_display_never_changes_session_control_identity ... ok
+test tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked ... ok
+test pages::airplay::name_tests::names_use_utf8_byte_bounds_and_success_does_not_erase_newer_drafts ... ok
+test pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes ... ok
+test tests::restore_sends_the_inverse_change_against_a_fresh_revision ... ok
+test tests::polling_does_not_lock_forms_and_stop_has_priority_over_pending_start ... ok
+test tests::stop_after_an_inflight_start_runs_last_and_keeps_the_stop_pending_until_ack ... ok
+test tests::chinese_composition_preserves_draft_without_enter_submission ... ok
+test tests::named_fields_publish_accessible_labels_without_exposing_password_text ... ok
+test tests::fader_click_never_jumps_gain_and_double_click_resets_to_unity ... ok
+test tests::cancel_modal_keeps_accesskit_focus_in_the_published_tree ... ok
+test tests::long_error_at_minimum_width_keeps_page_content_on_screen ... ok
+test tests::palette_enter_during_ime_composition_does_not_run_an_action ... ok
+test tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later ... ok
+test tests::pages_handle_missing_loading_failed_and_stale_states ... ok
+test tests::airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

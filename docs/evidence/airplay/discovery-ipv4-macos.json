@@ -1,0 +1,21 @@
+{
+  "platform": "macOS",
+  "scope": "actual mDNS resolution and local TCP requests to advertised IPv4 addresses",
+  "limitations": [
+    "not a remote Apple-device playback result",
+    "IPv6 is disabled for this profile"
+  ],
+  "ipv6_record_count": 0,
+  "ipv4_address_count": 7,
+  "srv_port_count": 1,
+  "ipv4_info_checks": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "passed": true,
+  "hub_sha256": "556532e6bd8fadde7b34457c1614aa1a1418ab3d99af99e468f366e371371b4d"
+}

@@ -1,7 +1,147 @@
-//! Motion that explains state changes. Nothing here animates while idle:
-//! every helper settles and stops requesting repaints.
+//! Motion that explains state changes or follows a live signal. Nothing here
+//! animates while idle: transitions settle, one-shots play once, and live
+//! motion (`live_phase` + `live_repaint`) only runs while the caller has real
+//! data moving (audio above the floor, a request in flight, a countdown).
 use eframe::egui::{self, Color32, Id};
+use std::cell::Cell;
 use std::time::Duration;
+
+// UI state lives on the UI thread; thread-local keeps parallel tests apart.
+thread_local! {
+    static REDUCE_MOTION: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Reduced motion: live motion becomes static, one-shots jump to their end.
+pub fn reduce_motion() -> bool {
+    REDUCE_MOTION.with(Cell::get)
+}
+
+pub fn set_reduce_motion(on: bool) {
+    REDUCE_MOTION.with(|c| c.set(on));
+}
+
+/// Live motion frame budget: 20 fps focused, 10 fps in the background.
+/// On macOS most of a frame's CPU is buffer presentation, so cost follows
+/// frame rate rather than what is drawn; 20 fps keeps 4 flowing lanes
+/// within the CPU budget recorded in docs/evidence/ui-rebuild-20261004.
+pub const LIVE_FRAME: Duration = Duration::from_millis(50);
+
+pub fn live_repaint(ctx: &egui::Context) {
+    if reduce_motion() {
+        return;
+    }
+    let focused = ctx.input(|i| i.viewport().focused.unwrap_or(true));
+    ctx.request_repaint_after(if focused { LIVE_FRAME } else { LIVE_FRAME * 2 });
+}
+
+/// Clock for painting. Screenshot builds can pin it with
+/// `NEONMIX_SCREENSHOT_PHASE=<seconds>` so captures are reproducible.
+pub fn now(ctx: &egui::Context) -> f64 {
+    #[cfg(feature = "screenshot")]
+    if let Some(t) = std::env::var("NEONMIX_SCREENSHOT_PHASE")
+        .ok()
+        .and_then(|v| v.parse::<f64>().ok())
+    {
+        return t;
+    }
+    ctx.input(|i| i.time)
+}
+
+#[derive(Clone, Copy)]
+struct Phase {
+    value: f64,
+    at: f64,
+}
+
+/// Phase in seconds that advances only while `active`, so live motion
+/// resumes where it stopped instead of jumping. Requests the live frame
+/// budget while active.
+pub fn live_phase(ctx: &egui::Context, id: Id, active: bool) -> f32 {
+    let now = now(ctx);
+    let mut phase = ctx.data(|d| d.get_temp::<Phase>(id)).unwrap_or(Phase {
+        value: 0.0,
+        at: now,
+    });
+    let dt = (now - phase.at).clamp(0.0, 0.1);
+    phase.at = now;
+    if active && !reduce_motion() {
+        phase.value += dt;
+        live_repaint(ctx);
+    }
+    ctx.data_mut(|d| d.insert_temp(id, phase));
+    #[cfg(feature = "screenshot")]
+    if std::env::var_os("NEONMIX_SCREENSHOT_PHASE").is_some() {
+        return now as f32;
+    }
+    phase.value as f32
+}
+
+#[derive(Clone, Copy)]
+struct Ease {
+    from: f32,
+    to: f32,
+    start: f64,
+}
+
+/// Value that eases (cubic out) to `target` over `time` seconds whenever the
+/// target changes. Used for positions and numeric readouts.
+pub fn ease_to(ctx: &egui::Context, id: Id, target: f32, time: f32) -> f32 {
+    let now = ctx.input(|i| i.time);
+    let state = ctx.data(|d| d.get_temp::<Ease>(id));
+    let current = |e: &Ease| {
+        let t = ((now - e.start) as f32 / time).clamp(0.0, 1.0);
+        e.from + (e.to - e.from) * ease_out_cubic(t)
+    };
+    let next = match state {
+        None => Ease {
+            from: target,
+            to: target,
+            start: now,
+        },
+        Some(e) if (e.to - target).abs() > f32::EPSILON => Ease {
+            from: if reduce_motion() { target } else { current(&e) },
+            to: target,
+            start: now,
+        },
+        Some(e) => e,
+    };
+    ctx.data_mut(|d| d.insert_temp(id, next));
+    let value = current(&next);
+    if (value - next.to).abs() > f32::EPSILON {
+        ctx.request_repaint();
+    }
+    value
+}
+
+#[derive(Clone, Copy)]
+struct Once {
+    key: u64,
+    start: f64,
+}
+
+/// One-shot progress 0→1 after `key` changes (not on first sight). Returns
+/// None when nothing is playing.
+pub fn once(ctx: &egui::Context, id: Id, key: u64, length: f32) -> Option<f32> {
+    let now = ctx.input(|i| i.time);
+    let state = ctx.data(|d| d.get_temp::<Once>(id));
+    let state = match state {
+        Some(s) if s.key == key => s,
+        Some(_) => Once { key, start: now },
+        None => Once {
+            key,
+            start: f64::NEG_INFINITY,
+        },
+    };
+    ctx.data_mut(|d| d.insert_temp(id, state));
+    if reduce_motion() {
+        return None;
+    }
+    let t = ((now - state.start) as f32 / length).max(0.0);
+    (t < 1.0).then(|| {
+        ctx.request_repaint();
+        t
+    })
+}
 
 pub const FAST: f32 = 0.12;
 pub const PAGE: f32 = 0.16;
@@ -102,4 +242,40 @@ pub fn meter(ctx: &egui::Context, id: Id, target_db: f32) -> (f32, f32) {
         ctx.request_repaint_after(Duration::from_millis(16));
     }
     (state.level, state.hold)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn delay(ctx: &egui::Context, frame: impl FnMut(&egui::Context)) -> Duration {
+        let output = ctx.run(Default::default(), frame);
+        output.viewport_output[&egui::ViewportId::ROOT].repaint_delay
+    }
+
+    #[test]
+    fn live_motion_repaints_only_while_active_and_not_reduced() {
+        let ctx = egui::Context::default();
+        let id = Id::new("flow");
+        // egui repaints its first passes on its own.
+        for _ in 0..3 {
+            _ = ctx.run(Default::default(), |_| {});
+        }
+        assert_eq!(delay(&ctx, |c| _ = live_phase(c, id, false)), Duration::MAX);
+        assert!(delay(&ctx, |c| _ = live_phase(c, id, true)) <= LIVE_FRAME);
+        set_reduce_motion(true);
+        assert_eq!(delay(&ctx, |c| _ = live_phase(c, id, true)), Duration::MAX);
+        set_reduce_motion(false);
+    }
+
+    #[test]
+    fn one_shot_plays_on_change_not_on_first_sight() {
+        let ctx = egui::Context::default();
+        let id = Id::new("ripple");
+        let mut seen = None;
+        _ = ctx.run(Default::default(), |c| seen = Some(once(c, id, 1, 0.6)));
+        assert_eq!(seen, Some(None));
+        _ = ctx.run(Default::default(), |c| seen = Some(once(c, id, 2, 0.6)));
+        assert!(matches!(seen, Some(Some(t)) if t < 0.2));
+    }
 }

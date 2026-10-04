@@ -1,0 +1,18 @@
+{
+  "scope": "macOS native preview; public recorded state, no actual Apple client",
+  "screens": {
+    "hub-1100": {
+      "bounds": "410,73,1100,792",
+      "has_speaker": true
+    },
+    "hub-600": {
+      "bounds": "660,153,600,472",
+      "has_speaker": true
+    },
+    "mixer-1100": {
+      "bounds": "410,73,1100,792",
+      "has_speaker": true
+    }
+  },
+  "passed": true
+}

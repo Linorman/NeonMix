@@ -1,0 +1,16 @@
+{
+  "identity_and_pairings_preserved": true,
+  "paired_devices": 1,
+  "components_match_release": {
+    "neonmix-hub": true,
+    "neonmix-airplay-worker": true,
+    "neonmix-desktop": true,
+    "neonmix-background": true
+  },
+  "receiver_ready": true,
+  "playback_mode": "low_latency",
+  "hub_running": true,
+  "desktop_running": true,
+  "output_frames_progress": true,
+  "room_name": "AirPlay PIN 对照"
+}

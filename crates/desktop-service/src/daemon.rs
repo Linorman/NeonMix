@@ -155,6 +155,9 @@ fn classify_error(message: &str) -> String {
     if m.contains("setup_incomplete") {
         return "Hub 资料不完整，请恢复完整目录；不能重新初始化覆盖".into();
     }
+    if m.contains("unsupported audio format") {
+        return "所选音频设备格式不受支持；请检查采样率、声道和缓冲设置".into();
+    }
     // EADDRINUSE on macOS/Linux, WSAEADDRINUSE on Windows (localized text).
     if m.contains("address already in use")
         || m.contains("os error 48)")
@@ -1619,6 +1622,14 @@ fn profile_error(error: impl std::fmt::Display) -> String {
 #[cfg(test)]
 mod discovery_tests {
     use super::*;
+    #[test]
+    fn unsupported_device_format_has_a_specific_redacted_error() {
+        let error =
+            classify_error("unsupported audio format: sample rate 384000; private_device_name");
+        assert!(error.contains("格式不受支持"));
+        assert!(!error.contains("private_device_name"));
+        assert!(!error.contains("384000"));
+    }
     #[test]
     fn receiver_pins_only_survive_authenticated_control_replies() {
         let original = json!({"receivers":[{"receiver_id":"a","pairing_pin":"1111"},{"receiver_id":"b","pairing_pin":"2222"}],"history":[{"pairing_pin":"3333"}],"secret_ref":"private"});

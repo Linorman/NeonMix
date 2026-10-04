@@ -1,0 +1,48 @@
+[
+  {
+    "name": "migrate-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "apps/credential-migrate/Cargo.toml",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "started_at": 1791045146.898849,
+    "ended_at": 1791045171.0738704,
+    "exit_code": 0
+  },
+  {
+    "name": "migrate-clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--manifest-path",
+      "apps/credential-migrate/Cargo.toml",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "started_at": 1791045171.0740037,
+    "ended_at": 1791045174.387357,
+    "exit_code": 0
+  },
+  {
+    "name": "migrate-release",
+    "command": [
+      "cargo",
+      "build",
+      "--manifest-path",
+      "apps/credential-migrate/Cargo.toml",
+      "--release",
+      "--locked"
+    ],
+    "started_at": 1791045174.3875322,
+    "ended_at": 1791045223.5384567,
+    "exit_code": 101
+  }
+]

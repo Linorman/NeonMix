@@ -1,0 +1,20 @@
+{
+  "BuiltInSpeakerDevice": {
+    "rate": 48000.0,
+    "volume": 0.625,
+    "mute": 0,
+    "name": "MacBook Pro Speakers"
+  },
+  "BlackHole2ch_UID": {
+    "rate": 48000.0,
+    "volume": 1.0,
+    "mute": 0,
+    "name": "BlackHole 2ch"
+  },
+  "com.neonmix.audio.virtual-output": {
+    "rate": 48000.0,
+    "volume": 0.060468509793281555,
+    "mute": 0,
+    "name": "NeonMix"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "platform": "Windows",
+  "pairing_raw_platform": "macOS",
+  "reason": "inherited hard-coded report label in pairing_probe.py; Windows wrapper missed single-quoted camel-case dict keyword",
+  "test_executed_on": "Windows-11-10.0.26100-SP0",
+  "binary_worker_sha256": "1dd293d163a2bdd3686ca0edb307d687ba285d31bb3539286c0ea78310894480",
+  "pairing_checks": 5,
+  "original_pairing_json_and_logs_preserved": true,
+  "product_changes": false,
+  "quality_assertions_changed": false,
+  "reexecuted_to_change_label": false
+}

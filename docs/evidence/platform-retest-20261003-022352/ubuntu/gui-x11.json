@@ -1,0 +1,58 @@
+{
+  "started_at": 1790967970.4578435,
+  "scope": "formal release desktop, Xwayland only for capture; five real Ctrl+number navigation actions, no preview mode",
+  "binary_sha256": "290089399e38bb444bc64049d23ceb66efdccd68260e360a0acf572af90652f4",
+  "passed": true,
+  "owned_window_id": "0x800005",
+  "gui_pid": 672683,
+  "screenshots": [
+    {
+      "page": "hub",
+      "shortcut": "Ctrl+1",
+      "path": "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/gui-hub.xwd",
+      "sha256": "0a8f8248cc7d36000fbea16580353d59a10b37761c171cfa3ec9f85b0f556e5a",
+      "bytes": 3078780
+    },
+    {
+      "page": "sender",
+      "shortcut": "Ctrl+2",
+      "path": "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/gui-sender.xwd",
+      "sha256": "ebf6bc4d6c92341a723597b62e5b6f45faa64657ff5992cac27433a264c98076",
+      "bytes": 3078780
+    },
+    {
+      "page": "mixer",
+      "shortcut": "Ctrl+3",
+      "path": "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/gui-mixer.xwd",
+      "sha256": "9b4e49c1b9f9c8e0e9f4903f80232068a485a55c2929ee129119403c77204593",
+      "bytes": 3078780
+    },
+    {
+      "page": "devices",
+      "shortcut": "Ctrl+4",
+      "path": "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/gui-devices.xwd",
+      "sha256": "5b9b813ed74a5ee695b9d24d79891abe88be3360cd05f511695e913de171541f",
+      "bytes": 3078780
+    },
+    {
+      "page": "diagnostics",
+      "shortcut": "Ctrl+5",
+      "path": "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/gui-diagnostics.xwd",
+      "sha256": "111e9a6cfb42b438ac570dc8f834f528169ce3e1b201f303f8460c67fd37a8be",
+      "bytes": 3078780
+    }
+  ],
+  "gui_alive_after_navigation": true,
+  "background_survives_gui_termination": true,
+  "shutdown": true,
+  "fixture_files_removed": true,
+  "ended_at": 1790967978.2774951,
+  "visual_pngs": {
+    "gui-hub.png": "57380f2b04a6511538f555e696e97ff8187bca348ec74b32d4341b2dacdbdef7",
+    "gui-mixer.png": "f3dbca6f761a56e2c572c37c81553f6f136fae2b10b973d798e12ce9559c2409",
+    "gui-devices.png": "4ee357efe6e672dc2aa0938811006b0c28a4884d4e3be476ec0d0dbb0ad4ebfb",
+    "gui-diagnostics.png": "c721e2bc9ef8fbd1755b8b89890221573519f166a9b1cf51b68514814872095a",
+    "gui-sender.png": "8a3fe0b8402cf300c58226c57e02205861617ff1a536c2e7b9291d75689a770d"
+  },
+  "conversion": "XWD ZPixmap ARGB32 to RGB PNG; no crop, content edit or re-render"
+}

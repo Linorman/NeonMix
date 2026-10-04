@@ -1,0 +1,1265 @@
+{
+  "platform": "Windows",
+  "tests": {
+    "targets": 42,
+    "passed": 217,
+    "failed": 0,
+    "ignored": 5
+  },
+  "matrix": [
+    {
+      "name": "mix-0plus4",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "output_frames": 2881440,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 4,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 0,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "windows": 1,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        }
+      ],
+      "cpu_mean": 3.677758064516129,
+      "cpu_max": 19.968
+    },
+    {
+      "name": "mix-1plus3",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "output_frames": 961920,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 2,
+      "status_reads": {
+        "readers": 4,
+        "successful": 7964,
+        "errors": 0
+      },
+      "windows": 7,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        }
+      ],
+      "cpu_mean": 7.153518518518519,
+      "cpu_max": 19.36
+    },
+    {
+      "name": "mix-2plus2",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "output_frames": 960000,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 4,
+      "status_reads": {
+        "readers": 4,
+        "successful": 9208,
+        "errors": 0
+      },
+      "windows": 13,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        }
+      ],
+      "cpu_mean": 5.9469393939393935,
+      "cpu_max": 15.415
+    },
+    {
+      "name": "mix-3plus1",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "output_frames": 960000,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 6,
+      "status_reads": {
+        "readers": 4,
+        "successful": 10357,
+        "errors": 0
+      },
+      "windows": 19,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        }
+      ],
+      "cpu_mean": 5.743473684210526,
+      "cpu_max": 12.351
+    },
+    {
+      "name": "mix-4plus0-retest",
+      "passed": false,
+      "failure_phase": "independent receiver pairing and encrypted PCM",
+      "failure": null,
+      "steady": null,
+      "recovered": 0,
+      "status_reads": {
+        "readers": 4,
+        "successful": 0,
+        "errors": 0
+      },
+      "windows": 0,
+      "quality": [],
+      "cpu_mean": 3.873608695652174,
+      "cpu_max": 8.607
+    },
+    {
+      "name": "mix-control",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": null,
+      "recovered": 0,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "windows": 0,
+      "quality": [],
+      "cpu_mean": 5.839428571428572,
+      "cpu_max": 10.488
+    }
+  ],
+  "background": {
+    "platform": "Windows",
+    "scenarios": {
+      "private_namedpipe_and_state": true,
+      "file_profiles_reference_dedicated_secret_entries": true,
+      "explicit_physical_output_low_level_test_tone": true,
+      "authenticated_viewer_role_and_real_snapshot": true,
+      "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true,
+      "repeat_invitation_after_cancel_uses_ephemeral_file": true,
+      "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true,
+      "diagnostics_redacted_with_real_meters": true,
+      "strict_numeric_whitelist_private_diagnostic_export": true,
+      "media_process_crash_reported_without_unbounded_restart": true,
+      "settings_revision_and_explicit_graceful_stop": true,
+      "explicit_background_shutdown_ends_audio_process": true
+    },
+    "limits": {
+      "ipc_bytes": 262144,
+      "command_timeout_seconds": 25,
+      "explicit_restart_after_failure": true
+    },
+    "build_profile": "release",
+    "listen_port": 7443,
+    "binary_sha256": {
+      "neonmix-background.exe": "8891f4d814c47f571009203b2980f4b080e6dddcffa96f6d2c4b48077e4e70df",
+      "neonmix-audio.exe": "b45a2526c3a1195d16f91ea41cb7f09a8ba622ca08650fcdfbf6c2f08896ef88",
+      "neonmix-hub.exe": "3fc568925907cb42670214843ec14dc838a3796f87d70a9db78ac0bfc6447e6c"
+    },
+    "passed": true,
+    "fixture_removed": true
+  },
+  "identity": {
+    "platform": "win32",
+    "checks": {
+      "v1": "same identity and signature",
+      "ring_v2": "same identity and signature",
+      "legacy_ring_v2": "same identity and signature",
+      "crlf_v2": "same identity and signature",
+      "missing": "clean rejection",
+      "empty": "clean rejection",
+      "truncated_pem": "clean rejection",
+      "truncated_der": "clean rejection",
+      "wrong_algorithm": "clean rejection",
+      "wrong_v2_public": "clean rejection",
+      "wrong_v2_seed": "clean rejection",
+      "wrong_version": "clean rejection",
+      "wrong_public_tag": "clean rejection",
+      "trailing_der": "clean rejection",
+      "trailing_pem": "clean rejection",
+      "encrypted_label": "clean rejection",
+      "oversized": "clean rejection"
+    },
+    "worker_startup": true,
+    "fixtures": "RFC 8032 section 7.1 test 1",
+    "probe_sha256": "892fafbaaa1cb8db289cb6e2120500fe6016608ca78cd76154279c7d9107723b",
+    "worker_sha256": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0",
+    "startup": {
+      "v1": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "ring_v2": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "legacy_ring_v2": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "crlf_v2": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "missing": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "private key open failed"
+        ]
+      },
+      "empty": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "truncated_pem": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "truncated_der": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_algorithm": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_v2_public": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_v2_seed": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_version": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_public_tag": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "trailing_der": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "trailing_pem": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "encrypted_label": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "oversized": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      }
+    }
+  },
+  "pairing": {
+    "platform": "macOS",
+    "passed": true,
+    "checks": {
+      "pin_response_and_signed_verify_bind_same_receiver_key": true,
+      "persisted_client_key_reconnects_after_process_restart_without_pin": true,
+      "missing_receiver_record_requires_pin_and_can_be_repaired": true,
+      "revocation_overrides_persisted_known_key": true,
+      "copying_client_list_cannot_repair_changed_receiver_identity": true
+    },
+    "worker_sha256": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0",
+    "fixture_files_removed": true,
+    "scope": "synthetic SRP and mutually authenticated pair-verify across worker restarts",
+    "limitations": [
+      "does not control the iPhone PIN UI",
+      "does not replace real Apple-source retesting"
+    ]
+  },
+  "namedpipe": {
+    "scope": "Actual native NamedPipe parent PID/current SID/owner-only protected ACL verification; synthetic RFC8032 key; no alternate-user login or recycled-PID simulation",
+    "cases": {
+      "private_parent": {
+        "passed": true,
+        "exit_code": 0,
+        "ready": true,
+        "token_bytes_received": 65,
+        "events": [
+          {
+            "type": "ready",
+            "control_version": 2,
+            "worker_generation": 7,
+            "port": 10160,
+            "public_key": "c5ece04f49cc748fdf5b9a3cfc4f0c57fa785b24a264219ae8fdfdb5c21e98cb",
+            "features": 1209817600
+          }
+        ],
+        "stderr": ""
+      },
+      "broad_dacl": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC pipe requires a protected owner-only DACL"
+          }
+        ],
+        "stderr": ""
+      },
+      "unprotected_dacl": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC pipe requires a protected owner-only DACL"
+          }
+        ],
+        "stderr": ""
+      },
+      "wrong_server_pid": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC Hub identity mismatch"
+          }
+        ],
+        "stderr": ""
+      },
+      "missing_pipe": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC pipe connection failed"
+          }
+        ],
+        "stderr": ""
+      },
+      "invalid_name": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "invalid private media pipe"
+          }
+        ],
+        "stderr": ""
+      }
+    },
+    "passed": true,
+    "owned_fixture_files_removed": true,
+    "all_owned_processes_stopped": true
+  },
+  "gui": {
+    "scope": "Actual current snapshot Windows desktop launch; SSH session limitations recorded",
+    "binary_sha256": "0d1d4ee0eb6642c138817b95d605736b276fee0bfd60aef41a4ca24230c894ac",
+    "cases": {
+      "hub": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "sender": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "mixer": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "devices": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "diagnostics": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "formal": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": ""
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      }
+    }
+  },
+  "lan": {
+    "samples": 128,
+    "active_samples": 29,
+    "active_sample_seconds": 56.70599999999999,
+    "receiver_maxima": {
+      "lost_packets": 0,
+      "overflow_plc_packets": 0,
+      "pcm_sink_dropped": 0,
+      "queue_drops": 0,
+      "late_packets": 0,
+      "pcm_timing_gap_count": 0,
+      "plc_samples": 0
+    },
+    "mixer_underrun_max": 0,
+    "timed_late_max": 0,
+    "output_errors_max": 0,
+    "output_over_budget_max": 0,
+    "output_frames_advanced": 2721600,
+    "output_rms_min": 0.002795286476612091,
+    "cpu_mean": 7.978068965517241,
+    "cpu_max": 10.777,
+    "scope": "2-second diagnostic samples of fresh actual WASAPI Hub; complete sender duration/provenance saved by main macOS agent; no analog capture or Apple sender",
+    "observed_clean": true
+  },
+  "source": {
+    "files": 519,
+    "mismatches": [],
+    "canonical_manifest_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+    "source_archive_sha256": "c47b1f27c16b9e84f90c28fb09ea394d3ad9690b91d19ccd24b56477811aacc0",
+    "binaries": {
+      "target\\release\\neonmix-airplay-profile.exe": "a22e5e4c2ddf0699f53ae651623819ad430336a1faf8e9d99095dd7613ba8a2d",
+      "target\\release\\neonmix-airplay-worker.exe": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0",
+      "target\\release\\neonmix-audio.exe": "b45a2526c3a1195d16f91ea41cb7f09a8ba622ca08650fcdfbf6c2f08896ef88",
+      "target\\release\\neonmix-background.exe": "8891f4d814c47f571009203b2980f4b080e6dddcffa96f6d2c4b48077e4e70df",
+      "target\\release\\neonmix-desktop.exe": "0d1d4ee0eb6642c138817b95d605736b276fee0bfd60aef41a4ca24230c894ac",
+      "target\\release\\neonmix-hub.exe": "3fc568925907cb42670214843ec14dc838a3796f87d70a9db78ac0bfc6447e6c",
+      ".local\\airplay\\build\\neonmix-airplay-audio-probe.exe": "0c452525ce84e29b00fba898b4262bb3ffa564ba79a3f78f413e2606bd28bb5c",
+      ".local\\airplay\\build\\neonmix-airplay-identity-probe.exe": "892fafbaaa1cb8db289cb6e2120500fe6016608ca78cd76154279c7d9107723b",
+      ".local\\airplay\\build\\neonmix-airplay-worker.exe": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0",
+      ".local\\airplay\\build\\libneonmix-airplay-probe-crypto.dll": "3e0fd82eb79a12a2560d1aad5ab41dc7eaa95434effee18d94cea813d9849926"
+    }
+  },
+  "cleanup": {
+    "owned_processes_before_cleanup": [],
+    "stopped_gui_background_pids": [],
+    "remaining_owned_neonmix_processes": [],
+    "preserved_ambient_processes": [],
+    "removed_owned_fixture_paths": [
+      ".local\\windows-lan"
+    ],
+    "system_settings_changed": false,
+    "outside_authorized_root_deleted": false,
+    "preserved": "v20261003-1241 fresh source/target/native worker/artifacts; all previous roots/packages/manual sessions",
+    "lan_sampler_remaining": [],
+    "lan_hub_pid": 26920,
+    "lan_ssh_runner_exit_code": 0,
+    "local_private_invite_remaining": false,
+    "terminal": true,
+    "round": "platform-validation-20261003-1241",
+    "closure_check": {
+      "round": "platform-validation-20261003-1241",
+      "status": "terminal",
+      "scope": "Read-only closure/provenance check; no new Windows testing",
+      "checked_unix": 1791009178.8374329,
+      "source_files": 519,
+      "source_mismatches": [],
+      "canonical_manifest_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+      "archive_sha256": "c47b1f27c16b9e84f90c28fb09ea394d3ad9690b91d19ccd24b56477811aacc0",
+      "owned_neonmix_or_lan_sampler_processes": [],
+      "private_fixture_paths_remaining": {
+        ".local/windows-lan": false,
+        ".local/gui-test-state": false,
+        ".local/airplay/probe": false
+      },
+      "multi_fixture_paths_remaining": []
+    }
+  },
+  "gui_visible_windows": 0,
+  "status": "terminal",
+  "round": "platform-validation-20261003-1241",
+  "scope": "旧Windows验证轮次；不计入后续Ubuntu/macOS重跑"
+}

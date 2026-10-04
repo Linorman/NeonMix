@@ -1,0 +1,162 @@
+[
+  {
+    "name": "fmt-members",
+    "command": [
+      "python3",
+      "-c",
+      "import subprocess,json; m=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version=1'])); ids=m['workspace_members']; raise SystemExit(max(subprocess.call(['cargo','fmt','--manifest-path',p['manifest_path'],'--check']) for p in m['packages'] if p['id'] in ids))"
+    ],
+    "exit_code": 0,
+    "seconds": 0.724,
+    "started_at": 1791044259.4542544,
+    "ended_at": 1791044260.1784172
+  },
+  {
+    "name": "worker-protocol",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.077,
+    "started_at": 1791044260.178612,
+    "ended_at": 1791044262.2560785
+  },
+  {
+    "name": "worker-pairing",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/pairing_probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 5.655,
+    "started_at": 1791044262.2565768,
+    "ended_at": 1791044267.9120045
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      "/home/parallels/NeonMix/d26u/.local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "seconds": 0.7,
+    "started_at": 1791044267.913229,
+    "ended_at": 1791044268.6136901
+  },
+  {
+    "name": "identity",
+    "command": [
+      "python3",
+      "tools/airplay_identity_probe.py",
+      "--worker",
+      "/home/parallels/NeonMix/d26u/.local/airplay/build/neonmix-airplay-worker",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/identity.json"
+    ],
+    "exit_code": 0,
+    "seconds": 9.416,
+    "started_at": 1791044268.613873,
+    "ended_at": 1791044278.0297563
+  },
+  {
+    "name": "credentials",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/credential_store_probe.py",
+      "--release",
+      "--binary",
+      "/home/parallels/NeonMix/d26u/target/release/neonmix-hub"
+    ],
+    "exit_code": 0,
+    "seconds": 0.118,
+    "started_at": 1791044278.029997,
+    "ended_at": 1791044278.1477718
+  },
+  {
+    "name": "single-pcm",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/single-pcm.json"
+    ],
+    "exit_code": 0,
+    "seconds": 7.957,
+    "started_at": 1791044278.1479676,
+    "ended_at": 1791044286.1047828
+  },
+  {
+    "name": "single-alac",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/single-alac.json"
+    ],
+    "exit_code": 0,
+    "seconds": 7.583,
+    "started_at": 1791044286.105246,
+    "ended_at": 1791044293.6880784
+  },
+  {
+    "name": "synchronized",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--playback-mode",
+      "synchronized",
+      "--report",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/synchronized.json"
+    ],
+    "exit_code": 0,
+    "seconds": 6.557,
+    "started_at": 1791044293.688389,
+    "ended_at": 1791044300.2457545
+  },
+  {
+    "name": "background",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/e07_background_probe.py",
+      "--release",
+      "--binary-directory",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/bin",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--evidence",
+      "/home/parallels/NeonMix/d26u/artifacts/d26u/background.json"
+    ],
+    "exit_code": 0,
+    "seconds": 3.764,
+    "started_at": 1791044300.2466218,
+    "ended_at": 1791044304.0105991
+  }
+]

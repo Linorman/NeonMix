@@ -1,0 +1,516 @@
+{
+  "endpoint": "https://192.168.100.112:7443",
+  "requested_seconds": 60,
+  "client_binary_sha256": "ef66f271c0e9b7eafbdcebda533c57a85c88443254b268da0f418811e3d31327",
+  "scope": "macOS native CLI synthetic 437 Hz / -36 dBFS Sender; not Apple AirPlay",
+  "samples": [
+    {
+      "elapsed_seconds": 2.007,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 1617920,
+      "output_peak": 0.004016832448542118,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 1440,
+      "lost_packets": [
+        11
+      ],
+      "pcm_sink_dropped": [
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 4.135,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 1720320,
+      "output_peak": 0.003978876397013664,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 3360,
+      "lost_packets": [
+        54
+      ],
+      "pcm_sink_dropped": [
+        4
+      ]
+    },
+    {
+      "elapsed_seconds": 6.264,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 1838080,
+      "output_peak": 0.0,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 5280,
+      "lost_packets": [
+        95
+      ],
+      "pcm_sink_dropped": [
+        4
+      ]
+    },
+    {
+      "elapsed_seconds": 8.727,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 1939456,
+      "output_peak": 0.0040321676060557365,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 7200,
+      "lost_packets": [
+        132
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 10.854,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2041856,
+      "output_peak": 0.004016533028334379,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 9120,
+      "lost_packets": [
+        146
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 12.974,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2143232,
+      "output_peak": 0.0040022688917815685,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 11040,
+      "lost_packets": [
+        175
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 15.094,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2244608,
+      "output_peak": 0.0040175532922148705,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 12960,
+      "lost_packets": [
+        195
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 17.251,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2348160,
+      "output_peak": 0.004024301189929247,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 14880,
+      "lost_packets": [
+        206
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 19.365,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2450432,
+      "output_peak": 0.00405656173825264,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 16800,
+      "lost_packets": [
+        220
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 21.485,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2551808,
+      "output_peak": 0.004025544971227646,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 18720,
+      "lost_packets": [
+        232
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 23.613,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2654208,
+      "output_peak": 0.00404753303155303,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 21120,
+      "lost_packets": [
+        252
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 25.733,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2758656,
+      "output_peak": 0.004018006846308708,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 23520,
+      "lost_packets": [
+        264
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 27.934,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2864128,
+      "output_peak": 0.0,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 25440,
+      "lost_packets": [
+        283
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 30.125,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 2966528,
+      "output_peak": 0.004086483269929886,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 27360,
+      "lost_packets": [
+        296
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 32.24,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3067904,
+      "output_peak": 0.004063319880515337,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 29280,
+      "lost_packets": [
+        311
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 34.353,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3170304,
+      "output_peak": 0.00402421411126852,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 31200,
+      "lost_packets": [
+        324
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 36.474,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3271680,
+      "output_peak": 0.004055393394082785,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 33120,
+      "lost_packets": [
+        339
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 38.593,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3373056,
+      "output_peak": 0.004070554859936237,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 35040,
+      "lost_packets": [
+        353
+      ],
+      "pcm_sink_dropped": [
+        5
+      ]
+    },
+    {
+      "elapsed_seconds": 40.706,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3475456,
+      "output_peak": 0.004078710917383432,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 36960,
+      "lost_packets": [
+        372
+      ],
+      "pcm_sink_dropped": [
+        6
+      ]
+    },
+    {
+      "elapsed_seconds": 42.823,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3577856,
+      "output_peak": 0.004070010501891375,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 38880,
+      "lost_packets": [
+        387
+      ],
+      "pcm_sink_dropped": [
+        6
+      ]
+    },
+    {
+      "elapsed_seconds": 44.945,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3679232,
+      "output_peak": 0.0040552993305027485,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 40800,
+      "lost_packets": [
+        401
+      ],
+      "pcm_sink_dropped": [
+        6
+      ]
+    },
+    {
+      "elapsed_seconds": 47.084,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3781632,
+      "output_peak": 0.004002317786216736,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 42720,
+      "lost_packets": [
+        414
+      ],
+      "pcm_sink_dropped": [
+        6
+      ]
+    },
+    {
+      "elapsed_seconds": 49.198,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3883008,
+      "output_peak": 0.004048309288918972,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 44640,
+      "lost_packets": [
+        429
+      ],
+      "pcm_sink_dropped": [
+        6
+      ]
+    },
+    {
+      "elapsed_seconds": 51.306,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 3984384,
+      "output_peak": 0.004032342694699764,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 46560,
+      "lost_packets": [
+        445
+      ],
+      "pcm_sink_dropped": [
+        7
+      ]
+    },
+    {
+      "elapsed_seconds": 53.424,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 4085760,
+      "output_peak": 0.004010148346424103,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 48480,
+      "lost_packets": [
+        458
+      ],
+      "pcm_sink_dropped": [
+        7
+      ]
+    },
+    {
+      "elapsed_seconds": 55.539,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 4187136,
+      "output_peak": 0.004062943626195192,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 50400,
+      "lost_packets": [
+        473
+      ],
+      "pcm_sink_dropped": [
+        7
+      ]
+    },
+    {
+      "elapsed_seconds": 57.653,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 4288512,
+      "output_peak": 0.00406273128464818,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 52320,
+      "lost_packets": [
+        488
+      ],
+      "pcm_sink_dropped": [
+        7
+      ]
+    },
+    {
+      "elapsed_seconds": 59.763,
+      "session_status": [
+        "network_degraded"
+      ],
+      "output_available": true,
+      "output_frames": 4388864,
+      "output_peak": 0.0040467060171067715,
+      "output_errors": 0,
+      "callback_over_budget": 0,
+      "underrun_frames": 54240,
+      "lost_packets": [
+        500
+      ],
+      "pcm_sink_dropped": [
+        7
+      ]
+    }
+  ],
+  "query_failures": [],
+  "passed": false,
+  "pair_exit_code": 0,
+  "send_exit_code": 0
+}

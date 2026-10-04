@@ -1,0 +1,99 @@
+patching file lib/crypto.c
+patching file lib/crypto.h
+patching file lib/dnssd.h
+patching file lib/dnssdint.h
+patching file lib/fairplay_playfair.c
+patching file lib/http_handlers.h
+patching file lib/http_request.c
+patching file lib/http_response.c
+patching file lib/http_response.h
+patching file lib/httpd.c
+patching file lib/httpd.h
+patching file lib/pairing.c
+Hunk #1 succeeded at 94 (offset -2 lines).
+patching file lib/raop.c
+patching file lib/raop.h
+patching file lib/raop_handlers.h
+patching file lib/raop_ntp.c
+patching file lib/raop_ntp.h
+patching file lib/raop_rtp.c
+patching file lib/stream.h
+-- The C compiler identification is GNU 15.2.0
+-- The CXX compiler identification is GNU 15.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/msys64/mingw64/bin/gcc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/msys64/mingw64/bin/g++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Looking for strndup
+-- Looking for strndup - not found
+-- Looking for strptime
+-- Looking for strptime - not found
+-- Looking for timegm
+-- Looking for timegm - not found
+-- Looking for gmtime_r
+-- Looking for gmtime_r - not found
+-- Looking for localtime_r
+-- Looking for localtime_r - not found
+-- Performing Test HAVE_TM_TM_GMTOFF
+-- Performing Test HAVE_TM_TM_GMTOFF - Failed
+-- Performing Test HAVE_TM_TM_ZONE
+-- Performing Test HAVE_TM_TM_ZONE - Failed
+-- Configuring done (2.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Desktop/NeonMix-test/r06/.local/airplay/build
+[1/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/fairplay_playfair.c.obj
+[2/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/http_request.c.obj
+[3/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/crypto.c.obj
+[4/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/pairing.c.obj
+[5/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/byteutils.c.obj
+[6/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/compat.c.obj
+[7/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/logger.c.obj
+[8/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/netutils.c.obj
+[9/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/http_response.c.obj
+[10/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/httpd.c.obj
+[11/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/utils.c.obj
+[12/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/playfair/modified_md5.c.obj
+[13/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/playfair/playfair.c.obj
+[14/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/playfair/hand_garble.c.obj
+[15/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/raop_buffer.c.obj
+[16/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/playfair/sap_hash.c.obj
+[17/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/llhttp/http.c.obj
+[18/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/llhttp/api.c.obj
+[19/46] Building C object CMakeFiles/protocol.dir/disabled_media.c.obj
+[20/46] Building C object CMakeFiles/protocol.dir/speaker_profile.c.obj
+[21/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/raop.c.obj
+[22/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/libcnary/node_list.c.obj
+[23/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/libcnary/node.c.obj
+[24/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/base64.c.obj
+[25/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/raop_ntp.c.obj
+[26/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/playfair/omg_hax.c.obj
+[27/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/bytearray.c.obj
+[28/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/raop_rtp.c.obj
+[29/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/hashtable.c.obj
+[30/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/jsmn.c.obj
+[31/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/srp.c.obj
+[32/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/bplist.c.obj
+[33/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/out-default.c.obj
+[34/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/out-limd.c.obj
+[35/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/ptrarray.c.obj
+[36/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/jplist.c.obj
+[37/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/out-plutil.c.obj
+[38/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/oplist.c.obj
+[39/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/time64.c.obj
+[40/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/patched/lib/llhttp/llhttp.c.obj
+[41/46] Linking C static library libprotocol.a
+[42/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/xplist.c.obj
+[43/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/r06/.local/airplay/src/libplist-2.6.0/src/plist.c.obj
+[44/46] Linking C static library libplist.a
+[45/46] Building CXX object CMakeFiles/neonmix-airplay-worker.dir/main.cpp.obj
+[46/46] Linking CXX executable neonmix-airplay-worker.exe
+E:\Desktop\NeonMix-test\r06\.local\airplay\build\neonmix-airplay-worker.exe

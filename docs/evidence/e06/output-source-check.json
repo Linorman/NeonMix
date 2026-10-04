@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "scope": "macOS cross type-check of actual E06 platform selection and native name sync; no platform runtime",
+  "targets": {
+    "x86_64-pc-windows-gnu": {
+      "exit_code": 0,
+      "executed_target_binary": false
+    },
+    "x86_64-unknown-linux-gnu": {
+      "exit_code": 0,
+      "executed_target_binary": false
+    }
+  },
+  "source_sha256": {
+    "apps/hub/src/virtual_output.rs": "26507023bc86acdd4198dbc470706519b1b7b829212b21433cbaf9cfaaef2cba",
+    "apps/hub/src/binding.rs": "3171a24a5921a0fdb8367cdab7d74acb407e075d9ec27c7f3c7212cfa9611902",
+    "adapters/linux/src/lib.rs": "3ed2ac3ec6b980e8cf9a6066898754034b358e6bc0d330541f8302e33fc6e0ca",
+    "adapters/linux/src/owned_sink.rs": "1b27d0d8a8f75b8926c98b9735d5ee28c41c8cbe073733b39e4a626ff1e48220",
+    "adapters/windows/src/virtual_output.rs": "7cd9fb74a9a7b8717f0c1f2160c89809c540f772d5f9a3cf37563f1c5370144e"
+  }
+}

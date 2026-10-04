@@ -1,0 +1,23 @@
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.89s
+     Running tests/ingress.rs (target/debug/deps/ingress-ccf382a133e04bed)
+
+running 1 test
+period=256 latency_ns=10000000 skipped=0 bad_samples=0
+period=1024 latency_ns=106645833 skipped=19092 bad_samples=36485
+
+thread 'low_latency_preserves_pcm_through_deep_device_callbacks' (26484376) panicked at crates/airplay-adapter/tests/ingress.rs:273:9:
+assertion `left == right` failed: device period=1024, latency=106645833
+  left: 19092
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test low_latency_preserves_pcm_through_deep_device_callbacks ... FAILED
+
+failures:
+
+failures:
+    low_latency_preserves_pcm_through_deep_device_callbacks
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.70s
+
+error: test failed, to rerun pass `-p neonmix-airplay-adapter --test ingress`

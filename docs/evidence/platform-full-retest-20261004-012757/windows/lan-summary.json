@@ -1,0 +1,24 @@
+{
+  "samples": 668,
+  "active_samples": 29,
+  "active_sample_seconds": 56.72399999999993,
+  "receiver_maxima": {
+    "lost_packets": 0,
+    "overflow_plc_packets": 0,
+    "pcm_sink_dropped": 0,
+    "queue_drops": 0,
+    "late_packets": 0,
+    "pcm_timing_gap_count": 0,
+    "plc_samples": 0
+  },
+  "mixer_underrun_max": 0,
+  "timed_late_max": 0,
+  "output_errors_max": 0,
+  "output_over_budget_max": 0,
+  "output_frames_advanced": 2723040,
+  "output_rms_min": 0.0027961598243564367,
+  "cpu_mean": 4.047448275862069,
+  "cpu_max": 8.271,
+  "scope": "2-second diagnostic samples of fresh actual WASAPI Hub; complete sender duration/provenance saved by main macOS agent; no analog capture or Apple sender",
+  "observed_clean": true
+}

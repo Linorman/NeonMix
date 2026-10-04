@@ -1,0 +1,65 @@
+--- before/tools/macos_sender_ui_probe.py
++++ after/tools/macos_sender_ui_probe.py
+@@ -11,7 +11,7 @@
+ 
+ from e07_background_probe import ipc, wait_for
+ from e07_native_ui_probe import NativeUI
+-from macos_ui_visual_probe import VisualWindow, click_native_button
++from macos_ui_visual_probe import VisualWindow, click_native_button, scroll_window
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ DEV = ROOT / "tools/dev"
+@@ -32,7 +32,7 @@
+     hubdir, senderdir = base / "hub", base / "sender"
+     hubdir.mkdir(parents=True, mode=0o700)
+     senderdir.mkdir(mode=0o700)
+-    report = {"passed": False, "binary_sha256": hashlib.sha256((BIN / "neonmix-desktop").read_bytes()).hexdigest(), "scenarios": {}, "limits": ["unnamed fields located by ordinal; accessibility regression remains", "single host; no real IME composition or VoiceOver listening"]}
++    report = {"passed": False, "binary_sha256": hashlib.sha256((BIN / "neonmix-desktop").read_bytes()).hexdigest(), "scenarios": {}, "limits": ["fields located by accessible names", "single host; no real IME composition or VoiceOver listening"]}
+     children, handles, windows = [], [], []
+ 
+     class Window(NativeUI):
+@@ -44,14 +44,15 @@
+             time.sleep(1.5)
+ 
+         def ax(self, body):
+-            for label, index in (("房间名称", 1), ("设备名称", 1), ("邀请文本", 2), ("虚拟输出名称", 3), ("搜索设备", 1)):
+-                body = body.replace(f'text field "{label}"', f'text field {index}')
++            body = body.replace('text field "邀请文本"', 'text field "粘贴 Hub 给出的一次性邀请"')
+             return super().ax(body)
+ 
+         def press(self, label):
+             click_native_button(self, label)
+ 
+         def paste(self, label, value):
++            if label == "虚拟输出名称":
++                scroll_window(self, -30)
+             try:
+                 super().paste(label, value)
+             except AssertionError:
+@@ -94,6 +95,7 @@
+         wait_for(lambda: (senderdir / "profiles/sender.json").exists())
+         member = wait_for(lambda: ipc(senderdir, "snapshot", credential="profiles/sender.json", hub=URL))["viewer"]["device_id"]
+         report["scenarios"]["native_invitation_paste_pair_commits_member_identity"] = True
++        scroll_window(app, -30)
+         app.ax('click pop up button "虚拟输出提供者" of group 1 of window 1 of p')
+         app.ax('click checkbox "BlackHole（外部提供者）" of group 1 of window 1 of p')
+         time.sleep(.3)
+@@ -123,6 +125,9 @@
+         wait_for(lambda: ipc(senderdir, "status")["output_binding"]["enabled"])
+         assert not ipc(senderdir, "status")["sender"]["running"]
+         report["scenarios"]["native_disable_enable_does_not_autostart"] = True
++        # System Events can canonicalize two unbundled processes with the same
++        # name to the wrong AX process. Keep one GUI open; both owners remain.
++        app.close()
+         admin = Window(hubdir, "admin-ui")
+         admin.press("设备管理")
+         admin.paste("搜索设备", "中文 Sender UI 验收")
+@@ -133,6 +138,8 @@
+         assert not ipc(senderdir, "status")["sender"]["running"]
+         report["scenarios"]["native_device_disconnect_allow_requires_manual_restart"] = True
+         admin.screenshot("device-authority")
++        admin.close()
++        app = Window(senderdir, "sender-ui-reopened")
+         app.press("Sender")
+         app.press("删除绑定…")
+         wait_for(lambda: "取消" in app.ax("return entire contents of window 1 of p"))

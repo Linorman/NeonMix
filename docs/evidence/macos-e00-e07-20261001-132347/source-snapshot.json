@@ -1,0 +1,16 @@
+{
+  "path": "/Volumes/projects-mac/NeonMix/.local/acceptance-source/e00-e07-20261001",
+  "changes_against_build_manifest": [
+    "apps/hub/Cargo.toml",
+    "apps/hub/src/server.rs",
+    "apps/hub/src/main.rs",
+    "crates/audio-core/src/mixer.rs"
+  ],
+  "purpose": "E00-E07 drift tests only; explicit workspace membership excludes concurrent AirPlay construction",
+  "unresolved_changes_after_restoring_matching_git_objects": [
+    "crates/audio-core/src/mixer.rs"
+  ],
+  "binary_hashes_still_match": true,
+  "drift_test_mixer_sha256": "bcfd57c73c2ff909d71bf506cff99984f1d122b3b1ba30ff458e8f86f5514427",
+  "drift_test_exit_code": 0
+}

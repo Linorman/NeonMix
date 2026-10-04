@@ -1,0 +1,71 @@
+{
+  "platform": "Ubuntu 24.04 ARM64",
+  "source_canonical_sha256": "322fda1b52872be7e880f750a02ef01fe0034895ecba6aa10741c504078de860",
+  "workspace_tests": {
+    "passed": 226,
+    "ignored": 5,
+    "failed": 0
+  },
+  "primary_builds_passed": true,
+  "optional_migrator": {
+    "passed_tests": 18,
+    "ignored_tests": 1,
+    "strict_clippy_passed": true,
+    "release_failed": "No space left on device",
+    "included_in_package": false
+  },
+  "worker_single_functional_passed": true,
+  "multi_source_quality_passed": false,
+  "package_relocation_functional_passed": true,
+  "package_short_airplay_quality_passed": false,
+  "lan_requested_seconds": 60,
+  "lan_completed_full_duration": false,
+  "lan_sender_exit_code": 1,
+  "lan_quality_passed": false,
+  "lan_last_active_quality": {
+    "lost": 0,
+    "overflow_plc": 0,
+    "late": 0,
+    "queue_drop": 0,
+    "pcm_sink_dropped": 93,
+    "timing_gap": 8,
+    "mixer_underrun": 15360,
+    "output_errors": 0
+  },
+  "lan_receiver_harness_timed_out": false,
+  "lan_hub_remained_alive": true,
+  "package": {
+    "directory": "/home/parallels/NeonMix/artifacts/packages/u26-20261004",
+    "archive": "/home/parallels/NeonMix/artifacts/packages/NeonMix-Ubuntu-ARM64-20261004.tar.gz",
+    "bytes": 126364060,
+    "sha256": "cba300f0886f033068ca90c9f8e9264352aa1566bf71f0aa81afb31b9d3ddd66",
+    "files": 1114,
+    "all_manifest_members_verified": true,
+    "no_runtime_state": true,
+    "no_symlinks": true,
+    "source_count": 522,
+    "main_runtime_required_programs": [
+      "neonmix-airplay-worker",
+      "neonmix-audio",
+      "neonmix-background",
+      "neonmix-desktop",
+      "neonmix-hub"
+    ],
+    "original_release_kept": true,
+    "old_packages_kept": true,
+    "free_bytes_after": 548716544
+  },
+  "local_package_integrity": {
+    "at": 1791047220.2070441,
+    "archive": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-Ubuntu-ARM64-20261004.tar.gz",
+    "bytes": 126364060,
+    "sha256": "cba300f0886f033068ca90c9f8e9264352aa1566bf71f0aa81afb31b9d3ddd66",
+    "manifest_files_checked": 1113,
+    "members": 1114,
+    "mismatches": [],
+    "no_runtime_state": true,
+    "source_snapshot_matches": true
+  },
+  "cleanup_passed": true,
+  "details": "README.md"
+}

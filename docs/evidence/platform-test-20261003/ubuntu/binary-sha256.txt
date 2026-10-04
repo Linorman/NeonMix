@@ -1,0 +1,5 @@
+1ee873f18102d6f4ca78fc4baacbf2e8ba1c6b8166b3e25f640b753cf863ae79  /home/parallels/NeonMix/.local/t03u/artifacts/t03u/bin/neonmix-airplay-worker
+f2bccec491fb80faf3435f5b9a1b804abafe5851b6fccb4b9bc060a456b9efaf  /home/parallels/NeonMix/.local/t03u/artifacts/t03u/bin/neonmix-audio
+88ce2ed96b9523d2e0dee8ef5bde1c1fba1feb1852d02cb42e58ad232bf4583c  /home/parallels/NeonMix/.local/t03u/artifacts/t03u/bin/neonmix-background
+28b18a8688b18e1f4afcbf1308f9a53d8b0b1f7d29fc3d6d2544776e29801de2  /home/parallels/NeonMix/.local/t03u/artifacts/t03u/bin/neonmix-desktop
+62b1aa415841407f45ebe2c7cd9aedb3f56ba9201b12eb330e2c623a44a983c4  /home/parallels/NeonMix/.local/t03u/artifacts/t03u/bin/neonmix-hub

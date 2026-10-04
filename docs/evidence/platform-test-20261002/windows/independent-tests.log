@@ -1,0 +1,180 @@
+ Downloading crates ...
+  Downloaded anstyle-wincon v3.0.11
+  Downloaded clap_lex v1.1.1
+  Downloaded tokio-macros v2.7.2
+  Downloaded windows-result v0.4.1
+  Downloaded windows-implement v0.60.2
+  Downloaded anstyle-query v1.1.5
+  Downloaded utf8parse v0.2.2
+  Downloaded windows-numerics v0.3.1
+  Downloaded once_cell_polyfill v1.70.2
+  Downloaded anstyle-parse v1.0.0
+  Downloaded strsim v0.11.1
+  Downloaded stats_alloc v0.1.10
+  Downloaded windows-collections v0.3.2
+  Downloaded dasp_sample v0.11.0
+  Downloaded windows-strings v0.5.1
+  Downloaded colorchoice v1.0.5
+  Downloaded windows-threading v0.2.1
+  Downloaded windows-interface v0.59.3
+  Downloaded heck v0.5.0
+  Downloaded is_terminal_polyfill v1.70.2
+  Downloaded windows-future v0.3.2
+  Downloaded pin-project-lite v0.2.17
+  Downloaded anstyle v1.0.14
+  Downloaded audio_thread_priority v0.35.1
+  Downloaded clap_derive v4.6.7
+  Downloaded windows-core v0.62.2
+  Downloaded anstream v1.0.0
+  Downloaded clap v4.6.7
+  Downloaded clap_builder v4.6.7
+  Downloaded syn v2.0.119
+  Downloaded tokio v1.53.1
+  Downloaded windows v0.62.2
+    Blocking waiting for file lock on package cache
+   Compiling stats_alloc v0.1.10
+   Compiling cpal v0.18.2 (E:\Desktop\NeonMix-test\vendor\cpal)
+   Compiling once_cell_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling utf8parse v0.2.2
+   Compiling dasp_sample v0.11.0
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling colorchoice v1.0.5
+   Compiling windows-sys v0.61.2
+   Compiling windows-strings v0.5.1
+   Compiling windows-result v0.4.1
+   Compiling windows-threading v0.2.1
+   Compiling clap_lex v1.1.1
+   Compiling strsim v0.11.1
+   Compiling heck v0.5.0
+   Compiling pin-project-lite v0.2.17
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling windows-sys v0.59.0
+   Compiling anstyle-parse v1.0.0
+   Compiling mio v1.2.3
+   Compiling anstyle-wincon v3.0.11
+   Compiling anstyle-query v1.1.5
+   Compiling socket2 v0.6.5
+   Compiling if-addrs v0.15.0
+   Compiling anstream v1.0.0
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling tokio-macros v2.7.2
+   Compiling clap_derive v4.6.7
+   Compiling windows-interface v0.59.3
+   Compiling windows-implement v0.60.2
+   Compiling socket-pktinfo v0.4.1
+   Compiling clap_builder v4.6.7
+   Compiling mdns-sd v0.21.4 (E:\Desktop\NeonMix-test\vendor\mdns-sd-scoped)
+   Compiling mdns-sd v0.21.4
+   Compiling audio_thread_priority v0.35.1
+   Compiling tokio v1.53.1
+   Compiling windows-core v0.62.2
+   Compiling thiserror v2.0.21
+   Compiling windows-numerics v0.3.1
+   Compiling windows-collections v0.3.2
+   Compiling windows-future v0.3.2
+   Compiling windows v0.62.2
+   Compiling clap v4.6.7
+   Compiling serde v1.0.229
+   Compiling neonmix-core v0.1.0 (E:\Desktop\NeonMix-test\crates\audio-core)
+   Compiling neonmix-output-binding v0.1.0 (E:\Desktop\NeonMix-test\crates\output-binding)
+   Compiling neonmix-identity v0.1.0 (E:\Desktop\NeonMix-test\crates\identity)
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling neonmix-io v0.1.0 (E:\Desktop\NeonMix-test\crates\audio-io)
+   Compiling neonmix-windows v0.1.0 (E:\Desktop\NeonMix-test\adapters\windows)
+warning: `cpal` (lib) generated 1 warning
+   Compiling neonmix-audio v0.1.0 (E:\Desktop\NeonMix-test\apps\audio)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3m 14s
+     Running unittests src\main.rs (target\debug\deps\neonmix_audio-1441bfac2e5b1b2c.exe)
+
+running 4 tests
+test measurement::tests::never_counts_a_gap_as_continuous_source_time ... ok
+test virtual_output::tests::rejected_second_owner_preserves_live_lock_and_drop_releases_it ... ok
+test measurement::tests::measures_received_tone_and_does_not_invent_one_for_silence ... ok
+test measurement::tests::source_restart_does_not_count_intervening_silence_as_tone_time ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\cli.rs (target\debug\deps\cli-6bd2d9af67741d03.exe)
+
+running 3 tests
+test unsupported_platform_sink_fails_explicitly ... ok
+test invalid_format_fails_without_claiming_success ... ok
+test offline_probe_returns_parseable_metrics ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+
+     Running tests\output_reopen.rs (target\debug\deps\output_reopen-f2f3964c2db72d92.exe)
+
+running 1 test
+test same_process_reopen_rebuilds_output_clock ... ignored, requires explicit NEONMIX_TEST_OUTPUT_DEVICE and physical native audio hardware
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\neonmix_core-2e8e230d77e9b792.exe)
+
+running 2 tests
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\audio_contract.rs (target\debug\deps\audio_contract-9b212c67a95c2c14.exe)
+
+running 18 tests
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test malicious_pcm_is_sanitized ... ok
+test mute_advances_signal_position ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test silence_is_data_but_idle_is_not ... ok
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.30s
+
+     Running tests\drift_stability.rs (target\debug\deps\drift_stability-a76b40f1453cab71.exe)
+
+running 3 tests
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ignored, Run with --release --ignored: four accelerated 600-second drift cases
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ignored, Release-only accelerated 300-second delivery-stall regression
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ignored, Release-only accelerated over-limit drift degradation
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\mixer.rs (target\debug\deps\mixer-ea9ab24700ba9349.exe)
+
+running 8 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests\mixer_realtime.rs (target\debug\deps\mixer_realtime-f02b6e168869742c.exe)
+
+running 1 test

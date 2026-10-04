@@ -1,0 +1,47 @@
+[
+  {
+    "name": "workspace",
+    "command": [
+      "python",
+      "suite.py"
+    ],
+    "exit_code": 0,
+    "seconds": 236.13336080000045
+  },
+  {
+    "name": "worker-build",
+    "command": [
+      "python",
+      "worker-build.py"
+    ],
+    "exit_code": 0,
+    "seconds": 9.420536400000856
+  },
+  {
+    "name": "worker-probes-build",
+    "command": [
+      "python",
+      "worker-probes-build.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.3326835000007122
+  },
+  {
+    "name": "worker-native-suite",
+    "command": [
+      "python",
+      "worker-native-suite.py"
+    ],
+    "exit_code": 0,
+    "seconds": 19.222009799999796
+  },
+  {
+    "name": "pipe-security",
+    "command": [
+      "python",
+      "pipe-security.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.8422064000005776
+  }
+]

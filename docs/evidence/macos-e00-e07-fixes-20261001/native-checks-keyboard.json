@@ -1,0 +1,8 @@
+{
+  "native-workflow-keyboard": {
+    "exit_code": 0
+  },
+  "sender-ui-keyboard": {
+    "exit_code": 1
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "scope": "macOS compiler/header check; not Windows driver acceptance",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.30.1)",
+  "wdk_sdk_version": "10.0.26100.6584",
+  "compatibility_overlay": {
+    "original_sha256": "210277c4abba05d26a3facfa4616f1bd87eb0ff431a1a9e46a1fcc4956cb526f",
+    "adjusted_sha256": "a922deb94b7fbef4c883661f304b025e10abcd10e0306ac4dc3087cf3e238b87",
+    "change": "WDF_REQUEST_TYPE definition explicitly uses the already-declared int type"
+  },
+  "files": [
+    {
+      "source": "drivers/windows/wavert/Source/Filters/speakertopo.cpp",
+      "exit_code": 0,
+      "source_sha256": "486580b6733add12bc159108c9caa634742ef9a4b14cfde55f164a410778105b",
+      "object_sha256": "eaee8232e290aa21b474d40e0cbcb838e7e7356ee50c54c71b16e16cfe2bbbf5"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Main/NewDelete.cpp",
+      "exit_code": 0,
+      "source_sha256": "d43699924e75388f7319ba30fd7101ba9759f3c7cca55926e8f0fdf11e04eac6",
+      "object_sha256": "d4cf9f6a53cd57ad94d7e4757f2e2a0b7733300f0452a5a38e731e1cfd01cf06"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Main/adapter.cpp",
+      "exit_code": 0,
+      "source_sha256": "180b40be2f73e5d8e0b70f62d8a8e6f3e08a2c70ab4f704c20c5f98ef934ed3b",
+      "object_sha256": "8f91c05560fa59a01b16ec724a93fc86791812ed8ba04641c30a4b85c149d705"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Main/basetopo.cpp",
+      "exit_code": 0,
+      "source_sha256": "67c7f8025a986b4af206178d3049178880f41d180a896693bef38b447a74adb5",
+      "object_sha256": "54b4fda557e055e3bf74de4455c19beaa51eb0f424183e9515aef3c165fff270"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Main/common.cpp",
+      "exit_code": 0,
+      "source_sha256": "6d10175e6551c06e6f3c48166ec5c6ecd297235fcb91e065c5200d72165e85d4",
+      "object_sha256": "570af683dde3b8b36a7f99edd16c94c4033d42e474b17accdcf5a1ed52611f89"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Main/mintopo.cpp",
+      "exit_code": 0,
+      "source_sha256": "bc7db02fb9f5d8cf2cb25813bf9481101cf5dc7aa90be1c8fc2e74be38936549",
+      "object_sha256": "41421b399e5ffcacb44df35c60fc340e4757f9f5cd37a12afc8efbab16503611"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Main/minwavert.cpp",
+      "exit_code": 0,
+      "source_sha256": "02d4c5e4cf41ba06eafd339d02212d3e38f98b50740a01aa1f56ed946cafec4d",
+      "object_sha256": "bdce5be278bafc055fe4491f48960d3d3b4d02cb520a0123baab0b96cd324096"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Main/minwavertstream.cpp",
+      "exit_code": 0,
+      "source_sha256": "3b24276d550826cf4398a668c0bb66e6abaaa63c7da539c081a34a1fbf22baa7",
+      "object_sha256": "6cddd1a1e9c44c419b0044f0dbb8e240353c38874227e3186096ef3c63ebef5c"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Utilities/hw.cpp",
+      "exit_code": 0,
+      "source_sha256": "eaf02af0b9381b7c8208016e2e49b772f3e0352f31a4940b910a2a4d4616cabe",
+      "object_sha256": "9c31a1e5c469ee17afcd376561a7fb34ceb524482318bf0e0ab7d4ce41b09989"
+    },
+    {
+      "source": "drivers/windows/wavert/Source/Utilities/kshelper.cpp",
+      "exit_code": 0,
+      "source_sha256": "d0c10e68f8500b136f813f4266c0767ab9e3bb5ea274c7b9e3ce7753efda04fc",
+      "object_sha256": "c09212bcbb0c522e03a020bbf3ca2b693570f38a9c6fed72d090d84ad9f062b8"
+    }
+  ],
+  "passed": true,
+  "link_exit_code": 0,
+  "pe": {
+    "machine": 34404,
+    "optional_header_magic": 523,
+    "subsystem": 1,
+    "dll_characteristics": 49504,
+    "sha256": "7c108895057f07e2d7dd542f4d81fe230c6e84eead46f3d520d9631f1e0a3513",
+    "signed": false,
+    "msvc_built": false,
+    "windows_loaded": false
+  }
+}

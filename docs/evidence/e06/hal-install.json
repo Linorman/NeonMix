@@ -1,0 +1,22 @@
+{
+  "installed": true,
+  "files": {
+    "Contents/Info.plist": {
+      "matches": true
+    },
+    "Contents/MacOS/NeonMixHAL": {
+      "matches": true
+    },
+    "Contents/Resources/TYMPAN-LICENSE-APACHE": {
+      "matches": true
+    },
+    "Contents/Resources/TYMPAN-LICENSE-MIT": {
+      "matches": true
+    },
+    "Contents/_CodeSignature/CodeResources": {
+      "matches": true
+    }
+  },
+  "matches_staged": true,
+  "binary_sha256": "447a28242cd8253e55f6f18812918a806030bec87e20d77595add732a5ed3e5b"
+}

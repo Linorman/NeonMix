@@ -1,0 +1,6 @@
+{
+  "user_constraint": "Ubuntu and macOS tests must not run simultaneously because they share CPU resources",
+  "updated_utc": "2026-10-03T05:10:16.458482+00:00",
+  "policy": "Complete Ubuntu tests, then resume macOS local tests. Windows remote host may run independently. Mac client runs only as the sender within an assigned cross-host window, with no other local tests.",
+  "earlier_results": "Retain initial concurrent build/unit and fixture logs with actual chronology; rerun potentially overlapping real-time Ubuntu cases under the serial policy before drawing quality conclusions."
+}

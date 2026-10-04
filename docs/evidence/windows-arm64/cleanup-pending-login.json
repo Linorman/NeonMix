@@ -1,0 +1,8 @@
+﻿{
+    "console":  "query.exe : No User exists for *\r\nAt line:5 char:126\r\n+ ... -restored.json | ConvertFrom-Json);console=(\u0026 query user 2\u003e\u00261 | Out-S ...\r\n+                                                 ~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (No User exists for *:String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError\r\n \r\n",
+    "volume":  {
+                   "muted":  false,
+                   "volume":  0.05929007
+               },
+    "tasksRemoved":  true
+}

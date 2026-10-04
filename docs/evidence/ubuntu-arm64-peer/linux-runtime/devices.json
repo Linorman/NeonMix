@@ -1,0 +1,1114 @@
+[
+  {
+    "id": "pipewire:alsa_input.pci-0000_00_01.0.analog-stereo",
+    "name": "Built-in Audio Analog Stereo",
+    "backend": "pipewire",
+    "input": {
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_type": "f32",
+      "period_min_frames": 1024,
+      "period_max_frames": 2048
+    },
+    "output": null,
+    "supported_input": [
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      }
+    ],
+    "supported_output": []
+  },
+  {
+    "id": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+    "name": "Built-in Audio Analog Stereo",
+    "backend": "pipewire",
+    "input": {
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_type": "f32",
+      "period_min_frames": 1024,
+      "period_max_frames": 2048
+    },
+    "output": {
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_type": "f32",
+      "period_min_frames": 1024,
+      "period_max_frames": 2048
+    },
+    "supported_input": [
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      }
+    ],
+    "supported_output": [
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      }
+    ]
+  },
+  {
+    "id": "pipewire:neonmix.sink.e01-24874",
+    "name": "NeonMix \u2014 e01-24874",
+    "backend": "pipewire",
+    "input": {
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_type": "f32",
+      "period_min_frames": 1024,
+      "period_max_frames": 2048
+    },
+    "output": {
+      "sample_rate": 48000,
+      "channels": 2,
+      "sample_type": "f32",
+      "period_min_frames": 1024,
+      "period_max_frames": 2048
+    },
+    "supported_input": [
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      }
+    ],
+    "supported_output": [
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 44100,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 48000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u8",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u16",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u24",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "i32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "u32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f32",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      },
+      {
+        "sample_rate": 96000,
+        "channels": 2,
+        "sample_type": "f64",
+        "period_min_frames": 1024,
+        "period_max_frames": 2048
+      }
+    ]
+  }
+]

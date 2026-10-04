@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/apps/airplay-worker/pairing_probe.py", line 186, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/apps/airplay-worker/pairing_probe.py", line 181, in main
+    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 809, in write_text
+    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes/projects-mac/NeonMix/.local/t04m/docs/evidence/airplay/pairing-persistence-macos.json'

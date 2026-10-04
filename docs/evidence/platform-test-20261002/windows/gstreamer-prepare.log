@@ -1,0 +1,15 @@
+{
+  "version": "1.26.10",
+  "prefix": "E:\\Desktop\\NeonMix-test\\.local\\gstreamer-windows\\extracted\\PFiles64\\gstreamer\\1.0\\msvc_x86_64",
+  "packages": [
+    {
+      "url": "https://gstreamer.freedesktop.org/data/pkg/windows/1.26.10/msvc/gstreamer-1.0-msvc-x86_64-1.26.10.msi",
+      "sha256": "a863bf3faa49e9f33bd3cc42967b473482d4dc98655ed95cba1ac59f26fb0cfb"
+    },
+    {
+      "url": "https://gstreamer.freedesktop.org/data/pkg/windows/1.26.10/msvc/gstreamer-1.0-devel-msvc-x86_64-1.26.10.msi",
+      "sha256": "8487a115fea3b0b0b4c55a9a413ad1adab0fe78f6681feedc60858a48613a121"
+    }
+  ],
+  "installation": "project-local administrative extraction only"
+}

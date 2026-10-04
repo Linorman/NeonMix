@@ -1,0 +1,58 @@
+{
+  "passed": true,
+  "requested_seconds": 300,
+  "hub": "Ubuntu ARM64",
+  "senders": [
+    "macOS",
+    "Ubuntu ARM64"
+  ],
+  "period_frames": 1024,
+  "period_ms": 21.333333333333332,
+  "captured_frames": 14399488,
+  "startup_capture_silent_frames": 1024,
+  "steady_capture_silent_frame_increase": 0,
+  "underrun_frames": 0,
+  "output_errors": 0,
+  "output_callback_over_budget": 0,
+  "capture_errors": 0,
+  "capture_callback_over_budget": 0,
+  "capture_stale_frames": 0,
+  "receivers": [
+    {
+      "lost_packets": 0,
+      "plc_samples": 0,
+      "queue_drops": 0,
+      "pcm_sink_dropped": 0,
+      "pcm_timing_gap_count": 0
+    },
+    {
+      "lost_packets": 0,
+      "plc_samples": 0,
+      "queue_drops": 0,
+      "pcm_sink_dropped": 0,
+      "pcm_timing_gap_count": 0
+    }
+  ],
+  "controls_passed": true,
+  "checks": [
+    "unauthenticated",
+    "single",
+    "dual",
+    "dual_soak",
+    "dual_soak_diagnostics",
+    "permissions_and_revision",
+    "mute_a_only_b",
+    "solo_a",
+    "multi_solo",
+    "master_mute",
+    "revoke_a_only_b",
+    "admin_disconnect",
+    "allow_does_not_restart_sender",
+    "wss_revisions",
+    "restart_preserves_revocation"
+  ],
+  "macos_hub_sha256": "143f30ae1239e6302fc88754bea423d70e2239b26dc8d00847a2435365d05ed2",
+  "linux_hub_sha256": "4e8b1773d9d1e5394ff29151a0c65fd1fec30fc4b13b9221275ef54b1b220d00",
+  "original_probe": "artifacts/e02-e04/20260930-214742",
+  "linux_process_permissions": "UID 1000, no effective capabilities; child-only rtprio/nice/rttime rlimits"
+}

@@ -1,0 +1,16 @@
+{
+  "active_owned_neonmix_processes": [],
+  "removed_owned_fixtures": [
+    "/home/parallels/NeonMix/.local/t03u/.local/lan03",
+    "/home/parallels/NeonMix/.local/t03u/artifacts/t03u/diagbin",
+    "/home/parallels/NeonMix/.local/t03u/artifacts/t03u/lan-invite.txt",
+    "/home/parallels/NeonMix/.local/t03u/artifacts/t03u/worker.pid"
+  ],
+  "remaining_airplay_fixture_count": 0,
+  "source_file_count": 512,
+  "source_mismatches": [],
+  "retained_binaries": "/home/parallels/NeonMix/.local/t03u/artifacts/t03u/bin",
+  "old_manual_package_untouched": "/home/parallels/NeonMix/artifacts/packages/u26-211335",
+  "system_settings_changed": false,
+  "default_audio_route_changed": false
+}

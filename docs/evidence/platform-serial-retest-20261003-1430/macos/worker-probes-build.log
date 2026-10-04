@@ -1,0 +1,16 @@
+[ 36%] Built target plist
+[ 93%] Built target protocol
+[ 97%] Building C object CMakeFiles/neonmix-airplay-probe-crypto.dir/crypto_probe.c.o
+[ 97%] Building C object CMakeFiles/neonmix-airplay-probe-crypto.dir/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/patched/lib/crypto.c.o
+[100%] Linking C shared library libneonmix-airplay-probe-crypto.dylib
+[100%] Built target neonmix-airplay-probe-crypto
+[ 36%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-audio-probe.dir/audio_probe.cpp.o
+[100%] Linking CXX executable neonmix-airplay-audio-probe
+[100%] Built target neonmix-airplay-audio-probe
+[ 47%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building C object CMakeFiles/neonmix-airplay-identity-probe.dir/identity_probe.c.o
+[100%] Linking C executable neonmix-airplay-identity-probe
+[100%] Built target neonmix-airplay-identity-probe

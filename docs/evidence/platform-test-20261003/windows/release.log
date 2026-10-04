@@ -1,0 +1,338 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling windows-link v0.2.1
+   Compiling cfg-if v1.0.5
+   Compiling log v0.4.34
+   Compiling once_cell v1.21.4
+   Compiling heck v0.5.0
+   Compiling pin-project-lite v0.2.17
+   Compiling autocfg v1.5.1
+   Compiling winnow v1.0.4
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling target-lexicon v0.13.5
+   Compiling futures-core v0.3.34
+   Compiling windows_x86_64_msvc v0.52.6
+   Compiling smallvec v1.16.2
+   Compiling serde_spanned v1.1.1
+   Compiling pkg-config v0.3.34
+   Compiling itoa v1.0.18
+   Compiling version-compare v0.2.1
+   Compiling futures-sink v0.3.34
+   Compiling thiserror v2.0.21
+   Compiling version_check v0.9.5
+   Compiling serde_core v1.0.229
+   Compiling bytes v1.12.1
+   Compiling bitflags v2.13.2
+   Compiling serde v1.0.229
+   Compiling libc v0.2.189
+   Compiling find-msvc-tools v0.1.14
+   Compiling shlex v2.0.1
+   Compiling zeroize v1.9.0
+   Compiling windows-sys v0.61.2
+   Compiling memchr v2.8.3
+   Compiling stable_deref_trait v1.2.1
+   Compiling slab v0.4.12
+   Compiling getrandom v0.2.17
+   Compiling tracing-core v0.1.36
+   Compiling futures-task v0.3.34
+   Compiling typenum v1.20.1
+   Compiling scopeguard v1.2.0
+   Compiling zmij v1.0.23
+   Compiling untrusted v0.9.0
+   Compiling zerocopy v0.8.59
+   Compiling rustls-pki-types v1.15.1
+   Compiling lock_api v0.4.14
+   Compiling serde_json v1.0.151
+   Compiling rustls v0.23.45
+   Compiling percent-encoding v2.3.2
+   Compiling litemap v0.8.3
+   Compiling writeable v0.6.4
+   Compiling subtle v2.6.1
+   Compiling paste v1.0.15
+   Compiling futures-channel v0.3.34
+   Compiling utf8_iter v1.0.4
+   Compiling generic-array v0.14.7
+   Compiling num-traits v0.2.19
+   Compiling icu_properties_data v2.3.0
+   Compiling cpufeatures v0.2.17
+   Compiling windows-targets v0.52.6
+   Compiling cc v1.5.1
+   Compiling tracing v0.1.44
+   Compiling cfg_aliases v0.2.2
+   Compiling getrandom v0.4.3
+   Compiling icu_normalizer_data v2.3.0
+   Compiling base64 v0.23.1
+   Compiling khronos_api v3.1.0
+   Compiling windows-result v0.4.1
+   Compiling windows-strings v0.5.1
+   Compiling http v1.5.0
+   Compiling rtrb v0.3.2
+   Compiling equivalent v1.0.2
+   Compiling windows-sys v0.59.0
+   Compiling httparse v1.10.1
+   Compiling xml-rs v0.8.29
+   Compiling hashbrown v0.17.1
+   Compiling form_urlencoded v1.2.2
+   Compiling simd-adler32 v0.3.10
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling spin v0.9.9
+   Compiling windows-threading v0.2.1
+   Compiling deranged v0.5.8
+   Compiling powerfmt v0.2.0
+   Compiling time-core v0.1.9
+   Compiling parking_lot_core v0.9.12
+   Compiling tower-service v0.3.3
+   Compiling cfg-expr v0.20.9
+   Compiling anstyle v1.0.14
+   Compiling crc32fast v1.5.2
+   Compiling utf8parse v0.2.2
+   Compiling num-conv v0.2.2
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling adler2 v2.0.1
+   Compiling getrandom v0.3.4
+   Compiling once_cell_polyfill v1.70.2
+   Compiling flume v0.12.0
+   Compiling windows-result v0.2.0
+   Compiling windows-sys v0.52.0
+   Compiling anstyle-parse v1.0.0
+   Compiling rustls-pemfile v2.2.0
+   Compiling ahash v0.8.12
+   Compiling dpi v0.1.2
+   Compiling base64 v0.22.1
+   Compiling toml v1.1.6+spec-1.1.0
+   Compiling fastrand v2.5.0
+   Compiling crossbeam-utils v0.8.23
+   Compiling indexmap v2.14.2
+   Compiling gl_generator v0.14.0
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling colorchoice v1.0.5
+   Compiling try-lock v0.2.5
+   Compiling ttf-parser v0.25.1
+   Compiling windows_x86_64_msvc v0.53.1
+   Compiling fnv v1.0.7
+   Compiling atomic-waker v1.1.2
+   Compiling digest v0.10.7
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling accesskit v0.17.1
+   Compiling cpal v0.18.2 (E:\Desktop\NeonMix-test\r03\vendor\cpal)
+   Compiling want v0.3.1
+   Compiling http-body v1.1.0
+   Compiling system-deps v7.0.8
+   Compiling windows-strings v0.1.0
+   Compiling num-integer v0.1.47
+   Compiling sha2 v0.10.9
+   Compiling miniz_oxide v0.9.1
+   Compiling pem v4.0.0
+   Compiling winit v0.30.13
+   Compiling strsim v0.11.1
+   Compiling raw-window-handle v0.6.2
+   Compiling clap_lex v1.1.1
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling foldhash v0.1.5
+   Compiling arrayvec v0.7.8
+   Compiling dasp_sample v0.11.0
+   Compiling httpdate v1.0.3
+   Compiling ring v0.17.14
+   Compiling either v1.18.0
+   Compiling parking_lot v0.12.5
+   Compiling rubato v0.16.2
+   Compiling toml_edit v0.25.15+spec-1.1.0
+   Compiling immutable-chunkmap v2.1.4
+   Compiling num-rational v0.4.2
+   Compiling hashbrown v0.15.5
+   Compiling glutin_egl_sys v0.7.1
+   Compiling glutin_wgl_sys v0.6.1
+   Compiling itertools v0.14.0
+   Compiling rand_core v0.9.5
+   Compiling flate2 v1.1.10
+   Compiling time v0.3.55
+   Compiling option-operations v0.5.0
+   Compiling miniz_oxide v0.8.9
+   Compiling fdeflate v0.3.7
+   Compiling webpki-roots v1.0.9
+   Compiling sync_wrapper v1.0.2
+   Compiling glib-sys v0.20.10
+   Compiling gobject-sys v0.20.10
+   Compiling gstreamer-sys v0.23.6
+   Compiling gio-sys v0.20.10
+   Compiling gstreamer-base-sys v0.23.6
+   Compiling cursor-icon v1.2.0
+   Compiling proc-macro-crate v3.5.0
+   Compiling profiling v1.0.18
+   Compiling unicode-segmentation v1.13.3
+   Compiling ipnet v2.12.2
+   Compiling smol_str v0.2.2
+   Compiling epaint_default_fonts v0.31.1
+   Compiling nohash-hasher v0.2.0
+   Compiling tower-layer v0.3.3
+   Compiling pxfm v0.1.30
+   Compiling muldiv v1.0.1
+   Compiling uuid v1.26.1
+   Compiling yasna v0.6.0
+   Compiling png v0.18.1
+   Compiling accesskit_consumer v0.26.0
+   Compiling gstreamer-app-sys v0.23.5
+   Compiling gstreamer-rtp-sys v0.23.5
+   Compiling windows-targets v0.53.5
+   Compiling glutin v0.32.3
+   Compiling memoffset v0.9.1
+   Compiling error-code v3.4.0
+   Compiling byteorder-lite v0.1.0
+   Compiling static_assertions v1.1.0
+   Compiling rustversion v1.0.23
+   Compiling http-body-util v0.1.5
+   Compiling sha1 v0.10.7
+   Compiling glutin-winit v0.5.0
+   Compiling fs-err v3.3.1
+   Compiling libloading v0.8.9
+   Compiling owned_ttf_parser v0.25.1
+   Compiling windows-sys v0.60.2
+   Compiling data-encoding v2.11.1
+   Compiling atomic_refcell v0.1.14
+   Compiling clipboard-win v5.4.1
+   Compiling ryu v1.0.23
+   Compiling winapi v0.3.9
+   Compiling ab_glyph v0.2.32
+   Compiling muda v0.21.0
+   Compiling crossbeam-channel v0.5.17
+   Compiling webpki-roots v0.26.11
+   Compiling keyboard-types v0.8.3
+   Compiling litrs v1.0.0
+   Compiling web-time v1.1.0
+   Compiling tray-icon v0.26.0
+   Compiling glow v0.16.0
+   Compiling mime v0.3.17
+   Compiling synstructure v0.14.0
+   Compiling serde_path_to_error v0.1.20
+   Compiling matchit v0.8.4
+   Compiling neonmix-hub v0.1.0 (E:\Desktop\NeonMix-test\r03\apps\hub)
+   Compiling tympan-aspl v0.1.0 (E:\Desktop\NeonMix-test\r03\vendor\tympan-aspl)
+   Compiling windows-interface v0.59.3
+   Compiling windows-implement v0.60.2
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.3
+   Compiling anstyle-query v1.1.5
+   Compiling anstyle-wincon v3.0.11
+   Compiling if-addrs v0.15.0
+   Compiling windows-interface v0.58.0
+   Compiling windows-implement v0.58.0
+warning: function `set_name` is never used
+   --> vendor\tympan-aspl\src\raw\output_controls.rs:248:15
+    |
+248 | pub(crate) fn set_name(runtime: &DriverRuntime, value: String) {
+    |               ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling glib-macros v0.20.12
+   Compiling anstream v1.0.0
+   Compiling socket-pktinfo v0.4.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling arc-swap v1.9.2
+   Compiling audio_thread_priority v0.35.1
+   Compiling mdns-sd v0.21.4 (E:\Desktop\NeonMix-test\r03\vendor\mdns-sd-scoped)
+   Compiling mdns-sd v0.21.4
+   Compiling clap_builder v4.6.7
+   Compiling document-features v0.2.12
+   Compiling axum-core v0.5.6
+   Compiling windows-core v0.62.2
+   Compiling rand_chacha v0.9.0
+   Compiling moxcms v0.8.1
+   Compiling windows-core v0.58.0
+   Compiling rand v0.9.5
+   Compiling thiserror-impl v2.0.21
+   Compiling zerofrom-derive v0.1.8
+   Compiling serde_derive v1.0.229
+   Compiling yoke-derive v0.8.3
+   Compiling tokio-macros v2.7.2
+   Compiling zerovec-derive v0.11.6
+   Compiling futures-macro v0.3.34
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.1
+   Compiling windows-collections v0.3.2
+warning: `tympan-aspl` (lib) generated 1 warning
+   Compiling windows-future v0.3.2
+   Compiling windows-numerics v0.3.1
+   Compiling clap_derive v4.6.7
+   Compiling neonmix-hal v0.1.0 (E:\Desktop\NeonMix-test\r03\drivers\macos\hal)
+   Compiling windows v0.58.0
+   Compiling tokio v1.53.1
+   Compiling futures-util v0.3.34
+   Compiling windows v0.62.2
+   Compiling zerofrom v0.1.8
+   Compiling bytemuck v1.25.2
+   Compiling rustls-webpki v0.103.15
+   Compiling rcgen v0.14.10
+   Compiling yoke v0.8.3
+   Compiling emath v0.31.1
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling ecolor v0.31.1
+   Compiling clap v4.6.7
+   Compiling epaint v0.31.1
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling neonmix-core v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\audio-core)
+   Compiling neonmix-control v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\control)
+   Compiling neonmix-airplay-ipc v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\airplay-ipc)
+   Compiling serde_urlencoded v0.7.1
+   Compiling neonmix-output-binding v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\output-binding)
+   Compiling egui v0.31.1
+   Compiling icu_provider v2.3.1
+   Compiling futures-executor v0.3.34
+   Compiling image v0.25.10
+   Compiling glib v0.20.12
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling neonmix-airplay-adapter v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\airplay-adapter)
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling tokio-util v0.7.19
+   Compiling tower v0.5.3
+   Compiling tokio-rustls v0.26.6
+   Compiling neonmix-identity v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\identity)
+   Compiling tungstenite v0.29.0
+   Compiling webbrowser v1.2.4
+   Compiling tower-http v0.6.11
+   Compiling h2 v0.4.19
+   Compiling arboard v3.6.1
+   Compiling tokio-tungstenite v0.29.0
+   Compiling neonmix-desktop-service v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\desktop-service)
+   Compiling egui_glow v0.31.1
+   Compiling hyper v1.11.1
+   Compiling gstreamer v0.23.7
+   Compiling accesskit_windows v0.24.1
+   Compiling accesskit_winit v0.23.1
+   Compiling egui-winit v0.31.1
+   Compiling eframe v0.31.1
+   Compiling hyper-util v0.1.21
+   Compiling hyper-rustls v0.27.10
+   Compiling axum-server v0.7.3
+   Compiling axum v0.8.9
+   Compiling reqwest v0.12.28
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling neonmix-io v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\audio-io)
+   Compiling neonmix-windows v0.1.0 (E:\Desktop\NeonMix-test\r03\adapters\windows)
+   Compiling neonmix-linux v0.1.0 (E:\Desktop\NeonMix-test\r03\adapters\linux)
+   Compiling neonmix-macos v0.1.0 (E:\Desktop\NeonMix-test\r03\adapters\macos)
+warning: `cpal` (lib) generated 1 warning
+   Compiling neonmix-audio v0.1.0 (E:\Desktop\NeonMix-test\r03\apps\audio)
+   Compiling gstreamer-base v0.23.6
+   Compiling gstreamer-rtp v0.23.5
+   Compiling gstreamer-app v0.23.5
+   Compiling neonmix-media v0.1.0 (E:\Desktop\NeonMix-test\r03\crates\media)
+   Compiling neonmix-desktop v0.1.0 (E:\Desktop\NeonMix-test\r03\apps\desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 17s

@@ -1,0 +1,8 @@
+{
+  "worker-protocol-retest": {
+    "exit_code": 1
+  },
+  "worker-pairing-retest": {
+    "exit_code": 1
+  }
+}

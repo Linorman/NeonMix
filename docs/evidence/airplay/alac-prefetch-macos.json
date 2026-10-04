@@ -1,0 +1,50 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "native_start_order": "hot",
+  "prefetch_blocks": 96,
+  "codec": "alac",
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; real receiver Keychain fixture entry",
+  "binary_sha256": {
+    "neonmix-hub": "667de867e03f398bac1da3f0da5bcd20d2f7aaf87e5e3ad4a878a11c7dbbeaf4",
+    "neonmix-airplay-worker": "b0104fc2c684205bb2aff870bdb105acd7959baa45a7fab4090aab9948be3488"
+  },
+  "passed": true,
+  "scenarios": {
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+    "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+    "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+    "worker_kill_clears_airplay_and_preserves_native_audio": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "airplay_pcm": {
+    "received_blocks": 113,
+    "released_blocks": 54,
+    "codec": "alac",
+    "source_frame_count": 352,
+    "accepted_packets": 113,
+    "identity_rejections": 0,
+    "source_rate": 44100,
+    "internal_rate": 48000,
+    "lane_rms": 0.08467327803373337,
+    "uncertainty_ns": 8711074,
+    "timed_late_frames": 0
+  },
+  "mixed_output_rms": 0.02176964096724987,
+  "output_frames_around_worker_crash": {
+    "before": 106752,
+    "after": 113152
+  },
+  "fixture_keychain_cleanup": {
+    "entries": 1,
+    "passed": true
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

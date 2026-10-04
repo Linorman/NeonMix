@@ -1,0 +1,4 @@
+fmt {'command': ['cargo', 'fmt', '--all', '--', '--check'], 'exit_code': 1, 'seconds': 0.22}
+clippy {'command': ['cargo', 'clippy', '--workspace', '--all-targets', '--locked', '--offline', '--', '-D', 'warnings'], 'exit_code': 0, 'seconds': 24.51}
+tests {'command': ['cargo', 'test', '--workspace', '--all-targets', '--locked', '--offline', '--no-fail-fast'], 'exit_code': 0, 'seconds': 74.73}
+release {'command': ['cargo', 'build', '--workspace', '--release', '--locked', '--offline'], 'exit_code': 0, 'seconds': 135.56}

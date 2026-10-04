@@ -1,0 +1,17 @@
+{
+  "package": "E:\\Desktop\\NeonMix-test\\packages\\NeonMix-windows-x64-20261002-tested-v1",
+  "zip": "E:\\Desktop\\NeonMix-test\\packages\\NeonMix-windows-x64-20261002-tested-v1.zip",
+  "zip_bytes": 64335408,
+  "zip_sha256": "91e41e3ff1cdb1c172ab3053c011f6ca7fb7e10f19d376c89f12e8f82011a2fc",
+  "file_count": 982,
+  "binary_sha256": {
+    "neonmix-airplay-worker.exe": "976942397748bff2de2d45463a293e0803dcf5db59f2f1899692d33bbd4f238e",
+    "neonmix-audio.exe": "72f7039b284d07daa153ac9d39e777cef8c8d8fcb25ce57b934871afe60e1274",
+    "neonmix-background.exe": "c3105df2d76c4c1b8a99ac12db38d14a0504876074b1fbb194ed38c31b5c9790",
+    "neonmix-desktop.exe": "1de8cfb79f60731385050453421576aabf9719794015e4c9cf7d1c6b1532fa25",
+    "neonmix-hub.exe": "1a0be49ebe3693a5740b78f1734687235345edd43b052a21c2eedfe94c552a2f"
+  },
+  "uncompressed_bytes": 175114918,
+  "local_archive_path": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-windows-x64-20261002-tested-v1.zip",
+  "local_archive_sha256_verified": true
+}

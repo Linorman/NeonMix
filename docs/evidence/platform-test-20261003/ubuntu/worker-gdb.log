@@ -1,0 +1,44 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+0x0000e11b268acd8c in __GI_kill () at ../sysdeps/unix/syscall-template.S:120
+
+warning: 120	../sysdeps/unix/syscall-template.S: No such file or directory
+process 615364 is executing new program: /home/parallels/NeonMix/.local/t03u/artifacts/t03u/bin/neonmix-airplay-worker
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/t03u/.local/native/root/usr/lib/aarch64-linux-gnu/libgstapp-1.0.so.0
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/t03u/.local/native/root/usr/lib/aarch64-linux-gnu/libgstreamer-1.0.so.0
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/t03u/.local/native/root/usr/lib/aarch64-linux-gnu/libglib-2.0.so.0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/aarch64-linux-gnu/libthread_db.so.1".
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/t03u/.local/native/root/usr/lib/aarch64-linux-gnu/libgstbase-1.0.so.0
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/t03u/.local/native/root/usr/lib/aarch64-linux-gnu/libgobject-2.0.so.0
+warning: could not find '.gnu_debugaltlink' file for /home/parallels/NeonMix/.local/t03u/.local/native/root/usr/lib/aarch64-linux-gnu/libgmodule-2.0.so.0
+[Detaching after fork from child process 615375]
+[New Thread 0xff29bd76f140 (LWP 615376)]
+
+Thread 1 "neonmix-airplay" received signal SIGSEGV, Segmentation fault.
+0x0000c2256aff225c in ed25519_key_get_raw (data=..., key=...) at /home/parallels/NeonMix/.local/t03u/.local/airplay/patched/lib/crypto.c:398
+398	    if (!EVP_PKEY_get_raw_public_key(key->pkey, data, &(size_t) {ED25519_KEY_SIZE})) {
+
+Thread 2 (Thread 0xff29bd76f140 (LWP 615376) "neonmix-airplay"):
+#0  0x0000ff29bdd21e9c in __futex_abstimed_wait_common64 (private=..., cancel=..., abstime=..., op=..., expected=..., futex_word=...) at ./nptl/futex-internal.c:57
+#1  __futex_abstimed_wait_common (cancel=..., private=..., abstime=..., clockid=..., expected=..., futex_word=...) at ./nptl/futex-internal.c:87
+#2  __GI___futex_abstimed_wait_cancelable64 (futex_word=..., expected=..., clockid=..., abstime=..., private=...) at ./nptl/futex-internal.c:139
+#3  0x0000ff29bdd25140 in __pthread_cond_wait_common (abstime=..., clockid=..., mutex=..., cond=...) at ./nptl/pthread_cond_wait.c:503
+#4  ___pthread_cond_clockwait64 (abstime=..., clockid=..., mutex=..., cond=...) at ./nptl/pthread_cond_wait.c:691
+#5  ___pthread_cond_clockwait64 (cond=..., mutex=..., clockid=..., abstime=...) at ./nptl/pthread_cond_wait.c:679
+#6  0x0000c2256afe4a38 in std::__condvar::wait_until (__abs_time=..., __clock=..., __m=..., this=...) at /usr/include/c++/13/bits/std_mutex.h:137
+#7  std::condition_variable::__wait_until_impl<std::chrono::duration<long, std::ratio<1l, 1000000000l> > > (__lock=..., __atime=..., this=...) at /usr/include/c++/13/condition_variable:203
+#8  std::condition_variable::wait_until<std::chrono::duration<long, std::ratio<1l, 1000000000l> > > (__atime=..., __lock=..., this=...) at /usr/include/c++/13/condition_variable:113
+#9  std::condition_variable::wait_until<std::chrono::_V2::steady_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l> >, Worker::connect_media(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)::{lambda()#1}::operator()() const::{lambda()#1}>(std::unique_lock<std::mutex>&, std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long, std::ratio<1l, 1000000000l> > > const&, Worker::connect_media(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)::{lambda()#1}::operator()() const::{lambda()#1}) (__p=..., __atime=..., __lock=..., this=...) at /usr/include/c++/13/condition_variable:154
+#10 std::condition_variable::wait_for<long, std::ratio<1l, 1000l>, Worker::connect_media(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)::{lambda()#1}::operator()() const::{lambda()#1}>(std::unique_lock<std::mutex>&, std::chrono::duration<long, std::ratio<1l, 1000l> > const&, Worker::connect_media(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)::{lambda()#1}::operator()() const::{lambda()#1}) (__p=..., __rtime=..., __lock=..., this=...) at /usr/include/c++/13/condition_variable:177
+#11 Worker::connect_media(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)::{lambda()#1}::operator()() const (__closure=...) at /home/parallels/NeonMix/.local/t03u/apps/airplay-worker/main.cpp:145
+#12 0x0000ff29be031ae0 in ?? () from /lib/aarch64-linux-gnu/libstdc++.so.6
+#13 0x0000ff29bdd2595c [PAC] in start_thread (arg=...) at ./nptl/pthread_create.c:447
+#14 0x0000ff29bdd8ba4c in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:76
+
+Thread 1 (Thread 0xff29be9bd480 (LWP 615364) "neonmix-airplay"):
+#0  0x0000c2256aff225c in ed25519_key_get_raw (data=..., key=...) at /home/parallels/NeonMix/.local/t03u/.local/airplay/patched/lib/crypto.c:398
+#1  0x0000c2256aff5d40 in pairing_get_public_key (pairing=..., public_key=...) at /home/parallels/NeonMix/.local/t03u/.local/airplay/patched/lib/pairing.c:105
+#2  0x0000c2256afed7ec in raop_init2 (raop=..., nohold=..., device_id=..., keyfile=...) at /home/parallels/NeonMix/.local/t03u/.local/airplay/patched/lib/raop.c:726
+#3  0x0000c2256afd828c in main () at /usr/include/c++/13/bits/basic_string.h:222
+[Inferior 1 (process 615364) detached]

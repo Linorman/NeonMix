@@ -1,0 +1,148 @@
+{
+  "scope": "Actual current snapshot Windows desktop launch; SSH session limitations recorded",
+  "binary_sha256": "5b8e4fe26b1d2e04e82ffaf70a7e8c50b27ee7ea14db209db20d1d002452ed58",
+  "cases": {
+    "hub": {
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "sender": {
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "mixer": {
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "devices": {
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "diagnostics": {
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    },
+    "formal": {
+      "session_id": 0,
+      "windows": [
+        {
+          "visible": false,
+          "title": "NeonMix"
+        },
+        {
+          "visible": false,
+          "title": ""
+        },
+        {
+          "visible": false,
+          "title": "__wglDummyWindowFodder"
+        },
+        {
+          "visible": false,
+          "title": "NVOGLDC invisible"
+        },
+        {
+          "visible": false,
+          "title": ""
+        }
+      ],
+      "exit_before_cleanup": null,
+      "visible_window": false
+    }
+  }
+}

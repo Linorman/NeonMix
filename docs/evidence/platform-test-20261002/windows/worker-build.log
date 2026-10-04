@@ -1,0 +1,145 @@
+patching file lib/crypto.c
+patching file lib/crypto.h
+patching file lib/dnssd.h
+patching file lib/dnssdint.h
+patching file lib/fairplay_playfair.c
+patching file lib/http_request.c
+patching file lib/http_response.c
+patching file lib/http_response.h
+patching file lib/httpd.c
+patching file lib/httpd.h
+patching file lib/pairing.c
+patching file lib/raop.c
+patching file lib/raop.h
+patching file lib/raop_handlers.h
+patching file lib/raop_ntp.c
+patching file lib/raop_ntp.h
+patching file lib/raop_rtp.c
+patching file lib/stream.h
+patching file lib/raop_handlers.h
+patching file lib/raop_rtp.c
+-- The C compiler identification is GNU 15.2.0
+-- The CXX compiler identification is GNU 15.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/msys64/mingw64/bin/gcc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/msys64/mingw64/bin/g++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Looking for strndup
+-- Looking for strndup - not found
+-- Looking for strptime
+-- Looking for strptime - not found
+-- Looking for timegm
+-- Looking for timegm - not found
+-- Looking for gmtime_r
+-- Looking for gmtime_r - not found
+-- Looking for localtime_r
+-- Looking for localtime_r - not found
+-- Performing Test HAVE_TM_TM_GMTOFF
+-- Performing Test HAVE_TM_TM_GMTOFF - Failed
+-- Performing Test HAVE_TM_TM_ZONE
+-- Performing Test HAVE_TM_TM_ZONE - Failed
+-- Configuring done (5.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Desktop/NeonMix-test/.local/airplay/build
+[1/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/fairplay_playfair.c.obj
+[2/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/http_request.c.obj
+[3/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/crypto.c.obj
+[4/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/pairing.c.obj
+[5/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/compat.c.obj
+[6/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/byteutils.c.obj
+[7/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/logger.c.obj
+[8/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/netutils.c.obj
+[9/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/http_response.c.obj
+[10/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/httpd.c.obj
+[11/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/utils.c.obj
+[12/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/playfair/modified_md5.c.obj
+[13/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop_buffer.c.obj
+[14/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/playfair/playfair.c.obj
+[15/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/playfair/hand_garble.c.obj
+[16/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/llhttp/http.c.obj
+[17/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/playfair/sap_hash.c.obj
+[18/46] Building C object CMakeFiles/protocol.dir/disabled_media.c.obj
+[19/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/llhttp/api.c.obj
+[20/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop.c.obj
+[21/46] Building C object CMakeFiles/protocol.dir/speaker_profile.c.obj
+[22/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/libcnary/node.c.obj
+[23/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/libcnary/node_list.c.obj
+[24/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/base64.c.obj
+[25/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/playfair/omg_hax.c.obj
+[26/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/bytearray.c.obj
+[27/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/hashtable.c.obj
+[28/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop_ntp.c.obj
+[29/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop_rtp.c.obj
+[30/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/jsmn.c.obj
+[31/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/srp.c.obj
+[32/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/bplist.c.obj
+[33/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/ptrarray.c.obj
+[34/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/out-limd.c.obj
+[35/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/out-default.c.obj
+[36/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/jplist.c.obj
+[37/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/oplist.c.obj
+[38/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/out-plutil.c.obj
+[39/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/time64.c.obj
+[40/46] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/llhttp/llhttp.c.obj
+[41/46] Linking C static library libprotocol.a
+[42/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/xplist.c.obj
+[43/46] Building C object CMakeFiles/plist.dir/E_/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/src/plist.c.obj
+[44/46] Linking C static library libplist.a
+[45/46] Building CXX object CMakeFiles/neonmix-airplay-worker.dir/main.cpp.obj
+FAILED: CMakeFiles/neonmix-airplay-worker.dir/main.cpp.obj 
+C:\msys64\mingw64\bin\g++.exe -DLIBPLIST_STATIC -DNEONMIX_AUDIO_PLUGIN_DIR=\"E:/Desktop/NeonMix-test/.local/airplay/plugins\" -DNEONMIX_AUDIO_REGISTRY=\"E:/Desktop/NeonMix-test/.local/airplay/registry.bin\" -DNOMINMAX -DWIN32 -D_WIN32 -D_WIN32_WINNT=0x0602 -IE:/Desktop/NeonMix-test/.local/gstreamer-windows/extracted/PFiles64/gstreamer/1.0/msvc_x86_64/include/gstreamer-1.0 -IE:/Desktop/NeonMix-test/.local/gstreamer-windows/extracted/PFiles64/gstreamer/1.0/msvc_x86_64/include/glib-2.0 -IE:/Desktop/NeonMix-test/.local/gstreamer-windows/extracted/PFiles64/gstreamer/1.0/msvc_x86_64/lib/glib-2.0/include -IE:/Desktop/NeonMix-test/.local/airplay/patched/lib -IE:/Desktop/NeonMix-test/.local/airplay/patched/lib/playfair -IE:/Desktop/NeonMix-test/.local/airplay/patched/lib/llhttp -IE:/Desktop/NeonMix-test/.local/airplay/src/libplist-2.6.0/include -IE:/Desktop/NeonMix-test/.local/gstreamer-windows/extracted/PFiles64/gstreamer/1.0/msvc_x86_64/include -O3 -DNDEBUG -std=gnu++17 -MD -MT CMakeFiles/neonmix-airplay-worker.dir/main.cpp.obj -MF CMakeFiles\neonmix-airplay-worker.dir\main.cpp.obj.d -o CMakeFiles/neonmix-airplay-worker.dir/main.cpp.obj -c E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp
+E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp:62:63: error: 'bool boolean(plist_t, const char*, bool)' redeclared as different kind of entity
+   62 | static bool boolean(plist_t p,const char*k,bool fallback=false) {
+      |                                                               ^
+In file included from C:/msys64/mingw64/include/wtypes.h:8,
+                 from C:/msys64/mingw64/include/winscard.h:10,
+                 from C:/msys64/mingw64/include/windows.h:97,
+                 from C:/msys64/mingw64/include/winsock2.h:23,
+                 from E:/Desktop/NeonMix-test/apps/airplay-worker/platform.h:17,
+                 from E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp:3:
+C:/msys64/mingw64/include/rpcndr.h:95:25: note: previous declaration 'typedef unsigned char boolean'
+   95 |   typedef unsigned char boolean;
+      |                         ^~~~~~~
+E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp: In member function 'void Worker::command(plist_t)':
+E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp:246:172: error: expression list treated as compound expression in functional cast [-fpermissive]
+  246 |         else if(type=="admit"){std::lock_guard<std::mutex>l(state_mutex);if(admission_pending && number(p,"request_id")==admission_id){admission_answer=boolean(p,"allowed");admission_pending=false;admission_cv.notify_all();}}
+      |                                                                                                                                                                            ^
+E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp:246:153: error: cast from 'const char*' to 'boolean' {aka 'unsigned char'} loses precision [-fpermissive]
+  246 |         else if(type=="admit"){std::lock_guard<std::mutex>l(state_mutex);if(admission_pending && number(p,"request_id")==admission_id){admission_answer=boolean(p,"allowed");admission_pending=false;admission_cv.notify_all();}}
+      |                                                                                                                                                         ^~~~~~~~~~~~~~~~~~~~
+E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp: In function 'int main()':
+E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp:282:271: error: expression list treated as compound expression in functional cast [-fpermissive]
+  282 |         worker.known=keyset(config,"known_client_keys");worker.blocked=keyset(config,"blocked_client_keys");if(worker.known.size()+worker.blocked.size()>64)throw std::runtime_error("client key limit exceeded");worker.pairing_enabled=boolean(config,"pairing_allowed",true);worker.protocol_trace_enabled=boolean(config,"protocol_trace",false);worker.pin_deadline=Clock::now()+std::chrono::minutes(10);
+      |                                                                                                                                                                                                                                                                               ^
+E:/Desktop/NeonMix-test/apps/airplay-worker/main.cpp:282:340: error: expression list treated as compound expression in functional cast [-fpermissive]
+  282 |         worker.known=keyset(config,"known_client_keys");worker.blocked=keyset(config,"blocked_client_keys");if(worker.known.size()+worker.blocked.size()>64)throw std::runtime_error("client key limit exceeded");worker.pairing_enabled=boolean(config,"pairing_allowed",true);worker.protocol_trace_enabled=boolean(config,"protocol_trace",false);worker.pin_deadline=Clock::now()+std::chrono::minutes(10);
+      |                                                                                                                                                                                                                                                                                                                                                    ^
+ninja: build stopped: subcommand failed.
+Traceback (most recent call last):
+  File "E:\Desktop\NeonMix-test\tools\prepare_airplay.py", line 135, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "E:\Desktop\NeonMix-test\tools\prepare_airplay.py", line 126, in main
+    subprocess.run(['cmake','--build',str(args.build_dir),'--parallel','8'],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['cmake', '--build', 'E:\\Desktop\\NeonMix-test\\.local\\airplay\\build', '--parallel', '8']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "E:\Desktop\NeonMix-test\prepare-worker.py", line 6, in <module>
+    subprocess.run([sys.executable,'tools/prepare_airplay.py','--gst-prefix',prefix,'--cmake-arg=-G','--cmake-arg=Ninja','--cmake-arg=-DCMAKE_C_COMPILER=C:/msys64/mingw64/bin/gcc.exe','--cmake-arg=-DCMAKE_CXX_COMPILER=C:/msys64/mingw64/bin/g++.exe'],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'tools/prepare_airplay.py', '--gst-prefix', 'E:\\Desktop\\NeonMix-test\\.local\\gstreamer-windows\\extracted\\PFiles64\\gstreamer\\1.0\\msvc_x86_64', '--cmake-arg=-G', '--cmake-arg=Ninja', '--cmake-arg=-DCMAKE_C_COMPILER=C:/msys64/mingw64/bin/gcc.exe', '--cmake-arg=-DCMAKE_CXX_COMPILER=C:/msys64/mingw64/bin/g++.exe']' returned non-zero exit status 1.

@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 180, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 97, in main
+    app.press("添加虚拟输出")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 49, in press
+    click_native_button(self, label)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_visual_probe.py", line 87, in click_native_button
+    raise RuntimeError("No enabled visible button: " + label)
+RuntimeError: No enabled visible button: 添加虚拟输出

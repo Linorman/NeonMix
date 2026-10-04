@@ -1,0 +1,16 @@
+{"elapsed_seconds": 0.0, "output_frames": 149504, "underrun_frames": 0, "rss_kib": 42464}
+{"elapsed_seconds": 30.16, "output_frames": 1597184, "underrun_frames": 0, "rss_kib": 42608}
+{"elapsed_seconds": 60.2, "output_frames": 3038976, "underrun_frames": 0, "rss_kib": 42656}
+{"elapsed_seconds": 90.11, "output_frames": 4474880, "underrun_frames": 0, "rss_kib": 42656}
+{"elapsed_seconds": 120.12, "output_frames": 5915136, "underrun_frames": 0, "rss_kib": 35680}
+{"elapsed_seconds": 150.13, "output_frames": 7355648, "underrun_frames": 0, "rss_kib": 35776}
+{"elapsed_seconds": 180.03, "output_frames": 8790784, "underrun_frames": 0, "rss_kib": 35808}
+{"elapsed_seconds": 210.02, "output_frames": 10230528, "underrun_frames": 0, "rss_kib": 35872}
+{"elapsed_seconds": 240.09, "output_frames": 11673856, "underrun_frames": 0, "rss_kib": 35824}
+{"elapsed_seconds": 270.05, "output_frames": 13111808, "underrun_frames": 0, "rss_kib": 35824}
+{"elapsed_seconds": 300.17, "output_frames": 14557696, "underrun_frames": 0, "rss_kib": 35888}
+{
+  "passed": true,
+  "evidence": "/Volumes/projects-mac/NeonMix/artifacts/hub-soak/20261001-133007",
+  "error": null
+}

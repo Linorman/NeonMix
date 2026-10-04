@@ -1,0 +1,291 @@
+[
+  {
+    "exit_code": 0,
+    "name": "media-credentials",
+    "command": [
+      "python",
+      "runtime.py"
+    ],
+    "seconds": 13.58
+  },
+  {
+    "exit_code": 0,
+    "name": "credential-locale",
+    "command": [
+      "python",
+      "credential-locale.py"
+    ],
+    "seconds": 0.69
+  },
+  {
+    "exit_code": 0,
+    "name": "native-enumeration",
+    "command": [
+      "target/release/neonmix-audio.exe",
+      "devices"
+    ],
+    "seconds": 0.29
+  },
+  {
+    "exit_code": 0,
+    "name": "native-tone",
+    "command": [
+      "target/release/neonmix-audio.exe",
+      "play",
+      "--device",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--seconds",
+      "3"
+    ],
+    "seconds": 3.08
+  },
+  {
+    "exit_code": 1,
+    "name": "mix-4plus0",
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "4",
+      "--native-sources",
+      "0",
+      "--fault-cycles",
+      "2",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\mix-4plus0.json"
+    ],
+    "seconds": 55.72
+  },
+  {
+    "exit_code": 0,
+    "name": "mix-3plus1",
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1",
+      "--fault-cycles",
+      "1",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "20",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\mix-3plus1.json"
+    ],
+    "seconds": 38.78
+  },
+  {
+    "exit_code": 0,
+    "name": "mix-2plus2",
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2",
+      "--fault-cycles",
+      "1",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "20",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\mix-2plus2.json"
+    ],
+    "seconds": 33.82
+  },
+  {
+    "exit_code": 0,
+    "name": "mix-1plus3",
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3",
+      "--fault-cycles",
+      "1",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "20",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\mix-1plus3.json"
+    ],
+    "seconds": 27.61
+  },
+  {
+    "exit_code": 0,
+    "name": "mix-0plus4",
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--fault-cycles",
+      "1",
+      "--status-readers",
+      "0",
+      "--steady-seconds",
+      "60",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\mix-0plus4.json"
+    ],
+    "seconds": 62.1
+  },
+  {
+    "exit_code": 0,
+    "name": "mix-control",
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "2",
+      "--scenario",
+      "mix-control",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\mix-control.json"
+    ],
+    "seconds": 7.41
+  },
+  {
+    "exit_code": 0,
+    "name": "management",
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "2",
+      "--scenario",
+      "management",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\management.json"
+    ],
+    "seconds": 8.43
+  },
+  {
+    "exit_code": 0,
+    "name": "single-pcm",
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\single-pcm.json"
+    ],
+    "seconds": 8.44
+  },
+  {
+    "exit_code": 0,
+    "name": "single-alac",
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\single-alac.json"
+    ],
+    "seconds": 8.85
+  },
+  {
+    "exit_code": 0,
+    "name": "background-full",
+    "command": [
+      "python",
+      "native-background-harness.py",
+      "--release",
+      "--listen-port",
+      "7443",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--evidence",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\background-full.json"
+    ],
+    "seconds": 13.66
+  },
+  {
+    "exit_code": 0,
+    "name": "single-sync",
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--codec",
+      "pcm",
+      "--playback-mode",
+      "synchronized",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\runs\\v20261003-1241\\artifacts\\platform-validation-20261003-1241\\windows\\single-sync.json"
+    ],
+    "seconds": 7.61
+  },
+  {
+    "exit_code": 0,
+    "name": "gui",
+    "command": [
+      "python",
+      "gui.py"
+    ],
+    "seconds": 48.52
+  }
+]

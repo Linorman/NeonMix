@@ -1,0 +1,65 @@
+[  2%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/libcnary/node.c.o
+[  4%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/byteutils.c.o
+[  8%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/compat.c.o
+[  8%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/libcnary/node_list.c.o
+[ 10%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/crypto.c.o
+[ 13%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/base64.c.o
+[ 15%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/bplist.c.o
+[ 17%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/fairplay_playfair.c.o
+[ 19%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/bytearray.c.o
+[ 21%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/http_request.c.o
+[ 23%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/hashtable.c.o
+[ 26%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/http_response.c.o
+[ 28%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/jplist.c.o
+[ 30%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/httpd.c.o
+[ 32%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/jsmn.c.o
+[ 34%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/oplist.c.o
+[ 36%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/logger.c.o
+[ 39%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/netutils.c.o
+[ 41%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/pairing.c.o
+[ 43%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/out-default.c.o
+[ 45%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/raop.c.o
+[ 47%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/out-limd.c.o
+[ 50%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/out-plutil.c.o
+[ 52%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/plist.c.o
+[ 54%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/raop_buffer.c.o
+[ 56%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/raop_ntp.c.o
+[ 58%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/raop_rtp.c.o
+[ 60%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/ptrarray.c.o
+[ 63%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/time64.c.o
+[ 65%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/srp.c.o
+[ 67%] Building C object CMakeFiles/plist.dir/Volumes/projects-mac/NeonMix/.local/airplay/src/libplist-2.6.0/src/xplist.c.o
+[ 69%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/utils.c.o
+[ 71%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/playfair/hand_garble.c.o
+[ 73%] Linking C static library libplist.a
+[ 76%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/playfair/modified_md5.c.o
+[ 76%] Built target plist
+[ 78%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/playfair/omg_hax.c.o
+[ 80%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/playfair/playfair.c.o
+[ 82%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/playfair/sap_hash.c.o
+[ 84%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/llhttp/api.c.o
+[ 86%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/llhttp/http.c.o
+[ 89%] Building C object CMakeFiles/protocol.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/llhttp/llhttp.c.o
+[ 91%] Building C object CMakeFiles/protocol.dir/disabled_media.c.o
+[ 93%] Building C object CMakeFiles/protocol.dir/speaker_profile.c.o
+[ 95%] Linking C static library libprotocol.a
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-worker.dir/main.cpp.o
+[100%] Linking CXX executable neonmix-airplay-worker
+[100%] Built target neonmix-airplay-worker
+[ 60%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-audio-probe.dir/audio_probe.cpp.o
+[100%] Linking CXX executable neonmix-airplay-audio-probe
+[100%] Built target neonmix-airplay-audio-probe
+[ 57%] Built target protocol
+[ 93%] Built target plist
+[ 95%] Building C object CMakeFiles/neonmix-airplay-probe-crypto.dir/crypto_probe.c.o
+[ 97%] Building C object CMakeFiles/neonmix-airplay-probe-crypto.dir/Volumes/projects-mac/NeonMix/.local/airplay/patched/lib/crypto.c.o
+[100%] Linking C shared library libneonmix-airplay-probe-crypto.dylib
+[100%] Built target neonmix-airplay-probe-crypto
+[ 69%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building C object CMakeFiles/neonmix-airplay-identity-probe.dir/identity_probe.c.o
+[100%] Linking C executable neonmix-airplay-identity-probe
+[100%] Built target neonmix-airplay-identity-probe

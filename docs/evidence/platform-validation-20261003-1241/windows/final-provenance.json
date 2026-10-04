@@ -1,0 +1,18 @@
+{
+  "files": 519,
+  "mismatches": [],
+  "canonical_manifest_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+  "source_archive_sha256": "c47b1f27c16b9e84f90c28fb09ea394d3ad9690b91d19ccd24b56477811aacc0",
+  "binaries": {
+    "target\\release\\neonmix-airplay-profile.exe": "a22e5e4c2ddf0699f53ae651623819ad430336a1faf8e9d99095dd7613ba8a2d",
+    "target\\release\\neonmix-airplay-worker.exe": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0",
+    "target\\release\\neonmix-audio.exe": "b45a2526c3a1195d16f91ea41cb7f09a8ba622ca08650fcdfbf6c2f08896ef88",
+    "target\\release\\neonmix-background.exe": "8891f4d814c47f571009203b2980f4b080e6dddcffa96f6d2c4b48077e4e70df",
+    "target\\release\\neonmix-desktop.exe": "0d1d4ee0eb6642c138817b95d605736b276fee0bfd60aef41a4ca24230c894ac",
+    "target\\release\\neonmix-hub.exe": "3fc568925907cb42670214843ec14dc838a3796f87d70a9db78ac0bfc6447e6c",
+    ".local\\airplay\\build\\neonmix-airplay-audio-probe.exe": "0c452525ce84e29b00fba898b4262bb3ffa564ba79a3f78f413e2606bd28bb5c",
+    ".local\\airplay\\build\\neonmix-airplay-identity-probe.exe": "892fafbaaa1cb8db289cb6e2120500fe6016608ca78cd76154279c7d9107723b",
+    ".local\\airplay\\build\\neonmix-airplay-worker.exe": "d2dda17cebc05846cb56372f673f0b18a7020ceccc3a080d4b0bc97fe898a6b0",
+    ".local\\airplay\\build\\libneonmix-airplay-probe-crypto.dll": "3e0fd82eb79a12a2560d1aad5ab41dc7eaa95434effee18d94cea813d9849926"
+  }
+}

@@ -1,0 +1,277 @@
+[
+  {
+    "passed": true,
+    "sources": 4,
+    "native_sources": 0,
+    "fault_cycles": 3,
+    "status_reads": {
+      "readers": 4,
+      "successful": 31819,
+      "errors": 0
+    },
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_process_stopped": true,
+    "native_processes_stopped": true,
+    "fixture_files_removed": true,
+    "name": "final-four-contention",
+    "fault_observations": 24,
+    "recoveries": 24,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "same_source_simultaneous_cross_receiver_has_one_owner": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    }
+  },
+  {
+    "passed": true,
+    "sources": 2,
+    "native_sources": 2,
+    "fault_cycles": 2,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_process_stopped": true,
+    "native_processes_stopped": true,
+    "fixture_files_removed": true,
+    "name": "mix-2plus2",
+    "fault_observations": 8,
+    "recoveries": 8,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "same_source_simultaneous_cross_receiver_has_one_owner": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    }
+  },
+  {
+    "passed": true,
+    "sources": 3,
+    "native_sources": 1,
+    "fault_cycles": 1,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_process_stopped": true,
+    "native_processes_stopped": true,
+    "fixture_files_removed": true,
+    "name": "mix-3plus1",
+    "fault_observations": 6,
+    "recoveries": 6,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "same_source_simultaneous_cross_receiver_has_one_owner": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    }
+  },
+  {
+    "passed": true,
+    "sources": 1,
+    "native_sources": 3,
+    "fault_cycles": 1,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_process_stopped": true,
+    "native_processes_stopped": true,
+    "fixture_files_removed": true,
+    "name": "mix-1plus3",
+    "fault_observations": 2,
+    "recoveries": 2,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    }
+  },
+  {
+    "passed": true,
+    "sources": 0,
+    "native_sources": 4,
+    "fault_cycles": 1,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_process_stopped": true,
+    "native_processes_stopped": true,
+    "fixture_files_removed": true,
+    "name": "mix-0plus4",
+    "fault_observations": 0,
+    "recoveries": 0,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    }
+  },
+  {
+    "passed": true,
+    "sources": 2,
+    "native_sources": 0,
+    "fault_cycles": 1,
+    "status_reads": {
+      "readers": 4,
+      "successful": 1312,
+      "errors": 0
+    },
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_process_stopped": true,
+    "native_processes_stopped": true,
+    "fixture_files_removed": true,
+    "name": "mix-control",
+    "fault_observations": 0,
+    "recoveries": 0,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "targeted_gain_mute_single_solo_multi_solo_and_clear": true,
+      "gain_mute_persist_and_solo_clears_on_same_source_reconnect": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    }
+  },
+  {
+    "passed": true,
+    "sources": 2,
+    "native_sources": 0,
+    "fault_cycles": 1,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_process_stopped": true,
+    "native_processes_stopped": true,
+    "fixture_files_removed": true,
+    "name": "management",
+    "fault_observations": 0,
+    "recoveries": 0,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "live_configure_idle_entries_preserves_active_sessions": true,
+      "multi_receiver_v1_requires_upgrade": true,
+      "revoke_global_and_allow_cannot_restore_pairing": true,
+      "explicit_repair_requires_new_pin_and_preserves_same_source_identity": true,
+      "independent_playback_mode_does_not_reset_other_source": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    }
+  },
+  {
+    "passed": true,
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_files_removed": true,
+    "name": "single-pcm",
+    "fault_observations": 0,
+    "recoveries": 0,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "playback_mode_admin_permission_and_persistence": true,
+      "receiver_key_and_trust_survive_worker_restart": true,
+      "room_source_identity_visible_without_control_credentials": true,
+      "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+      "same_session_pause_resume_without_route_reselection": true,
+      "steady_timing_without_new_late_packets_or_skipped_samples": true,
+      "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+      "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+      "worker_kill_clears_airplay_and_preserves_native_audio": true
+    }
+  },
+  {
+    "passed": true,
+    "binary_sha256": {
+      "neonmix-hub": "ebe9e621c5e099ad99cbbdcdfa2113416d1922c2a21f7f406fdbdc7284009add",
+      "neonmix-airplay-worker": "3d581b37cba73cefff68d219a5720f36c80f4c6401711a02855e106981f69640"
+    },
+    "fixture_files_removed": true,
+    "name": "single-alac",
+    "fault_observations": 0,
+    "recoveries": 0,
+    "nonzero_continuity": [],
+    "scenarios": {
+      "playback_mode_admin_permission_and_persistence": true,
+      "receiver_key_and_trust_survive_worker_restart": true,
+      "room_source_identity_visible_without_control_credentials": true,
+      "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+      "same_session_pause_resume_without_route_reselection": true,
+      "steady_timing_without_new_late_packets_or_skipped_samples": true,
+      "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+      "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+      "worker_kill_clears_airplay_and_preserves_native_audio": true
+    }
+  }
+]

@@ -1,0 +1,116 @@
+{
+  "passed": true,
+  "platform": "darwin",
+  "scope": "macOS local functional E05; no Windows/Linux runtime or cross-machine performance claim",
+  "binary_sha256": "a631296869a4f3ec5afb5aecc0370fb40056a1ccc621b2beb4798053afbb19a7",
+  "scenarios": {
+    "native_vault_write_read_delete": true,
+    "same_name_candidates": [
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:53555",
+            "url": "https://10.11.11.147:53555"
+          },
+          {
+            "address": "10.211.55.2:53555",
+            "url": "https://10.211.55.2:53555"
+          },
+          {
+            "address": "10.254.101.147:53555",
+            "url": "https://10.254.101.147:53555"
+          },
+          {
+            "address": "10.37.129.2:53555",
+            "url": "https://10.37.129.2:53555"
+          },
+          {
+            "address": "127.0.0.1:53555",
+            "url": "https://127.0.0.1:53555"
+          },
+          {
+            "address": "192.168.100.111:53555",
+            "url": "https://192.168.100.111:53555"
+          },
+          {
+            "address": "192.168.100.208:53555",
+            "url": "https://192.168.100.208:53555"
+          }
+        ],
+        "hub_id": "0eabd863-88b7-4fe7-a18a-17796b3d677c",
+        "instance": "NeonMix-0eabd86388b74fe7a18a17796b3d677c-b5e91ba6619f._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      },
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "127.0.0.1:53556",
+            "url": "https://127.0.0.1:53556"
+          }
+        ],
+        "hub_id": "3f61551c-505a-49bf-b9b3-6d68d8b347f0",
+        "instance": "NeonMix-3f61551c505a49bfb9b36d68d8b347f0-df379cd6831f._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      }
+    ],
+    "automatic_pair_and_repeat_native_profile": {
+      "credential": "/Volumes/projects-mac/NeonMix/.local/tmp/e05-r0bxgzyc/sender.json",
+      "credential_store": "platform",
+      "device_id": "979221d0-8207-4318-a5a1-b782180a0529",
+      "event": "paired",
+      "hub_id": "0eabd863-88b7-4fe7-a18a-17796b3d677c"
+    },
+    "unpaired_and_wrong_certificate_rejected": {
+      "http": 401,
+      "client_error": "error sending request for url (https://127.0.0.1:53556/v1/identity)"
+    },
+    "changed_key_rejected_and_duplicate_identity_candidates": {
+      "client_error": "error sending request for url (https://127.0.0.1:53556/v1/identity)",
+      "instances": [
+        "NeonMix-0eabd86388b74fe7a18a17796b3d677c-b5e91ba6619f._neonmix._tcp.local.",
+        "NeonMix-0eabd86388b74fe7a18a17796b3d677c-df379cd6831f._neonmix._tcp.local."
+      ]
+    },
+    "same_certificate_foreign_hub_uuid_rejected": "authenticated Hub UUID differs from paired identity",
+    "single_use_exact_retry": {
+      "hub_id": "0eabd863-88b7-4fe7-a18a-17796b3d677c",
+      "device_id": "3a387064-dab2-48e0-bec0-93ff000fb564",
+      "revision": 4
+    },
+    "actual_rename_failure_is_atomic_and_grant_retryable": true,
+    "cancel_and_client_server_expiry": true,
+    "revoke_control_and_active_protected_media": {
+      "pcm_before": 48960,
+      "sender_exit": 1,
+      "watch_exit": 1
+    },
+    "goodbye_address_change_persistent_trust_revocation_and_grant_expiry": {
+      "old_port": 53555,
+      "new_port": 53647,
+      "stable_hub_id": "0eabd863-88b7-4fe7-a18a-17796b3d677c"
+    },
+    "lost_response_local_recovery": true,
+    "missing_vault_secret_fails_closed": true,
+    "ipv6_discovery_media_and_wss_address_recovery": {
+      "media_frames": 54720,
+      "subscriptions": 2
+    },
+    "real_link_local_scope_https_wss_and_protected_media": {
+      "interface": "en0",
+      "scope": 18,
+      "media_frames": 105600
+    },
+    "abrupt_offline_active_verification": true,
+    "product_default_listen_is_discoverable_lan": true
+  },
+  "pairing_seconds_single_sample": 0.776,
+  "cleanup": {
+    "platform_entries_attempted": 8,
+    "failed": [],
+    "temporary_profiles_removed": true
+  }
+}

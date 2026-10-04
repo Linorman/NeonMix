@@ -1,0 +1,28 @@
+{
+  "verified_epoch": 1791010203.180037,
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "commands": {
+    "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A5416b\n",
+    "rustc --version": "rustc 1.95.0 (59807616e 2026-04-14)\n",
+    "cargo --version": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)\n",
+    "cmake --version": "cmake version 4.2.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\n"
+  },
+  "fixture_output": "coreaudio:BlackHole2ch_UID",
+  "source_snapshot": "519 files canonical SHA256 53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+  "preexisting_pids": [
+    81271,
+    98624,
+    98625,
+    98648
+  ],
+  "cpu_policy": "1Hz whole-host observation only; no caps or admission threshold; Mac exclusive test window after Ubuntu new-round finish and cleanup",
+  "cargo_jobs": 2,
+  "environment": {
+    "CARGO_HOME": "/Volumes/projects-mac/NeonMix/.local/tm3/.local/cargo",
+    "CARGO_TARGET_DIR": "/Volumes/projects-mac/NeonMix/.local/tm3/target",
+    "TMPDIR": "/Volumes/projects-mac/NeonMix/.local/tm3/.local/tmp",
+    "PKG_CONFIG_PATH": "/Volumes/projects-mac/NeonMix/.local/tm3/.local/gstreamer/pkgconfig",
+    "GST_PLUGIN_SYSTEM_PATH_1_0": "/Volumes/projects-mac/NeonMix/.local/tm3/.local/gstreamer/plugins"
+  }
+}

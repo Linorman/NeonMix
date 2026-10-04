@@ -1,0 +1,28 @@
+{
+  "target": "ubuntu",
+  "endpoint": "https://192.168.100.112:7443",
+  "client_binary_sha256": "4d1c1ed97447951fc0b3e637924d72ae8dd6e4478ebdc202adbd4ae7deeab571",
+  "scope": "macOS synthetic -36dBFS native Sender to Ubuntu LAN Hub",
+  "checks": {
+    "pair_exit_code": 0,
+    "snapshot_exit_code": 0,
+    "diagnostics_exit_code": 0,
+    "send_exit_code": 0
+  },
+  "functional_connection_passed": true,
+  "quality_passed": false,
+  "quality_at_10_seconds": {
+    "session_status": [
+      "network_degraded"
+    ],
+    "underrun_frames": 8640,
+    "output_errors": 0,
+    "output_peak": 0.003963042050600052,
+    "receiver_lost_packets": [
+      65
+    ],
+    "receiver_pcm_sink_dropped": [
+      1
+    ]
+  }
+}

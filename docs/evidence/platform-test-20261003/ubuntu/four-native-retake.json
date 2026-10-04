@@ -1,0 +1,191 @@
+{
+  "scenario": "mix",
+  "platform": "Linux",
+  "os_version": "6.14.0-27-generic",
+  "architecture": "aarch64",
+  "build_profile": "release",
+  "sources": 0,
+  "native_sources": 1,
+  "output_device": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+  "scope": "Linux v2 1/2/4 entry lifecycle with one native tone; no AirPlay digital source started",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "62b1aa415841407f45ebe2c7cd9aedb3f56ba9201b12eb330e2c623a44a983c4",
+    "neonmix-airplay-worker": "1ee873f18102d6f4ca78fc4baacbf2e8ba1c6b8166b3e25f640b753cf863ae79"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "faf1f0251c0727c56ffa82bd2caf72abece8290e415ca399704d6cb0a06d5b05",
+  "steady_seconds": 11,
+  "airplay_frequencies_hz": [],
+  "native_frequencies_hz": [
+    809
+  ],
+  "passed": false,
+  "scenarios": {},
+  "isolation_checks": [],
+  "entry_lifecycle": [
+    {
+      "receiver_count": 4,
+      "configured_count": 4,
+      "receivers": [
+        {
+          "enabled": false,
+          "ready": false,
+          "active": false,
+          "error": "worker_failed",
+          "failure_stage": "worker_exit"
+        },
+        {
+          "enabled": false,
+          "ready": false,
+          "active": false,
+          "error": "worker_failed",
+          "failure_stage": "worker_exit"
+        },
+        {
+          "enabled": false,
+          "ready": false,
+          "active": false,
+          "error": "worker_failed",
+          "failure_stage": "worker_exit"
+        },
+        {
+          "enabled": false,
+          "ready": false,
+          "active": false,
+          "error": "worker_failed",
+          "failure_stage": "worker_exit"
+        }
+      ],
+      "hub_running": true,
+      "native_running": true,
+      "output_frames_delta": 1160192,
+      "output_errors": 0,
+      "native_nonzero_meter": true,
+      "all_disabled": true,
+      "native_requested_seconds": 600,
+      "native_exit_codes_before_cleanup": [
+        null
+      ],
+      "timeline": [
+        {
+          "seconds": 2,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 227328,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 4,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 323584,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 6,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 420864,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 8,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 517120,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 10,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 613376,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 12,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 710656,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 14,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 807936,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 16,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 903840,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 18,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 999424,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 20,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 1096704,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 22,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 1192960,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        },
+        {
+          "seconds": 24,
+          "native_exit_codes": [
+            null
+          ],
+          "output_frames": 1289216,
+          "output_errors": 0,
+          "native_nonzero_meter": true
+        }
+      ]
+    }
+  ],
+  "global_disable": true,
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

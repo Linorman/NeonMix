@@ -1,0 +1,11 @@
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cpal` (lib) generated 1 warning
+    Checking neonmix-desktop-service v0.1.0 (C:\Users\linorman\NeonMix-test-20261001\crates\desktop-service)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.03s

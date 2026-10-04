@@ -1,0 +1,150 @@
+{
+  "platform": "Windows-2025Server-10.0.26100-SP0",
+  "machine": "AMD64",
+  "source_commit": "67c3cc68536e4647bde3b70d7a59d4a89cb78330",
+  "scenarios": {
+    "credential-manager": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "neonmix-identity",
+        "--test",
+        "native_vault",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "seconds": 31.172
+    },
+    "named-pipe": {
+      "passed": true,
+      "exit_code": 0,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "neonmix-desktop-service",
+        "--test",
+        "windows_native_ipc",
+        "--",
+        "--nocapture"
+      ],
+      "seconds": 48.531
+    },
+    "wasapi-devices": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "devices"
+      ],
+      "seconds": 0.0
+    },
+    "media-runtime": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "runtime"
+      ],
+      "seconds": 0.0
+    },
+    "media-dual": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "probe",
+        "--seconds",
+        "5",
+        "--streams",
+        "2"
+      ],
+      "seconds": 0.0
+    },
+    "media-loss-replay": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "probe",
+        "--seconds",
+        "5",
+        "--streams",
+        "1",
+        "--drop-every",
+        "17",
+        "--replay"
+      ],
+      "seconds": 0.0
+    },
+    "media-reject": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-hub.exe",
+        "probe",
+        "--seconds",
+        "2",
+        "--streams",
+        "1",
+        "--wrong-fingerprint"
+      ],
+      "seconds": 0.0
+    },
+    "simulate-44100": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "simulate",
+        "--input-rate",
+        "44100",
+        "--output-rate",
+        "48000"
+      ],
+      "seconds": 0.0
+    },
+    "simulate-48000": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "simulate",
+        "--input-rate",
+        "48000",
+        "--output-rate",
+        "48000"
+      ],
+      "seconds": 0.0
+    },
+    "simulate-96000": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified",
+      "command": [
+        "D:\\a\\NeonMix\\NeonMix\\target\\release\\neonmix-audio.exe",
+        "simulate",
+        "--input-rate",
+        "96000",
+        "--output-rate",
+        "48000"
+      ],
+      "seconds": 0.0
+    },
+    "desktop-pages": {
+      "passed": false,
+      "error": "[WinError 2] The system cannot find the file specified"
+    }
+  },
+  "limitations": {
+    "physical_audio_soak": "Not exercised without an explicitly selected physical endpoint.",
+    "driver_loading": "Unsigned CI build does not establish installation or kernel runtime.",
+    "gui": "Native window/render/startup/close smoke only; no interactive UX or screen-reader acceptance."
+  },
+  "passed": false
+}

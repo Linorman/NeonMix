@@ -1,0 +1,11 @@
+{
+  "scope": "first and last active diagnostic samples, not a packet capture",
+  "first_elapsed": 2.012,
+  "last_elapsed": 59.858,
+  "received_delta": 5783,
+  "highest_sequence_delta": 5783,
+  "lost_packets_last": 400,
+  "overflow_plc_last": 400,
+  "lost_minus_overflow_last": 0,
+  "note": "Equal received/sequence deltas support no authentication sequence gap across these endpoints; overflow PLC is a local diagnostic, not a measured physical-network loss count."
+}

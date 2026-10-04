@@ -1,0 +1,21 @@
+{
+  "directory": "/home/parallels/NeonMix/artifacts/packages/u26-20261004",
+  "archive": "/home/parallels/NeonMix/artifacts/packages/NeonMix-Ubuntu-ARM64-20261004.tar.gz",
+  "bytes": 126364060,
+  "sha256": "cba300f0886f033068ca90c9f8e9264352aa1566bf71f0aa81afb31b9d3ddd66",
+  "files": 1114,
+  "all_manifest_members_verified": true,
+  "no_runtime_state": true,
+  "no_symlinks": true,
+  "source_count": 522,
+  "main_runtime_required_programs": [
+    "neonmix-airplay-worker",
+    "neonmix-audio",
+    "neonmix-background",
+    "neonmix-desktop",
+    "neonmix-hub"
+  ],
+  "original_release_kept": true,
+  "old_packages_kept": true,
+  "free_bytes_after": 548716544
+}

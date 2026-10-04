@@ -1,0 +1,40 @@
+{
+  "format": {
+    "exit_code": 0,
+    "seconds": 0.249,
+    "command": [
+      "tools/dev",
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ]
+  },
+  "clippy": {
+    "exit_code": 0,
+    "seconds": 9.619,
+    "command": [
+      "tools/dev",
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ]
+  },
+  "workspace-tests": {
+    "exit_code": 0,
+    "seconds": 42.216,
+    "command": [
+      "tools/dev",
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked"
+    ]
+  }
+}

@@ -2,290 +2,57 @@
 //! one row per input with level, fader and latching Mute/Solo; details fold
 //! out per row. Rows that are not audible recede.
 use super::*;
+use crate::lanes::Lane;
 use crate::widgets::{FaderSize, Kind, Tone};
 use egui::{Align, CornerRadius, Layout, Margin, Stroke};
 
-struct Lane {
-    key: u64,
-    airplay_target: Option<(String, u64)>,
-    name: String,
-    role: Option<&'static str>,
-    status: &'static str,
-    tone: Tone,
-    gain: f32,
-    muted: bool,
-    solo: bool,
-    can_mix: bool,
-    can_solo: bool,
-    audible: bool,
-    peak: Option<f64>,
-    rms: Option<f64>,
-    device_id: Option<uuid::Uuid>,
-    queue_ms: Option<f64>,
-    drift_ppm: Option<f64>,
-    network: (&'static str, Option<Tone>),
-}
-
 impl Desktop {
-    fn lanes(&self, state: &Snapshot) -> Vec<Lane> {
-        let diag = self.diagnostics.as_ref();
-        let lane_index = |id: u64| {
-            diag.and_then(|d| d.get("lane_stream_ids")?.as_array().cloned())
-                .and_then(|ids| ids.iter().position(|v| v.as_u64() == Some(id)))
-        };
-        let meter = |id: u64| {
-            diag.and_then(|v| v.pointer("/meters/lanes"))
-                .and_then(Value::as_array)
-                .and_then(|lanes| lanes.iter().find(|v| v["stream_id"].as_u64() == Some(id)))
-                .map(|v| (v["peak"].as_f64(), v["rms"].as_f64()))
-                .unwrap_or((None, None))
-        };
-        let at =
-            |key: &str, index: Option<usize>| index.and_then(|i| diag?.get(key)?.get(i)?.as_f64());
-        let mine = self
-            .status
-            .as_ref()
-            .and_then(|s| s.profiles.iter().find(|p| p.credential == self.credential))
-            .and_then(|p| p.device_id);
-        let airplay_sessions = self.airplay_sessions();
-        let any_solo = state.streams.values().any(|s| s.mix.solo)
-            || airplay_sessions
-                .iter()
-                .any(|s| s.pointer("/mix/solo").and_then(Value::as_bool) == Some(true));
-        let mut streams: Vec<_> = state.streams.values().collect();
-        streams.sort_by_key(|s| s.id);
-        let mut lanes: Vec<Lane> = streams
-            .into_iter()
-            .map(|stream| {
-                let device = state.devices.get(&stream.device_id);
-                let session = state.sessions.get(&stream.session_id).map(|s| s.status);
-                let solo_elsewhere = any_solo && !stream.mix.solo;
-                let (status, tone) = if !state.output.available {
-                    ("输出丢失", Tone::Warning)
-                } else if stream.mix.muted {
-                    ("已静音", Tone::Warning)
-                } else if solo_elsewhere {
-                    ("因 Solo 静音", Tone::Warning)
-                } else {
-                    let tone = match session {
-                        Some(SessionStatus::Playing) => Tone::Success,
-                        Some(SessionStatus::Buffering) => Tone::Accent,
-                        Some(SessionStatus::NetworkDegraded) => Tone::Warning,
-                        Some(
-                            SessionStatus::NetworkInterrupted
-                            | SessionStatus::Revoked
-                            | SessionStatus::OutputLost
-                            | SessionStatus::AdminDisconnected,
-                        ) => Tone::Danger,
-                        _ => Tone::Neutral,
-                    };
-                    (status_text(session), tone)
-                };
-                let network = match session {
-                    Some(SessionStatus::Playing) => ("良好", Some(Tone::Success)),
-                    Some(SessionStatus::Buffering) => ("缓冲", None),
-                    Some(SessionStatus::NetworkDegraded) => ("降级", Some(Tone::Warning)),
-                    Some(SessionStatus::NetworkInterrupted) => ("中断", Some(Tone::Danger)),
-                    None => ("未取得", None),
-                    _ => ("已停止", None),
-                };
-                let (peak, rms) = meter(stream.id);
-                let index = lane_index(stream.id);
-                Lane {
-                    key: stream.id,
-                    airplay_target: None,
-                    name: device.map_or("未知设备".into(), |d| d.name.clone()),
-                    role: device.map(|d| role_name(d.role)),
-                    status,
-                    tone,
-                    gain: stream.mix.gain_db,
-                    muted: stream.mix.muted,
-                    solo: stream.mix.solo,
-                    can_mix: self.controls_room() || mine == Some(stream.device_id),
-                    can_solo: self.controls_room(),
-                    audible: state.output.available && !stream.mix.muted && !solo_elsewhere,
-                    peak,
-                    rms,
-                    device_id: Some(stream.device_id),
-                    queue_ms: at("queues", index).map(|f| f / 48.0),
-                    drift_ppm: at("drift_ppm", index),
-                    network,
-                }
-            })
-            .collect();
-        for airplay in &airplay_sessions {
-            let (Some(stream_id), Some(session_id), Some(source_id)) = (
-                airplay["stream_id"].as_u64(),
-                airplay["session_id"].as_u64(),
-                airplay["source_id"].as_str(),
-            ) else {
-                continue;
-            };
-            let mix = |k: &str| airplay.pointer(&format!("/mix/{k}"));
-            let muted = mix("muted").and_then(Value::as_bool).unwrap_or(false);
-            let solo = mix("solo").and_then(Value::as_bool).unwrap_or(false);
-            let solo_elsewhere = any_solo && !solo;
-            let (peak, rms) = meter(stream_id);
-            let index = lane_index(stream_id);
-            lanes.push(Lane {
-                key: stream_id,
-                airplay_target: Some((source_id.into(), session_id)),
-                name: airplay["source_name"]
-                    .as_str()
-                    .filter(|n| !n.trim().is_empty())
-                    .unwrap_or("AirPlay 来源")
-                    .to_owned(),
-                role: Some("AirPlay"),
-                status: if muted {
-                    "已静音"
-                } else if solo_elsewhere {
-                    "因 Solo 静音"
-                } else {
-                    "正在接收"
-                },
-                tone: if muted || solo_elsewhere {
-                    Tone::Warning
-                } else {
-                    Tone::Success
-                },
-                gain: mix("gain_db").and_then(Value::as_f64).unwrap_or(0.0) as f32,
-                muted,
-                solo,
-                can_mix: self.admin(),
-                can_solo: self.admin(),
-                audible: state.output.available && !muted && !solo_elsewhere,
-                peak,
-                rms,
-                device_id: None,
-                queue_ms: at("queues", index).map(|f| f / 48.0),
-                drift_ppm: at("drift_ppm", index),
-                network: ("AirPlay", None),
-            });
-        }
-        lanes
-    }
-
-    /// Mute/Solo for a lane by key, with a restorable inverse (palette and
-    /// keyboard reuse this).
-    pub(crate) fn lane_toggle(&mut self, key: u64, mute: Option<bool>, solo: Option<bool>) {
-        let Some(state) = self.snapshot.clone() else {
-            return;
-        };
-        let Some(lane) = self.lanes(&state).into_iter().find(|l| l.key == key) else {
-            return;
-        };
-        if (mute.is_some() && !lane.can_mix) || (solo.is_some() && !lane.can_solo) {
-            return;
-        }
-        let what = match (mute, solo) {
-            (Some(true), _) => "静音",
-            (Some(false), _) => "取消静音",
-            (_, Some(true)) => "Solo",
-            _ => "取消 Solo",
-        };
-        let label = format!("{what}「{}」", lane.name);
-        let (write, inverse) = if let Some((source_id, session_id)) = &lane.airplay_target {
-            let next = AirplayMix {
-                source_id: source_id.clone(),
-                session_id: *session_id,
-                gain_db: lane.gain,
-                muted: mute.unwrap_or(lane.muted),
-                solo: solo.unwrap_or(lane.solo),
-            };
-            let prev = AirplayMix {
-                source_id: source_id.clone(),
-                session_id: *session_id,
-                gain_db: lane.gain,
-                muted: lane.muted,
-                solo: lane.solo,
-            };
-            (next.write(), prev.write())
-        } else {
-            let op = |muted, solo| {
-                Write::Control(Operation::StreamMix {
-                    stream_id: key,
-                    gain_db: None,
-                    muted,
-                    solo,
-                })
-            };
-            (
-                op(mute, solo),
-                op(mute.map(|_| lane.muted), solo.map(|_| lane.solo)),
-            )
-        };
-        self.mix_change(label, write, inverse);
-    }
-
-    fn lane_gain(&mut self, lane: &Lane, gain: f32) {
-        let label = format!(
-            "「{}」音量 {} → {} dB",
-            lane.name,
-            widgets::gain_text(lane.gain),
-            widgets::gain_text(gain)
-        );
-        let (write, inverse) = if let Some((source_id, session_id)) = &lane.airplay_target {
-            let mix = |g| AirplayMix {
-                source_id: source_id.clone(),
-                session_id: *session_id,
-                gain_db: g,
-                muted: lane.muted,
-                solo: lane.solo,
-            };
-            (mix(gain).write(), mix(lane.gain).write())
-        } else {
-            let op = |g| {
-                Write::Control(Operation::StreamMix {
-                    stream_id: lane.key,
-                    gain_db: Some(g),
-                    muted: None,
-                    solo: None,
-                })
-            };
-            (op(gain), op(lane.gain))
-        };
-        self.mix_change(label, write, inverse);
-    }
-
     pub(crate) fn mixer_page(&mut self, ui: &mut egui::Ui) {
         let Some(state) = self.snapshot.clone() else {
             self.mixer_empty(ui);
             return;
         };
-        self.master_hero(ui, &state);
         let lanes = self.lanes(&state);
+        let console = console_fits(ui.available_width(), lanes.len());
+        if !console {
+            self.master_hero(ui, &state);
+        }
         let wide = ui.available_width() >= 620.0;
         widgets::section(ui, "输入通道", |ui| {
             widgets::pill(ui, &format!("{} 路", lanes.len()), Tone::Neutral);
             if wide && !lanes.is_empty() {
+                // Keys follow the fader direction of the current layout.
+                let (pick, gain) = if console {
+                    ("← →", "↑ ↓")
+                } else {
+                    ("↑ ↓", "← →")
+                };
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     widgets::note(ui, "Solo");
                     widgets::kbd(ui, "S");
                     widgets::note(ui, "静音");
                     widgets::kbd(ui, "M");
                     widgets::note(ui, "音量");
-                    widgets::kbd(ui, "← →");
+                    widgets::kbd(ui, gain);
                     widgets::note(ui, "选择通道");
-                    widgets::kbd(ui, "↑ ↓");
+                    widgets::kbd(ui, pick);
                 });
             }
         });
         if lanes.is_empty() {
-            egui::Frame::new()
-                .fill(theme::SURFACE)
-                .stroke(Stroke::new(1.0, theme::BORDER))
-                .corner_radius(CornerRadius::same(theme::RADIUS))
-                .inner_margin(Margin::same(16))
-                .show(ui, |ui| {
-                    ui.set_min_width(ui.available_width());
-                    widgets::empty(
-                        ui,
-                        "暂无输入",
-                        "Sender 配对并开始发送，或 AirPlay 来源连接后，通道会显示在这里。",
-                    );
-                });
+            widgets::surface(ui, None, Margin::same(16), |ui| {
+                ui.set_min_width(ui.available_width());
+                widgets::empty(
+                    ui,
+                    "暂无输入",
+                    "Sender 配对并开始发送，或 AirPlay 来源连接后，通道会显示在这里。",
+                );
+            });
+        } else if console {
+            let focus = self.mixer_keys(ui, &lanes, true);
+            self.console(ui, &state, &lanes, focus);
         } else {
-            let focus = self.mixer_keys(ui, &lanes);
+            let focus = self.mixer_keys(ui, &lanes, false);
             ui.spacing_mut().item_spacing.y = 8.0;
             for lane in &lanes {
                 ui.push_id(lane.key, |ui| {
@@ -294,21 +61,22 @@ impl Desktop {
             }
             ui.spacing_mut().item_spacing.y = 14.0;
         }
-        widgets::note(
-            ui,
-            "电平为最近 50 ms 双声道窗口：每路在 Mute/Solo 与增益之后、总控之前测量，总控在限幅之后。实心为 RMS，浅色为峰值，竖线为峰值保持。推子按住拖动（Shift 微调），双击回到 0 dB；聚焦后或按住 Option 可用滚轮调节。",
+        self.level_ribbon(ui, &lanes);
+        ui.label(
+            RichText::new("电平与推子说明")
+                .size(theme::SMALL)
+                .color(theme::TEXT_3)
+                .underline(),
+        )
+        .on_hover_text(
+            "电平为最近 50 ms 双声道窗口：每路在 Mute/Solo 与增益之后、总控之前测量，总控在限幅之后。实心为 RMS，浅色为峰值，横线/竖线为峰值保持。推子按住拖动（Shift 微调），双击回到 0 dB；聚焦后或按住 Option 可用滚轮调节。",
         );
     }
 
     fn mixer_empty(&mut self, ui: &mut egui::Ui) {
-        egui::Frame::new()
-            .fill(theme::SURFACE)
-            .stroke(Stroke::new(1.0, theme::BORDER))
-            .corner_radius(CornerRadius::same(theme::RADIUS))
-            .inner_margin(Margin::same(24))
-            .show(ui, |ui| {
-                ui.set_min_width(ui.available_width());
-                ui.vertical_centered(|ui| {
+        widgets::surface(ui, None, Margin::same(24), |ui| {
+            ui.set_min_width(ui.available_width());
+            ui.vertical_centered(|ui| {
                     let (rect, _) = ui.allocate_exact_size(egui::vec2(40.0, 40.0), egui::Sense::hover());
                     ui.painter()
                         .circle_filled(rect.center(), 20.0, theme::ACCENT.gamma_multiply(0.12));
@@ -330,17 +98,17 @@ impl Desktop {
                     );
                     ui.add_space(6.0);
                 });
-                ui.horizontal(|ui| {
-                    let pad = ((ui.available_width() - 260.0) / 2.0).max(0.0);
-                    ui.add_space(pad);
-                    if widgets::button(ui, "前往 Hub 设置", Kind::Primary).clicked() {
-                        self.navigate(Page::Hub);
-                    }
-                    if widgets::button(ui, "前往 Sender", Kind::Secondary).clicked() {
-                        self.navigate(Page::Sender);
-                    }
-                });
+            ui.horizontal(|ui| {
+                let pad = ((ui.available_width() - 260.0) / 2.0).max(0.0);
+                ui.add_space(pad);
+                if widgets::button(ui, "前往 Hub 设置", Kind::Primary).clicked() {
+                    self.navigate(Page::Hub);
+                }
+                if widgets::button(ui, "前往 Sender", Kind::Secondary).clicked() {
+                    self.navigate(Page::Sender);
+                }
             });
+        });
         if self.airplay.is_some() {
             self.airplay_panel(ui);
         }
@@ -348,7 +116,14 @@ impl Desktop {
 
     /// ↑/↓ choose a lane (and move focus to its fader, where ←/→ adjust),
     /// M/S latch Mute/Solo. Ignored while typing or when a dialog is open.
-    fn mixer_keys(&mut self, ui: &egui::Ui, lanes: &[Lane]) -> Option<u64> {
+    /// Lane selection keys: ↑/↓ for rows, ←/→ for console strips (where
+    /// ↑/↓ belong to the focused vertical fader).
+    pub(crate) fn mixer_keys(
+        &mut self,
+        ui: &egui::Ui,
+        lanes: &[Lane],
+        console: bool,
+    ) -> Option<u64> {
         let ctx = ui.ctx().clone();
         let mut focus_to = None;
         if ctx.wants_keyboard_input() || self.confirm.is_some() || self.palette.is_some() {
@@ -358,10 +133,15 @@ impl Desktop {
             .selected_lane
             .and_then(|k| lanes.iter().position(|l| l.key == k));
         let none = egui::Modifiers::NONE;
+        let (next_key, prev_key) = if console {
+            (egui::Key::ArrowRight, egui::Key::ArrowLeft)
+        } else {
+            (egui::Key::ArrowDown, egui::Key::ArrowUp)
+        };
         let (down, up, m, s) = ctx.input_mut(|i| {
             (
-                i.consume_key(none, egui::Key::ArrowDown),
-                i.consume_key(none, egui::Key::ArrowUp),
+                i.consume_key(none, next_key),
+                i.consume_key(none, prev_key),
                 i.consume_key(none, egui::Key::M),
                 i.consume_key(none, egui::Key::S),
             )
@@ -445,7 +225,7 @@ impl Desktop {
                         ui.label(
                             RichText::new(format!("{} dB", widgets::gain_text(shown)))
                                 .monospace()
-                                .size(28.0)
+                                .size(theme::DISPLAY)
                                 .color(if shown > 0.0 {
                                     theme::WARNING
                                 } else {
@@ -549,21 +329,7 @@ impl Desktop {
                     });
                 });
                 if let Some(gain) = committed {
-                    self.mix_change(
-                        format!(
-                            "总音量 {} → {} dB",
-                            widgets::gain_text(current),
-                            widgets::gain_text(gain)
-                        ),
-                        Write::Control(Operation::OutputMix {
-                            gain_db: Some(gain),
-                            muted: None,
-                        }),
-                        Write::Control(Operation::OutputMix {
-                            gain_db: Some(current),
-                            muted: None,
-                        }),
-                    );
+                    self.master_gain(current, gain);
                 }
                 if !can {
                     widgets::note(ui, "总控需要房间控制者或管理员身份；当前只能查看。");
@@ -701,7 +467,7 @@ impl Desktop {
                         out.0 = Some(!lane.muted);
                     }
                     if lane.can_solo {
-                        let solo = widgets::toggle(ui, true, lane.solo, "Solo", Tone::Accent);
+                        let solo = widgets::toggle(ui, true, lane.solo, "Solo", Tone::Solo);
                         solo.widget_info(|| {
                             egui::WidgetInfo::selected(
                                 egui::WidgetType::Button,
@@ -844,7 +610,7 @@ impl Desktop {
         ui.painter().rect_filled(bar, CornerRadius::same(2), color);
     }
 
-    fn lane_detail_panel(&mut self, ui: &mut egui::Ui, lane: &Lane) {
+    pub(crate) fn lane_detail_panel(&mut self, ui: &mut egui::Ui, lane: &Lane) {
         use neonmix_airplay_adapter::control::AirplayActionV2 as AirplayAction;
         widgets::inset(ui, |ui| {
             ui.horizontal_wrapped(|ui| {
@@ -930,31 +696,8 @@ impl Desktop {
     }
 }
 
-/// AirPlay mix is set as one triple; this keeps call sites symmetrical.
-struct AirplayMix {
-    source_id: String,
-    session_id: u64,
-    gain_db: f32,
-    muted: bool,
-    solo: bool,
-}
-
-impl AirplayMix {
-    fn write(&self) -> Write {
-        Write::Airplay(
-            neonmix_airplay_adapter::control::AirplayActionV2::MixSource {
-                source_id: self.source_id.clone(),
-                session_id: self.session_id,
-                gain_db: self.gain_db,
-                muted: self.muted,
-                solo: self.solo,
-            },
-        )
-    }
-}
-
 /// Chevron button that folds a row's details in and out.
-fn disclosure(ui: &mut egui::Ui, open: bool, name: &str) -> egui::Response {
+pub(super) fn disclosure(ui: &mut egui::Ui, open: bool, name: &str) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(egui::vec2(30.0, 30.0), egui::Sense::click());
     response.widget_info(|| {
         egui::WidgetInfo::selected(
@@ -989,6 +732,17 @@ fn disclosure(ui: &mut egui::Ui, open: bool, name: &str) -> egui::Response {
         );
     }
     response.on_hover_text("详情")
+}
+
+/// Strip width, master strip width and gap of the console layout.
+pub(super) const STRIP_W: f32 = 128.0;
+pub(super) const MASTER_W: f32 = 188.0;
+pub(super) const STRIP_GAP: f32 = 10.0;
+
+/// The console needs every strip side by side plus the master strip; the
+/// row layout takes over otherwise (narrow windows, no lanes, many lanes).
+pub(super) fn console_fits(width: f32, lanes: usize) -> bool {
+    (1..=6).contains(&lanes) && width >= lanes as f32 * (STRIP_W + STRIP_GAP) + MASTER_W
 }
 
 #[cfg(test)]

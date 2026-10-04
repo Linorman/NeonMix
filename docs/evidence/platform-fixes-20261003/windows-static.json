@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-03",
+  "host": "macOS ARM64",
+  "scope": "Windows worker platform header syntax check and Windows/Linux IPC foreign-cfg Clippy; no foreign binaries executed",
+  "recording": "Recorded from completed tool outputs in this task; raw stdout logs were not saved. No checks were rerun while the main task was building or performing audio tests.",
+  "checks": [
+    {
+      "name": "windows_worker_platform_header",
+      "command": "tools/dev clang++ --target=x86_64-w64-windows-gnu -std=c++17 -fsyntax-only -x c++ -D_WIN32_WINNT=0x0602 -D_LIBCPP_DISABLE_AVAILABILITY -nostdinc++ -isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -isystem .local/e05-cross/mingw/usr/share/mingw-w64/include apps/airplay-worker/platform.h",
+      "exit_code": 0,
+      "result": "Passed; one expected pragma-once-outside-header warning because the header was checked as the main translation unit.",
+      "log": null
+    },
+    {
+      "name": "windows_ipc_clippy",
+      "command": "tools/dev cargo clippy -p neonmix-airplay-ipc --all-targets --target x86_64-pc-windows-gnu --locked -- -D warnings",
+      "exit_code": 0,
+      "result": "Finished dev profile in 1.49s.",
+      "log": null
+    },
+    {
+      "name": "linux_ipc_clippy",
+      "command": "tools/dev env CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS=--sysroot=/Volumes/projects-mac/NeonMix/.local/cross-linux/rust cargo clippy -p neonmix-airplay-ipc --all-targets --target x86_64-unknown-linux-gnu --locked -- -D warnings",
+      "exit_code": 0,
+      "result": "Finished dev profile in 1.38s.",
+      "log": null
+    },
+    {
+      "name": "macos_worker_build",
+      "command": "tools/dev cmake --build .local/airplay/build --target neonmix-airplay-worker -j 4",
+      "exit_code": 0,
+      "result": "Built target neonmix-airplay-worker. This preceded the main task final combined rebuild.",
+      "log": null
+    },
+    {
+      "name": "macos_ipc_tests",
+      "command": "tools/dev cargo test -p neonmix-airplay-ipc --locked",
+      "exit_code": 0,
+      "result": "13 passed, 0 failed, 0 ignored; 0 doc tests.",
+      "log": null
+    }
+  ],
+  "additional_issue_found": "Standalone Windows IPC Clippy initially failed because windows-sys lacked Win32_System_IO, required for ReadFile and ConnectNamedPipe. The crate feature list was corrected; the subsequent check passed.",
+  "transport_review": {
+    "server_authentication": "Before sending the media capability, the client verifies kernel server PID against the parent PID, validates parent creation time against worker creation time, compares current-user SIDs and checks protected owner-only pipe owner/DACL. SECURITY_IDENTIFICATION prevents server impersonation using the client token.",
+    "security_object_type": "GetSecurityInfo receives SE_KERNEL_OBJECT and a live pipe HANDLE. Microsoft documents that GetSecurityInfo/SetSecurityInfo support all kernel-object types; its securable-object table explicitly lists named pipes.",
+    "security_object_type_sources": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/accctrl/ne-accctrl-se_object_type",
+      "https://learn.microsoft.com/en-us/windows/win32/secauthz/securable-objects"
+    ],
+    "stop_concurrency": "PIPE_NOWAIT writes have no outstanding overlapped I/O. The writer reads atomic running between immediate writes and sleeps at most 5 ms under backpressure. Worker destruction sets running=false and joins the writer before MediaPipe destroys its HANDLE; there is no concurrent handle close/write.",
+    "send_deadline": "Each pipe write call uses one steady-clock 250 ms packet deadline across partial writes. Polling and OS scheduling can add small deadline observation latency; Windows wall-clock behavior was not measured.",
+    "unix_tcp_compatibility": "Existing Unix transport and standalone loopback TCP fixture remain; Hub is not changed to TCP."
+  },
+  "limitations": [
+    "No Windows or Linux program was executed by these checks.",
+    "The Windows C++ check is syntax/type checking of platform.h using MinGW Win32 declarations and read-only host libc++ headers, not a complete worker cross-build or link check.",
+    "The actual Windows NamedPipe connection, parent/SID/DACL rejection, timeout/stop behavior, and full worker startup remain unverified on Windows.",
+    "Clippy validates target-specific Rust branches but does not run target tests.",
+    "No raw log files or build-time source manifests were captured for these early checks; current hashes below identify files at evidence recording time only and do not assert a frozen final build."
+  ],
+  "files_sha256_at_recording": {
+    "apps/airplay-worker/platform.h": "4e07b788c2016029c0ace49ca5d76a01bc3d126f31555aba4076eb6a5cce134d",
+    "crates/airplay-ipc/Cargo.toml": "7ba818e38f840f27c0e1cc018473a50b933f1ba90b854572f7a35f490230cdf3",
+    "crates/airplay-ipc/src/local_windows.rs": "cdb3420a3a429d0abe6775eb0235a65141cc6a5e8bc52a18e71a8dccdc0fd4d4",
+    "crates/airplay-ipc/src/local_unix.rs": "d13287f892ce3c5d43d0fea9e984d4603bbc190339882c21106a5ed0f19326c9"
+  },
+  "filesystem": "No dependencies downloaded. All generated build/cache files were routed through tools/dev into the project. No temporary files remain from this subtask."
+}

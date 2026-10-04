@@ -1,0 +1,96 @@
+{
+  "fmt": {
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 1,
+    "seconds": 0.13
+  },
+  "fmt-members": {
+    "command": [
+      "cargo",
+      "fmt",
+      "-p",
+      "neonmix-airplay-adapter",
+      "-p",
+      "neonmix-airplay-ipc",
+      "-p",
+      "neonmix-core",
+      "-p",
+      "neonmix-io",
+      "-p",
+      "neonmix-control",
+      "-p",
+      "neonmix-desktop-service",
+      "-p",
+      "neonmix-identity",
+      "-p",
+      "neonmix-media",
+      "-p",
+      "neonmix-output-binding",
+      "-p",
+      "neonmix-linux",
+      "-p",
+      "neonmix-macos",
+      "-p",
+      "neonmix-windows",
+      "-p",
+      "neonmix-audio",
+      "-p",
+      "neonmix-desktop",
+      "-p",
+      "neonmix-hub",
+      "-p",
+      "neonmix-hal",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0
+  },
+  "clippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 24.11
+  },
+  "tests": {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--no-fail-fast",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "seconds": 76.46
+  },
+  "release": {
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked",
+      "--offline"
+    ],
+    "exit_code": 0,
+    "seconds": 143.69
+  }
+}

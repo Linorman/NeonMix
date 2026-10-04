@@ -1,0 +1,13 @@
+{
+  "remaining_owned_product_processes": [],
+  "temporary_directory_empty": true,
+  "airplay_multi_directory_empty": true,
+  "protocol_fixture_removed": true,
+  "preexisting_processes_alive": {
+    "81271": true,
+    "98624": true,
+    "98625": true,
+    "98648": true
+  },
+  "cpu_monitor_stopped": true
+}

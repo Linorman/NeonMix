@@ -1,0 +1,12 @@
+{
+  "target": "windows",
+  "endpoint": "https://192.168.100.186:17446",
+  "requested_seconds": 60,
+  "client_binary_sha256": "765b8761577c79fc1ac4ef3624d6f0b31d8a17bc256aef1b57d8067658dda36d",
+  "scope": "macOS native CLI synthetic 437 Hz / -36 dBFS Sender; not Apple AirPlay",
+  "samples": [],
+  "query_failures": [],
+  "passed": false,
+  "pair_exit_code": 1,
+  "pair_error": "invitation expired\n"
+}

@@ -1,0 +1,15 @@
+{
+  "stopped_owned_processes": [],
+  "removed_fixture_and_transfer_paths": [
+    ".local\\windows-lan",
+    ".local\\background-smoke",
+    ".local\\background-product-owned",
+    ".local\\tmp\\windows-owned-credential-probe",
+    "crate-cache.tar",
+    "source.tar.gz",
+    ".local\\gstreamer-windows\\downloads\\gstreamer-1.0-devel-msvc-x86_64-1.26.10.msi.part"
+  ],
+  "remaining_owned_neonmix_processes": [],
+  "preserved": "source tree, native dependencies, toolchain junction, cargo cache, target binaries/PDB, logs",
+  "outside_root_modified": false
+}

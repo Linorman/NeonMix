@@ -1,0 +1,4 @@
+{
+  "reason": "prepare_airplay validates resolved SDK paths inside its project; prior read-only cache junction resolved outside r06",
+  "fix": "copy cached SDK contents into r06 .local/gst; product source unchanged; first failure retained"
+}

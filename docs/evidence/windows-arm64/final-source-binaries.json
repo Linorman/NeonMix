@@ -1,0 +1,14 @@
+{
+  "source_files": 742,
+  "mismatches": [],
+  "binaries": {
+    "target/aarch64-pc-windows-gnullvm/release/neonmix-audio.exe": {
+      "sha256": "06c91bc5f85ed17377994c9e59864a7b1cda3c2391406827a2f1b0a88779e50b",
+      "machine": "0xaa64"
+    },
+    "target/aarch64-pc-windows-gnullvm/release/neonmix-background.exe": {
+      "sha256": "8533db9fd59737404ab25a9861c970c3f1ea56d894592f2a94ce00527e1eb64a",
+      "machine": "0xaa64"
+    }
+  }
+}

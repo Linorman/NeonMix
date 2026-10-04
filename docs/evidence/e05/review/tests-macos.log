@@ -1,0 +1,68 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.77s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_control-8d4cb683bae373d4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/authority.rs (target/debug/deps/authority-bc0d659ceb631516)
+
+running 11 tests
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test member_cannot_solo_or_change_others_and_master ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-b733d79c502e0f0f)
+
+running 13 tests
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test virtual_output::tests::binding_requires_exact_provider_uid_and_both_sides ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.01s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_identity-723e802e1a14eebe)
+
+running 6 tests
+test discovery::tests::incompatible_or_incomplete_records_do_not_become_candidates ... ok
+test discovery::tests::names_are_distinct_candidates_and_all_usable_addresses_survive ... ok
+test pairing::tests::expiration_cancellation_single_use_and_exact_retry ... ok
+test pairing::tests::quota_reclaims_expired_grants ... ok
+test files::tests::failed_replace_preserves_destination_and_cleans_its_own_temporary_file ... ok
+test files::tests::private_replace_is_exclusive_and_removes_an_old_insecure_file_mode ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+   Doc-tests neonmix_control
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_identity
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

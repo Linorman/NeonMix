@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-10-03",
+  "scope": "read-only verification after completed tests; no media rerun or system mutation",
+  "build_affinity": {
+    "limited_to": "CPU 0,1 of 0-3",
+    "original_rust_runner_pid": 630568,
+    "operation": "taskset -pc 0,1 630568 applied only to build runner; later worker builds launched with taskset -c 0,1",
+    "cargo_jobs_after_user_constraint": 2,
+    "cmake_parallel_final": 2
+  },
+  "runtime_affinity": {
+    "expected_allowed_cpus": "0-3 (all 4 logical CPUs)",
+    "basis": "LAN, runtime, runtime-retake and GUI were separate systemd --user transient units launched directly with .local/env.sh python3, without taskset/CPUAffinity/AllowedCPUs; env/dev/spawn do not set affinity; child Hub/worker inherit from runtime parent",
+    "historical_per_process_cpus_allowed_list_recorded": false,
+    "evidence_boundary": "Inference from actual launch records and affinity inheritance; not a saved /proc measurement of historical Hub/worker processes"
+  },
+  "current_user_manager": {
+    "pid": 83480,
+    "cpus_allowed_list": "0-3",
+    "read_from": "/proc/83480/status"
+  },
+  "unit_start_records": [
+    "neonmix-t04u-worker2.service: .local/env.sh taskset -c 0,1 python3 artifacts/t04u/build-worker.py",
+    "neonmix-t04u-worker3.service: .local/env.sh taskset -c 0,1 python3 artifacts/t04u/build-worker.py",
+    "neonmix-t04u-lan2.service: .local/env.sh python3 artifacts/t04u/lan.py",
+    "neonmix-t04u-runtime.service: .local/env.sh python3 artifacts/t04u/run-runtime.py",
+    "neonmix-t04u-runtime-retake.service: .local/env.sh python3 artifacts/t04u/run-runtime-retake.py",
+    "neonmix-t04u-gui.service: .local/env.sh python3 artifacts/t04u/gui_probe.py"
+  ],
+  "cpu_runtime_monitor": {
+    "then_configured": "10 samples below 80% before start; interrupt at 3 samples >80% or one >=95%",
+    "abort_triggered_on_ubuntu": false,
+    "all_own_runtime_and_monitor_processes_finished": true,
+    "policy_note": "Historical test condition only; user later revoked forced CPU caps; no persistent restriction or monitor remains"
+  }
+}

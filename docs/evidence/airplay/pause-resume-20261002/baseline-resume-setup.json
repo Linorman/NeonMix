@@ -1,0 +1,71 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "native_start_order": "hot",
+  "prefetch_blocks": 0,
+  "codec": "alac",
+  "playback_mode": "low_latency",
+  "protocol_lead_ms": 2000,
+  "pause_seconds": 2.0,
+  "resume_lead_ms": 250,
+  "resume_reset": "setup",
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; real receiver Keychain fixture entry",
+  "binary_sha256": {
+    "neonmix-hub": "06832c9bdf0bbbaee03038c06b6671949076e1fd67deb959cce15827a7d8a2cd",
+    "neonmix-airplay-worker": "5deca98a1a8be144b46ab416b6362da7b402dc4273d4373203c9fedbaf0b2581"
+  },
+  "passed": false,
+  "scenarios": {
+    "playback_mode_admin_permission_and_persistence": true,
+    "room_source_identity_visible_without_control_credentials": true,
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "failure_phase": "pause and resume with changed protocol lead",
+  "failure_type": "AssertionError",
+  "failure": "resume SETUP returned invalid audio ports",
+  "failure_counters": {
+    "enabled": true,
+    "ready": true,
+    "active": true,
+    "error": null,
+    "failure_stage": null,
+    "received_blocks": 40,
+    "rejected_blocks": 0,
+    "released_blocks": 40,
+    "ingress": {
+      "accepted_packets": 40,
+      "clock_resets": 0,
+      "future_packets": 0,
+      "identity_rejections": 0,
+      "last_mapping_id": 0,
+      "last_presentation_time_ns": 0,
+      "last_source_rate": 0,
+      "last_source_sample_position": 0,
+      "last_uncertainty_ns": 0,
+      "late_packets": 0,
+      "latency_advance_ns": 0,
+      "malformed_packets": 0,
+      "output_latency_ns": 5312500,
+      "overflow_packets": 0,
+      "pending_bytes": 0,
+      "pending_frames": 0,
+      "playout_lead_ns": 0,
+      "protocol_lead_ns": 0,
+      "released_packets": 40,
+      "timeline_rejections": 0
+    }
+  },
+  "fixture_keychain_cleanup": {
+    "entries": 1,
+    "passed": true
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

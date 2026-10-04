@@ -1,5 +1,11 @@
 mod animation;
+mod emblem;
+mod events;
+mod flow;
+mod fx;
+mod history;
 mod icons;
+mod lanes;
 mod pages;
 mod palette;
 mod shell;
@@ -7,6 +13,7 @@ mod shell;
 mod shot;
 mod theme;
 mod tray;
+mod viz;
 mod widgets;
 use clap::Parser;
 use eframe::egui::{self, RichText};
@@ -44,11 +51,12 @@ struct Args {
     #[arg(long, requires = "preview_page")]
     preview_data: Option<PathBuf>,
     /// Open a page without connecting to a background (visual verification only).
-    #[arg(long, value_parser = ["hub", "sender", "mixer", "devices", "diagnostics", "about", "airplay"])]
+    #[arg(long, value_parser = ["live", "hub", "sender", "mixer", "devices", "diagnostics", "about", "airplay"])]
     preview_page: Option<String>,
 }
 #[derive(Clone, Copy, PartialEq, Hash, Debug)]
 enum Page {
+    Live,
     Hub,
     Sender,
     Mixer,
@@ -59,6 +67,7 @@ enum Page {
 impl Page {
     fn icon(self) -> icons::Icon {
         match self {
+            Self::Live => icons::Icon::Flow,
             Self::Hub => icons::Icon::Room,
             Self::Sender => icons::Icon::Sender,
             Self::Mixer => icons::Icon::Mixer,
@@ -67,10 +76,11 @@ impl Page {
             Self::About => icons::Icon::Info,
         }
     }
-    const ALL: [(Self, &'static str); 6] = [
+    const ALL: [(Self, &'static str); 7] = [
+        (Self::Live, "现场"),
+        (Self::Mixer, "Mixer"),
         (Self::Hub, "Hub 设置"),
         (Self::Sender, "Sender"),
-        (Self::Mixer, "Mixer"),
         (Self::Devices, "设备管理"),
         (Self::Diagnostics, "诊断"),
         (Self::About, "关于"),
@@ -215,6 +225,11 @@ enum Write {
 }
 /// The last mixer change, offered as 还原 (restore) for a few seconds. Named
 /// apart from 撤销 (revoke a pairing) so the two can never be confused.
+#[derive(Default, serde::Serialize, serde::Deserialize)]
+struct UiPreferences {
+    #[serde(default)]
+    reduce_motion: bool,
+}
 struct Undo {
     label: String,
     inverse: Write,
@@ -314,9 +329,19 @@ struct Desktop {
     /// Panel to bring into view on the next frame (stepper / tile clicks).
     scroll_to: Option<&'static str>,
     palette: Option<palette::Palette>,
+    palette_since: Instant,
     undo: Option<Undo>,
     tray: Option<tray::Tray>,
     tray_attempted: bool,
+    events: std::collections::VecDeque<events::RoomEvent>,
+    marks: Option<events::Marks>,
+    /// When a lane first joined while this window watched (connect animation).
+    joined: std::collections::BTreeMap<u64, Instant>,
+    /// Last minute of per-lane RMS (dBFS) for the Mixer ribbon.
+    level_history: history::Series<u64>,
+    /// Last two minutes of room metrics for diagnostics sparklines.
+    metric_history: history::Series<&'static str>,
+    marks_key: Option<(uuid::Uuid, u64, Option<u64>, usize)>,
     #[cfg(feature = "screenshot")]
     shot: Option<shot::Shot>,
 }
@@ -329,9 +354,14 @@ impl Desktop {
             args.preview_page.is_some(),
         );
         app.repaint = cc.egui_ctx.clone();
+        animation::set_reduce_motion(
+            std::env::var("NEONMIX_REDUCE_MOTION").is_ok_and(|v| v == "1")
+                || (!app.preview && app.load_ui_preferences().reduce_motion),
+        );
         if let Some(page) = args.preview_page {
             app.preview_airplay_only = page == "airplay";
             app.page = match page.as_str() {
+                "live" => Page::Live,
                 "sender" => Page::Sender,
                 "mixer" => Page::Mixer,
                 "devices" => Page::Devices,
@@ -387,37 +417,7 @@ impl Desktop {
                     .ok()
                     .and_then(|b| serde_json::from_slice::<Value>(&b).ok())
                 {
-                    Some(data) => {
-                        app.devices =
-                            serde_json::from_value(data["devices"].clone()).unwrap_or_default();
-                        app.snapshot = serde_json::from_value(data["snapshot"].clone()).ok();
-                        app.status = serde_json::from_value(data["status"].clone()).ok();
-                        if let Some(settings) =
-                            app.status.as_ref().and_then(|s| s.hub_settings.as_ref())
-                        {
-                            app.room = settings.name.clone();
-                            app.output = settings.output.clone();
-                        }
-                        app.remote_room = data["snapshot"]
-                            .pointer("/viewer/room_name")
-                            .and_then(Value::as_str)
-                            .map(str::to_owned);
-                        app.diagnostics = data.get("diagnostics").cloned();
-                        app.airplay = data.get("airplay").cloned();
-                        #[cfg(feature = "screenshot")]
-                        {
-                            app.airplay_name_drafts =
-                                serde_json::from_value(data["preview_name_drafts"].clone())
-                                    .unwrap_or_default();
-                            if let Some(error) = data["preview_error"].as_str() {
-                                app.error = true;
-                                app.message = error.into();
-                            }
-                        }
-                        app.binding = app.status.as_ref().and_then(|s| s.output_binding.clone());
-                        app.fresh = Some(Instant::now());
-                        app.synced = app.fresh;
-                    }
+                    Some(data) => app.load_preview(&data),
                     None => {
                         app.error = true;
                         app.message = "无法读取预览记录".into();
@@ -427,9 +427,64 @@ impl Desktop {
         }
         app
     }
+    fn ui_preferences_path(&self) -> PathBuf {
+        self.client.state_dir().join("ui-preferences.json")
+    }
+
+    /// Window preferences that are not room state (no secrets, no names).
+    fn load_ui_preferences(&self) -> UiPreferences {
+        std::fs::read(self.ui_preferences_path())
+            .ok()
+            .and_then(|b| serde_json::from_slice(&b).ok())
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn set_reduce_motion(&mut self, on: bool) {
+        animation::set_reduce_motion(on);
+        if self.preview {
+            return;
+        }
+        let prefs = UiPreferences { reduce_motion: on };
+        if let Err(e) = serde_json::to_vec_pretty(&prefs)
+            .map_err(|e| e.to_string())
+            .and_then(|b| std::fs::write(self.ui_preferences_path(), b).map_err(|e| e.to_string()))
+        {
+            self.message = format!("无法保存界面偏好：{e}");
+            self.error = true;
+        }
+    }
+
+    /// Recorded public state for preview builds and tests.
+    fn load_preview(&mut self, data: &Value) {
+        self.devices = serde_json::from_value(data["devices"].clone()).unwrap_or_default();
+        self.snapshot = serde_json::from_value(data["snapshot"].clone()).ok();
+        self.status = serde_json::from_value(data["status"].clone()).ok();
+        if let Some(settings) = self.status.as_ref().and_then(|s| s.hub_settings.as_ref()) {
+            self.room = settings.name.clone();
+            self.output = settings.output.clone();
+        }
+        self.remote_room = data["snapshot"]
+            .pointer("/viewer/room_name")
+            .and_then(Value::as_str)
+            .map(str::to_owned);
+        self.diagnostics = data.get("diagnostics").cloned();
+        self.airplay = data.get("airplay").cloned();
+        #[cfg(feature = "screenshot")]
+        {
+            self.airplay_name_drafts =
+                serde_json::from_value(data["preview_name_drafts"].clone()).unwrap_or_default();
+            if let Some(error) = data["preview_error"].as_str() {
+                self.error = true;
+                self.message = error.into();
+            }
+        }
+        self.binding = self.status.as_ref().and_then(|s| s.output_binding.clone());
+        self.fresh = Some(Instant::now());
+        self.synced = self.fresh;
+    }
     fn empty(client: Client, cjk: bool, preview: bool) -> Self {
         Self {
-            page: Page::Hub,
+            page: Page::Live,
             page_since: Instant::now() - Duration::from_secs(5),
             shown_message: String::new(),
             message_since: Instant::now() - Duration::from_secs(5),
@@ -492,9 +547,16 @@ impl Desktop {
             device_filter: 0,
             scroll_to: None,
             palette: None,
+            palette_since: Instant::now() - Duration::from_secs(5),
             undo: None,
             tray: None,
             tray_attempted: false,
+            events: Default::default(),
+            marks: None,
+            marks_key: None,
+            joined: Default::default(),
+            level_history: history::Series::new(Duration::from_secs(60)),
+            metric_history: history::Series::new(Duration::from_secs(120)),
             #[cfg(feature = "screenshot")]
             shot: None,
         }
@@ -720,6 +782,7 @@ impl Desktop {
                         self.diagnostics = data
                             .diagnostics
                             .map(|v| v.get("remote").cloned().unwrap_or(v));
+                        self.record_history();
                     } else {
                         self.fresh = None;
                         self.synced = None;
@@ -1652,24 +1715,29 @@ mod tests {
     /// only a drag moves the fader. Double-click is the explicit reset.
     #[test]
     fn fader_click_never_jumps_gain_and_double_click_resets_to_unity() {
-        let ctx = themed();
-        let mut gain = -30.0_f32;
-        let frame = |input: egui::RawInput, gain: &mut f32| {
-            let _ = ctx.run(input, |ctx| {
-                egui::CentralPanel::default().show(ctx, |ui| {
-                    widgets::fader(ui, "test", gain, "受测音量", widgets::FaderSize::Row);
+        // Horizontal row fader and vertical console fader share one core.
+        for (size, far) in [
+            (widgets::FaderSize::Row, egui::pos2(380.0, 20.0)),
+            (widgets::FaderSize::Strip(80.0), egui::pos2(22.0, 84.0)),
+        ] {
+            let ctx = themed();
+            let mut gain = -30.0_f32;
+            let frame = |input: egui::RawInput, gain: &mut f32| {
+                let _ = ctx.run(input, |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| {
+                        widgets::fader(ui, "test", gain, "受测音量", size);
+                    });
                 });
-            });
-        };
-        let far = egui::pos2(380.0, 20.0);
-        frame(pointer(far, None, 0.0), &mut gain);
-        frame(pointer(far, Some(true), 0.1), &mut gain);
-        frame(pointer(far, Some(false), 0.15), &mut gain);
-        assert_eq!(gain, -30.0, "a click on the track must not move the fader");
-        frame(pointer(far, Some(true), 0.2), &mut gain);
-        frame(pointer(far, Some(false), 0.25), &mut gain);
-        frame(pointer(far, None, 0.3), &mut gain);
-        assert_eq!(gain, 0.0, "double-click returns to 0 dB");
+            };
+            frame(pointer(far, None, 0.0), &mut gain);
+            frame(pointer(far, Some(true), 0.1), &mut gain);
+            frame(pointer(far, Some(false), 0.15), &mut gain);
+            assert_eq!(gain, -30.0, "a click on the track must not move the fader");
+            frame(pointer(far, Some(true), 0.2), &mut gain);
+            frame(pointer(far, Some(false), 0.25), &mut gain);
+            frame(pointer(far, None, 0.3), &mut gain);
+            assert_eq!(gain, 0.0, "double-click returns to 0 dB");
+        }
     }
 
     /// Enter that confirms an IME candidate belongs to the input method; it
@@ -1716,7 +1784,8 @@ mod tests {
             app.palette.is_none(),
             "plain Enter runs the highlighted action"
         );
-        assert_eq!(app.page, Page::Hub);
+        // The first "前往" entry is the first page.
+        assert_eq!(app.page, Page::ALL[0].0);
     }
 
     /// 还原 sends the inverse of the last mixer change, against the next
@@ -1834,5 +1903,150 @@ mod tests {
             bounds.y0 >= 0.0 && bounds.y1 < 440.0,
             "status message displaced page title"
         );
+    }
+
+    fn fixture(name: &str) -> Desktop {
+        let path = format!(
+            "{}/../../docs/evidence/ui-rebuild-20261004/fixtures/{name}.json",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let data: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, true);
+        app.load_preview(&data);
+        app
+    }
+
+    fn frame(ctx: &egui::Context, app: &mut Desktop, size: egui::Vec2) -> egui::FullOutput {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                ..Default::default()
+            },
+            |ctx| app.show(ctx),
+        )
+    }
+
+    #[test]
+    fn live_graph_names_every_node_for_assistive_tech() {
+        for size in [egui::vec2(1100.0, 760.0), egui::vec2(600.0, 440.0)] {
+            let mut app = fixture("full");
+            assert_eq!(app.page, Page::Live);
+            let ctx = themed();
+            ctx.enable_accesskit();
+            let output = frame(&ctx, &mut app, size);
+            let tree = output.platform_output.accesskit_update.unwrap();
+            let labels: Vec<String> = tree
+                .nodes
+                .iter()
+                .filter_map(|(_, node)| node.label().map(str::to_owned))
+                .collect();
+            for needle in [
+                "E07 真实采集 A，原生 Sender，成员 · 已静音",
+                "客厅 iPhone，AirPlay，AirPlay · 因 Solo 静音",
+                "房间「E07 双路测试」",
+                "另有 1 台已配对设备未在发送",
+            ] {
+                assert!(
+                    labels.iter().any(|l| l.starts_with(needle)),
+                    "{size:?}: missing {needle} in {labels:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn live_graph_moves_only_while_signal_flows() {
+        let delay = |app: &mut Desktop| {
+            let ctx = themed();
+            frame(&ctx, app, egui::vec2(1100.0, 760.0));
+            // Settle egui's own first passes and the status message fade-in.
+            app.message_since = Instant::now() - Duration::from_secs(5);
+            for _ in 0..3 {
+                frame(&ctx, app, egui::vec2(1100.0, 760.0));
+            }
+            let delay = frame(&ctx, app, egui::vec2(1100.0, 760.0)).viewport_output
+                [&egui::ViewportId::ROOT]
+                .repaint_delay;
+            (delay, ctx.repaint_causes())
+        };
+        let (d, why) = delay(&mut fixture("playing"));
+        assert!(d <= animation::LIVE_FRAME, "{d:?} {why:?}");
+        let mut silent = fixture("playing");
+        silent.diagnostics = None;
+        for mut app in [silent, fixture("empty")] {
+            let (d, why) = delay(&mut app);
+            assert!(d > animation::LIVE_FRAME, "{d:?} {why:?}");
+        }
+        animation::set_reduce_motion(true);
+        let (d, why) = delay(&mut fixture("playing"));
+        animation::set_reduce_motion(false);
+        assert!(d > animation::LIVE_FRAME, "{d:?} {why:?}");
+    }
+
+    #[test]
+    fn mixer_arrows_follow_the_fader_direction_of_the_layout() {
+        let press = |key| egui::Event::Key {
+            key,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::NONE,
+        };
+        // Console (wide): ←/→ pick strips. Rows (narrow): ↑/↓ pick rows.
+        for (size, pick, other) in [
+            (
+                egui::vec2(1100.0, 760.0),
+                egui::Key::ArrowRight,
+                egui::Key::ArrowDown,
+            ),
+            (
+                egui::vec2(600.0, 440.0),
+                egui::Key::ArrowDown,
+                egui::Key::ArrowRight,
+            ),
+        ] {
+            let mut app = fixture("full");
+            app.page = Page::Mixer;
+            let ctx = themed();
+            frame(&ctx, &mut app, size);
+            let run = |app: &mut Desktop, key| {
+                let _ = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                        events: vec![press(key)],
+                        ..Default::default()
+                    },
+                    |ctx| app.show(ctx),
+                );
+            };
+            run(&mut app, other);
+            assert_eq!(app.selected_lane, None, "{size:?}: {other:?} must not pick");
+            run(&mut app, pick);
+            assert_eq!(app.selected_lane, Some(1158294319324071), "{size:?}");
+        }
+    }
+
+    #[test]
+    fn sidebar_fits_seven_pages_and_actions_in_the_minimum_window() {
+        let mut app = fixture("full");
+        let ctx = themed();
+        ctx.enable_accesskit();
+        let output = frame(&ctx, &mut app, egui::vec2(600.0, 440.0));
+        let tree = output.platform_output.accesskit_update.unwrap();
+        let bounds = |label: &str| {
+            tree.nodes
+                .iter()
+                .find(|(_, n)| n.label() == Some(label))
+                .and_then(|(_, n)| n.bounds())
+                .unwrap_or_else(|| panic!("{label} missing"))
+        };
+        let last_page = bounds("关于");
+        let identity = bounds("控制身份");
+        let quit = bounds("退出后台");
+        assert!(
+            last_page.y1 <= identity.y0,
+            "navigation {last_page:?} overlaps identity {identity:?}"
+        );
+        assert!(quit.y1 <= 440.0, "quit button {quit:?} off screen");
     }
 }

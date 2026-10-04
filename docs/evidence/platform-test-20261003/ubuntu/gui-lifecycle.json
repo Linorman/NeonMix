@@ -1,0 +1,59 @@
+{
+  "gui_alive": true,
+  "output_available": true,
+  "status": {
+    "hub": {
+      "error": null,
+      "last_event": {
+        "event": "hub_started",
+        "hub_id": "decb3319-2016-483a-971d-684212991af4",
+        "lanes": 16,
+        "listen": "0.0.0.0:7443",
+        "output": {
+          "actual_period_frames": 1024,
+          "backend": "pipewire",
+          "device_id": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 48000
+          },
+          "requested_period_frames": null,
+          "resampler_delay_frames": 0,
+          "sample_type": "f32",
+          "stream_epoch": 1
+        },
+        "room_name": "Ubuntu same-version 20261003"
+      },
+      "metrics": null,
+      "pid": 608684,
+      "running": true
+    },
+    "hub_settings": {
+      "name": "Ubuntu same-version 20261003",
+      "output": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo"
+    },
+    "output_binding": null,
+    "pid": 608655,
+    "profiles": [
+      {
+        "credential": "hub/admin.json",
+        "device_id": "8f23c9aa-9b26-4c74-9dfb-c8d67b82de9c",
+        "hub_id": "decb3319-2016-483a-971d-684212991af4",
+        "name": "admin",
+        "pending": false,
+        "role": "admin"
+      }
+    ],
+    "sender": {
+      "error": null,
+      "last_event": null,
+      "metrics": null,
+      "pid": null,
+      "running": false
+    },
+    "sender_options": null,
+    "version": 1
+  },
+  "background_survives_ui_termination": true,
+  "shutdown": true
+}

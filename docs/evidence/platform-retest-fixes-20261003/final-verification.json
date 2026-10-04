@@ -1,0 +1,21 @@
+{
+  "cargo_fmt_all_check": {
+    "exit_code": 0
+  },
+  "workspace_tests": {
+    "passed": 232,
+    "failed": 0,
+    "ignored": 5
+  },
+  "final_desktop_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "workspace_clippy": {
+    "exit_code": 0
+  },
+  "final_desktop_clippy": {
+    "exit_code": 0
+  },
+  "note": "Final rustfmt only wrapped the existing media build.rs println; linker arguments and tested program logic are unchanged."
+}

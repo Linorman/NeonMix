@@ -1,0 +1,27 @@
+{
+  "windows": {
+    "archive": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-windows-x64-20261002-tested-v1.zip",
+    "archive_sha256": "91e41e3ff1cdb1c172ab3053c011f6ca7fb7e10f19d376c89f12e8f82011a2fc",
+    "manifest_files_checked": 981,
+    "hash_mismatches": [],
+    "forbidden_runtime_members": [],
+    "entrypoints": [
+      "NeonMix-Audio.cmd",
+      "NeonMix-Background.cmd",
+      "NeonMix-CLI.cmd",
+      "package-env.cmd",
+      "Start-NeonMix.cmd"
+    ]
+  },
+  "ubuntu": {
+    "archive": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-Ubuntu-ARM64-u26-211335.tar.gz",
+    "archive_sha256": "8d0319681e94f3c5e0d2e1a51a329df4d1d3d07a256ce8c4d82e06d84017b79c",
+    "manifest_files_checked": 417,
+    "hash_mismatches": [],
+    "forbidden_runtime_members": [],
+    "entrypoint_executable_modes": {
+      "neonmix": "0o755",
+      "start-desktop.sh": "0o755"
+    }
+  }
+}

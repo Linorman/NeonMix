@@ -1,0 +1,22 @@
+{
+  "files": {
+    "Cargo.lock": "b4a4f614dcbf7e768c45adcc6ead131b25a1a718fcdbb6a01b5bbed57ce9242c",
+    "adapters/linux/Cargo.toml": "ee5e19b1ceb300d0f8aa525412a6c350167868d3f29dade49bfd1191c47c0115",
+    "crates/media/Cargo.toml": "61911e4d5ef3e436a28adb3d0516f6a7a80bccfff6838b12df0c426d7a9b5cfe",
+    "crates/media/src/thread_priority.rs": "73e226c12a5ce921bc0f1a7d7ec75854725b518a0294ddec7f22eec13c6ad365",
+    "vendor/cpal/src/host/pipewire/stream.rs": "564127457b83a6165c8af54c263977e6602f2915befd696c157eb68853af01e8",
+    "vendor/cpal/src/host/pipewire/rt_promote.rs": "960260bbc78798c560f3752363c159040dc9315a09569d1aa983d9481fc71527",
+    "apps/hub/src/server.rs": "377a38384bd46eba844f287a2f7ad8d15c9e82523330631be8893f0b996ffa8e",
+    "apps/hub/src/sender.rs": "c8e564c165559b2dde9db7c8e9044d8de13560652abcc756360a598803dd390b",
+    ".local/private-audio.py": "201f1dd5d0d2a01a7d56ba062d13e343fa55a1ff04a2ae08b486f6743d31ed85",
+    ".local/config/pipewire/pipewire.conf": "4725a5b62bdadbd8bc9414685389e90b2551d3ef2b83f49c82302bc1f3fdb713",
+    ".local/config/pipewire/client-rt.conf": "9e7d543b48819ea9c1c5b8a2c833f240355fff4fd7ce40c575d6eb62bee40f93",
+    ".local/env.sh": "b0192f1f43dac526d79670a1e9122388bc9bafd7ce60f1747c5594190b47d6a2",
+    ".local/audio-env.sh": "340021ff4683b4e6a08534a1830bf76700bf260025d6d2f4607c049e371b66d1"
+  },
+  "binaries": {
+    "neonmix-hub": "4e8b1773d9d1e5394ff29151a0c65fd1fec30fc4b13b9221275ef54b1b220d00",
+    "neonmix-audio": "9e4b96deb71f6f32b23b08e0b30f30681e80cb96e95423d4e564e0e2a0105f24"
+  },
+  "test_scope": "fixed Ubuntu ARM64 snapshot with Linux scheduling and system-default period fixes"
+}

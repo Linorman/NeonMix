@@ -60,46 +60,43 @@ impl Desktop {
         } else {
             ("尚未创建", Tone::Neutral)
         };
-        let shown = egui::Frame::new()
-            .fill(theme::SURFACE)
-            .stroke(Stroke::new(1.0, theme::BORDER))
-            .corner_radius(CornerRadius::same(theme::RADIUS))
-            .inner_margin(Margin {
+        let shown = widgets::surface(
+            ui,
+            (tone != Tone::Neutral).then(|| tone.color()),
+            Margin {
                 left: 20,
                 right: 18,
                 top: 16,
                 bottom: 16,
-            })
-            .show(ui, |ui| {
+            },
+            |ui| {
                 ui.set_min_width(ui.available_width());
                 ui.spacing_mut().item_spacing.y = 10.0;
                 let wide = ui.available_width() >= 560.0;
                 let action = |this: &mut Self, ui: &mut egui::Ui| {
-                    if running {
-                        if widgets::button_busy(
-                            ui,
-                            true,
-                            this.pending("hub-stop"),
-                            "停止共享",
-                            Kind::Quiet,
-                        )
-                        .on_hover_text("房间停止播放；已配对设备与设置保留")
-                        .clicked()
-                        {
-                            this.request(Request::HubStop);
-                        }
-                    } else if configured {
-                        if widgets::button_busy(
-                            ui,
-                            !dirty,
-                            this.pending("hub-start"),
-                            "开始共享",
-                            Kind::Primary,
-                        )
-                        .on_disabled_hover_text("先保存或放弃未保存的更改")
-                        .clicked()
-                        {
-                            this.request(Request::HubStart);
+                    if configured {
+                        // One switch: its accessible name is the action it performs.
+                        let busy = this.pending("hub-start") || this.pending("hub-stop");
+                        let label = if running {
+                            "停止共享"
+                        } else {
+                            "开始共享"
+                        };
+                        let switch =
+                            crate::viz::switch(ui, running || !dirty, running, busy, label);
+                        let switch = if running {
+                            switch.on_hover_text("停止共享：房间停止播放；已配对设备与设置保留")
+                        } else if dirty {
+                            switch.on_hover_text("先保存或放弃未保存的更改")
+                        } else {
+                            switch.on_hover_text("开始共享：局域网中的设备可以向房间发送声音")
+                        };
+                        if switch.clicked() && !busy && (running || !dirty) {
+                            this.request(if running {
+                                Request::HubStop
+                            } else {
+                                Request::HubStart
+                            });
                         }
                     } else if widgets::button_busy(
                         ui,
@@ -122,6 +119,7 @@ impl Desktop {
                 };
                 if wide {
                     ui.horizontal(|ui| {
+                        self.room_emblem(ui, running);
                         let width = ui.available_width() - 240.0;
                         ui.allocate_ui_with_layout(
                             egui::vec2(width, 56.0),
@@ -159,7 +157,8 @@ impl Desktop {
                     ui.separator();
                     self.member_strip(ui, &snapshot);
                 }
-            });
+            },
+        );
         let rect = shown.response.rect;
         let bar = egui::Rect::from_min_size(
             egui::pos2(rect.left() + 1.0, rect.top() + 16.0),
@@ -167,6 +166,60 @@ impl Desktop {
         );
         let color = animation::color(ui.ctx(), ui.id().with("room-rail"), tone.color());
         ui.painter().rect_filled(bar, CornerRadius::same(2), color);
+    }
+
+    /// The room's identity glyph; a one-shot ripple when sharing starts.
+    fn room_emblem(&mut self, ui: &mut egui::Ui, running: bool) {
+        let (rect, _) = ui.allocate_exact_size(egui::vec2(56.0, 56.0), egui::Sense::hover());
+        let hub_id = self.snapshot.as_ref().map(|s| s.hub_id).or_else(|| {
+            self.status
+                .as_ref()?
+                .hub
+                .last_event
+                .as_ref()?
+                .get("hub_id")?
+                .as_str()?
+                .parse()
+                .ok()
+        });
+        let painter = ui.painter();
+        match hub_id {
+            Some(id) => crate::emblem::paint(
+                painter,
+                rect.center(),
+                26.0,
+                crate::emblem::Emblem::from_id(id),
+                if running { 1.0 } else { 0.0 },
+            ),
+            None => {
+                let pts: Vec<egui::Pos2> = (0..=48)
+                    .map(|i| {
+                        rect.center()
+                            + egui::Vec2::angled(i as f32 / 48.0 * std::f32::consts::TAU) * 26.0
+                    })
+                    .collect();
+                crate::fx::dashed(
+                    painter,
+                    &pts,
+                    Stroke::new(1.0, theme::BORDER_STRONG),
+                    3.0,
+                    3.0,
+                );
+            }
+        }
+        if let Some(t) =
+            animation::once(ui.ctx(), ui.id().with("share-ripple"), running as u64, 0.7)
+            && running
+        {
+            let layer = egui::LayerId::new(egui::Order::Foreground, ui.id().with("ripple"));
+            crate::viz::ripple(
+                &ui.ctx().layer_painter(layer),
+                rect.center(),
+                26.0,
+                t,
+                theme::SUCCESS,
+            );
+        }
     }
 
     fn output_picker(&mut self, ui: &mut egui::Ui) {
@@ -372,14 +425,16 @@ impl Desktop {
 
     fn issued_invite(&mut self, ui: &mut egui::Ui) {
         widgets::inset(ui, |ui| {
-            let remaining = self.invite_expiry.map(|expiry| {
-                expiry.saturating_sub(
-                    std::time::SystemTime::now()
-                        .duration_since(std::time::UNIX_EPOCH)
-                        .unwrap_or_default()
-                        .as_secs(),
-                )
-            });
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs_f64();
+            let remaining = self
+                .invite_expiry
+                .map(|expiry| (expiry as f64 - now).max(0.0) as u64);
+            let precise = self
+                .invite_expiry
+                .map(|expiry| (expiry as f64 - now).max(0.0) as f32);
             let caption = ui
                 .horizontal(|ui| {
                     let caption = widgets::caption(ui, "邀请内容");
@@ -388,7 +443,14 @@ impl Desktop {
                             widgets::pill(ui, "已过期", Tone::Warning);
                         }
                         Some(s) => {
-                            widgets::pill(ui, &format!("剩余 {s} 秒"), Tone::Accent);
+                            // Real time left of the 120 s validity.
+                            crate::viz::countdown_ring(
+                                ui,
+                                precise.unwrap_or(s as f32),
+                                120.0,
+                                34.0,
+                            )
+                            .on_hover_text(format!("邀请剩余 {s} 秒"));
                         }
                         None => {}
                     });

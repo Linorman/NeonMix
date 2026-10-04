@@ -1,0 +1,22 @@
+{
+  "at": 1791043732.913943,
+  "reason": "Space prevention: independent debug/test no symbols grew target to >2 GiB, 511 MiB remaining. First fmt and clippy passed; test compile intentionally interrupted before failure; no completed tests claimed. Reuse previous project target approved by parent/user testing scope.",
+  "old_release_hashes": {
+    "neonmix-audio": "fea1bcacf8b904b6deb5841c9450d0b978946ad09ca5b64c149e03acdcb0ccc2",
+    "neonmix-background": "c8f541207f7d0c436789a84f3a2cbc78c9504c28f2af5b1650020c41145b3ecc",
+    "neonmix-airplay-worker": "b0aa5ce7d1194e5e3476a3eae852da5ef144972d76df36fda39ff54d7a196a84",
+    "neonmix-desktop": "9d32c83edb54b6f150fd7db14c6c77cbcd514670167af550f0745f0adff7fb9c",
+    "neonmix-hub": "8d9cd78b0b907d5ef37f634ce697e2128e3e1f823ce4b2050ffc24cda59169eb",
+    "neonmix-airplay-profile": "4cae847a5a22718242bd997d9abee71b04247a3461ef6220aa44e85fb3a6b100"
+  },
+  "space_before": [
+    66205626368,
+    62273835008,
+    535506944
+  ],
+  "space_after": [
+    66205626368,
+    60195086336,
+    2614255616
+  ]
+}

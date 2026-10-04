@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.25s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_media-58784d191866234f)
+
+running 1 test
+received=30 pcm=14400 lost=2 overflow=2 late=0
+
+thread 'transport::duration_tests::scheduled_jitter_output_delay_preserves_authenticated_packets' (28923200) panicked at crates/media/src/transport.rs:1318:9:
+assertion `left == right` failed
+  left: 2
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test transport::duration_tests::scheduled_jitter_output_delay_preserves_authenticated_packets ... FAILED
+
+failures:
+
+failures:
+    transport::duration_tests::scheduled_jitter_output_delay_preserves_authenticated_packets
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.60s
+
+error: test failed, to rerun pass `-p neonmix-media --lib`

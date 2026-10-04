@@ -1,0 +1,8 @@
+error: failed to load manifest for workspace member `/Volumes/projects-mac/NeonMix/crates/airplay-adapter`
+referenced via `crates/*` by workspace at `/Volumes/projects-mac/NeonMix/Cargo.toml`
+
+Caused by:
+  failed to read `/Volumes/projects-mac/NeonMix/crates/airplay-adapter/Cargo.toml`
+
+Caused by:
+  No such file or directory (os error 2)

@@ -1,0 +1,6 @@
+{
+  "file": "apps/hub/src/media_worker.rs",
+  "before_sha256": "e73cdeb4ecd7fe83049f23de867eec568369216ac1e2055ca5cae11f108b4296",
+  "after_sha256": "d97d0b0a7d09021563db58e805d37975b68536fe338c7abef0838abe041430b8",
+  "scope": "cfg(test) only; capture assertions under lock then release lock before asserting"
+}

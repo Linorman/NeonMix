@@ -1,0 +1,26 @@
+[
+  {
+    "name": "member-fmt",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "-c",
+      "import subprocess,json;d=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version','1','--locked']));cmd=['cargo','fmt'];[cmd.extend(['-p',p['name']]) for p in d['packages'] if p['id'] in d['workspace_members']];raise SystemExit(subprocess.run(cmd+['--','--check']).returncode)"
+    ],
+    "exit_code": 0,
+    "seconds": 1.123,
+    "start_epoch": 1790967145.1695201,
+    "end_epoch": 1790967146.292469,
+    "cpu": {
+      "samples": 1,
+      "mean": 30.384,
+      "p95": 30.384,
+      "max": 30.384,
+      "minimum_headroom": 69.616,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  }
+]

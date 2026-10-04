@@ -1,0 +1,20 @@
+{
+  "owned_processes_before_cleanup": [],
+  "stopped_gui_background_pids": [],
+  "remaining_owned_neonmix_processes": [],
+  "preserved_ambient_processes": [
+    {
+      "ProcessId": 33236,
+      "Name": "neonmix-background.exe",
+      "ExecutablePath": "E:\\Desktop\\NeonMix-test\\target\\release\\neonmix-background.exe",
+      "CommandLine": "\"E:\\Desktop\\NeonMix-test\\target\\release\\neonmix-background.exe\" --state-dir .local/desktop"
+    }
+  ],
+  "removed_owned_fixture_paths": [
+    ".local\\windows-lan",
+    ".local\\gui-test-state"
+  ],
+  "system_settings_changed": false,
+  "outside_authorized_root_deleted": false,
+  "preserved": "r04 fresh source/target/native worker/artifacts; all previous roots/packages/manual sessions"
+}

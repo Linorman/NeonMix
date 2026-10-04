@@ -1,0 +1,15 @@
+{
+  "archive": "artifacts/packages/NeonMix-Ubuntu-ARM64-20261004.tar.gz",
+  "bytes": 126364060,
+  "sha256": "cba300f0886f033068ca90c9f8e9264352aa1566bf71f0aa81afb31b9d3ddd66",
+  "regular_members": 1114,
+  "manifest": "u26-20261004/SHA256SUMS",
+  "checked": 1113,
+  "differences": [],
+  "forbidden_runtime_paths": [],
+  "unsafe_paths": [],
+  "launcher_modes": {
+    "u26-20261004/neonmix": 493,
+    "u26-20261004/start-desktop.sh": 493
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "cause": "GStreamer drop-on-latency evicts the oldest queued packet by RTP timestamp span >= latency, independently of deadline and native loss events.",
+  "upstream_source": "https://raw.githubusercontent.com/GStreamer/gstreamer/1.24.2/subprojects/gst-plugins-good/gst/rtpmanager/gstrtpjitterbuffer.c",
+  "upstream_lines": [
+    3320,
+    3345
+  ],
+  "controlled_reproduction": {
+    "platform": "macOS",
+    "gstreamer": "1.28.7",
+    "source_packet_ms": 10,
+    "jitter_deadline_ms": 40,
+    "first_output_task_hold_ms": 35,
+    "received": 30,
+    "pcm_frames": 14400,
+    "before": {
+      "lost": 2,
+      "overflow_plc": 2,
+      "late": 0
+    },
+    "after": {
+      "lost": 0,
+      "overflow_plc": 0,
+      "late": 0
+    }
+  },
+  "fix": {
+    "jitter_deadline_ms": 40,
+    "drop_on_latency": false,
+    "authenticated_inflight_packet_capacity": 32,
+    "capacity_exhausted_behavior": "Revoke this media context; expose jitter_capacity_exhausted. Other bounded ingress and decoded queues are unchanged."
+  },
+  "validation": {
+    "media_tests_passed": 18,
+    "media_tests_failed": 0,
+    "media_clippy_all_targets_strict": "passed"
+  },
+  "limits": "A controlled native output-task scheduling delay reproduces the same local overflow mechanism. Ubuntu was not rerun and its precise scheduling trigger is not proven by these counters."
+}

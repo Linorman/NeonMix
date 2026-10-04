@@ -1,0 +1,12 @@
+{
+  "active_test_neonmix_processes": [],
+  "removed_owned_fixture_paths": [
+    "/home/parallels/NeonMix/.local/run copy/u26",
+    "/home/parallels/NeonMix/.local/pkg check/u26-211335",
+    "/home/parallels/NeonMix/.local/pkg ready/u26-211335"
+  ],
+  "retained_package": "/home/parallels/NeonMix/artifacts/packages/u26-211335",
+  "retained_archive": "/home/parallels/NeonMix/artifacts/packages/u26-211335.tar.gz",
+  "system_settings_changed": false,
+  "default_audio_route_changed": false
+}

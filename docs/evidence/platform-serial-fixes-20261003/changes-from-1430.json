@@ -1,0 +1,12 @@
+[
+  "apps/hub/src/airplay.rs",
+  "apps/hub/src/server.rs",
+  "crates/audio-core/src/mixer.rs",
+  "crates/audio-core/tests/timed_mixer.rs",
+  "crates/media/src/transport.rs",
+  "crates/media/tests/security.rs",
+  "docs/AIRPLAY-CONTRACT.md",
+  "docs/MEDIA-CONTROL-CONTRACT.md",
+  "docs/STATUS.md",
+  "tools/airplay_multi_source_probe.py"
+]

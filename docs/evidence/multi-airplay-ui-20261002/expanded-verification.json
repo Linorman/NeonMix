@@ -1,0 +1,102 @@
+{
+  "platform": "macOS arm64",
+  "minimum_window_points": [
+    600,
+    440
+  ],
+  "scenarios": [
+    {
+      "file": "airplay-empty-600.png",
+      "fixture": "airplay-empty-600.json",
+      "requested_points": [
+        600,
+        760
+      ],
+      "image_pixels": [
+        1200,
+        1520
+      ],
+      "source_count": 0,
+      "surface": "same AirPlay panel in isolated preview"
+    },
+    {
+      "file": "airplay-name-errors-600.png",
+      "fixture": "airplay-name-errors-600.json",
+      "requested_points": [
+        600,
+        900
+      ],
+      "image_pixels": [
+        1200,
+        1800
+      ],
+      "source_count": 0,
+      "surface": "same AirPlay panel in isolated preview"
+    },
+    {
+      "file": "airplay-four-1600.png",
+      "fixture": "airplay-four-1600.json",
+      "requested_points": [
+        1600,
+        900
+      ],
+      "image_pixels": [
+        3200,
+        1800
+      ],
+      "source_count": 4,
+      "surface": "same AirPlay panel in isolated preview"
+    },
+    {
+      "file": "mixer-four-long-name-1600.png",
+      "fixture": "mixer-four-long-name-1600.json",
+      "requested_points": [
+        1600,
+        900
+      ],
+      "image_pixels": [
+        3200,
+        1800
+      ],
+      "source_count": 4,
+      "surface": "mixer"
+    },
+    {
+      "file": "alias-invalid-600.png",
+      "fixture": "alias-invalid-600.json",
+      "requested_points": [
+        600,
+        800
+      ],
+      "image_pixels": [
+        1200,
+        1600
+      ],
+      "source_count": 1,
+      "surface": "devices"
+    },
+    {
+      "file": "alias-retained-600.png",
+      "fixture": "alias-retained-600.json",
+      "requested_points": [
+        600,
+        800
+      ],
+      "image_pixels": [
+        1200,
+        1600
+      ],
+      "source_count": 1,
+      "surface": "devices"
+    }
+  ],
+  "unit_tests": {
+    "identity": 27,
+    "desktop": 16
+  },
+  "limitations": [
+    "synthetic state; preview starts no background and plays no audio",
+    "draft error state is injected for visual inspection; asynchronous matching is unit-tested"
+  ],
+  "regression": "Long error status at 600px no longer expands bottom bar over the page; full message is retained for hover and accessibility."
+}

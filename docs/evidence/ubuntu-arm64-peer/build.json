@@ -1,0 +1,167 @@
+{
+  "scope": "E00/E01, Ubuntu 24.04 ARM64 Parallels guest; not E02-E04 or bare-metal acceptance",
+  "binaries": {
+    "neonmix-audio": {
+      "sha256": "cee904af5d83da57af764bdbcfbddf58898333e6cadd4c253ea47233224e0188",
+      "debug_sha256": "1b87fdf94ddc346d6319984430fdefd9141afdbdd8d943991fa636eec2a9c143",
+      "ldd": "\tlinux-vdso.so.1 (0x0000eea5f3588000)\n\tlibpipewire-0.3.so.0 => /home/parallels/NeonMix/.local/native/root/usr/lib/aarch64-linux-gnu/libpipewire-0.3.so.0 (0x0000eea5f32e0000)\n\tlibasound.so.2 => /home/parallels/NeonMix/.local/native/root/usr/lib/aarch64-linux-gnu/libasound.so.2 (0x0000eea5f31b0000)\n\tlibgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000eea5f3170000)\n\tlibm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000eea5f30c0000)\n\tlibc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000eea5f2f00000)\n\t/lib/ld-linux-aarch64.so.1 (0x0000eea5f3540000)\n"
+    },
+    "neonmix-desktop": {
+      "sha256": "b9f45c68f2b3195da5b082b997fad3298a3d73d0026c1c6eb4889cc7f3be62b7",
+      "debug_sha256": "9bfa28fd879019f4944c6290b087bdbacce887bb72b6beb7447640c75f929a16",
+      "ldd": "\tlinux-vdso.so.1 (0x0000e65efe45c000)\n\tlibgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000e65efdaf0000)\n\tlibm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000e65efda40000)\n\tlibc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000e65efd880000)\n\t/lib/ld-linux-aarch64.so.1 (0x0000e65efe420000)\n"
+    }
+  },
+  "environment": {
+    "platform": "Linux-6.14.0-27-generic-aarch64-with-glibc2.39",
+    "architecture": "aarch64",
+    "virtualization": "parallels",
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: aarch64-unknown-linux-gnu\nrelease: 1.95.0\nLLVM version: 22.1.2\n",
+    "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "scope": "E00/E01 packages from current working-tree snapshot; E02-E04 integration not tested",
+    "base_commit": "1fc338f",
+    "source_changes_after_snapshot": [
+      "tools/dev",
+      "tools/prepare_linux.sh"
+    ],
+    "native_debs_sha256": {
+      "libwayland-dev_1.22.0-2.1build1_arm64.deb": "6d94b723710aae35d0ff765978818601f4320c1dc4e0eec57e73b000943a1758",
+      "libpipewire-0.3-dev_1.0.5-1ubuntu3.3_arm64.deb": "64b0265107acac5d7dda408754f21f7532d02c20dc38ef67cf9a0ce9158965ac",
+      "libxi-dev_2%3a1.8.1-1build1_arm64.deb": "f7596e9d21f81ebef7149f07ca7014c0544fb732e234f5ce0ab19a6586a5b0c9",
+      "pkgconf_1.8.1-2build1_arm64.deb": "818ac3b4ae09f3747098872c7d5a9e387118798155b0107bb1625c2ab675664b",
+      "libasound2-dev_1.2.11-1ubuntu0.3_arm64.deb": "21a6f4948138f88652b33de0986ddcfdb27e9d37a9c12ada4f1b01fbcf1618ea",
+      "libxrandr-dev_2%3a1.5.2-2build1_arm64.deb": "7f965ded4be71fee097bddcbb051e42ef425f5018b59888533457cc83923e554",
+      "libspa-0.2-dev_1.0.5-1ubuntu3.3_arm64.deb": "9621299a86017a44d8d4af7e64aa40b19288d6efe24ded25be5325486d5b2b7f",
+      "pkgconf-bin_1.8.1-2build1_arm64.deb": "bcd0d24c48b8b73ed7ba20ffc21a3575d5d9bdd53c3cee5a8051b7bde5fbf638",
+      "libxkbcommon-dev_1.6.0-1build1_arm64.deb": "de01e5d50d114ddc5419d61cde552d8a956a2dc9e6c004ce50b7f37a02a47c1d",
+      "libx11-dev_2%3a1.8.7-1build1_arm64.deb": "69b028d3917aae9fb44b2c56aa94739c7a1711afd3c86ccc7117dbf63a91c3c3",
+      "libglx-dev_1.7.0-1build1_arm64.deb": "dc75223f01a41118e9ba8a7861ed9c0a01578c85cf303a9fecf48515b82fe352",
+      "libclang-common-18-dev_1%3a18.1.3-1ubuntu1_arm64.deb": "b9475c49e5613ce2f98630a269864fb34651e3de275d40dffb2dbdc9863f7fb9",
+      "libpipewire-0.3-0t64_1.0.5-1ubuntu3.3_arm64.deb": "2be10a9a87efa3d4456ca178a89673db79e4258bc52935fdea204434caacd252",
+      "libasound2t64_1.2.11-1ubuntu0.3_arm64.deb": "de49425b8480c651eae0ffbe24a1f1d88b2ea578f95a291b95f78fae10662ec6",
+      "libgl-dev_1.7.0-1build1_arm64.deb": "9bc28c1265bb82ff2498c234893cbb891529e43fa6b100c007ba677c0a77bbc1",
+      "libpkgconf3_1.8.1-2build1_arm64.deb": "f476cb81e1ecec6bf974f21181469cf5edcc749c4ead621469cdbf584dfd3be8"
+    }
+  },
+  "checks": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-io",
+        "-p",
+        "neonmix-linux",
+        "-p",
+        "neonmix-audio",
+        "-p",
+        "neonmix-desktop",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.061
+    },
+    "core": {
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "-p",
+        "neonmix-core",
+        "--lib",
+        "--test",
+        "audio_contract",
+        "--test",
+        "realtime",
+        "--offline",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 8.764,
+      "passed_test_count": 21
+    },
+    "io": {
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "-p",
+        "neonmix-io",
+        "--test",
+        "pipewire_buffer",
+        "--offline",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 3.675,
+      "passed_test_count": 2
+    },
+    "audio": {
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "-p",
+        "neonmix-audio",
+        "--bin",
+        "neonmix-audio",
+        "--test",
+        "cli",
+        "--offline",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 22.258,
+      "passed_test_count": 6
+    },
+    "desktop": {
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "-p",
+        "neonmix-desktop",
+        "--offline",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 12.526,
+      "passed_test_count": 1
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "--release",
+        "-p",
+        "neonmix-audio",
+        "-p",
+        "neonmix-desktop",
+        "--offline",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 18.503
+    },
+    "simulate": {
+      "command": [
+        "/home/parallels/NeonMix/target/release/neonmix-audio",
+        "simulate",
+        "--input-rate",
+        "44100",
+        "--output-rate",
+        "48000",
+        "--seconds",
+        "2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.011
+    }
+  }
+}

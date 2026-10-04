@@ -1,0 +1,12 @@
+[
+  {
+    "Name": "AudioEndpointBuilder",
+    "Status": 4,
+    "StartType": 2
+  },
+  {
+    "Name": "Audiosrv",
+    "Status": 4,
+    "StartType": 2
+  }
+]

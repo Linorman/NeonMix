@@ -1,0 +1,17 @@
+{
+  "machine": "Apple M4 Pro, macOS",
+  "build": "tools/dev cargo build -p neonmix-desktop --release --locked --features screenshot",
+  "method": "preview mode with docs/evidence/multi-airplay-ui-20261002/fixture.json; 5 s warm-up, then process CPU time over 30 s / wall time",
+  "note": "Baseline repaints at 5 Hz (request_repaint_after 200 ms) even when idle; meters in preview are static.",
+  "samples_percent_of_one_core": {
+    "mixer_1100x760": 1.03,
+    "hub_1100x760": 1.03,
+    "diagnostics_1100x760": 1.16,
+    "mixer_1600x1000": 1.23
+  },
+  "targets_after_rebuild": {
+    "idle_no_audio": "<= baseline + 0.5 (no live repaint requests)",
+    "live_flow_four_lanes_1100x760": "<= 8.0",
+    "live_flow_four_lanes_1600x1000": "<= 10.0"
+  }
+}

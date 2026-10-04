@@ -1,0 +1,35 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "scope": "isolated loopback TLS Hub API, real CoreAudio output, integrated Speaker worker lifecycle, synthetic native SRTP Sender",
+  "credential_scope": "explicit init laboratory bearer tokens; not production credential-storage acceptance",
+  "binary_sha256": {
+    "neonmix-hub": "49eabd81bf3ff025e01c8f5b687031c52cffb71bc4d07ae04256079b789870a7",
+    "neonmix-airplay-worker": "b95246f755554b25de3230c28a5fdd1455358af78acf2e9efcdcc2689d23013b"
+  },
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "room_gain_db": -12,
+  "native_sender_gain_db": -36,
+  "passed": true,
+  "scenarios": {
+    "tls13_trusted_fixture_certificate_and_real_output": true,
+    "two_enable_disable_rounds_and_worker_cleanup": true,
+    "receiver_file_identity_and_trust_survive_worker_restart": true,
+    "admin_only_pin_member_write_denied_stale_revision_denied": true,
+    "missing_corrupt_receiver_key_fails_without_identity_replacement": true,
+    "sigkill_worker_preserves_hub_output_and_authenticated_native_sender": true
+  },
+  "limitations": [
+    "no Apple AirPlay sender was attached",
+    "no analog latency or audio/video synchronization measurement",
+    "no output unplug/loss injection"
+  ],
+  "output_frames_at_start": 8960,
+  "output_frames_around_worker_crash": {
+    "before": 78336,
+    "after": 85248
+  },
+  "native_lane_rms_after_worker_crash": 0.011215748265385628,
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

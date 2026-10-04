@@ -1,0 +1,75 @@
+{
+  "original_neonmix_processes_preserved": true,
+  "no_new_neonmix_processes_left": true,
+  "original_processes": [
+    {
+      "pid": 81271,
+      "ppid": 1,
+      "command": "/Volumes/projects-mac/NeonMix/target/release/neonmix-background"
+    },
+    {
+      "pid": 98624,
+      "ppid": 1,
+      "command": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-background"
+    },
+    {
+      "pid": 98625,
+      "ppid": 98624,
+      "command": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-hub"
+    },
+    {
+      "pid": 98648,
+      "ppid": 98625,
+      "command": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-airplay-worker"
+    }
+  ],
+  "after": [
+    {
+      "pid": 81271,
+      "ppid": 1,
+      "command": "/Volumes/projects-mac/NeonMix/target/release/neonmix-background"
+    },
+    {
+      "pid": 98624,
+      "ppid": 1,
+      "command": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-background"
+    },
+    {
+      "pid": 98625,
+      "ppid": 98624,
+      "command": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-hub"
+    },
+    {
+      "pid": 98648,
+      "ppid": 98625,
+      "command": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677/bin/neonmix-airplay-worker"
+    }
+  ],
+  "runtime_fixture_cleanup": {
+    "four-airplay": {
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true
+    },
+    "mix-3plus1": {
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true
+    },
+    "mix-2plus2": {
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true
+    },
+    "mix-1plus3": {
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true
+    },
+    "mix-0plus4": {
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true
+    }
+  }
+}

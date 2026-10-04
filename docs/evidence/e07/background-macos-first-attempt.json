@@ -1,0 +1,14 @@
+{
+  "platform": "macOS",
+  "passed": false,
+  "stage": "test_tone",
+  "reported_error": "输出设备故障；检查所选设备和输出绑定",
+  "raw_child_output_retained": false,
+  "root_cause": "unconfirmed: the first implementation classified a nonzero child exit but did not retain its native numeric fault telemetry",
+  "follow_up": {
+    "same_audio_cli_direct_play": "passed: 191 callbacks, zero errors, low-level 2-second tone",
+    "same_full_background_probe_retry": "passed",
+    "retry_evidence": "background-macos.json"
+  },
+  "interpretation": "The first failure is retained. Successful retries do not establish the original native fault's cause."
+}

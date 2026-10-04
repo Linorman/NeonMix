@@ -1,0 +1,23 @@
+{
+  "command": [
+    "tools/dev",
+    "python3",
+    "tools/airplay_multi_source_probe.py",
+    "--output",
+    "coreaudio:BlackHole2ch_UID",
+    "--report",
+    "artifacts/platform-serial-fixes-20261003/four-airplay-diagnostic-retest.json",
+    "--sources",
+    "4",
+    "--status-readers",
+    "4",
+    "--steady-seconds",
+    "30",
+    "--fault-cycles",
+    "3"
+  ],
+  "exit_code": 1,
+  "start_epoch": 1791013229.920318,
+  "end_epoch": 1791013291.011585,
+  "reason": "Initial four-source timeout; improve wait phase, source pacing and output state diagnostics. Same product binary and load; preserve initial failure."
+}

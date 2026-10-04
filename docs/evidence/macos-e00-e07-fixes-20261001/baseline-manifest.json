@@ -1,0 +1,15 @@
+{
+  "apps/desktop/src/main.rs": "6fa915236569a52c37af27948f8ed0db87c801b4b654adff9d4d4ae080c295bf",
+  "apps/desktop/src/widgets.rs": "bbb563a643a423b77b8a1e964a9f35b1b663562e5fa80dfe53a2f7e2925ea572",
+  "apps/desktop/src/theme.rs": "1dce580a8b111fac1d1b49c35bfbb5139a000ae060e001cdb13e018c6aed9dd0",
+  "apps/desktop/src/animation.rs": "e0b08985526d0b4f667d89898ecdbb7550b0766e3b687ed45405cf898acee91c",
+  "crates/desktop-service/src/daemon.rs": "15a08a5bacb31d947ad683be36915963db6f3807a07ad339c4469f386093433a",
+  "apps/hub/src/airplay.rs": "9ce21dbdf77b664bb006b3cc355050f68e04988a17e8df496a7e476a0160df22",
+  "DESIGN.md": "7a7ab7a0ecb2e66588052d7193a4125f8e13937854f3ac7fafffeba6f04f8f0d",
+  "UX-CONTRACT.md": "b79639b0e601bb0a229cbeac71acaecfb8fa897e80d37af9a7ffcf087af1cad0",
+  "docs/DESKTOP-IPC-CONTRACT.md": "498daf6d42523759c4e3c6abe454d438b63fd119a109ab9169032468c04ebc75",
+  "tools/e07_native_ui_probe.py": "c3fe1bc27f36a2567d9b84a8ca5eca91b50f825d72df807b5de86d615ee8a66f",
+  "tools/macos_ui_visual_probe.py": "845d2d0e4ccf8b991f4c811450acdf571748e5fae7e5675091c61d77f9d8af80",
+  "tools/macos_sender_ui_probe.py": "49b117a6aa0fe409538184019efad0b427e84853a695c6ca1109f7fd2a838b3a",
+  "tools/macos_ui_workflow_probe.py": "97c43e5c299be9cea215367117515dd5088b8cef71d574067b33f634d83bf500"
+}

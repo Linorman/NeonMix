@@ -1,0 +1,149 @@
+[
+  {
+    "name": "four-contention",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/four-contention.json",
+      "--sources",
+      "4",
+      "--fault-cycles",
+      "2",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 1,
+    "seconds": 33.931,
+    "started_at": 1791004872.7477512,
+    "ended_at": 1791004906.678987
+  },
+  {
+    "name": "3plus1",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/3plus1.json",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 41.79,
+    "started_at": 1791004906.6794815,
+    "ended_at": 1791004948.4698982
+  },
+  {
+    "name": "2plus2",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/2plus2.json",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 37.441,
+    "started_at": 1791004948.470546,
+    "ended_at": 1791004985.9120162
+  },
+  {
+    "name": "1plus3",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/1plus3.json",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 0,
+    "seconds": 34.66,
+    "started_at": 1791004985.9123278,
+    "ended_at": 1791005020.5723293
+  },
+  {
+    "name": "0plus4",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/0plus4.json",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--steady-seconds",
+      "60"
+    ],
+    "exit_code": 0,
+    "seconds": 61.589,
+    "started_at": 1791005020.5728445,
+    "ended_at": 1791005082.161501
+  },
+  {
+    "name": "mix-control",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/mix-control.json",
+      "--scenario",
+      "mix-control",
+      "--sources",
+      "2",
+      "--status-readers",
+      "4"
+    ],
+    "exit_code": 0,
+    "seconds": 3.794,
+    "started_at": 1791005082.1618197,
+    "ended_at": 1791005085.9553585
+  },
+  {
+    "name": "management",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/tl3/management.json",
+      "--scenario",
+      "management",
+      "--sources",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 4.749,
+    "started_at": 1791005085.9558198,
+    "ended_at": 1791005090.7045782
+  }
+]

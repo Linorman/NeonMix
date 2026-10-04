@@ -1,0 +1,48 @@
+[
+  {
+    "name": "sources",
+    "command": [
+      "tools/dev",
+      "python3",
+      "tools/prepare_airplay.py",
+      "--sources-only"
+    ],
+    "exit_code": 0,
+    "started_epoch": 1791043820.084237,
+    "ended_epoch": 1791043820.420629
+  },
+  {
+    "name": "configure",
+    "command": [
+      "tools/dev",
+      "cmake",
+      "-S",
+      "apps/airplay-worker",
+      "-B",
+      ".local/airplay/build",
+      "-DCMAKE_BUILD_TYPE=Release"
+    ],
+    "exit_code": 0,
+    "started_epoch": 1791043820.4211829,
+    "ended_epoch": 1791043820.651872
+  },
+  {
+    "name": "build",
+    "command": [
+      "tools/dev",
+      "cmake",
+      "--build",
+      ".local/airplay/build",
+      "--parallel",
+      "2",
+      "--target",
+      "neonmix-airplay-worker",
+      "neonmix-airplay-audio-probe",
+      "neonmix-airplay-probe-crypto",
+      "neonmix-airplay-identity-probe"
+    ],
+    "exit_code": 0,
+    "started_epoch": 1791043820.6521869,
+    "ended_epoch": 1791043826.132065
+  }
+]

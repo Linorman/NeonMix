@@ -1,0 +1,12 @@
+{
+  "platform": "macOS",
+  "checks": {
+    "receiver_files_unchanged": true,
+    "hub_id_unchanged": true,
+    "ready": true,
+    "pairing_window_open": true,
+    "known_client_count": 1
+  },
+  "passed": true,
+  "scope": "real manual fixture stop/start; preserves previously paired iPad identity; iPhone UI pending"
+}

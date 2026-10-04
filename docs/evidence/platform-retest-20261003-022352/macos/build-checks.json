@@ -1,0 +1,43 @@
+[
+  {
+    "name": "release",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 72.137
+  },
+  {
+    "name": "worker-build",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "-c",
+      "from pathlib import Path; p=Path('tools/prepare_airplay.py');exec(compile(p.read_text().replace(\"'--parallel','8'\",\"'--parallel','2'\"),str(p),'exec'),{'__file__':str(p.resolve()),'__name__':'__main__'})"
+    ],
+    "exit_code": 0,
+    "seconds": 5.881
+  },
+  {
+    "name": "worker-probes-build",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "cmake",
+      "--build",
+      ".local/airplay/build",
+      "--target",
+      "neonmix-airplay-probe-crypto",
+      "neonmix-airplay-audio-probe",
+      "neonmix-airplay-identity-probe",
+      "--parallel",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 1.752
+  }
+]

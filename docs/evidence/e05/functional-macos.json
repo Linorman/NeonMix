@@ -1,0 +1,109 @@
+{
+  "passed": true,
+  "platform": "darwin",
+  "scope": "macOS local functional E05; no Windows/Linux runtime or cross-machine performance claim",
+  "binary_sha256": "e182030816e6304bd147ef5df7bb6bd7c01992349e152b088d6da748ec0551bd",
+  "scenarios": {
+    "native_vault_write_read_delete": true,
+    "same_name_candidates": [
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "127.0.0.1:65491",
+            "url": "https://127.0.0.1:65491"
+          }
+        ],
+        "hub_id": "5f0a1994-ddf5-4214-80ee-5ce8d170c544",
+        "instance": "NeonMix-5f0a1994ddf5421480ee5ce8d170c544-9b1413d82893._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      },
+      {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:65490",
+            "url": "https://10.11.11.147:65490"
+          },
+          {
+            "address": "10.211.55.2:65490",
+            "url": "https://10.211.55.2:65490"
+          },
+          {
+            "address": "10.254.101.147:65490",
+            "url": "https://10.254.101.147:65490"
+          },
+          {
+            "address": "10.37.129.2:65490",
+            "url": "https://10.37.129.2:65490"
+          },
+          {
+            "address": "127.0.0.1:65490",
+            "url": "https://127.0.0.1:65490"
+          },
+          {
+            "address": "192.168.100.111:65490",
+            "url": "https://192.168.100.111:65490"
+          },
+          {
+            "address": "192.168.100.208:65490",
+            "url": "https://192.168.100.208:65490"
+          }
+        ],
+        "hub_id": "9ba79873-fae7-45d1-836a-1c982bed11da",
+        "instance": "NeonMix-9ba79873fae745d1836a1c982bed11da-eb36ee3e0d73._neonmix._tcp.local.",
+        "room_name": "E05 同名房间",
+        "version": 1
+      }
+    ],
+    "automatic_pair_and_repeat_native_profile": {
+      "credential": "/Volumes/projects-mac/NeonMix/.local/tmp/e05-9wxtb6w0/sender.json",
+      "credential_store": "platform",
+      "device_id": "477f1971-9fd3-4c5e-a5ba-dfbb80b01764",
+      "event": "paired",
+      "hub_id": "9ba79873-fae7-45d1-836a-1c982bed11da"
+    },
+    "unpaired_and_wrong_certificate_rejected": {
+      "http": 401,
+      "client_error": "error sending request for url (https://127.0.0.1:65491/v1/identity)"
+    },
+    "changed_key_rejected_and_duplicate_identity_candidates": {
+      "client_error": "error sending request for url (https://127.0.0.1:65491/v1/identity)",
+      "instances": [
+        "NeonMix-9ba79873fae745d1836a1c982bed11da-9b1413d82893._neonmix._tcp.local.",
+        "NeonMix-9ba79873fae745d1836a1c982bed11da-eb36ee3e0d73._neonmix._tcp.local."
+      ]
+    },
+    "same_certificate_foreign_hub_uuid_rejected": "authenticated Hub UUID differs from paired identity",
+    "single_use_exact_retry": {
+      "hub_id": "9ba79873-fae7-45d1-836a-1c982bed11da",
+      "device_id": "f6e6a471-5cff-4130-9ee0-20e96311b6ea",
+      "revision": 4
+    },
+    "cancel_and_client_server_expiry": true,
+    "revoke_control_and_active_protected_media": {
+      "pcm_before": 49920,
+      "sender_exit": 1,
+      "watch_exit": 1
+    },
+    "goodbye_address_change_persistent_trust_revocation_and_grant_expiry": {
+      "old_port": 65490,
+      "new_port": 49187,
+      "stable_hub_id": "9ba79873-fae7-45d1-836a-1c982bed11da"
+    },
+    "lost_response_local_recovery": true,
+    "missing_vault_secret_fails_closed": true,
+    "ipv6_discovery_media_and_wss_address_recovery": {
+      "media_frames": 49920,
+      "subscriptions": 2
+    },
+    "abrupt_offline_active_verification": true
+  },
+  "pairing_seconds_single_sample": 0.8197,
+  "cleanup": {
+    "platform_entries_attempted": 8,
+    "failed": [],
+    "temporary_profiles_removed": true
+  }
+}

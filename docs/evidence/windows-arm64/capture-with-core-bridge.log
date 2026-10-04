@@ -1,0 +1,1 @@
+error=WASAPI capture discontinuity: flags=0x1, device_position=1653600, expected_position=Some(1652640), frames=480, qpc_100ns=324922461809; frames=1565280

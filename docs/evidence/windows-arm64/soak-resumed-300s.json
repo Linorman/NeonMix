@@ -1,0 +1,54 @@
+{
+  "seconds": 300,
+  "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+  "passed": false,
+  "capture_exit_code": 1,
+  "capture_fault": {
+    "event": "capture_fault",
+    "info": {
+      "actual_period_frames": 480,
+      "backend": "wasapi",
+      "device_id": "wasapi:{0.0.0.00000000}.{f47dbf0e-6962-462c-889e-734b7a257741}",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 48000
+      },
+      "requested_period_frames": null,
+      "resampler_delay_frames": 0,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "measurement": {
+      "analyzed_frames": 590400,
+      "estimated_frequency_hz": 436.9991234926022,
+      "peak": 0.015848932787775993,
+      "positive_zero_crossings": 5371,
+      "rms": 0.011206800748839528
+    },
+    "stats": {
+      "callback_max_ns": 281958,
+      "callback_over_budget": 0,
+      "callbacks": 1230,
+      "clock_epoch": 1,
+      "discontinuities": 2,
+      "dropped_frames": 0,
+      "errors": 1,
+      "frames": 590400,
+      "last_arrival_ns": 12235874083,
+      "last_device_ns": 30264470821600,
+      "last_error": 5,
+      "native_device_frame_position": null,
+      "native_internal_frames": null,
+      "native_stream_frames": null,
+      "no_data_intervals": 0,
+      "peak": 0.015848897397518158,
+      "period_max": 480,
+      "period_min": 480,
+      "presented_frames": 0,
+      "silent_frames": 12,
+      "stale_frames": 0,
+      "submitted_frames": 0
+    }
+  },
+  "error": "capture stopped on a native fault"
+}

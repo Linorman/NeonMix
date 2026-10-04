@@ -1,0 +1,23 @@
+{
+  "pair_exit_code": 0,
+  "send_exit_code": 0,
+  "samples": 28,
+  "active_samples": 28,
+  "passed": false,
+  "max_lost_packets": 398,
+  "max_overflow_plc_packets": 398,
+  "max_queue_drops": 0,
+  "max_pcm_sink_dropped": 1,
+  "max_late_packets": 0,
+  "max_pcm_timing_gap_count": 1,
+  "max_underrun_frames": 16320,
+  "max_output_errors": 0,
+  "max_callback_over_budget": 0,
+  "mac_cpu": {
+    "aggregate_cpu_avg_percent": 35.73125806451613,
+    "aggregate_cpu_p95_percent": 53.993,
+    "aggregate_cpu_max_percent": 71.512,
+    "minimum_idle_percent": 28.488,
+    "cpu_condition_satisfied": true
+  }
+}

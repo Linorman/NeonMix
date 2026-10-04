@@ -1,0 +1,11 @@
+{
+  "target": "windows",
+  "endpoint": "https://192.168.100.186:17443",
+  "client_binary_sha256": "4d1c1ed97447951fc0b3e637924d72ae8dd6e4478ebdc202adbd4ae7deeab571",
+  "scope": "macOS synthetic -36dBFS native Sender to Windows LAN Hub, VB-Audio output",
+  "checks": {
+    "pair_exit_code": 1
+  },
+  "pair_error": "invitation expired\n",
+  "functional_connection_passed": false
+}

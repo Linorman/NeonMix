@@ -1,0 +1,132 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "binaries": {
+    "neonmix-hub": "fa9f4e5980de169f975b2320e607d840f1e00528dace80802825e8f47bdfb189",
+    "neonmix-airplay-worker": "be297c919d8f11c8d78ff40c32d843e44830927e351f2fc2096b7763f8868379"
+  },
+  "os_build": "26A5416b",
+  "source": "actual macOS system Sound output selector, same-host receiver",
+  "discovered": true,
+  "connected": false,
+  "audio_played": false,
+  "video_av_sync": "not measured",
+  "passed": false,
+  "pairing_ui_before": {
+    "cg_windows": [],
+    "ax_state": "false, true, 0"
+  },
+  "pairing_ui_after_selection": {
+    "cg_windows": [],
+    "ax_state": "false, true, 0"
+  },
+  "pin_ui_results": [
+    "AX -1719"
+  ],
+  "pairing_ui_after_wait": {
+    "cg_windows": [],
+    "ax_state": "false, true, 0"
+  },
+  "protocol_events": [
+    {
+      "body_bytes": 0,
+      "connection_id": 1,
+      "cseq_present": false,
+      "event": "open",
+      "method": "OTHER",
+      "outcome": "opened",
+      "protocol": "none",
+      "relative_ms": 2276,
+      "response_bytes": 0,
+      "route": "other",
+      "sent_bytes": 0,
+      "session_present": false,
+      "status": 0,
+      "type": "protocol_transport"
+    },
+    {
+      "at_worker_ms": 2327,
+      "method": "GET",
+      "route": "info",
+      "status": 200
+    },
+    {
+      "body_bytes": 70,
+      "connection_id": 1,
+      "cseq_present": true,
+      "event": "response",
+      "method": "GET",
+      "outcome": "complete",
+      "protocol": "RTSP/1.0",
+      "relative_ms": 2299,
+      "response_bytes": 440,
+      "route": "info",
+      "sent_bytes": 440,
+      "session_present": false,
+      "status": 200,
+      "type": "protocol_transport"
+    },
+    {
+      "at_worker_ms": 2330,
+      "method": "POST",
+      "route": "pair_pin_start",
+      "status": 200
+    },
+    {
+      "body_bytes": 0,
+      "connection_id": 1,
+      "cseq_present": true,
+      "event": "response",
+      "method": "POST",
+      "outcome": "complete",
+      "protocol": "RTSP/1.0",
+      "relative_ms": 2301,
+      "response_bytes": 97,
+      "route": "pair_pin_start",
+      "sent_bytes": 97,
+      "session_present": false,
+      "status": 200,
+      "type": "protocol_transport"
+    },
+    {
+      "body_bytes": 0,
+      "connection_id": 1,
+      "cseq_present": false,
+      "event": "close",
+      "method": "OTHER",
+      "outcome": "peer_closed",
+      "protocol": "none",
+      "relative_ms": 2302,
+      "response_bytes": 0,
+      "route": "other",
+      "sent_bytes": 0,
+      "session_present": false,
+      "status": 0,
+      "type": "protocol_transport"
+    }
+  ],
+  "playback_allowed": true,
+  "receiver_error": null,
+  "ingress": {
+    "accepted_packets": 0,
+    "clock_resets": 0,
+    "future_packets": 0,
+    "identity_rejections": 0,
+    "last_mapping_id": 0,
+    "last_presentation_time_ns": 0,
+    "last_source_rate": 0,
+    "last_source_sample_position": 0,
+    "last_uncertainty_ns": 0,
+    "late_packets": 0,
+    "malformed_packets": 0,
+    "output_latency_ns": 5312500,
+    "overflow_packets": 0,
+    "pending_bytes": 0,
+    "pending_frames": 0,
+    "released_packets": 0,
+    "timeline_rejections": 0
+  },
+  "default_outputs_restored": true,
+  "fixture_keychain_cleanup": true,
+  "fixture_files_removed": true
+}

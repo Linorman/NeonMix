@@ -1,0 +1,44 @@
+{
+  "platform": "macOS",
+  "os_build": "26A5416b",
+  "source": "actual macOS system Sound output selector, same-host receiver",
+  "discovered": true,
+  "connected": false,
+  "audio_played": false,
+  "video_av_sync": "not measured",
+  "passed": false,
+  "protocol_events": [
+    {
+      "method": "OPTIONS",
+      "route": "options",
+      "status": 200
+    },
+    {
+      "method": "OPTIONS",
+      "route": "options",
+      "status": 200
+    },
+    {
+      "method": "OPTIONS",
+      "route": "options",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "fp_setup",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "fp_setup",
+      "status": 200
+    },
+    {
+      "method": "ANNOUNCE",
+      "route": "audio",
+      "status": 501
+    }
+  ],
+  "fixture_keychain_cleanup": true,
+  "fixture_files_removed": true
+}

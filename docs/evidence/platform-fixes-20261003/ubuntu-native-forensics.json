@@ -1,0 +1,47 @@
+{
+  "source": "docs/evidence/platform-test-20261003/cross-platform/mac-to-ubuntu-samples.jsonl",
+  "first": {
+    "elapsed_seconds": 2.003,
+    "lost_packets": 12,
+    "late_packets": 0,
+    "overflow_plc_packets": 12,
+    "queue_drops": 3360,
+    "pcm_sink_dropped": 0,
+    "pcm_timing_gap_count": 0,
+    "packets": {
+      "duplicate": 0,
+      "highest_sequence": 31863,
+      "highest_timestamp": 1610460798,
+      "invalid": 0,
+      "received": 175,
+      "reordered": 0,
+      "timestamp_step_errors": 0
+    }
+  },
+  "last": {
+    "elapsed_seconds": 58.149,
+    "lost_packets": 445,
+    "late_packets": 0,
+    "overflow_plc_packets": 445,
+    "queue_drops": 154560,
+    "pcm_sink_dropped": 6,
+    "pcm_timing_gap_count": 10,
+    "packets": {
+      "duplicate": 0,
+      "highest_sequence": 37477,
+      "highest_timestamp": 1613155518,
+      "invalid": 0,
+      "received": 5789,
+      "reordered": 0,
+      "timestamp_step_errors": 0
+    }
+  },
+  "delta": {
+    "received": 5614,
+    "highest_sequence": 5614,
+    "highest_timestamp": 2694720
+  },
+  "sequence_gap": 0,
+  "expected_timestamp_delta": 2694720,
+  "scope": "Forensic analysis of previous Ubuntu run; not a new remote test"
+}

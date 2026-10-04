@@ -1,0 +1,58 @@
+{
+  "passed": false,
+  "requested_seconds": 300,
+  "capture_elapsed_ns": 300003341434,
+  "captured_frames": 14317824,
+  "macos_binaries": {
+    "neonmix-hub": "a631296869a4f3ec5afb5aecc0370fb40056a1ccc621b2beb4798053afbb19a7",
+    "neonmix-audio": "6fa6d07f8c0480f9311d7490c56ee40eb8001ee5a278e76ec2c37281a714908b"
+  },
+  "linux_binary_sha256": "fc8c4060f6ad3794319976c2f979d70e93791670ec377cb2447c061e407cfb78",
+  "hub_platform": "linux",
+  "senders": [
+    "macos",
+    "linux"
+  ],
+  "underrun_frames": 158400,
+  "capture_errors": 0,
+  "capture_callback_over_budget": 0,
+  "capture_stale_frames": 21248,
+  "capture_silent_frames": 32544,
+  "receivers": [
+    {
+      "authenticated": true,
+      "lost_packets": 1496,
+      "plc_samples": 718080,
+      "queue_drops": 468960,
+      "pcm_sink_dropped": 30,
+      "pcm_timing_gap_count": 51
+    },
+    {
+      "authenticated": true,
+      "lost_packets": 0,
+      "plc_samples": 0,
+      "queue_drops": 3360,
+      "pcm_sink_dropped": 0,
+      "pcm_timing_gap_count": 0
+    }
+  ],
+  "original_probe_passed": false,
+  "source_senders": {
+    "sender-a": {
+      "sent_packets": 30597,
+      "audio_queue_dropped": 0,
+      "queue_drops": 0,
+      "max_loop_gap_ns": 10785333,
+      "max_source_backlog_ns": 0,
+      "stop_event": "sender_stopped"
+    },
+    "sender-b": {
+      "sent_packets": 30299,
+      "audio_queue_dropped": 0,
+      "queue_drops": 0,
+      "max_loop_gap_ns": 91022459,
+      "max_source_backlog_ns": 72745516,
+      "stop_event": "sender_stopped"
+    }
+  }
+}

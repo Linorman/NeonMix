@@ -1,0 +1,70 @@
+{
+  "at": 1791047108.4454212,
+  "owned_neonmix_processes": [],
+  "private_fixture_entries": [],
+  "lan_fixture_deleted": true,
+  "source_verify": {
+    "at": 1791046786.861749,
+    "files": 522,
+    "differences": [],
+    "canonical_sha256": "322fda1b52872be7e880f750a02ef01fe0034895ecba6aa10741c504078de860",
+    "archive_sha256": "3cc83620794eceb5fabf635853d9ff56e194330a89e51ac69f4db76bffb08faa"
+  },
+  "route_table_unchanged": true,
+  "default_audio_device_writes_performed": false,
+  "persistent_system_settings_changed": false,
+  "old_package_exists": true,
+  "old_archive_exists": true,
+  "new_package_exists": true,
+  "new_archive_exists": true,
+  "relocated_validation_directory_removed": true,
+  "source_and_original_target_kept": true,
+  "new_package_has_runtime_state": false,
+  "no_invitation_remains": true,
+  "test_harness_log_gaps": [
+    "0plus4 first run removed native stderr before diagnostic collector; preserved original failure; unique same-strength diagnostic adds native logs but did not reproduce early exit",
+    "LAN sampled via redacted background diagnostic API; no terminal worker reason retained after receiver removal; Hub remained queryable until explicit cleanup"
+  ],
+  "units": {
+    "neonmix-delivery26u-checks": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-checks-cache": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-native": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-native-diagnostic": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-migrate": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-package": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-package-final": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-relocation": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-lan": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    },
+    "neonmix-delivery26u-finalize": {
+      "exit_code": 0,
+      "status": "RuntimeMaxUSec=infinity\nMainPID=0\nActiveState=inactive\n"
+    }
+  }
+}

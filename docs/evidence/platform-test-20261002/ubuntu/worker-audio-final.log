@@ -1,0 +1,6 @@
+{"type":"format","codec":"pcm_s16","source_rate":44100,"source_frame_count":352}
+{"type":"format","codec":"alac","source_rate":44100,"source_frame_count":4096}
+{"type":"format","codec":"aac_lc","source_rate":44100,"source_frame_count":1024}
+codec 1: 24 bounded PCM chunks; source44100, pcm48000, timestamp and RTP wrap preserved
+codec 2: 40 bounded PCM chunks; source44100, pcm48000, timestamp and RTP wrap preserved
+codec 4: 51 bounded PCM chunks; source44100, pcm48000, timestamp and RTP wrap preserved

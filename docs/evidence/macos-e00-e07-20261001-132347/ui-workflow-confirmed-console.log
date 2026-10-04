@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 90, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 75, in main
+    probe.main()
+    ~~~~~~~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 117, in main
+    app.press('总静音');wait_for(lambda:ipc(state,'snapshot',credential='hub/admin.json',hub=URL)['output']['muted'])
+                        ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_background_probe.py", line 54, in wait_for
+    raise RuntimeError(f"probe condition timed out: {last}")
+RuntimeError: probe condition timed out: False

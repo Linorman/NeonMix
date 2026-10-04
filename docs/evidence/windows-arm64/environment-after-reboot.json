@@ -1,0 +1,30 @@
+﻿{
+    "audio":  {
+                  "Name":  "High Definition Audio Device",
+                  "Status":  "OK"
+              },
+    "os":  {
+               "Caption":  "Microsoft Windows 11 Pro",
+               "BuildNumber":  "26100",
+               "LastBootUpTime":  "\/Date(1790795404557)\/",
+               "OSArchitecture":  "ARM 64-bit Processor"
+           },
+    "services":  [
+                     {
+                         "Name":  "AudioEndpointBuilder",
+                         "Status":  4
+                     },
+                     {
+                         "Name":  "Audiosrv",
+                         "Status":  4
+                     },
+                     {
+                         "Name":  "MMCSS",
+                         "Status":  4
+                     },
+                     {
+                         "Name":  "sshd",
+                         "Status":  4
+                     }
+                 ]
+}

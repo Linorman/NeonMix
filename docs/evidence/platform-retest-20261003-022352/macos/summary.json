@@ -1,0 +1,1152 @@
+{
+  "source": {
+    "files": 516,
+    "mismatch": [],
+    "unchanged": true,
+    "immutable_binary_unchanged": true
+  },
+  "binary_sha256": {
+    "neonmix-audio": "4aec539c54273504842c9fb6570939126b68061d4b05fc46a2a909ca5169fa29",
+    "neonmix-desktop": "f28a5a9c6edc3a531dbc84eeba2bc179bba9308eebfb2a0b273855a882e728ad",
+    "neonmix-hub": "765b8761577c79fc1ac4ef3624d6f0b31d8a17bc256aef1b57d8067658dda36d",
+    "neonmix-airplay-worker": "5cfa7d8a2fb91c9ccc4ee0ff6f941682a28f6bbf50ee745b5c3ddf766b9de09e",
+    "neonmix-background": "56c67d848e4d204da2f27aa73212f475e6b3999d1c0f1575cc991ca339c48c8d"
+  },
+  "fixture_output": "coreaudio:BlackHole2ch_UID",
+  "checks": {
+    "build": [
+      {
+        "name": "release",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "cargo",
+          "build",
+          "--workspace",
+          "--release",
+          "--locked"
+        ],
+        "exit_code": 0,
+        "seconds": 72.137
+      },
+      {
+        "name": "worker-build",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "-c",
+          "from pathlib import Path; p=Path('tools/prepare_airplay.py');exec(compile(p.read_text().replace(\"'--parallel','8'\",\"'--parallel','2'\"),str(p),'exec'),{'__file__':str(p.resolve()),'__name__':'__main__'})"
+        ],
+        "exit_code": 0,
+        "seconds": 5.881
+      },
+      {
+        "name": "worker-probes-build",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "cmake",
+          "--build",
+          ".local/airplay/build",
+          "--target",
+          "neonmix-airplay-probe-crypto",
+          "neonmix-airplay-audio-probe",
+          "neonmix-airplay-identity-probe",
+          "--parallel",
+          "2"
+        ],
+        "exit_code": 0,
+        "seconds": 1.752
+      }
+    ],
+    "quality": [
+      {
+        "name": "workspace-tests",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "cargo",
+          "test",
+          "--workspace",
+          "--locked",
+          "--",
+          "--test-threads=1"
+        ],
+        "exit_code": 0,
+        "seconds": 200.093,
+        "start_epoch": 1790966740.4858,
+        "end_epoch": 1790966940.5795698,
+        "cpu": {
+          "samples": 199,
+          "mean": 52.47,
+          "p95": 71.345,
+          "max": 81.438,
+          "minimum_headroom": 18.562,
+          "above80": 1,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "strict-clippy",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "cargo",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--locked",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit_code": 0,
+        "seconds": 67.588,
+        "start_epoch": 1790966940.582162,
+        "end_epoch": 1790967008.17038,
+        "cpu": {
+          "samples": 68,
+          "mean": 57.706,
+          "p95": 66.275,
+          "max": 69.591,
+          "minimum_headroom": 30.409,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "workspace-fmt",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "cargo",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "exit_code": 1,
+        "seconds": 0.509,
+        "start_epoch": 1790967008.17326,
+        "end_epoch": 1790967008.681803,
+        "cpu": {
+          "samples": 0,
+          "mean": null,
+          "p95": null,
+          "max": null,
+          "minimum_headroom": null,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": false
+        }
+      },
+      {
+        "name": "worker-protocol",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "apps/airplay-worker/probe.py"
+        ],
+        "exit_code": 1,
+        "seconds": 12.122,
+        "start_epoch": 1790967008.684649,
+        "end_epoch": 1790967020.8063328,
+        "cpu": {
+          "samples": 12,
+          "mean": 36.141,
+          "p95": 44.621,
+          "max": 44.621,
+          "minimum_headroom": 55.379,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "worker-pairing",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "apps/airplay-worker/pairing_probe.py"
+        ],
+        "exit_code": 1,
+        "seconds": 3.036,
+        "start_epoch": 1790967020.8090398,
+        "end_epoch": 1790967023.8453279,
+        "cpu": {
+          "samples": 3,
+          "mean": 35.949,
+          "p95": 38.782,
+          "max": 38.782,
+          "minimum_headroom": 61.218,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "worker-decoder",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          ".local/airplay/build/neonmix-airplay-audio-probe"
+        ],
+        "exit_code": 0,
+        "seconds": 1.014,
+        "start_epoch": 1790967023.8479528,
+        "end_epoch": 1790967024.862026,
+        "cpu": {
+          "samples": 1,
+          "mean": 40.394,
+          "p95": 40.394,
+          "max": 40.394,
+          "minimum_headroom": 59.606,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "worker-identity",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_identity_probe.py",
+          "--worker",
+          ".local/airplay/build/neonmix-airplay-worker",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/worker-identity.json"
+        ],
+        "exit_code": 1,
+        "seconds": 10.601,
+        "start_epoch": 1790967024.8647768,
+        "end_epoch": 1790967035.46596,
+        "cpu": {
+          "samples": 11,
+          "mean": 35.454,
+          "p95": 43.055,
+          "max": 43.055,
+          "minimum_headroom": 56.945,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      }
+    ],
+    "worker-retry": [
+      {
+        "name": "worker-protocol-retry",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/harness/protocol-diagnostic.py"
+        ],
+        "exit_code": 0,
+        "seconds": 1.119,
+        "start_epoch": 1790967116.3874948,
+        "end_epoch": 1790967117.506902,
+        "cpu": {
+          "samples": 1,
+          "mean": 31.417,
+          "p95": 31.417,
+          "max": 31.417,
+          "minimum_headroom": 68.583,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "worker-pairing-retry",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "apps/airplay-worker/pairing_probe.py"
+        ],
+        "exit_code": 0,
+        "seconds": 1.52,
+        "start_epoch": 1790967117.509847,
+        "end_epoch": 1790967119.029558,
+        "cpu": {
+          "samples": 1,
+          "mean": 36.234,
+          "p95": 36.234,
+          "max": 36.234,
+          "minimum_headroom": 63.766,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "worker-identity-retry",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_identity_probe.py",
+          "--worker",
+          ".local/airplay/build/neonmix-airplay-worker",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/worker-identity-retry.json"
+        ],
+        "exit_code": 0,
+        "seconds": 9.595,
+        "start_epoch": 1790967119.032385,
+        "end_epoch": 1790967128.62731,
+        "cpu": {
+          "samples": 10,
+          "mean": 35.671,
+          "p95": 55.333,
+          "max": 55.333,
+          "minimum_headroom": 44.667,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      }
+    ],
+    "runtime": [
+      {
+        "name": "four-airplay-contention",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-contention.json",
+          "--sources",
+          "4",
+          "--fault-cycles",
+          "3",
+          "--status-readers",
+          "4",
+          "--steady-seconds",
+          "30"
+        ],
+        "exit_code": -2,
+        "seconds": 32.906,
+        "start_epoch": 1790967160.419755,
+        "end_epoch": 1790967193.32613,
+        "cpu": {
+          "samples": 33,
+          "mean": 66.465,
+          "p95": 81.91,
+          "max": 86.717,
+          "minimum_headroom": 13.283,
+          "above80": 2,
+          "near_full": false,
+          "sustained_above80": true,
+          "condition_met": false
+        }
+      },
+      {
+        "name": "mix-control",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/mix-control.json",
+          "--scenario",
+          "mix-control",
+          "--sources",
+          "2",
+          "--status-readers",
+          "4"
+        ],
+        "exit_code": 0,
+        "seconds": 5.599,
+        "start_epoch": 1790967203.42347,
+        "end_epoch": 1790967209.022789,
+        "cpu": {
+          "samples": 6,
+          "mean": 43.655,
+          "p95": 50.543,
+          "max": 50.543,
+          "minimum_headroom": 49.457,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "management",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/management.json",
+          "--scenario",
+          "management",
+          "--sources",
+          "2"
+        ],
+        "exit_code": 0,
+        "seconds": 5.595,
+        "start_epoch": 1790967209.026283,
+        "end_epoch": 1790967214.621799,
+        "cpu": {
+          "samples": 5,
+          "mean": 53.573,
+          "p95": 65.943,
+          "max": 65.943,
+          "minimum_headroom": 34.057,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "mix-2plus2",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/mix-2plus2.json",
+          "--sources",
+          "2",
+          "--native-sources",
+          "2",
+          "--fault-cycles",
+          "2"
+        ],
+        "exit_code": 0,
+        "seconds": 24.431,
+        "start_epoch": 1790967214.625372,
+        "end_epoch": 1790967239.05635,
+        "cpu": {
+          "samples": 24,
+          "mean": 47.882,
+          "p95": 60.033,
+          "max": 66.639,
+          "minimum_headroom": 33.361,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "mix-3plus1",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/mix-3plus1.json",
+          "--sources",
+          "3",
+          "--native-sources",
+          "1"
+        ],
+        "exit_code": 0,
+        "seconds": 22.359,
+        "start_epoch": 1790967239.059571,
+        "end_epoch": 1790967261.418732,
+        "cpu": {
+          "samples": 23,
+          "mean": 54.295,
+          "p95": 64.09,
+          "max": 65.919,
+          "minimum_headroom": 34.081,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "mix-1plus3",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/mix-1plus3.json",
+          "--sources",
+          "1",
+          "--native-sources",
+          "3"
+        ],
+        "exit_code": 0,
+        "seconds": 15.802,
+        "start_epoch": 1790967261.422119,
+        "end_epoch": 1790967277.2240078,
+        "cpu": {
+          "samples": 15,
+          "mean": 40.272,
+          "p95": 51.372,
+          "max": 51.372,
+          "minimum_headroom": 48.628,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "mix-0plus4",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/mix-0plus4.json",
+          "--sources",
+          "0",
+          "--native-sources",
+          "4",
+          "--steady-seconds",
+          "60"
+        ],
+        "exit_code": 0,
+        "seconds": 61.671,
+        "start_epoch": 1790967277.227403,
+        "end_epoch": 1790967338.898311,
+        "cpu": {
+          "samples": 62,
+          "mean": 32.588,
+          "p95": 42.311,
+          "max": 70.441,
+          "minimum_headroom": 29.559,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "single-pcm",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_mixer_probe.py",
+          "--profile",
+          "release",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--codec",
+          "pcm",
+          "--pause-seconds",
+          "1",
+          "--pause-cycles",
+          "2",
+          "--resume-reset",
+          "setup",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/single-pcm.json"
+        ],
+        "exit_code": 0,
+        "seconds": 8.642,
+        "start_epoch": 1790967338.902105,
+        "end_epoch": 1790967347.543893,
+        "cpu": {
+          "samples": 8,
+          "mean": 39.383,
+          "p95": 48.164,
+          "max": 48.164,
+          "minimum_headroom": 51.836,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "single-alac",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_mixer_probe.py",
+          "--profile",
+          "release",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--codec",
+          "alac",
+          "--pause-seconds",
+          "1",
+          "--pause-cycles",
+          "2",
+          "--resume-reset",
+          "setup",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/single-alac.json"
+        ],
+        "exit_code": 0,
+        "seconds": 7.639,
+        "start_epoch": 1790967347.547319,
+        "end_epoch": 1790967355.1866822,
+        "cpu": {
+          "samples": 8,
+          "mean": 38.23,
+          "p95": 48.09,
+          "max": 48.09,
+          "minimum_headroom": 51.91,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      },
+      {
+        "name": "background",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/e07_background_probe.py",
+          "--release",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--evidence",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/background.json"
+        ],
+        "exit_code": 0,
+        "seconds": 5.093,
+        "start_epoch": 1790967355.1902158,
+        "end_epoch": 1790967360.283162,
+        "cpu": {
+          "samples": 5,
+          "mean": 38.433,
+          "p95": 43.961,
+          "max": 43.961,
+          "minimum_headroom": 56.039,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      }
+    ],
+    "runtime-cpu-retry": [
+      {
+        "name": "four-airplay-contention-cpu-retry",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-contention-cpu-retry.json",
+          "--sources",
+          "4",
+          "--fault-cycles",
+          "3",
+          "--status-readers",
+          "4",
+          "--steady-seconds",
+          "30"
+        ],
+        "exit_code": -2,
+        "seconds": 53.219,
+        "start_epoch": 1790967419.558951,
+        "end_epoch": 1790967472.777904,
+        "cpu": {
+          "samples": 53,
+          "mean": 70.47,
+          "p95": 81.643,
+          "max": 92.821,
+          "minimum_headroom": 7.179,
+          "above80": 3,
+          "near_full": false,
+          "sustained_above80": true,
+          "condition_met": false
+        }
+      }
+    ],
+    "runtime-bounded": [
+      {
+        "name": "four-airplay-contention-20ms",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/harness/four-bounded.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-contention-20ms.json",
+          "--sources",
+          "4",
+          "--fault-cycles",
+          "3",
+          "--status-readers",
+          "4",
+          "--steady-seconds",
+          "30"
+        ],
+        "exit_code": -2,
+        "seconds": 10.525,
+        "start_epoch": 1790967518.906786,
+        "end_epoch": 1790967529.431851,
+        "cpu": {
+          "samples": 10,
+          "mean": 66.484,
+          "p95": 94.653,
+          "max": 94.653,
+          "minimum_headroom": 5.347,
+          "above80": 2,
+          "near_full": false,
+          "sustained_above80": true,
+          "condition_met": false
+        }
+      }
+    ],
+    "runtime-low-load": [
+      {
+        "name": "four-airplay-low-load",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-low-load.json",
+          "--sources",
+          "4",
+          "--native-sources",
+          "0",
+          "--status-readers",
+          "0",
+          "--fault-cycles",
+          "1",
+          "--steady-seconds",
+          "20"
+        ],
+        "exit_code": 0,
+        "seconds": 36.946,
+        "start_epoch": 1790968134.73967,
+        "end_epoch": 1790968171.68566,
+        "cpu": {
+          "samples": 37,
+          "mean": 61.602,
+          "p95": 76.544,
+          "max": 78.619,
+          "minimum_headroom": 21.381,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      }
+    ],
+    "runtime-uncapped": [
+      {
+        "name": "four-airplay-uncapped",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "tools/airplay_multi_source_probe.py",
+          "--output",
+          "coreaudio:BlackHole2ch_UID",
+          "--report",
+          "/Volumes/projects-mac/NeonMix/.local/t04m/artifacts/platform-retest-20261003-022352/macos/four-airplay-uncapped.json",
+          "--sources",
+          "4",
+          "--fault-cycles",
+          "3",
+          "--status-readers",
+          "4",
+          "--steady-seconds",
+          "30"
+        ],
+        "exit_code": 0,
+        "seconds": 66.402,
+        "start_epoch": 1790968872.4627268,
+        "end_epoch": 1790968938.864928,
+        "cpu": {
+          "samples": 66,
+          "mean": 66.166,
+          "p95": 77.037,
+          "max": 89.522,
+          "minimum_headroom": 10.478,
+          "above80": 1,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": null
+        },
+        "cpu_policy": "observation only; no percentage admission/abort threshold, affinity or hard cap; own compile/other stress paused"
+      }
+    ],
+    "gui": [
+      {
+        "name": "formal-ui",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/harness/formal_ui.py"
+        ],
+        "exit_code": 0,
+        "seconds": 34.475,
+        "start_epoch": 1790968186.07865,
+        "end_epoch": 1790968220.5536928,
+        "cpu": {
+          "samples": 35,
+          "mean": 47.239,
+          "p95": 74.271,
+          "max": 89.983,
+          "minimum_headroom": 10.017,
+          "above80": 1,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      }
+    ],
+    "member": [
+      {
+        "name": "member-fmt",
+        "command": [
+          "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+          "python3",
+          "-c",
+          "import subprocess,json;d=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version','1','--locked']));cmd=['cargo','fmt'];[cmd.extend(['-p',p['name']]) for p in d['packages'] if p['id'] in d['workspace_members']];raise SystemExit(subprocess.run(cmd+['--','--check']).returncode)"
+        ],
+        "exit_code": 0,
+        "seconds": 1.123,
+        "start_epoch": 1790967145.1695201,
+        "end_epoch": 1790967146.292469,
+        "cpu": {
+          "samples": 1,
+          "mean": 30.384,
+          "p95": 30.384,
+          "max": 30.384,
+          "minimum_headroom": 69.616,
+          "above80": 0,
+          "near_full": false,
+          "sustained_above80": false,
+          "condition_met": true
+        }
+      }
+    ]
+  },
+  "runtime": {
+    "four-airplay-uncapped": {
+      "passed": true,
+      "sources": 4,
+      "native_sources": 0,
+      "fault_cycles": 3,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "same_source_simultaneous_cross_receiver_has_one_owner": true,
+        "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+        "dynamic_unique_lanes_and_shared_output": true,
+        "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+        "command_replay_idempotent_and_stale_session_rejected": true,
+        "full_room_native_start_rejected_without_reservation_leak": true,
+        "each_source_disconnect_preserves_other_sources": true,
+        "each_worker_crash_preserves_other_sources": true,
+        "paired_recovery_preserves_source_and_receiver_identity": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "worker-protocol-retry": {
+      "checks": [
+        "format follows granted context when SETUP arrives first",
+        "repeated stream SETUP reannounces format for the next epoch",
+        "trace opt-in and completed-send metadata",
+        "connection lifecycle IDs and close reasons",
+        "private IPC authentication",
+        "audio-only info",
+        "video/HLS/mirror rejection",
+        "unauthorized audio rejected",
+        "second client denied",
+        "PIN event",
+        "malformed SRP rejected",
+        "wrong PIN rejected",
+        "correct PIN with native 20-byte proof and signed pair verify",
+        "legacy 64-byte padded proof",
+        "second socket close preserves owner",
+        "encrypted RTP PCM reaches bounded IPC with NTP mapping",
+        "paired reconnect",
+        "revoked key rejected",
+        "PIN cannot authorize a different key",
+        "five SRP attempt limit",
+        "invalid X25519 and zero SRP keys rejected",
+        "fragmented request parsed",
+        "oversized and negative control identities rejected"
+      ]
+    },
+    "worker-pairing-retry": {
+      "passed": true,
+      "checks": {
+        "pin_response_and_signed_verify_bind_same_receiver_key": true,
+        "persisted_client_key_reconnects_after_process_restart_without_pin": true,
+        "missing_receiver_record_requires_pin_and_can_be_repaired": true,
+        "revocation_overrides_persisted_known_key": true,
+        "copying_client_list_cannot_repair_changed_receiver_identity": true
+      }
+    },
+    "worker-identity-retry": {
+      "checks": {
+        "v1": "same identity and signature",
+        "ring_v2": "same identity and signature",
+        "legacy_ring_v2": "same identity and signature",
+        "crlf_v2": "same identity and signature",
+        "missing": "clean rejection",
+        "empty": "clean rejection",
+        "truncated_pem": "clean rejection",
+        "truncated_der": "clean rejection",
+        "wrong_algorithm": "clean rejection",
+        "wrong_v2_public": "clean rejection",
+        "wrong_v2_seed": "clean rejection",
+        "wrong_version": "clean rejection",
+        "wrong_public_tag": "clean rejection",
+        "trailing_der": "clean rejection",
+        "trailing_pem": "clean rejection",
+        "encrypted_label": "clean rejection",
+        "oversized": "clean rejection"
+      }
+    },
+    "four-airplay-contention-cpu-retry": {
+      "passed": false,
+      "sources": 4,
+      "native_sources": 0,
+      "fault_cycles": 3,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "same_source_simultaneous_cross_receiver_has_one_owner": true,
+        "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+        "dynamic_unique_lanes_and_shared_output": true,
+        "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+        "command_replay_idempotent_and_stale_session_rejected": true,
+        "full_room_native_start_rejected_without_reservation_leak": true
+      }
+    },
+    "four-airplay-contention-20ms": {
+      "passed": false,
+      "sources": 4,
+      "native_sources": 0,
+      "fault_cycles": 3,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "same_source_simultaneous_cross_receiver_has_one_owner": true
+      }
+    },
+    "four-airplay-low-load": {
+      "passed": true,
+      "sources": 4,
+      "native_sources": 0,
+      "fault_cycles": 1,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "same_source_simultaneous_cross_receiver_has_one_owner": true,
+        "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+        "dynamic_unique_lanes_and_shared_output": true,
+        "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+        "command_replay_idempotent_and_stale_session_rejected": true,
+        "full_room_native_start_rejected_without_reservation_leak": true,
+        "each_source_disconnect_preserves_other_sources": true,
+        "each_worker_crash_preserves_other_sources": true,
+        "paired_recovery_preserves_source_and_receiver_identity": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "four-airplay-contention": {
+      "passed": false,
+      "sources": 4,
+      "native_sources": 0,
+      "fault_cycles": 3,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "same_source_simultaneous_cross_receiver_has_one_owner": true
+      }
+    },
+    "mix-control": {
+      "passed": true,
+      "sources": 2,
+      "native_sources": 0,
+      "fault_cycles": 1,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "targeted_gain_mute_single_solo_multi_solo_and_clear": true,
+        "gain_mute_persist_and_solo_clears_on_same_source_reconnect": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "management": {
+      "passed": true,
+      "sources": 2,
+      "native_sources": 0,
+      "fault_cycles": 1,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "live_configure_idle_entries_preserves_active_sessions": true,
+        "multi_receiver_v1_requires_upgrade": true,
+        "revoke_global_and_allow_cannot_restore_pairing": true,
+        "explicit_repair_requires_new_pin_and_preserves_same_source_identity": true,
+        "independent_playback_mode_does_not_reset_other_source": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "mix-2plus2": {
+      "passed": true,
+      "sources": 2,
+      "native_sources": 2,
+      "fault_cycles": 2,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "same_source_simultaneous_cross_receiver_has_one_owner": true,
+        "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+        "independent_native_tones_render_with_requested_mix": true,
+        "dynamic_unique_lanes_and_shared_output": true,
+        "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+        "command_replay_idempotent_and_stale_session_rejected": true,
+        "full_room_native_start_rejected_without_reservation_leak": true,
+        "each_source_disconnect_preserves_other_sources": true,
+        "each_worker_crash_preserves_other_sources": true,
+        "paired_recovery_preserves_source_and_receiver_identity": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "mix-3plus1": {
+      "passed": true,
+      "sources": 3,
+      "native_sources": 1,
+      "fault_cycles": 1,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "same_source_simultaneous_cross_receiver_has_one_owner": true,
+        "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+        "independent_native_tones_render_with_requested_mix": true,
+        "dynamic_unique_lanes_and_shared_output": true,
+        "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+        "command_replay_idempotent_and_stale_session_rejected": true,
+        "full_room_native_start_rejected_without_reservation_leak": true,
+        "each_source_disconnect_preserves_other_sources": true,
+        "each_worker_crash_preserves_other_sources": true,
+        "paired_recovery_preserves_source_and_receiver_identity": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "mix-1plus3": {
+      "passed": true,
+      "sources": 1,
+      "native_sources": 3,
+      "fault_cycles": 1,
+      "scenarios": {
+        "explicit_idle_pairing_window_renews_without_worker_restart": true,
+        "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+        "independent_native_tones_render_with_requested_mix": true,
+        "dynamic_unique_lanes_and_shared_output": true,
+        "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+        "command_replay_idempotent_and_stale_session_rejected": true,
+        "full_room_native_start_rejected_without_reservation_leak": true,
+        "each_source_disconnect_preserves_other_sources": true,
+        "each_worker_crash_preserves_other_sources": true,
+        "paired_recovery_preserves_source_and_receiver_identity": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "mix-0plus4": {
+      "passed": true,
+      "sources": 0,
+      "native_sources": 4,
+      "fault_cycles": 1,
+      "scenarios": {
+        "independent_native_tones_render_with_requested_mix": true,
+        "dynamic_unique_lanes_and_shared_output": true,
+        "full_room_native_start_rejected_without_reservation_leak": true,
+        "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+      }
+    },
+    "single-pcm": {
+      "passed": true,
+      "scenarios": {
+        "playback_mode_admin_permission_and_persistence": true,
+        "receiver_key_and_trust_survive_worker_restart": true,
+        "room_source_identity_visible_without_control_credentials": true,
+        "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+        "same_session_pause_resume_without_route_reselection": true,
+        "steady_timing_without_new_late_packets_or_skipped_samples": true,
+        "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+        "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+        "worker_kill_clears_airplay_and_preserves_native_audio": true
+      }
+    },
+    "single-alac": {
+      "passed": true,
+      "scenarios": {
+        "playback_mode_admin_permission_and_persistence": true,
+        "receiver_key_and_trust_survive_worker_restart": true,
+        "room_source_identity_visible_without_control_credentials": true,
+        "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+        "same_session_pause_resume_without_route_reselection": true,
+        "steady_timing_without_new_late_packets_or_skipped_samples": true,
+        "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+        "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+        "worker_kill_clears_airplay_and_preserves_native_audio": true
+      }
+    },
+    "background": {
+      "passed": true,
+      "scenarios": {
+        "private_socket_and_state": true,
+        "file_profiles_reference_dedicated_secret_entries": true,
+        "explicit_physical_output_low_level_test_tone": true,
+        "authenticated_viewer_role_and_real_snapshot": true,
+        "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true,
+        "repeat_invitation_after_cancel_uses_ephemeral_file": true,
+        "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true,
+        "diagnostics_redacted_with_real_meters": true,
+        "strict_numeric_whitelist_private_diagnostic_export": true,
+        "media_process_crash_reported_without_unbounded_restart": true,
+        "settings_revision_and_explicit_graceful_stop": true,
+        "explicit_background_shutdown_ends_audio_process": true
+      },
+      "fixture_removed": true
+    },
+    "formal-ui": {
+      "passed": true,
+      "scenarios": {
+        "formal_window_owned_background_and_ax_controls": true,
+        "five_page_navigation_chinese_clipboard_paste_and_draft_persistence": true,
+        "native_physical_output_popup_and_create_room_without_audio_start": true,
+        "native_popup_create_start_blackhole_and_authenticated_authority": true,
+        "native_mixer_mute_commits_and_unmutes_server": true,
+        "native_redacted_diagnostic_export": true,
+        "command_w_hides_tray_restores_hub_pid_retained": true,
+        "gui_crash_audio_continues_and_reopen_loads_saved_room": true,
+        "command_q_confirmation_escape_keeps_audio": true,
+        "confirmed_quit_ends_gui_background_and_hub": true
+      },
+      "fixture_removed": true
+    }
+  },
+  "workspace_tests": {
+    "passed": 229,
+    "failed": 0,
+    "ignored": 5
+  },
+  "preexisting_processes_alive": {
+    "81271": true,
+    "98624": true,
+    "98625": true,
+    "98648": true
+  }
+}

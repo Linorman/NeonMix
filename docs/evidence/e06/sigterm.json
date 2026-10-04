@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "signal": "SIGTERM",
+  "sender_exit_code": 0,
+  "capture_closed": {
+    "event": "capture_closed",
+    "info": {
+      "actual_period_frames": 480,
+      "backend": "core_audio",
+      "device_id": "coreaudio:BlackHole2ch_UID",
+      "format": {
+        "channel_layout": "stereo",
+        "sample_rate": 48000
+      },
+      "requested_period_frames": 480,
+      "resampler_delay_frames": 0,
+      "sample_type": "f32",
+      "stream_epoch": 1
+    },
+    "stats": {
+      "callback_max_ns": 20458,
+      "callback_over_budget": 0,
+      "callbacks": 280,
+      "clock_epoch": 1,
+      "discontinuities": 1,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 134400,
+      "last_arrival_ns": 2871777250,
+      "last_device_ns": 194205707524416,
+      "last_error": 0,
+      "native_device_frame_position": null,
+      "native_internal_frames": null,
+      "native_stream_frames": null,
+      "no_data_intervals": 0,
+      "peak": 0.022856518626213074,
+      "period_max": 480,
+      "period_min": 480,
+      "presented_frames": 0,
+      "silent_frames": 0,
+      "stale_frames": 0,
+      "submitted_frames": 0
+    }
+  },
+  "sessions": {
+    "ccce0d59-9ddf-45dc-b15e-60d00d95fa33": {
+      "created_revision": 4,
+      "media_ttl_seconds": 86400,
+      "id": "ccce0d59-9ddf-45dc-b15e-60d00d95fa33",
+      "device_id": "03f2f77c-16b9-4684-a6b0-8db3d776ca55",
+      "stream_id": 4966599473310301,
+      "media_context": "6c3110e6-7c64-44cc-b215-9c011826c54b",
+      "offer": {
+        "version": 1,
+        "codec": "opus",
+        "rate": 48000,
+        "channels": 2,
+        "packet_frames": 480,
+        "payload_type": 96,
+        "ssrc": 2298160821,
+        "stream_epoch": 1,
+        "udp_port": 55577,
+        "certificate_sha256": "6c383f349f703d2c5edabbd311d8ba8645396d459a453626e99558bfe0593121"
+      },
+      "status": "user_stopped"
+    }
+  }
+}

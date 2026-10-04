@@ -1,0 +1,2183 @@
+{
+  "passed": true,
+  "uid": 1000,
+  "scope": "Ubuntu actual desktop owner, pw-play, volume and encrypted Sender binding",
+  "binary_sha256": {
+    "neonmix-audio": "806983d26c3bf76876ddd9b3f2113f19f471c80d58a07869089b83290bed2937",
+    "neonmix-hub": "6a061fa96f972955729f108662ce33c22fd51800d7255f0850d7dbe478bca2eb"
+  },
+  "original_node": {
+    "id": 68,
+    "type": "PipeWire:Interface:Node",
+    "version": 3,
+    "permissions": [
+      "r",
+      "w",
+      "x",
+      "m"
+    ],
+    "info": {
+      "max-input-ports": 65,
+      "max-output-ports": 0,
+      "change-mask": [
+        "input-ports",
+        "output-ports",
+        "state",
+        "props",
+        "params"
+      ],
+      "n-input-ports": 2,
+      "n-output-ports": 2,
+      "state": "suspended",
+      "error": null,
+      "props": {
+        "audio.adapt.follower": "",
+        "audio.channels": 2,
+        "audio.position": "[ FL FR ]",
+        "audio.rate": 48000,
+        "client.id": 62,
+        "clock.quantum-limit": 8192,
+        "factory.id": 7,
+        "factory.mode": "merge",
+        "factory.name": "support.null-audio-sink",
+        "library.name": "audioconvert/libspa-audioconvert",
+        "media.class": "Audio/Sink",
+        "monitor.channel-volumes": true,
+        "node.description": "NeonMix",
+        "node.driver": true,
+        "node.name": "neonmix.sink.default",
+        "node.nick": "NeonMix",
+        "node.pause-on-idle": false,
+        "object.id": 68,
+        "object.linger": false,
+        "object.serial": 104
+      },
+      "params": {
+        "EnumFormat": [
+          {
+            "mediaType": "audio",
+            "mediaSubtype": "raw",
+            "format": {
+              "default": "F32P",
+              "alt1": "F32P",
+              "alt2": "F32LE"
+            },
+            "rate": 48000,
+            "channels": 2,
+            "position": [
+              "FL",
+              "FR"
+            ]
+          }
+        ],
+        "PropInfo": [
+          {
+            "id": "volume",
+            "description": "Volume",
+            "type": {
+              "default": 1.0,
+              "min": 0.0,
+              "max": 10.0
+            }
+          },
+          {
+            "id": "mute",
+            "description": "Mute",
+            "type": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            }
+          },
+          {
+            "id": "channelVolumes",
+            "description": "Channel Volumes",
+            "type": {
+              "default": 1.0,
+              "min": 0.0,
+              "max": 10.0
+            },
+            "container": "Array"
+          },
+          {
+            "id": "channelMap",
+            "description": "Channel Map",
+            "type": "",
+            "container": "Array"
+          },
+          {
+            "id": "monitorMute",
+            "description": "Monitor Mute",
+            "type": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            }
+          },
+          {
+            "id": "monitorVolumes",
+            "description": "Monitor Volumes",
+            "type": {
+              "default": 1.0,
+              "min": 0.0,
+              "max": 10.0
+            },
+            "container": "Array"
+          },
+          {
+            "id": "softMute",
+            "description": "Soft Mute",
+            "type": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            }
+          },
+          {
+            "id": "softVolumes",
+            "description": "Soft Volumes",
+            "type": {
+              "default": 1.0,
+              "min": 0.0,
+              "max": 10.0
+            },
+            "container": "Array"
+          },
+          {
+            "name": "monitor.channel-volumes",
+            "description": "Monitor channel volume",
+            "type": {
+              "default": true,
+              "alt1": true,
+              "alt2": false
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.disable",
+            "description": "Disable Channel mixing",
+            "type": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.min-volume",
+            "description": "Minimum volume level",
+            "type": {
+              "default": 0.0,
+              "min": 0.0,
+              "max": 10.0
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.max-volume",
+            "description": "Maximum volume level",
+            "type": {
+              "default": 10.0,
+              "min": 0.0,
+              "max": 10.0
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.normalize",
+            "description": "Normalize Volumes",
+            "type": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.mix-lfe",
+            "description": "Mix LFE into channels",
+            "type": {
+              "default": true,
+              "alt1": true,
+              "alt2": false
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.upmix",
+            "description": "Enable upmixing",
+            "type": {
+              "default": true,
+              "alt1": true,
+              "alt2": false
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.lfe-cutoff",
+            "description": "LFE cutoff frequency",
+            "type": {
+              "default": 0.0,
+              "min": 0.0,
+              "max": 1000.0
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.fc-cutoff",
+            "description": "FC cutoff frequency (Hz)",
+            "type": {
+              "default": 0.0,
+              "min": 0.0,
+              "max": 48000.0
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.rear-delay",
+            "description": "Rear channels delay (ms)",
+            "type": {
+              "default": 0.0,
+              "min": 0.0,
+              "max": 1000.0
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.stereo-widen",
+            "description": "Stereo widen",
+            "type": {
+              "default": 0.0,
+              "min": 0.0,
+              "max": 1.0
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.hilbert-taps",
+            "description": "Taps for phase shift of rear",
+            "type": {
+              "default": 0,
+              "min": 0,
+              "max": 255
+            },
+            "params": true
+          },
+          {
+            "name": "channelmix.upmix-method",
+            "description": "Upmix method to use",
+            "type": "none",
+            "params": true,
+            "labels": [
+              "none",
+              "Disabled",
+              "simple",
+              "Simple upmixing",
+              "psd",
+              "Passive Surround Decoding"
+            ]
+          },
+          {
+            "id": "rate",
+            "description": "Rate scaler",
+            "type": {
+              "default": 1.0,
+              "min": 0.0,
+              "max": 10.0
+            }
+          },
+          {
+            "id": "quality",
+            "name": "resample.quality",
+            "description": "Resample Quality",
+            "type": {
+              "default": 4,
+              "min": 0,
+              "max": 14
+            },
+            "params": true
+          },
+          {
+            "name": "resample.disable",
+            "description": "Disable Resampling",
+            "type": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            },
+            "params": true
+          },
+          {
+            "name": "dither.noise",
+            "description": "Add noise bits",
+            "type": {
+              "default": 0,
+              "min": 0,
+              "max": 16
+            },
+            "params": true
+          },
+          {
+            "name": "dither.method",
+            "description": "The dithering method",
+            "type": "none",
+            "params": true,
+            "labels": [
+              "none",
+              "Disabled",
+              "rectangular",
+              "Rectangular dithering",
+              "triangular",
+              "Triangular dithering",
+              "triangular-hf",
+              "Sloped Triangular dithering",
+              "wannamaker3",
+              "Wannamaker 3 dithering",
+              "shaped5",
+              "Lipshitz 5 dithering"
+            ]
+          },
+          {
+            "name": "debug.wav-path",
+            "description": "Path to WAV file",
+            "type": "",
+            "params": true
+          },
+          {
+            "name": "channelmix.lock-volumes",
+            "description": "Disable volume updates",
+            "type": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            },
+            "params": true
+          }
+        ],
+        "Props": [
+          {
+            "volume": 1.0,
+            "mute": false,
+            "channelVolumes": [
+              1.0,
+              1.0
+            ],
+            "channelMap": [
+              "FL",
+              "FR"
+            ],
+            "softMute": false,
+            "softVolumes": [
+              1.0,
+              1.0
+            ],
+            "monitorMute": false,
+            "monitorVolumes": [
+              1.0,
+              1.0
+            ],
+            "params": [
+              "monitor.channel-volumes",
+              true,
+              "channelmix.disable",
+              false,
+              "channelmix.min-volume",
+              0.0,
+              "channelmix.max-volume",
+              10.0,
+              "channelmix.normalize",
+              false,
+              "channelmix.mix-lfe",
+              true,
+              "channelmix.upmix",
+              true,
+              "channelmix.lfe-cutoff",
+              0.0,
+              "channelmix.fc-cutoff",
+              0.0,
+              "channelmix.rear-delay",
+              0.0,
+              "channelmix.stereo-widen",
+              0.0,
+              "channelmix.hilbert-taps",
+              0,
+              "channelmix.upmix-method",
+              "none",
+              "resample.quality",
+              4,
+              "resample.disable",
+              false,
+              "dither.noise",
+              0,
+              "dither.method",
+              "none",
+              "debug.wav-path",
+              "",
+              "channelmix.lock-volumes",
+              false
+            ]
+          }
+        ],
+        "Format": [],
+        "EnumPortConfig": [
+          {
+            "direction": "Input",
+            "mode": {
+              "default": "none",
+              "alt1": "none",
+              "alt2": "dsp",
+              "alt3": "convert"
+            },
+            "monitor": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            },
+            "control": {
+              "default": false,
+              "alt1": false,
+              "alt2": true
+            }
+          }
+        ],
+        "PortConfig": [
+          {
+            "direction": "Input",
+            "mode": "dsp",
+            "monitor": true,
+            "control": false,
+            "format": {
+              "mediaType": "audio",
+              "mediaSubtype": "raw",
+              "format": "F32P",
+              "channels": 2,
+              "position": [
+                "FL",
+                "FR"
+              ]
+            }
+          }
+        ],
+        "Latency": [],
+        "ProcessLatency": [],
+        "Tag": []
+      }
+    }
+  },
+  "phases": {
+    "full_volume": {
+      "rms": 0.01120706115883914,
+      "before": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 143360,
+          "estimated_frequency_hz": 437.000510117327,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 1286,
+          "rms": 0.011125967568050137
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 16500,
+          "callback_over_budget": 0,
+          "callbacks": 70,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 143360,
+          "last_arrival_ns": 2995163626,
+          "last_device_ns": 24487304591753,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.015846868976950645,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 2053,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "after": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 239616,
+          "estimated_frequency_hz": 436.99971352016314,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 2162,
+          "rms": 0.011158614446283886
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 16500,
+          "callback_over_budget": 0,
+          "callbacks": 117,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 239616,
+          "last_arrival_ns": 5000387252,
+          "last_device_ns": 24489309925055,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.015846719965338707,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 2057,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "native_props": [
+        {
+          "volume": 1.0,
+          "mute": false,
+          "channelVolumes": [
+            1.0,
+            1.0
+          ],
+          "channelMap": [
+            "FL",
+            "FR"
+          ],
+          "softMute": false,
+          "softVolumes": [
+            1.0,
+            1.0
+          ],
+          "monitorMute": false,
+          "monitorVolumes": [
+            1.0,
+            1.0
+          ],
+          "params": [
+            "monitor.channel-volumes",
+            true,
+            "channelmix.disable",
+            false,
+            "channelmix.min-volume",
+            0.0,
+            "channelmix.max-volume",
+            10.0,
+            "channelmix.normalize",
+            false,
+            "channelmix.mix-lfe",
+            true,
+            "channelmix.upmix",
+            true,
+            "channelmix.lfe-cutoff",
+            0.0,
+            "channelmix.fc-cutoff",
+            0.0,
+            "channelmix.rear-delay",
+            0.0,
+            "channelmix.stereo-widen",
+            0.0,
+            "channelmix.hilbert-taps",
+            0,
+            "channelmix.upmix-method",
+            "none",
+            "resample.quality",
+            4,
+            "resample.disable",
+            false,
+            "dither.noise",
+            0,
+            "dither.method",
+            "none",
+            "debug.wav-path",
+            "",
+            "channelmix.lock-volumes",
+            false
+          ]
+        }
+      ]
+    },
+    "half_volume": {
+      "rms": 0.005603281905395922,
+      "before": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 333824,
+          "estimated_frequency_hz": 436.99790113628137,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 3020,
+          "rms": 0.009940325200086121
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 16500,
+          "callback_over_budget": 0,
+          "callbacks": 163,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 333824,
+          "last_arrival_ns": 6963142336,
+          "last_device_ns": 24491272591691,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.00792216882109642,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 2061,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "after": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 382976,
+          "estimated_frequency_hz": 436.9974810024507,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 3467,
+          "rms": 0.009495161459423428
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 76916,
+          "callback_over_budget": 0,
+          "callbacks": 187,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 382976,
+          "last_arrival_ns": 7988093170,
+          "last_device_ns": 24492296591675,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.007922693155705929,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 2063,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "native_props": [
+        {
+          "volume": 1.0,
+          "mute": false,
+          "channelVolumes": [
+            0.5,
+            0.5
+          ],
+          "channelMap": [
+            "FL",
+            "FR"
+          ],
+          "softMute": false,
+          "softVolumes": [
+            1.0,
+            1.0
+          ],
+          "monitorMute": false,
+          "monitorVolumes": [
+            1.0,
+            1.0
+          ],
+          "params": [
+            "monitor.channel-volumes",
+            true,
+            "channelmix.disable",
+            false,
+            "channelmix.min-volume",
+            0.0,
+            "channelmix.max-volume",
+            10.0,
+            "channelmix.normalize",
+            false,
+            "channelmix.mix-lfe",
+            true,
+            "channelmix.upmix",
+            true,
+            "channelmix.lfe-cutoff",
+            0.0,
+            "channelmix.fc-cutoff",
+            0.0,
+            "channelmix.rear-delay",
+            0.0,
+            "channelmix.stereo-widen",
+            0.0,
+            "channelmix.hilbert-taps",
+            0,
+            "channelmix.upmix-method",
+            "none",
+            "resample.quality",
+            4,
+            "resample.disable",
+            false,
+            "dither.noise",
+            0,
+            "dither.method",
+            "none",
+            "debug.wav-path",
+            "",
+            "channelmix.lock-volumes",
+            false
+          ]
+        }
+      ]
+    },
+    "mute": {
+      "rms": 0.0,
+      "before": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 479232,
+          "estimated_frequency_hz": 436.99769222315837,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 3729,
+          "rms": 0.008598116069852172
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 76916,
+          "callback_over_budget": 0,
+          "callbacks": 234,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 479232,
+          "last_arrival_ns": 9996707921,
+          "last_device_ns": 24494301924977,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.0,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 69649,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "after": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 575488,
+          "estimated_frequency_hz": 436.99769222315837,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 3729,
+          "rms": 0.00784617648081899
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 76916,
+          "callback_over_budget": 0,
+          "callbacks": 281,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 575488,
+          "last_arrival_ns": 11999088672,
+          "last_device_ns": 24496307258279,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.0,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 165905,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "native_props": [
+        {
+          "volume": 1.0,
+          "mute": true,
+          "channelVolumes": [
+            0.5,
+            0.5
+          ],
+          "channelMap": [
+            "FL",
+            "FR"
+          ],
+          "softMute": false,
+          "softVolumes": [
+            1.0,
+            1.0
+          ],
+          "monitorMute": false,
+          "monitorVolumes": [
+            1.0,
+            1.0
+          ],
+          "params": [
+            "monitor.channel-volumes",
+            true,
+            "channelmix.disable",
+            false,
+            "channelmix.min-volume",
+            0.0,
+            "channelmix.max-volume",
+            10.0,
+            "channelmix.normalize",
+            false,
+            "channelmix.mix-lfe",
+            true,
+            "channelmix.upmix",
+            true,
+            "channelmix.lfe-cutoff",
+            0.0,
+            "channelmix.fc-cutoff",
+            0.0,
+            "channelmix.rear-delay",
+            0.0,
+            "channelmix.stereo-widen",
+            0.0,
+            "channelmix.hilbert-taps",
+            0,
+            "channelmix.upmix-method",
+            "none",
+            "resample.quality",
+            4,
+            "resample.disable",
+            false,
+            "dither.noise",
+            0,
+            "dither.method",
+            "none",
+            "debug.wav-path",
+            "",
+            "channelmix.lock-volumes",
+            false
+          ]
+        }
+      ]
+    },
+    "restored": {
+      "rms": 0.01120641445951598,
+      "before": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 669696,
+          "estimated_frequency_hz": 436.99769222315837,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 3729,
+          "rms": 0.008308644160914546
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 89750,
+          "callback_over_budget": 0,
+          "callbacks": 327,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 669696,
+          "last_arrival_ns": 13960785215,
+          "last_device_ns": 24498269924915,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.01584494486451149,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 174100,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "after": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 718848,
+          "estimated_frequency_hz": 436.99769222315837,
+          "peak": 0.015849247574806213,
+          "positive_zero_crossings": 3729,
+          "rms": 0.008538164042182146
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 89750,
+          "callback_over_budget": 0,
+          "callbacks": 351,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 718848,
+          "last_arrival_ns": 14985550424,
+          "last_device_ns": 24499293924899,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.015847504138946533,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 174102,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "native_props": [
+        {
+          "volume": 1.0,
+          "mute": false,
+          "channelVolumes": [
+            1.0,
+            1.0
+          ],
+          "channelMap": [
+            "FL",
+            "FR"
+          ],
+          "softMute": false,
+          "softVolumes": [
+            1.0,
+            1.0
+          ],
+          "monitorMute": false,
+          "monitorVolumes": [
+            1.0,
+            1.0
+          ],
+          "params": [
+            "monitor.channel-volumes",
+            true,
+            "channelmix.disable",
+            false,
+            "channelmix.min-volume",
+            0.0,
+            "channelmix.max-volume",
+            10.0,
+            "channelmix.normalize",
+            false,
+            "channelmix.mix-lfe",
+            true,
+            "channelmix.upmix",
+            true,
+            "channelmix.lfe-cutoff",
+            0.0,
+            "channelmix.fc-cutoff",
+            0.0,
+            "channelmix.rear-delay",
+            0.0,
+            "channelmix.stereo-widen",
+            0.0,
+            "channelmix.hilbert-taps",
+            0,
+            "channelmix.upmix-method",
+            "none",
+            "resample.quality",
+            4,
+            "resample.disable",
+            false,
+            "dither.noise",
+            0,
+            "dither.method",
+            "none",
+            "debug.wav-path",
+            "",
+            "channelmix.lock-volumes",
+            false
+          ]
+        }
+      ]
+    },
+    "two_applications": {
+      "rms": 0.015845431106505475,
+      "before": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 815104,
+          "estimated_frequency_hz": 436.99769222315837,
+          "peak": 0.031695377081632614,
+          "positive_zero_crossings": 3729,
+          "rms": 0.009429646845552841
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 123166,
+          "callback_over_budget": 0,
+          "callbacks": 398,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 815104,
+          "last_arrival_ns": 16991046258,
+          "last_device_ns": 24501299258201,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.031532853841781616,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 174104,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "after": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 911360,
+          "estimated_frequency_hz": 436.99769222315837,
+          "peak": 0.031695377081632614,
+          "positive_zero_crossings": 3729,
+          "rms": 0.010297824648670604
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 123166,
+          "callback_over_budget": 0,
+          "callbacks": 445,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 911360,
+          "last_arrival_ns": 18995519092,
+          "last_device_ns": 24503304591503,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.026840073987841606,
+          "period_max": 2048,
+          "period_min": 2048,
+          "presented_frames": 0,
+          "silent_frames": 174104,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "native_props": [
+        {
+          "volume": 1.0,
+          "mute": false,
+          "channelVolumes": [
+            1.0,
+            1.0
+          ],
+          "channelMap": [
+            "FL",
+            "FR"
+          ],
+          "softMute": false,
+          "softVolumes": [
+            1.0,
+            1.0
+          ],
+          "monitorMute": false,
+          "monitorVolumes": [
+            1.0,
+            1.0
+          ],
+          "params": [
+            "monitor.channel-volumes",
+            true,
+            "channelmix.disable",
+            false,
+            "channelmix.min-volume",
+            0.0,
+            "channelmix.max-volume",
+            10.0,
+            "channelmix.normalize",
+            false,
+            "channelmix.mix-lfe",
+            true,
+            "channelmix.upmix",
+            true,
+            "channelmix.lfe-cutoff",
+            0.0,
+            "channelmix.fc-cutoff",
+            0.0,
+            "channelmix.rear-delay",
+            0.0,
+            "channelmix.stereo-widen",
+            0.0,
+            "channelmix.hilbert-taps",
+            0,
+            "channelmix.upmix-method",
+            "none",
+            "resample.quality",
+            4,
+            "resample.disable",
+            false,
+            "dither.noise",
+            0,
+            "dither.method",
+            "none",
+            "debug.wav-path",
+            "",
+            "channelmix.lock-volumes",
+            false
+          ]
+        }
+      ]
+    },
+    "no_source": {
+      "rms": 0.0,
+      "before": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 1054720,
+          "estimated_frequency_hz": 442.5285149199278,
+          "peak": 0.031695377081632614,
+          "positive_zero_crossings": 3842,
+          "rms": 0.010135414759989676
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 321833,
+          "callback_over_budget": 0,
+          "callbacks": 542,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 1054720,
+          "last_arrival_ns": 22004093802,
+          "last_device_ns": 24506312591456,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.0,
+          "period_max": 2048,
+          "period_min": 1024,
+          "presented_frames": 0,
+          "silent_frames": 228379,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "after": {
+        "event": "capture_stats",
+        "measurement": {
+          "analyzed_frames": 1149952,
+          "estimated_frequency_hz": 442.5285149199278,
+          "peak": 0.031695377081632614,
+          "positive_zero_crossings": 3842,
+          "rms": 0.00970666988132259
+        },
+        "no_data": false,
+        "paused": false,
+        "stats": {
+          "callback_max_ns": 599500,
+          "callback_over_budget": 0,
+          "callbacks": 635,
+          "clock_epoch": 1,
+          "discontinuities": 1,
+          "dropped_frames": 0,
+          "errors": 0,
+          "frames": 1149952,
+          "last_arrival_ns": 23987596345,
+          "last_device_ns": 24508296591425,
+          "last_error": 0,
+          "native_device_frame_position": null,
+          "native_internal_frames": null,
+          "native_stream_frames": null,
+          "no_data_intervals": 0,
+          "peak": 0.0,
+          "period_max": 2048,
+          "period_min": 1024,
+          "presented_frames": 0,
+          "silent_frames": 323611,
+          "stale_frames": 0,
+          "submitted_frames": 0
+        }
+      },
+      "native_props": [
+        {
+          "volume": 1.0,
+          "mute": false,
+          "channelVolumes": [
+            1.0,
+            1.0
+          ],
+          "channelMap": [
+            "FL",
+            "FR"
+          ],
+          "softMute": false,
+          "softVolumes": [
+            1.0,
+            1.0
+          ],
+          "monitorMute": false,
+          "monitorVolumes": [
+            1.0,
+            1.0
+          ],
+          "params": [
+            "monitor.channel-volumes",
+            true,
+            "channelmix.disable",
+            false,
+            "channelmix.min-volume",
+            0.0,
+            "channelmix.max-volume",
+            10.0,
+            "channelmix.normalize",
+            false,
+            "channelmix.mix-lfe",
+            true,
+            "channelmix.upmix",
+            true,
+            "channelmix.lfe-cutoff",
+            0.0,
+            "channelmix.fc-cutoff",
+            0.0,
+            "channelmix.rear-delay",
+            0.0,
+            "channelmix.stereo-widen",
+            0.0,
+            "channelmix.hilbert-taps",
+            0,
+            "channelmix.upmix-method",
+            "none",
+            "resample.quality",
+            4,
+            "resample.disable",
+            false,
+            "dither.noise",
+            0,
+            "dither.method",
+            "none",
+            "debug.wav-path",
+            "",
+            "channelmix.lock-volumes",
+            false
+          ]
+        }
+      ]
+    }
+  },
+  "rename_keeps_node_and_media": {
+    "node": {
+      "id": 68,
+      "type": "PipeWire:Interface:Node",
+      "version": 3,
+      "permissions": [
+        "r",
+        "w",
+        "x",
+        "m"
+      ],
+      "info": {
+        "max-input-ports": 65,
+        "max-output-ports": 0,
+        "change-mask": [
+          "input-ports",
+          "output-ports",
+          "state",
+          "props",
+          "params"
+        ],
+        "n-input-ports": 2,
+        "n-output-ports": 2,
+        "state": "running",
+        "error": null,
+        "props": {
+          "audio.adapt.follower": "",
+          "audio.channels": 2,
+          "audio.position": "[ FL FR ]",
+          "audio.rate": 48000,
+          "client.id": 62,
+          "clock.quantum-limit": 8192,
+          "factory.id": 7,
+          "factory.mode": "merge",
+          "factory.name": "support.null-audio-sink",
+          "library.name": "audioconvert/libspa-audioconvert",
+          "media.class": "Audio/Sink",
+          "monitor.channel-volumes": true,
+          "node.description": "NeonMix \u2014 Ubuntu renamed",
+          "node.driver": true,
+          "node.name": "neonmix.sink.default",
+          "node.nick": "NeonMix \u2014 Ubuntu renamed",
+          "node.pause-on-idle": false,
+          "object.id": 68,
+          "object.linger": false,
+          "object.serial": 104
+        },
+        "params": {
+          "EnumFormat": [
+            {
+              "mediaType": "audio",
+              "mediaSubtype": "raw",
+              "format": {
+                "default": "F32P",
+                "alt1": "F32P",
+                "alt2": "F32LE"
+              },
+              "rate": 48000,
+              "channels": 2,
+              "position": [
+                "FL",
+                "FR"
+              ]
+            }
+          ],
+          "PropInfo": [
+            {
+              "id": "volume",
+              "description": "Volume",
+              "type": {
+                "default": 1.0,
+                "min": 0.0,
+                "max": 10.0
+              }
+            },
+            {
+              "id": "mute",
+              "description": "Mute",
+              "type": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              }
+            },
+            {
+              "id": "channelVolumes",
+              "description": "Channel Volumes",
+              "type": {
+                "default": 1.0,
+                "min": 0.0,
+                "max": 10.0
+              },
+              "container": "Array"
+            },
+            {
+              "id": "channelMap",
+              "description": "Channel Map",
+              "type": "",
+              "container": "Array"
+            },
+            {
+              "id": "monitorMute",
+              "description": "Monitor Mute",
+              "type": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              }
+            },
+            {
+              "id": "monitorVolumes",
+              "description": "Monitor Volumes",
+              "type": {
+                "default": 1.0,
+                "min": 0.0,
+                "max": 10.0
+              },
+              "container": "Array"
+            },
+            {
+              "id": "softMute",
+              "description": "Soft Mute",
+              "type": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              }
+            },
+            {
+              "id": "softVolumes",
+              "description": "Soft Volumes",
+              "type": {
+                "default": 1.0,
+                "min": 0.0,
+                "max": 10.0
+              },
+              "container": "Array"
+            },
+            {
+              "name": "monitor.channel-volumes",
+              "description": "Monitor channel volume",
+              "type": {
+                "default": true,
+                "alt1": true,
+                "alt2": false
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.disable",
+              "description": "Disable Channel mixing",
+              "type": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.min-volume",
+              "description": "Minimum volume level",
+              "type": {
+                "default": 0.0,
+                "min": 0.0,
+                "max": 10.0
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.max-volume",
+              "description": "Maximum volume level",
+              "type": {
+                "default": 10.0,
+                "min": 0.0,
+                "max": 10.0
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.normalize",
+              "description": "Normalize Volumes",
+              "type": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.mix-lfe",
+              "description": "Mix LFE into channels",
+              "type": {
+                "default": true,
+                "alt1": true,
+                "alt2": false
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.upmix",
+              "description": "Enable upmixing",
+              "type": {
+                "default": true,
+                "alt1": true,
+                "alt2": false
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.lfe-cutoff",
+              "description": "LFE cutoff frequency",
+              "type": {
+                "default": 0.0,
+                "min": 0.0,
+                "max": 1000.0
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.fc-cutoff",
+              "description": "FC cutoff frequency (Hz)",
+              "type": {
+                "default": 0.0,
+                "min": 0.0,
+                "max": 48000.0
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.rear-delay",
+              "description": "Rear channels delay (ms)",
+              "type": {
+                "default": 0.0,
+                "min": 0.0,
+                "max": 1000.0
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.stereo-widen",
+              "description": "Stereo widen",
+              "type": {
+                "default": 0.0,
+                "min": 0.0,
+                "max": 1.0
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.hilbert-taps",
+              "description": "Taps for phase shift of rear",
+              "type": {
+                "default": 0,
+                "min": 0,
+                "max": 255
+              },
+              "params": true
+            },
+            {
+              "name": "channelmix.upmix-method",
+              "description": "Upmix method to use",
+              "type": "none",
+              "params": true,
+              "labels": [
+                "none",
+                "Disabled",
+                "simple",
+                "Simple upmixing",
+                "psd",
+                "Passive Surround Decoding"
+              ]
+            },
+            {
+              "id": "rate",
+              "description": "Rate scaler",
+              "type": {
+                "default": 1.0,
+                "min": 0.0,
+                "max": 10.0
+              }
+            },
+            {
+              "id": "quality",
+              "name": "resample.quality",
+              "description": "Resample Quality",
+              "type": {
+                "default": 4,
+                "min": 0,
+                "max": 14
+              },
+              "params": true
+            },
+            {
+              "name": "resample.disable",
+              "description": "Disable Resampling",
+              "type": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              },
+              "params": true
+            },
+            {
+              "name": "dither.noise",
+              "description": "Add noise bits",
+              "type": {
+                "default": 0,
+                "min": 0,
+                "max": 16
+              },
+              "params": true
+            },
+            {
+              "name": "dither.method",
+              "description": "The dithering method",
+              "type": "none",
+              "params": true,
+              "labels": [
+                "none",
+                "Disabled",
+                "rectangular",
+                "Rectangular dithering",
+                "triangular",
+                "Triangular dithering",
+                "triangular-hf",
+                "Sloped Triangular dithering",
+                "wannamaker3",
+                "Wannamaker 3 dithering",
+                "shaped5",
+                "Lipshitz 5 dithering"
+              ]
+            },
+            {
+              "name": "debug.wav-path",
+              "description": "Path to WAV file",
+              "type": "",
+              "params": true
+            },
+            {
+              "name": "channelmix.lock-volumes",
+              "description": "Disable volume updates",
+              "type": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              },
+              "params": true
+            }
+          ],
+          "Props": [
+            {
+              "volume": 1.0,
+              "mute": false,
+              "channelVolumes": [
+                1.0,
+                1.0
+              ],
+              "channelMap": [
+                "FL",
+                "FR"
+              ],
+              "softMute": false,
+              "softVolumes": [
+                1.0,
+                1.0
+              ],
+              "monitorMute": false,
+              "monitorVolumes": [
+                1.0,
+                1.0
+              ],
+              "params": [
+                "monitor.channel-volumes",
+                true,
+                "channelmix.disable",
+                false,
+                "channelmix.min-volume",
+                0.0,
+                "channelmix.max-volume",
+                10.0,
+                "channelmix.normalize",
+                false,
+                "channelmix.mix-lfe",
+                true,
+                "channelmix.upmix",
+                true,
+                "channelmix.lfe-cutoff",
+                0.0,
+                "channelmix.fc-cutoff",
+                0.0,
+                "channelmix.rear-delay",
+                0.0,
+                "channelmix.stereo-widen",
+                0.0,
+                "channelmix.hilbert-taps",
+                0,
+                "channelmix.upmix-method",
+                "none",
+                "resample.quality",
+                4,
+                "resample.disable",
+                false,
+                "dither.noise",
+                0,
+                "dither.method",
+                "none",
+                "debug.wav-path",
+                "",
+                "channelmix.lock-volumes",
+                false
+              ]
+            }
+          ],
+          "Format": [
+            {
+              "mediaType": "audio",
+              "mediaSubtype": "raw",
+              "format": "F32P",
+              "rate": 48000,
+              "channels": 2,
+              "position": [
+                "FL",
+                "FR"
+              ]
+            }
+          ],
+          "EnumPortConfig": [
+            {
+              "direction": "Input",
+              "mode": {
+                "default": "none",
+                "alt1": "none",
+                "alt2": "dsp",
+                "alt3": "convert"
+              },
+              "monitor": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              },
+              "control": {
+                "default": false,
+                "alt1": false,
+                "alt2": true
+              }
+            }
+          ],
+          "PortConfig": [
+            {
+              "direction": "Input",
+              "mode": "dsp",
+              "monitor": true,
+              "control": false,
+              "format": {
+                "mediaType": "audio",
+                "mediaSubtype": "raw",
+                "format": "F32P",
+                "channels": 2,
+                "position": [
+                  "FL",
+                  "FR"
+                ]
+              }
+            }
+          ],
+          "Latency": [],
+          "ProcessLatency": [],
+          "Tag": []
+        }
+      }
+    },
+    "binding": {
+      "schema_version": 1,
+      "revision": 2,
+      "output_id": "61e6cbc9-108a-46f6-90d0-c17efdaac154",
+      "hub_id": "58cf639c-1c59-434e-9323-90c379a08fd4",
+      "provider": "neonmix",
+      "device_id": "pipewire:neonmix.sink.default",
+      "display_name": "NeonMix \u2014 Ubuntu renamed",
+      "enabled": true,
+      "authorization_epoch": 1
+    },
+    "diagnostics": {
+      "drift_ppm": [
+        -18.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "errors": [],
+      "fifo_frames": [
+        2816,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "filtered_queues": [
+        3282,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360,
+        3360
+      ],
+      "lane_stream_ids": [
+        7809281486690926,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "last_underrun_fifo_frames": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_underrun_needed_frames": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_underrun_output_frame": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "last_underrun_source_end": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "limited_frames": 0,
+      "media_workers": [
+        {
+          "max_loop_gap_ns": 21221334,
+          "max_pump_ns": 27625,
+          "max_report_ns": 193875,
+          "pump_timing": {
+            "feedback": {
+              "at_ns": 513311625,
+              "cpu_ns": 1250,
+              "phase": "feedback",
+              "requested_wait_ns": null,
+              "wall_ns": 1250
+            },
+            "max_wait_lateness_ns": 3628208,
+            "outgoing": {
+              "at_ns": 460748500,
+              "cpu_ns": 14584,
+              "phase": "outgoing",
+              "requested_wait_ns": null,
+              "wall_ns": 14625
+            },
+            "receive": {
+              "at_ns": 502235334,
+              "cpu_ns": 39458,
+              "phase": "receive",
+              "requested_wait_ns": null,
+              "wall_ns": 81916
+            },
+            "recent_slow": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "report": {
+              "at_ns": 460763917,
+              "cpu_ns": 205042,
+              "phase": "report",
+              "requested_wait_ns": null,
+              "wall_ns": 194583
+            },
+            "slow_count": 0,
+            "source": {
+              "at_ns": 513280959,
+              "cpu_ns": 28916,
+              "phase": "source",
+              "requested_wait_ns": null,
+              "wall_ns": 28666
+            },
+            "wait": {
+              "at_ns": 20351833,
+              "cpu_ns": 6375,
+              "phase": "wait",
+              "requested_wait_ns": 19999750,
+              "wall_ns": 21188917
+            }
+          },
+          "receive_throttles": 0,
+          "scheduling": {
+            "base_priority": 0,
+            "configured": true,
+            "error": null,
+            "nice": -10,
+            "policy": 1073741824
+          }
+        }
+      ],
+      "output_frames": 984064,
+      "output_stats": {
+        "callback_max_ns": 1376459,
+        "callback_over_budget": 0,
+        "callbacks": 961,
+        "clock_epoch": 1,
+        "discontinuities": 0,
+        "dropped_frames": 0,
+        "errors": 0,
+        "frames": 984064,
+        "last_arrival_ns": 20485485509,
+        "last_device_ns": 24504302073104,
+        "last_error": 0,
+        "native_device_frame_position": 984064,
+        "native_internal_frames": 983040,
+        "native_stream_frames": 983040,
+        "no_data_intervals": 0,
+        "peak": 0.003995032515376806,
+        "period_max": 1024,
+        "period_min": 1024,
+        "presented_frames": 983040,
+        "silent_frames": 966720,
+        "stale_frames": 0,
+        "submitted_frames": 984064
+      },
+      "packet_budget_drops": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_queue_age_max_ns": [
+        13641417,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "queues": [
+        2816,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "receivers": [
+        {
+          "authenticated": true,
+          "authenticated_to_jitter_max_ns": 39684708,
+          "jitter_to_pcm_max_ns": 556000,
+          "last_buffer_peak": 0.015899658203125,
+          "last_buffer_rms": 0.01123414424341525,
+          "last_loss_duration_ns": 0,
+          "last_pcm_pts_ns": 646774292,
+          "last_pcm_timing_gap": null,
+          "last_source_position": 24480,
+          "late_packets": 0,
+          "lost_packets": 0,
+          "native_scheduling": {
+            "configured": 4,
+            "entered": 4,
+            "failed": 0,
+            "max_base_priority": 0,
+            "min_base_priority": 0
+          },
+          "overflow_plc_packets": 0,
+          "packets": {
+            "duplicate": 0,
+            "highest_sequence": 17220,
+            "highest_timestamp": 2817104823,
+            "invalid": 0,
+            "received": 51,
+            "reordered": 0,
+            "timestamp_step_errors": 0
+          },
+          "pcm_frames": 24480,
+          "pcm_peak": 0.01666259765625,
+          "pcm_sink_dropped": 0,
+          "pcm_timing_gap_count": 0,
+          "pcm_timing_gaps": [],
+          "pipeline_base_time_ns": 24503675824100,
+          "pipeline_clock_ns": 24504307695434,
+          "plc_samples": 0,
+          "queue_drops": 480,
+          "retimed_loss_events": 0,
+          "silent_pcm_frames": 162,
+          "wire_to_authenticated_max_ns": 505792
+        }
+      ],
+      "sinc_delay_frames": 64,
+      "underrun_frames": 0,
+      "underrun_frames_by_lane": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "disable_enable_stops_old_sender": {
+    "old_session": {
+      "created_revision": 4,
+      "media_ttl_seconds": 86400,
+      "id": "61f50ccb-853d-4933-a8f3-ecc43c94eb61",
+      "device_id": "dae8cca9-c1ff-49e7-8c02-8935e1df1ac4",
+      "stream_id": 7809281486690926,
+      "media_context": "4081ecaf-f72c-4805-91f3-20e173d3ca10",
+      "offer": {
+        "version": 1,
+        "codec": "opus",
+        "rate": 48000,
+        "channels": 2,
+        "packet_frames": 480,
+        "payload_type": 96,
+        "ssrc": 208754520,
+        "stream_epoch": 1,
+        "udp_port": 55381,
+        "certificate_sha256": "c5f92fa936c06a6f6f61ff8a34c9731f79d24b4001ef9f5209ef864c9213d4b7"
+      },
+      "status": "user_stopped"
+    },
+    "enabled": {
+      "schema_version": 1,
+      "revision": 4,
+      "output_id": "61e6cbc9-108a-46f6-90d0-c17efdaac154",
+      "hub_id": "58cf639c-1c59-434e-9323-90c379a08fd4",
+      "provider": "neonmix",
+      "device_id": "pipewire:neonmix.sink.default",
+      "display_name": "NeonMix \u2014 Ubuntu renamed",
+      "enabled": true,
+      "authorization_epoch": 2
+    }
+  },
+  "remove_preserves_local_output": true
+}

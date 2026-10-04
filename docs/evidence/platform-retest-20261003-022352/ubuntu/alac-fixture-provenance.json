@@ -1,0 +1,28 @@
+{
+  "scope": "synthetic 352-frame ALAC digital source fixture encoded on macOS, decoded by actual Ubuntu worker",
+  "command": [
+    "/opt/homebrew/bin/ffmpeg",
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-f",
+    "s16le",
+    "-ar",
+    "44100",
+    "-ac",
+    "2",
+    "-i",
+    "pipe:0",
+    "-map",
+    "0:a",
+    "-c:a",
+    "alac",
+    "-f",
+    "data",
+    "pipe:1"
+  ],
+  "wave_sha256": "5d7c39d1b2f3d6eae2a78644ec4a23723d0d2a9b8de1879cf00ce24c9203ae69",
+  "packet_sha256": "25480a585bade7b37d2c1f03b5ba882126eced2eb2d5e2004c3fde2955426645",
+  "packet_bytes": 183,
+  "encoder_version": "ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers"
+}

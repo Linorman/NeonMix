@@ -1,0 +1,25 @@
+[
+  {
+    "name": "formal-ui",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/t04m/tools/dev",
+      "python3",
+      "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/macos/harness/formal_ui.py"
+    ],
+    "exit_code": 1,
+    "seconds": 18.745,
+    "start_epoch": 1790967905.872988,
+    "end_epoch": 1790967924.618538,
+    "cpu": {
+      "samples": 19,
+      "mean": 39.259,
+      "p95": 48.992,
+      "max": 48.992,
+      "minimum_headroom": 51.008,
+      "above80": 0,
+      "near_full": false,
+      "sustained_above80": false,
+      "condition_met": true
+    }
+  }
+]

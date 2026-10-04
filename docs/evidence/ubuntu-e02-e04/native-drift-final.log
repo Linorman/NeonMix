@@ -1,0 +1,20 @@
+   Compiling syn v3.0.6
+   Compiling serde_core v1.0.229
+   Compiling num-integer v0.1.47
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling rubato v0.16.2
+   Compiling stats_alloc v0.1.10
+   Compiling serde v1.0.229
+   Compiling neonmix-core v0.1.0 (/home/parallels/NeonMix/.local/e02-e04-20260930/workspace/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 4.87s
+     Running tests/drift_stability.rs (target/release/deps/drift_stability-77219d0ffb08309a)
+
+running 3 tests
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ok
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ok
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.11s
+

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "tools/dev",
+    "python3",
+    "/Volumes/projects-mac/NeonMix/artifacts/platform-full-retest-20261004-012757/macos/formal_ui.py"
+  ],
+  "start_epoch": 1791050332.207793,
+  "end_epoch": 1791050370.825771,
+  "exit_code": 0
+}

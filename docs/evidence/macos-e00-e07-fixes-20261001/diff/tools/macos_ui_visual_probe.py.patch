@@ -1,0 +1,36 @@
+--- before/tools/macos_ui_visual_probe.py
++++ after/tools/macos_ui_visual_probe.py
+@@ -44,7 +44,18 @@
+ 
+ 
+ def click_native_button(app, label, last=False):
+-    """Click the current visible AX rectangle with actual macOS mouse events."""
++    """Activate a named control by keyboard before falling back to mouse input."""
++    target = f'(last button of group 1 of window 1 of p whose name is "{label}")' if last else f'button "{label}" of group 1 of window 1 of p'
++    try:
++        wait_for(lambda: app.ax(f'return enabled of {target}') == "true")
++        app.ax(f'''set frontmost of p to true
++set value of attribute "AXFocused" of {target} to true
++delay 0.2
++key code 49''')
++        time.sleep(.3)
++        return
++    except RuntimeError:
++        pass
+     class Point(ctypes.Structure):
+         _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double)]
+     cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+@@ -88,13 +99,6 @@
+ 
+ 
+ class VisualWindow(NativeUI):
+-    def ax(self, body):
+-        # Keep missing accessible names as a finding; ordinal fallback only
+-        # allows the rendering/functional checks to proceed.
+-        for label in ("房间名称", "搜索设备"):
+-            body = body.replace(f'text field "{label}"', 'text field 1')
+-        return super().ax(body)
+-
+     def __init__(self, output, page, width, height, fixture=None):
+         self.log = (output / f"{page}-{width}.log").open("w")
+         command = [str(DEV), str(UI), "--preview-page", page, "--width", str(width), "--height", str(height)]

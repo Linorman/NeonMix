@@ -1,0 +1,71 @@
+{
+  "started_at": 1790966258.4231653,
+  "cpu_gate_wait_seconds": 0.0,
+  "scope": "formal Ubuntu Wayland desktop process plus native background IPC; no mouse/keyboard claim",
+  "gui_alive": true,
+  "output_available": true,
+  "status": {
+    "hub": {
+      "error": null,
+      "last_event": {
+        "event": "hub_started",
+        "hub_id": "a7ae7be8-b025-4651-b880-68c63e4fea07",
+        "lanes": 16,
+        "listen": "0.0.0.0:7443",
+        "output": {
+          "actual_period_frames": 1024,
+          "backend": "pipewire",
+          "device_id": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 48000
+          },
+          "requested_period_frames": null,
+          "resampler_delay_frames": 0,
+          "sample_type": "f32",
+          "stream_epoch": 1
+        },
+        "room_name": "Ubuntu retest 20261003 t04u"
+      },
+      "metrics": null,
+      "pid": 661446,
+      "running": true
+    },
+    "hub_settings": {
+      "name": "Ubuntu retest 20261003 t04u",
+      "output": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo"
+    },
+    "output_binding": null,
+    "pid": 661422,
+    "profiles": [
+      {
+        "credential": "hub/admin.json",
+        "device_id": "d4449c1e-0a20-4005-b463-1b6f3601dc88",
+        "hub_id": "a7ae7be8-b025-4651-b880-68c63e4fea07",
+        "name": "admin",
+        "pending": false,
+        "role": "admin"
+      }
+    ],
+    "sender": {
+      "error": null,
+      "last_event": null,
+      "metrics": null,
+      "pid": null,
+      "running": false
+    },
+    "sender_options": null,
+    "version": 1
+  },
+  "screenshot": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Error: GDBus.Error:org.freedesktop.DBus.Error.AccessDenied: Screenshot is not allowed\n"
+  },
+  "background_survives_ui_termination": true,
+  "shutdown": true,
+  "fixture_cleanup_error": "ValueError",
+  "ended_at": 1790966399.2995656,
+  "fixture_deleted": true,
+  "cleanup_note": "copied credential_fixture ROOT corrected after process import; explicit owned fixture cleanup after graceful shutdown"
+}

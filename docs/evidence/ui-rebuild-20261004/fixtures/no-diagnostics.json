@@ -1,0 +1,576 @@
+{
+ "devices": [
+  {
+   "backend": "core_audio",
+   "id": "coreaudio:654DFB74-332C-4DC2-BEEF-B63900000003",
+   "input": {
+    "channels": 1,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "name": "HUAWEI Mate XTs Microphone",
+   "output": null,
+   "supported_input": [
+    {
+     "channels": 1,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    }
+   ],
+   "supported_output": []
+  },
+  {
+   "backend": "core_audio",
+   "id": "coreaudio:BlackHole2ch_UID",
+   "input": {
+    "channels": 2,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "name": "BlackHole 2ch",
+   "output": {
+    "channels": 2,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "supported_input": [
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 44100,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 96000,
+     "sample_type": "f32"
+    }
+   ],
+   "supported_output": [
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 44100,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 96000,
+     "sample_type": "f32"
+    }
+   ]
+  },
+  {
+   "backend": "core_audio",
+   "id": "coreaudio:BuiltInMicrophoneDevice",
+   "input": {
+    "channels": 1,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "name": "MacBook Pro Microphone",
+   "output": null,
+   "supported_input": [
+    {
+     "channels": 1,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 44100,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 1,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 1,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 96000,
+     "sample_type": "f32"
+    }
+   ],
+   "supported_output": []
+  },
+  {
+   "backend": "core_audio",
+   "id": "coreaudio:BuiltInSpeakerDevice",
+   "input": null,
+   "name": "MacBook Pro Speakers",
+   "output": {
+    "channels": 2,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "supported_input": [],
+   "supported_output": [
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 44100,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    },
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 96000,
+     "sample_type": "f32"
+    }
+   ]
+  },
+  {
+   "backend": "core_audio",
+   "id": "coreaudio:ItourInput2ch_UID",
+   "input": {
+    "channels": 1,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "name": "ItourInput 2ch",
+   "output": {
+    "channels": 1,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "supported_input": [
+    {
+     "channels": 1,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    }
+   ],
+   "supported_output": [
+    {
+     "channels": 1,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    }
+   ]
+  },
+  {
+   "backend": "core_audio",
+   "id": "coreaudio:ItourOutput2ch_UID",
+   "input": {
+    "channels": 2,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "name": "ItourOutput 2ch",
+   "output": {
+    "channels": 2,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "supported_input": [
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    }
+   ],
+   "supported_output": [
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    }
+   ]
+  },
+  {
+   "backend": "core_audio",
+   "id": "coreaudio:com.neonmix.audio.virtual-output",
+   "input": {
+    "channels": 2,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "name": "NeonMix",
+   "output": {
+    "channels": 2,
+    "period_max_frames": 4096,
+    "period_min_frames": 15,
+    "sample_rate": 48000,
+    "sample_type": "f32"
+   },
+   "supported_input": [
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    }
+   ],
+   "supported_output": [
+    {
+     "channels": 2,
+     "period_max_frames": 4096,
+     "period_min_frames": 15,
+     "sample_rate": 48000,
+     "sample_type": "f32"
+    }
+   ]
+  }
+ ],
+ "status": {
+  "hub": {
+   "error": null,
+   "last_event": {
+    "event": "hub_started",
+    "hub_id": "13ebafde-12c1-4fc4-b91d-d0eed7bdbc9a",
+    "lanes": 16,
+    "listen": "0.0.0.0:7443",
+    "output": {
+     "actual_period_frames": 256,
+     "backend": "core_audio",
+     "device_id": "coreaudio:BuiltInSpeakerDevice",
+     "format": {
+      "channel_layout": "stereo",
+      "sample_rate": 48000
+     },
+     "requested_period_frames": 256,
+     "resampler_delay_frames": 0,
+     "sample_type": "f32",
+     "stream_epoch": 1
+    },
+    "room_name": "E07 双路测试"
+   },
+   "metrics": null,
+   "pid": 88901,
+   "running": true
+  },
+  "hub_settings": {
+   "name": "E07 双路测试",
+   "output": "coreaudio:BuiltInSpeakerDevice"
+  },
+  "output_binding": {
+   "display_name": "NeonMix — 客厅",
+   "enabled": true,
+   "revision": 3,
+   "device_id": "36c63ab0-396b-4ee7-a63b-9743cf158383",
+   "hub_id": "13ebafde-12c1-4fc4-b91d-d0eed7bdbc9a",
+   "output_id": "out-1"
+  },
+  "pid": 88814,
+  "profiles": [
+   {
+    "credential": "hub/admin.json",
+    "device_id": "5818dd9d-bb5c-45ee-aaef-4800ccca4b53",
+    "hub_id": "13ebafde-12c1-4fc4-b91d-d0eed7bdbc9a",
+    "name": "admin",
+    "pending": false,
+    "role": "admin"
+   },
+   {
+    "credential": "profiles/b.json",
+    "device_id": "c48842fd-0bbd-43ea-8a0d-07c64c0bee6e",
+    "hub_id": "13ebafde-12c1-4fc4-b91d-d0eed7bdbc9a",
+    "name": "E07 合成 B",
+    "pending": false,
+    "role": null
+   }
+  ],
+  "sender": {
+   "running": true,
+   "pid": 4242,
+   "error": null,
+   "last_event": null,
+   "metrics": {
+    "control_connected": true,
+    "encoded_media_packets": 1200,
+    "capture_stats": {
+     "frames": 480000,
+     "peak": 0.42,
+     "silent_frames": 0,
+     "no_data_intervals": 0,
+     "errors": 0
+    },
+    "sent_packets": 1200,
+    "queue_drops": 0
+   }
+  },
+  "sender_options": null,
+  "version": 1
+ },
+ "snapshot": {
+  "bus_id": "main",
+  "devices": {
+   "36c63ab0-396b-4ee7-a63b-9743cf158383": {
+    "id": "36c63ab0-396b-4ee7-a63b-9743cf158383",
+    "name": "E07 真实采集 A",
+    "playback_allowed": true,
+    "revoked": false,
+    "role": "member"
+   },
+   "5818dd9d-bb5c-45ee-aaef-4800ccca4b53": {
+    "id": "5818dd9d-bb5c-45ee-aaef-4800ccca4b53",
+    "name": "admin",
+    "playback_allowed": true,
+    "revoked": false,
+    "role": "admin"
+   },
+   "c48842fd-0bbd-43ea-8a0d-07c64c0bee6e": {
+    "id": "c48842fd-0bbd-43ea-8a0d-07c64c0bee6e",
+    "name": "E07 合成 B",
+    "playback_allowed": true,
+    "revoked": false,
+    "role": "member"
+   },
+   "11111111-2222-4333-8444-555555555555": {
+    "id": "11111111-2222-4333-8444-555555555555",
+    "name": "客房音箱",
+    "playback_allowed": false,
+    "revoked": false,
+    "role": "controller"
+   },
+   "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee": {
+    "id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+    "name": "旧平板",
+    "playback_allowed": false,
+    "revoked": true,
+    "role": "member"
+   }
+  },
+  "hub_id": "13ebafde-12c1-4fc4-b91d-d0eed7bdbc9a",
+  "output": {
+   "available": true,
+   "gain_db": -12.0,
+   "id": "coreaudio:BuiltInSpeakerDevice",
+   "muted": false
+  },
+  "revision": 8,
+  "sessions": {
+   "af9f0613-5149-4c63-b02f-c414058796aa": {
+    "created_revision": 5,
+    "device_id": "36c63ab0-396b-4ee7-a63b-9743cf158383",
+    "id": "af9f0613-5149-4c63-b02f-c414058796aa",
+    "media_context": "43aa7357-2143-441d-aa77-539c0a2ea093",
+    "media_ttl_seconds": 86400,
+    "offer": {
+     "certificate_sha256": "[redacted]",
+     "channels": 2,
+     "codec": "opus",
+     "packet_frames": 480,
+     "payload_type": 96,
+     "rate": 48000,
+     "ssrc": 1757897463,
+     "stream_epoch": 1,
+     "udp_port": 56070,
+     "version": 1
+    },
+    "status": "playing",
+    "stream_id": 1158294319324071
+   },
+   "b5e38b13-2397-4982-82ae-f9c67ea0c848": {
+    "created_revision": 7,
+    "device_id": "c48842fd-0bbd-43ea-8a0d-07c64c0bee6e",
+    "id": "b5e38b13-2397-4982-82ae-f9c67ea0c848",
+    "media_context": "5b2a9262-7c84-4173-9169-19b9cbe3432c",
+    "media_ttl_seconds": 86400,
+    "offer": {
+     "certificate_sha256": "[redacted]",
+     "channels": 2,
+     "codec": "opus",
+     "packet_frames": 480,
+     "payload_type": 96,
+     "rate": 48000,
+     "ssrc": 2970042243,
+     "stream_epoch": 1,
+     "udp_port": 58982,
+     "version": 1
+    },
+    "status": "network_degraded",
+    "stream_id": 3544280085171326
+   }
+  },
+  "streams": {
+   "1158294319324071": {
+    "device_id": "36c63ab0-396b-4ee7-a63b-9743cf158383",
+    "id": 1158294319324071,
+    "mix": {
+     "gain_db": -6.0,
+     "muted": true,
+     "solo": false
+    },
+    "session_id": "af9f0613-5149-4c63-b02f-c414058796aa"
+   },
+   "3544280085171326": {
+    "device_id": "c48842fd-0bbd-43ea-8a0d-07c64c0bee6e",
+    "id": 3544280085171326,
+    "mix": {
+     "gain_db": 3.5,
+     "muted": false,
+     "solo": true
+    },
+    "session_id": "b5e38b13-2397-4982-82ae-f9c67ea0c848"
+   }
+  },
+  "viewer": {
+   "device_id": "5818dd9d-bb5c-45ee-aaef-4800ccca4b53",
+   "hub_id": "13ebafde-12c1-4fc4-b91d-d0eed7bdbc9a",
+   "role": "admin",
+   "room_name": "E07 双路测试"
+  }
+ },
+ "airplay": {
+  "revision": 7,
+  "enabled": true,
+  "multi_receiver": true,
+  "receivers": [
+   {
+    "receiver_id": "00000000-0000-4000-8000-000000000001",
+    "name": "NeonMix — 客厅 · 输入 1",
+    "enabled": true,
+    "ready": true,
+    "active": true,
+    "discovery_state": "hidden",
+    "visibility_reason": "occupied",
+    "pairing_pin": null,
+    "pairing_window_open": false,
+    "error": null
+   },
+   {
+    "receiver_id": "00000000-0000-4000-8000-000000000002",
+    "name": "NeonMix — 客厅 · 输入 2",
+    "enabled": true,
+    "ready": true,
+    "active": true,
+    "discovery_state": "hidden",
+    "visibility_reason": "occupied",
+    "pairing_pin": null,
+    "pairing_window_open": false,
+    "error": null
+   }
+  ],
+  "sources": [
+   {
+    "source_id": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+    "alias": null,
+    "last_name": "客厅 iPhone",
+    "blocked": false,
+    "revoked": false,
+    "gain_db": -3.0,
+    "muted": false,
+    "playback_mode": "low_latency"
+   },
+   {
+    "source_id": "sha256:0000000000000000000000000000000000000000000000000000000000000002",
+    "alias": null,
+    "last_name": "工作 iPad",
+    "blocked": false,
+    "revoked": false,
+    "gain_db": -6.0,
+    "muted": false,
+    "playback_mode": "low_latency"
+   }
+  ],
+  "sessions": [
+   {
+    "receiver_id": "00000000-0000-4000-8000-000000000001",
+    "source_id": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+    "source_name": "客厅 iPhone",
+    "session_id": 101,
+    "stream_id": 201,
+    "lane": 2,
+    "playback_mode": "low_latency",
+    "mix": {
+     "gain_db": -3.0,
+     "muted": false,
+     "solo": false
+    },
+    "ingress": {
+     "protocol_lead_ns": 2000000000,
+     "latency_advance_ns": 1880000000,
+     "playout_lead_ns": 120000000
+    }
+   },
+   {
+    "receiver_id": "00000000-0000-4000-8000-000000000002",
+    "source_id": "sha256:0000000000000000000000000000000000000000000000000000000000000002",
+    "source_name": "工作 iPad",
+    "session_id": 102,
+    "stream_id": 202,
+    "lane": 3,
+    "playback_mode": "low_latency",
+    "mix": {
+     "gain_db": -6.0,
+     "muted": false,
+     "solo": false
+    },
+    "ingress": {
+     "protocol_lead_ns": 2000000000,
+     "latency_advance_ns": 1880000000,
+     "playout_lead_ns": 120000000
+    }
+   }
+  ],
+  "capacity": {
+   "limit": 4,
+   "active": 4,
+   "reserved": 0,
+   "available": 0
+  }
+ }
+}

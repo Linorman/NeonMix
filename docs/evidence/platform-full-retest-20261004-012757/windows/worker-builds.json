@@ -1,0 +1,20 @@
+{
+  "worker-build": {
+    "command": [
+      "python",
+      "worker-build.py"
+    ],
+    "exit_code": 0,
+    "seconds": 8.801408100000117,
+    "utc": "2026-10-03T17:37:13.663676+00:00"
+  },
+  "worker-probes-build": {
+    "command": [
+      "python",
+      "worker-probes-build.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.3662217000019155,
+    "utc": "2026-10-03T17:37:17.030397+00:00"
+  }
+}

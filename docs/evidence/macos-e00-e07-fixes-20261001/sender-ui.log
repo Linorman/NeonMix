@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 185, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 101, in main
+    app.paste("虚拟输出名称", "NeonMix — 中文 UI 输出")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 55, in paste
+    super().paste(label, value)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 64, in paste
+    assert self.ax(script)==value
+           ~~~~~~~^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 48, in ax
+    return super().ax(body)
+           ~~~~~~~~~~^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 28, in ax
+    if result.returncode:raise RuntimeError(result.stderr.strip())
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: 586:598: execution error: System Events got an error: AppleEvent handler failed. (-10000)

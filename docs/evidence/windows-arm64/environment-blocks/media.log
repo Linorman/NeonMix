@@ -1,0 +1,126 @@
+   Compiling winnow v1.0.4
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling target-lexicon v0.13.5
+   Compiling smallvec v1.16.2
+   Compiling serde_spanned v1.1.1
+   Compiling pkg-config v0.3.34
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling version-compare v0.2.1
+   Compiling libc v0.2.189
+   Compiling toml v1.1.6+spec-1.1.0
+   Compiling cfg-expr v0.20.9
+   Compiling system-deps v7.0.8
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.2
+    Checking futures-core v0.3.34
+   Compiling indexmap v2.14.2
+    Checking num-integer v0.1.47
+   Compiling futures-macro v0.3.34
+   Compiling glib-sys v0.20.10
+   Compiling gobject-sys v0.20.10
+   Compiling gstreamer-sys v0.23.6
+warning: glib-sys@0.20.10: Could not run `PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags glib-2.0 'glib-2.0 >= 2.56'`
+error: failed to run custom build command for `glib-sys v0.20.10`
+
+Caused by:
+  process didn't exit successfully: `C:\Users\linorman\NeonMix-test-20261001\target\debug\build\glib-sys-cf71679e09f63c6d\build-script-build` (exit code: 1)
+  --- stdout
+  cargo:rerun-if-changed=C:\Users\linorman\NeonMix-test-20261001\.local\cargo\registry\src\index.crates.io-1949cf8c6b5b557f\glib-sys-0.20.10\Cargo.toml
+  cargo:rerun-if-env-changed=GLIB_2.0_NO_PKG_CONFIG
+  cargo:rerun-if-env-changed=PKG_CONFIG_ALLOW_CROSS_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_ALLOW_CROSS_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_ALLOW_CROSS
+  cargo:rerun-if-env-changed=PKG_CONFIG_ALLOW_CROSS
+  cargo:rerun-if-env-changed=PKG_CONFIG_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG
+  cargo:rerun-if-env-changed=PKG_CONFIG
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_SYSROOT_DIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_SYSROOT_DIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
+  cargo:warning=Could not run `PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags glib-2.0 'glib-2.0 >= 2.56'`
+  The pkg-config command could not be found.
+
+  Most likely, you need to install a pkg-config package for your OS.
+
+  If you've already installed it, ensure the pkg-config command is one of the
+  directories in the PATH environment variable.
+
+  If you did not expect this build to link to a pre-installed system library,
+  then check documentation of the glib-sys crate for an option to
+  build the library from source, or disable features or dependencies
+  that require pkg-config.
+warning: build failed, waiting for other jobs to finish...
+warning: gobject-sys@0.20.10: Could not run `PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags gobject-2.0 'gobject-2.0 >= 2.56'`
+error: failed to run custom build command for `gobject-sys v0.20.10`
+
+Caused by:
+  process didn't exit successfully: `C:\Users\linorman\NeonMix-test-20261001\target\debug\build\gobject-sys-9dc1889d399506d7\build-script-build` (exit code: 1)
+  --- stdout
+  cargo:rerun-if-changed=C:\Users\linorman\NeonMix-test-20261001\.local\cargo\registry\src\index.crates.io-1949cf8c6b5b557f\gobject-sys-0.20.10\Cargo.toml
+  cargo:rerun-if-env-changed=GOBJECT_2.0_NO_PKG_CONFIG
+  cargo:rerun-if-env-changed=PKG_CONFIG_ALLOW_CROSS_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_ALLOW_CROSS_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_ALLOW_CROSS
+  cargo:rerun-if-env-changed=PKG_CONFIG_ALLOW_CROSS
+  cargo:rerun-if-env-changed=PKG_CONFIG_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG
+  cargo:rerun-if-env-changed=PKG_CONFIG
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_SYSROOT_DIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_PATH
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_LIBDIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64-pc-windows-gnullvm
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_aarch64_pc_windows_gnullvm
+  cargo:rerun-if-env-changed=TARGET_PKG_CONFIG_SYSROOT_DIR
+  cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
+  cargo:warning=Could not run `PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 pkg-config --libs --cflags gobject-2.0 'gobject-2.0 >= 2.56'`
+  The pkg-config command could not be found.
+
+  Most likely, you need to install a pkg-config package for your OS.
+
+  If you've already installed it, ensure the pkg-config command is one of the
+  directories in the PATH environment variable.
+
+  If you did not expect this build to link to a pre-installed system library,
+  then check documentation of the gobject-sys crate for an option to
+  build the library from source, or disable features or dependencies
+  that require pkg-config.

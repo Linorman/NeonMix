@@ -1,0 +1,113 @@
+{
+  "scenario": "mix",
+  "platform": "Windows",
+  "os_version": "Windows-11-10.0.26100-SP0",
+  "architecture": "AMD64",
+  "build_profile": "release",
+  "sources": 0,
+  "native_sources": 4,
+  "output_device": "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real WASAPI output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub.exe": "1590ba2de63fbab8e7411e141fe9ad99b5353285a9b8e9aca4347931f3059dd1",
+    "neonmix-airplay-worker.exe": "14fcaadc940cbf97b5c65cf8415c2a81813d1dc65b646868696fc4220b084cd6"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": 60.0,
+  "airplay_frequencies_hz": [],
+  "native_frequencies_hz": [
+    809,
+    946,
+    1083,
+    1220
+  ],
+  "passed": true,
+  "scenarios": {
+    "independent_native_tones_render_with_requested_mix": true,
+    "dynamic_unique_lanes_and_shared_output": true,
+    "full_room_native_start_rejected_without_reservation_leak": true,
+    "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+  },
+  "isolation_checks": [],
+  "native_streams": 4,
+  "steady": {
+    "output_rms": 0.005581323057413101,
+    "active": 4,
+    "lane_rms": [],
+    "native_lane_rms": [
+      0.011215501464903355,
+      0.011237437836825848,
+      0.011179236695170403,
+      0.011195508763194084
+    ]
+  },
+  "steady_continuity": {
+    "output_frames": 2880480,
+    "global_timed_late_frames_before": 0,
+    "global_timed_late_frames_after": 0,
+    "global_timed_late_frames_delta": 0,
+    "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+    "lanes": [
+      {
+        "kind": "native",
+        "source_index": 1,
+        "lane": 0,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 2,
+        "lane": 1,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 3,
+        "lane": 2,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      },
+      {
+        "kind": "native",
+        "source_index": 4,
+        "lane": 3,
+        "underrun_frames_before": 0,
+        "underrun_frames_after": 0,
+        "underrun_frames_delta": 0
+      }
+    ]
+  },
+  "continuity_claim": "Session/stream identity and nonzero meters only; underrun and late deltas are reported, not proof of gap-free audio",
+  "global_disable": {
+    "receivers": [
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      }
+    ],
+    "reserved": 0,
+    "owned_worker_count": 0
+  },
+  "status_reads": {
+    "readers": 0,
+    "successful": 0,
+    "errors": 0
+  },
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

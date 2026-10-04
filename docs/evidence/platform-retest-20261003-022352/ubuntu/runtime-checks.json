@@ -1,0 +1,321 @@
+[
+  {
+    "name": "fmt-members",
+    "command": [
+      "python3",
+      "-c",
+      "import subprocess,json; m=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version=1'])); ids=m['workspace_members']; raise SystemExit(max(subprocess.call(['cargo','fmt','--manifest-path',p['manifest_path'],'--check']) for p in m['packages'] if p['id'] in ids))"
+    ],
+    "exit_code": 0,
+    "seconds": 2.008,
+    "started_at": 1790966411.4992957,
+    "ended_at": 1790966413.5074003,
+    "cpu_gate_wait_seconds": 0.0,
+    "cpu_stopped": false
+  },
+  {
+    "name": "worker-protocol",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 3.014,
+    "started_at": 1790966413.5085194,
+    "ended_at": 1790966416.5221007,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "worker-pairing",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/pairing_probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 6.028,
+    "started_at": 1790966416.5234208,
+    "ended_at": 1790966422.551804,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      "/home/parallels/NeonMix/.local/t04u/.local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "seconds": 1.002,
+    "started_at": 1790966422.5525432,
+    "ended_at": 1790966423.554991,
+    "cpu_gate_wait_seconds": 0.0,
+    "cpu_stopped": false
+  },
+  {
+    "name": "identity",
+    "command": [
+      "python3",
+      "tools/airplay_identity_probe.py",
+      "--worker",
+      "/home/parallels/NeonMix/.local/t04u/.local/airplay/build/neonmix-airplay-worker",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/identity.json"
+    ],
+    "exit_code": 0,
+    "seconds": 10.055,
+    "started_at": 1790966423.5564048,
+    "ended_at": 1790966433.6117294,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "single-pcm",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/single-pcm.json"
+    ],
+    "exit_code": 1,
+    "seconds": 27.048,
+    "started_at": 1790966433.6133327,
+    "ended_at": 1790966460.661736,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "single-alac",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/single-alac.json"
+    ],
+    "exit_code": 1,
+    "seconds": 1.002,
+    "started_at": 1790966460.6631904,
+    "ended_at": 1790966461.665154,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "two",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/two.json",
+      "--sources",
+      "2",
+      "--fault-cycles",
+      "2"
+    ],
+    "exit_code": 1,
+    "seconds": 26.05,
+    "started_at": 1790966461.6657805,
+    "ended_at": 1790966487.715304,
+    "cpu_gate_wait_seconds": 0.0,
+    "cpu_stopped": false
+  },
+  {
+    "name": "four-contention",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/four-contention.json",
+      "--sources",
+      "4",
+      "--fault-cycles",
+      "2",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30"
+    ],
+    "exit_code": 1,
+    "seconds": 26.081,
+    "started_at": 1790966487.7164931,
+    "ended_at": 1790966513.7978485,
+    "cpu_gate_wait_seconds": 0.0,
+    "cpu_stopped": false
+  },
+  {
+    "name": "2plus2",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/2plus2.json",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2"
+    ],
+    "exit_code": 1,
+    "seconds": 26.037,
+    "started_at": 1790966513.798924,
+    "ended_at": 1790966539.8358643,
+    "cpu_gate_wait_seconds": 0.0,
+    "cpu_stopped": false
+  },
+  {
+    "name": "3plus1",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/3plus1.json",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1"
+    ],
+    "exit_code": 1,
+    "seconds": 26.043,
+    "started_at": 1790966539.8370078,
+    "ended_at": 1790966565.8803184,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "1plus3",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/1plus3.json",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3"
+    ],
+    "exit_code": 1,
+    "seconds": 27.041,
+    "started_at": 1790966565.8806882,
+    "ended_at": 1790966592.9212186,
+    "cpu_gate_wait_seconds": 0.0,
+    "cpu_stopped": false
+  },
+  {
+    "name": "0plus4",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/0plus4.json",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--steady-seconds",
+      "60"
+    ],
+    "exit_code": 0,
+    "seconds": 62.09,
+    "started_at": 1790966592.923578,
+    "ended_at": 1790966655.0135295,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "mix-control",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/mix-control.json",
+      "--scenario",
+      "mix-control",
+      "--sources",
+      "2",
+      "--status-readers",
+      "4"
+    ],
+    "exit_code": 1,
+    "seconds": 26.098,
+    "started_at": 1790966655.0159898,
+    "ended_at": 1790966681.1141129,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "management",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/airplay_multi_source_probe.py",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--report",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/management.json",
+      "--scenario",
+      "management",
+      "--sources",
+      "2"
+    ],
+    "exit_code": 1,
+    "seconds": 26.084,
+    "started_at": 1790966681.1163812,
+    "ended_at": 1790966707.200852,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  },
+  {
+    "name": "background",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/harness/e07_background_probe.py",
+      "--release",
+      "--binary-directory",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/bin",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--evidence",
+      "/home/parallels/NeonMix/.local/t04u/artifacts/t04u/background.json"
+    ],
+    "exit_code": 0,
+    "seconds": 4.008,
+    "started_at": 1790966707.202343,
+    "ended_at": 1790966711.2104862,
+    "cpu_gate_wait_seconds": 0.001,
+    "cpu_stopped": false
+  }
+]

@@ -1,0 +1,79 @@
+{
+  "runtime-credentials": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "runtime.py"
+    ],
+    "seconds": 13.53
+  },
+  "credential-locale": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "credential-locale.py"
+    ],
+    "seconds": 0.73
+  },
+  "background": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-background-harness.py",
+      "--release",
+      "--listen-port",
+      "7443",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--evidence",
+      "E:\\Desktop\\NeonMix-test\\r05\\artifacts\\platform-delivery-20261004\\windows\\background.json"
+    ],
+    "seconds": 13.79
+  },
+  "single-pcm": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r05\\artifacts\\platform-delivery-20261004\\windows\\single-pcm.json"
+    ],
+    "seconds": 8.77
+  },
+  "single-alac": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r05\\artifacts\\platform-delivery-20261004\\windows\\single-alac.json"
+    ],
+    "seconds": 8.78
+  }
+}

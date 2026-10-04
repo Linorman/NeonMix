@@ -1,0 +1,30 @@
+{
+  "scope": "Invocation-owned fixture diagnostics captured before teardown; no product or assertion changes",
+  "native_processes_before_teardown": [],
+  "logs": {
+    "hub.log": [
+      {
+        "event": "hub_started",
+        "hub_id": "fbe05a5c-dfe8-45d6-9dc0-dff3e6c58176",
+        "lanes": 16,
+        "listen": "127.0.0.1:64262",
+        "output": {
+          "actual_period_frames": 256,
+          "backend": "core_audio",
+          "device_id": "coreaudio:BlackHole2ch_UID",
+          "format": {
+            "channel_layout": "stereo",
+            "sample_rate": 48000
+          },
+          "requested_period_frames": 256,
+          "resampler_delay_frames": 0,
+          "sample_type": "f32",
+          "stream_epoch": 1
+        },
+        "room_name": "NeonMix Lab"
+      }
+    ]
+  },
+  "original_probe_sha256": "36e1278691e2c09d5804b4867ed85bf9680c228ca064efedafff9c28d86f2927",
+  "diagnostic_wrapper_sha256": "76ab69a89a19cbcb6c5211edc9781f22a71a4ddfba28c77a09b109dce783baed"
+}

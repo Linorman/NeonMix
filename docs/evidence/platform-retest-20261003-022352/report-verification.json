@@ -1,0 +1,23 @@
+{
+  "tests_independently_counted": {
+    "macos": {
+      "passed": 229,
+      "failed": 0,
+      "ignored": 5
+    },
+    "ubuntu": {
+      "passed": 219,
+      "failed": 0,
+      "ignored": 5
+    },
+    "windows": {
+      "passed": 214,
+      "failed": 0,
+      "ignored": 5
+    }
+  },
+  "report_links_missing": [],
+  "temporary_mac_sender_fixtures": [],
+  "local_invite_files": [],
+  "cpu_observer_stopped": true
+}

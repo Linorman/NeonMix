@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/apps/airplay-worker/probe.py", line 242, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/apps/airplay-worker/probe.py", line 36, in main
+    media.settimeout(10);connection,_=media.accept();connection.settimeout(10);token=b''
+                                      ~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 298, in accept
+    fd, addr = self._accept()
+               ~~~~~~~~~~~~^^
+TimeoutError: timed out

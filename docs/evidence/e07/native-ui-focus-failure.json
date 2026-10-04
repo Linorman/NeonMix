@@ -1,0 +1,26 @@
+{
+  "platform": "macOS",
+  "binary_sha256": "813f9d8f859ebb75814cbe3c5309141d1a1ead58269a79a59793d5656b72748b",
+  "passed": false,
+  "scenarios": {
+    "native_ax_named_controls": true,
+    "native_chinese_input_preserves_clipboard": true,
+    "native_popup_setup_start_and_real_authority": true,
+    "cmd_w_hides_and_tray_restores_with_audio_owner_retained": true,
+    "actual_gui_crash_audio_continues_and_new_gui_reads_saved_state": true,
+    "native_mixer_controls_commit_server_state": true,
+    "native_diagnostic_export": true,
+    "native_quit_confirmation_escape_preserves_audio": true
+  },
+  "limits": [
+    "native Chinese paste and egui IME event regression covered; full VoiceOver listening audit not performed",
+    "single-host check; other platforms not run"
+  ],
+  "failure": "42:90: execution error: System Events got an error: Can’t get application process 1 whose unix id = 22149. Invalid index. (-1719)",
+  "failure_hub_settings": {
+    "name": "影音室 E07",
+    "output": "coreaudio:BuiltInSpeakerDevice"
+  },
+  "failure_hub_running": true,
+  "root_cause": "Modal immediately requested focus for a nonexistent origin node; AccessKit consumer panicked. Audio owner survived."
+}

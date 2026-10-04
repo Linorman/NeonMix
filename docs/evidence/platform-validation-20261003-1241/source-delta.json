@@ -1,0 +1,33 @@
+{
+  "previous_snapshot": "platform-retest-20261003-022352",
+  "current_snapshot": "platform-validation-20261003-1241",
+  "changed_files": [
+    "DESIGN.md",
+    "UX-CONTRACT.md",
+    "apps/desktop/src/palette.rs",
+    "apps/desktop/src/shell.rs",
+    "apps/desktop/src/widgets.rs",
+    "apps/hub/build.rs",
+    "apps/hub/src/airplay.rs",
+    "apps/hub/src/server.rs",
+    "crates/airplay-adapter/src/ingress.rs",
+    "crates/airplay-adapter/tests/ingress.rs",
+    "crates/audio-core/src/mixer.rs",
+    "crates/audio-core/tests/timed_mixer.rs",
+    "crates/media/build.rs",
+    "crates/media/tests/security.rs",
+    "docs/AIRPLAY-CONTRACT.md",
+    "docs/PLATFORM-RETEST-20261003-022352.md",
+    "docs/PLATFORM-RETEST-FIXES-20261003.md",
+    "docs/STATUS.md",
+    "docs/adr/ADR-013-airplay-audio-worker.md",
+    "docs/adr/ADR-015-multi-airplay.md",
+    "tools/airplay_multi_source_probe.py"
+  ],
+  "added_files": [
+    "crates/media/build.rs",
+    "docs/PLATFORM-RETEST-20261003-022352.md",
+    "docs/PLATFORM-RETEST-FIXES-20261003.md"
+  ],
+  "removed_files": []
+}

@@ -1,0 +1,50 @@
+{
+  "output_device_id": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+  "format": {
+    "channel_layout": "stereo",
+    "sample_rate": 48000
+  },
+  "stats": {
+    "callback_max_ns": 63750,
+    "callback_over_budget": 0,
+    "callbacks": 139,
+    "clock_epoch": 1,
+    "discontinuities": 0,
+    "dropped_frames": 0,
+    "errors": 0,
+    "frames": 142336,
+    "last_arrival_ns": 3020041335,
+    "last_device_ns": 2453574300798,
+    "last_error": 0,
+    "native_device_frame_position": 143360,
+    "native_internal_frames": 142336,
+    "native_stream_frames": 142336,
+    "no_data_intervals": 0,
+    "peak": 0.0,
+    "period_max": 1024,
+    "period_min": 1024,
+    "presented_frames": 136193,
+    "silent_frames": 142336,
+    "stale_frames": 0,
+    "submitted_frames": 142336
+  },
+  "clock": {
+    "callback_frames": 1024,
+    "clock_timestamp_ns": 2453467634132,
+    "device_timestamp_ns": 2453574300798,
+    "epoch": 1,
+    "epoch_exhausted": false,
+    "internal_frames": 136193,
+    "native_device_frame_position": 143360,
+    "native_internal_frames": 142336,
+    "native_stream_frames": 142336,
+    "presented_frames": 136193,
+    "reset": false,
+    "sample_rate": 48000,
+    "submitted_frames": 142336
+  },
+  "passed": true,
+  "virtualization": "parallels",
+  "platform": "Linux-6.14.0-27-generic-aarch64-with-glibc2.39",
+  "scope": "virtual HDA output; no analog measurement"
+}

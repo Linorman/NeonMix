@@ -1,0 +1,11 @@
+--- before/docs/DESKTOP-IPC-CONTRACT.md
++++ after/docs/DESKTOP-IPC-CONTRACT.md
+@@ -26,6 +26,8 @@
+ 
+ ## Pairing, output binding, and diagnostics
+ 
++`Discover` returns one `discovery_complete` object containing the final `candidates` array, including an empty array when no rooms remain. CLI `resolved`/address-update events are transient and are not returned as the desktop command result. Missing completion or a malformed candidate list fails the request rather than displaying discovery success with an invented empty result.
++
+ `Invite` returns invitation text for temporary UI display/copy and removes its private output file after reading it. `PairText` writes a private temporary invitation, invokes the platform-vault pairing flow to `profiles/sender.json`, then removes the temporary invitation. Single-use, cancellation, expiration and device authorization remain server responsibilities.
+ 
+ `Output` uses persisted binding revisions for add/show/rename/enable/disable/remove. NeonMix add/rename attempts native display-name synchronization and explicitly returns success or a failure warning; the BlackHole provider is never renamed. Disabling/removing the binding is observed by the Sender's permission watcher.

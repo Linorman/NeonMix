@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "E:\Desktop\NeonMix-test\r05\package.py", line 6, in <module>
+    old={'source_files':json.loads((root/'source-manifest.json').read_text()),'binaries':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in (root/'target/release').glob('neonmix-*.exe')},'snapshot':json.loads((root/'snapshot.json').read_text())};assert len(old['binaries'])==5
+                                                                                                                                                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

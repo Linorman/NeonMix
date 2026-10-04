@@ -1,0 +1,25 @@
+{
+  "source_files": 522,
+  "source_differences": [],
+  "report_missing_links": [],
+  "packages": [
+    {
+      "platform": "ubuntu",
+      "path": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-Ubuntu-ARM64-20261004.tar.gz",
+      "bytes": 126364060,
+      "sha256": "cba300f0886f033068ca90c9f8e9264352aa1566bf71f0aa81afb31b9d3ddd66"
+    },
+    {
+      "platform": "windows",
+      "path": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-windows-x64-20261004-source322fda1b.zip",
+      "bytes": 65450836,
+      "sha256": "46823171e47bf939c70cad966b522fbb61989587ed41cad20786480dd5dfdfd7"
+    },
+    {
+      "platform": "macos",
+      "path": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-macos-arm64-20261004.zip",
+      "bytes": 49745906,
+      "sha256": "96b379e1e7e42d175fc00a221a2e302280f7ed3c9df41c098072bb7bc1d5f2f1"
+    }
+  ]
+}

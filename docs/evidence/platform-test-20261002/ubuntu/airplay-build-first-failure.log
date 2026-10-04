@@ -1,0 +1,7 @@
+-- Found OpenSSL: /home/parallels/NeonMix/.local/platform-test-20261002/workspace/.local/native/root/usr/lib/aarch64-linux-gnu/libcrypto.so (found suitable version "3.0.13", minimum required is "1.1.1") found components: Crypto 
+-- Configuring done (0.0s)
+CMake Error at CMakeLists.txt:48 (add_library):
+  No SOURCES given to target: plist
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.

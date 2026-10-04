@@ -1,0 +1,55 @@
+{
+  "completed_current_and_default": true,
+  "active_airplay_state_directory": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677",
+  "default_desktop_state_directory": "/Volumes/projects-mac/NeonMix/.local/desktop",
+  "original_active_state_retained": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-stable-b3de8677",
+  "original_desktop_state_retained": "/Volumes/projects-mac/NeonMix/.local/desktop-native-20261002",
+  "hub_uuids_preserved": true,
+  "certificates_admin_ids_and_references_preserved": true,
+  "airplay_all_original_fields_preserved": true,
+  "known_airplay_sources": 2,
+  "private_secret_file_count": 5,
+  "private_permissions_verified": true,
+  "secrets_in_logs_or_reports": false,
+  "native_entries_deleted": 0,
+  "historical_test_room_migrated": false,
+  "historical_test_room_reason": "original_native_entries_missing",
+  "staging_remaining": 0,
+  "active_runtime": {
+    "hub_identity_same": true,
+    "administrator_authenticated": true,
+    "airplay_ready": true,
+    "playback_mode": "low_latency",
+    "known_source_count": 2,
+    "background_pid": 75949,
+    "hub_pid": 75951,
+    "state_directory": "/Volumes/projects-mac/NeonMix/.local/airplay/manual-file-b3de8677",
+    "output_frames_advancing": true,
+    "output_frames": 7848192,
+    "ui_launched": true,
+    "ui_pid": 82754
+  },
+  "desktop_runtime_verified": {
+    "administrator_authenticated": true,
+    "hub_identity_same": true,
+    "administrator_device_same": true,
+    "listen": "127.0.0.1:55607",
+    "verified_pid": 80176
+  },
+  "default_desktop_switch": {
+    "default_state_directory": "/Volumes/projects-mac/NeonMix/.local/desktop",
+    "native_backup_directory": "/Volumes/projects-mac/NeonMix/.local/desktop-native-20261002",
+    "new_profile_version": 2,
+    "background_pid": 81271,
+    "hub_not_autostarted": true,
+    "sender_not_autostarted": true,
+    "administrator_profile_listed": true
+  },
+  "roll_back_requires_explicit_offline_state_review": true,
+  "sha256": {
+    "target/release/neonmix-hub": "ac2ebecbc842f609d66923997049d2110b9d2f8047794a4b845ad1aefe3ec252",
+    "target/release/neonmix-background": "61c5ca54481c6949753f5d7feb172b907875fcdbe114a9402b0b51a514149050",
+    "target/release/neonmix-desktop": "1ab93087db46e6b196b4f462cd4b5fb55cfeebc7af1ff7ca9d9f2334ce82ecf8",
+    "target/credential-migrate/release/neonmix-credential-migrate": "c61f3c663342f4812434b5065935ec08740d2655849582bb2c28477cb997ffb2"
+  }
+}

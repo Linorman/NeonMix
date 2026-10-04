@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "binary_sha256": "1e142aa0a8f66120e5f8121365f8a9b2fd6bbde316c29be167377b4292e1f5c3",
+  "scenarios": {},
+  "limits": [
+    "unnamed fields located by ordinal; accessibility regression remains",
+    "single host; no real IME composition or VoiceOver listening"
+  ],
+  "failure": "probe condition timed out: False",
+  "keychain_cleanup": [
+    true,
+    true
+  ]
+}

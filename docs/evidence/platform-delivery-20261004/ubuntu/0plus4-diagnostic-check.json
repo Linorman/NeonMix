@@ -1,0 +1,21 @@
+{
+  "reason": "One same-strength diagnostic repeat: original native sender-exit failure was cleaned before preserving stderr/exit codes. No production code or assertions changed; original failure retained.",
+  "command": [
+    "python3",
+    "/home/parallels/NeonMix/d26u/artifacts/d26u/harness/airplay_multi_source_native_diagnostic.py",
+    "--output",
+    "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+    "--report",
+    "/home/parallels/NeonMix/d26u/artifacts/d26u/0plus4-diagnostic.json",
+    "--sources",
+    "0",
+    "--native-sources",
+    "4",
+    "--steady-seconds",
+    "60"
+  ],
+  "started_at": 1791044751.1237712,
+  "ended_at": 1791044812.9384623,
+  "exit_code": 1,
+  "harness_sha256": "10814447cb56f43ecd4cfa7cc27952693aab922b6c353536ac11bbee75b7493a"
+}

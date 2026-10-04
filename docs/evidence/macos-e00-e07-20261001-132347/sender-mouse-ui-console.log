@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 156, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_sender_ui_probe.py", line 67, in main
+    wait_for(lambda: "本机 UI 验收房间" in app.ax("return entire contents of window 1 of p"), seconds=15)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_background_probe.py", line 54, in wait_for
+    raise RuntimeError(f"probe condition timed out: {last}")
+RuntimeError: probe condition timed out: False

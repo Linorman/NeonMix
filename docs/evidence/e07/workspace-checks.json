@@ -1,0 +1,32 @@
+{
+  "platform": "macOS",
+  "date": "2026-10-01",
+  "workspace_tests_passed": 110,
+  "fmt": true,
+  "clippy_all_targets_deny_warnings": true,
+  "workspace_release": true,
+  "source_files": {
+    "apps/desktop/src/main.rs": "ef45088b6c2bc66171ed56dcb69f1fac4aebee74188f1355bea3ebc67b33ff95",
+    "apps/desktop/src/widgets.rs": "97422d47dafd46a816865bb0ac5aba0bf1a263b826364f7d336d07547aca1a03",
+    "apps/desktop/src/theme.rs": "7d14526e8292796f4cf0caa818ce001940731b3047751eb19415523f9ba2580b",
+    "apps/desktop/src/tray.rs": "5042afeaa0ac0d6602737d9149629d616efc1686d62bd3deca09545ea730a4f8",
+    "crates/desktop-service/src/lib.rs": "a53a73cf5a07241b05a3c4c049f1debe3953b0ac1cb6d5d5f21a3bd740ded04c",
+    "crates/desktop-service/src/daemon.rs": "2362c70cfecb05c2cb7e99b2a7cc7f3c1cc7138ce04f36bc0836c15423e6b8d0",
+    "crates/desktop-service/src/transport.rs": "473d1698c001613876075f575ab0a1f3c8bd648bdf9fe44b127f5d900c07718b",
+    "crates/desktop-service/src/transport_windows.rs": "61c86850ecf694ed7179281754be39c3a7d0fa8a45bc3552dc9b9e88987a55b5",
+    "crates/audio-core/src/mixer.rs": "961e1d8815f148b9c22bbeb9fadfaf210f22725b84f56a813a1b5badea456f83",
+    "apps/hub/src/server.rs": "790dc50ecb648b2ee347a21fe1d3c33045bb7b993c8ecaac979f76e80ac05544",
+    "crates/desktop-service/src/linux_owner.rs": "d8ea88fbe62909bf0e0bdae6dcf4ac1f190ad0a02967826f07fc06b651eb022a",
+    "Cargo.lock": "b9f8c39b4bb5bf7f41267e1391888e24922dfd7a4724f3edad5baaa8ab226ba3",
+    "apps/desktop/Cargo.toml": "df3f5bf020c3375e89cba982077f7c14de7691e8391a125b0e838da4ef2e0b95",
+    "tools/e07_background_probe.py": "40a736e3ff205362e37782d0a051726723feaa04be1c8f14c181f16eda303fd7",
+    "tools/e07_mixer_probe.py": "b755814eb1b81e907fcc18a86b0e9db21ef42292942fae5167c090bbc796006f",
+    "tools/e07_native_ui_probe.py": "c3fe1bc27f36a2567d9b84a8ca5eca91b50f825d72df807b5de86d615ee8a66f"
+  },
+  "binary_sha256": {
+    "neonmix-desktop": "24af50953d27c796995b4dc5960d91dc7fb3347456e08cffddb213eae37a9f89",
+    "neonmix-background": "4c09f7b4186f38da85ba499fcd86dd322c46028c20c90d360f460b091718434e",
+    "neonmix-hub": "b725ff89b2c8d19d106861318249d56461bc6a3f726b911015f86d006f823aff",
+    "neonmix-audio": "eda91c62e400990c3bf3e10a5dbecf30e269b427bb47e37d176c2a1f89066949"
+  }
+}

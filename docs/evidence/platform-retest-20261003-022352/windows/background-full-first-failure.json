@@ -1,0 +1,19 @@
+{
+  "platform": "Windows",
+  "scenarios": {},
+  "limits": {
+    "ipc_bytes": 262144,
+    "command_timeout_seconds": 25,
+    "explicit_restart_after_failure": true
+  },
+  "build_profile": "release",
+  "listen_port": 7443,
+  "binary_sha256": {
+    "neonmix-background.exe": "e73dea26c929fbd665bee771304d91fceb85e1d98083e5029654d12da93f5ea5",
+    "neonmix-audio.exe": "e35b2a1fb99e9a92f5e36421f52d56558bfcc7bc485039f2ba4e452e93405188",
+    "neonmix-hub.exe": "1590ba2de63fbab8e7411e141fe9ad99b5353285a9b8e9aca4347931f3059dd1"
+  },
+  "passed": false,
+  "failure_type": "RuntimeError",
+  "fixture_removed": true
+}

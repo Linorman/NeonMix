@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "process_clock_ns": 50001000,
+  "rusage_converted_ns": 50053250,
+  "ratio": 1.001044979100418,
+  "mach_timebase": [
+    125,
+    3
+  ]
+}

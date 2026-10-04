@@ -1,0 +1,7 @@
+Running as unit: run-u306.service; invocation ID: b39d4bd4f45644739f94bf62671d0c6a
+Finished with result: exit-code
+Main processes terminated with: code=exited/status=1
+Service runtime: 27.332s
+CPU time consumed: 5.326s
+Memory peak: 744.0K
+Memory swap peak: 0B

@@ -1,0 +1,55 @@
+START doctor
+END doctor 0
+START workspace-tests
+END workspace-tests 0
+START release-build
+END release-build 0
+START simulate
+END simulate 0
+START devices
+END devices 0
+START hal-abi
+END hal-abi 0
+START hal-build
+END hal-build 0
+START hal-bundle-host
+END hal-bundle-host 0
+START hal-vendor-tests
+END hal-vendor-tests 0
+START media-runtime
+END media-runtime 0
+START media-dual
+END media-dual 0
+START media-loss-replay
+END media-loss-replay 0
+START media-reject
+END media-reject 0
+START drift-injection
+END drift-injection 101
+START blackhole-44100
+END blackhole-44100 0
+START blackhole-48000
+END blackhole-48000 0
+START blackhole-96000
+END blackhole-96000 0
+START capture-lifecycle
+END capture-lifecycle 0
+START media-control
+END media-control 0
+START media-faults
+END media-faults 0
+START discovery-pairing
+END discovery-pairing 0
+START hal-binding
+END hal-binding 0
+START hal-app-volume
+END hal-app-volume 0
+START background
+END background 0
+START mixer
+END mixer 0
+START native-ui
+END native-ui 1
+START dual-soak-300s
+END dual-soak-300s 0
+/Volumes/projects-mac/NeonMix/docs/evidence/macos-e00-e07-20261001-132347

@@ -1,0 +1,13 @@
+{
+  "owned_processes_before_cleanup": [],
+  "stopped_fixture_background_pids": [],
+  "remaining_r03_neonmix_processes": [],
+  "removed_owned_fixture_paths": [
+    ".local\\windows-lan",
+    ".local\\background-product-owned",
+    ".local\\gui-test-state"
+  ],
+  "preserved": "r03 source, target EXE/PDB, .local SDK/cache/build, all evidence; old directories/packages/manual sessions untouched",
+  "system_settings_changed": false,
+  "outside_authorized_root_deleted": false
+}

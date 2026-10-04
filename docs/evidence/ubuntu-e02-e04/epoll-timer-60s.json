@@ -1,0 +1,33 @@
+{
+  "elapsed_ns": 60000617737,
+  "policy": 0,
+  "priority": 0,
+  "requested_wait_ns": 1000000,
+  "samples": 42338,
+  "max_wait_lateness_ns": 16081042,
+  "slowest_samples": [
+    {
+      "at_ns": 34348307600,
+      "wall_ns": 17081042,
+      "cpu_ns": 49376
+    },
+    {
+      "at_ns": 43370801646,
+      "wall_ns": 16566625,
+      "cpu_ns": 49792
+    },
+    {
+      "at_ns": 35366554559,
+      "wall_ns": 14024791,
+      "cpu_ns": 12668167
+    },
+    {
+      "at_ns": 17489811550,
+      "wall_ns": 12407334,
+      "cpu_ns": 49125
+    }
+  ],
+  "proc_cpu_before": "cpu  69006 1 15364 2686155 3978 0 1683 0 0 0",
+  "proc_cpu_after": "cpu  69164 1 15500 2709684 3989 0 1699 0 0 0",
+  "scope": "diagnostic only; no audio acceptance and no scheduling changes"
+}

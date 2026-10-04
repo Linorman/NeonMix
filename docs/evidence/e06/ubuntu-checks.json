@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "platform": "Ubuntu 24.04.3 ARM64, PipeWire 1.0.5, WirePlumber 0.4.17",
+  "scope": "E06 targeted native checks, not full workspace/release acceptance",
+  "release_binary_sha256": {
+    "neonmix-audio": "806983d26c3bf76876ddd9b3f2113f19f471c80d58a07869089b83290bed2937",
+    "neonmix-hub": "6a061fa96f972955729f108662ce33c22fd51800d7255f0850d7dbe478bca2eb"
+  },
+  "source_files": 299,
+  "commands": [
+    "cargo fmt -p neonmix-linux -- --check",
+    "cargo clippy --release --locked -p neonmix-audio -p neonmix-hub --all-targets -- -D warnings",
+    "cargo test --release --locked -p neonmix-output-binding",
+    "cargo test --release --locked -p neonmix-audio -p neonmix-hub virtual_output"
+  ],
+  "targeted_tests_passed": 7,
+  "runtime_reports": [
+    "ubuntu-native.json",
+    "ubuntu-binding.json",
+    "ubuntu-service-recovery.json",
+    "ubuntu-permissions.json",
+    "ubuntu-cleanup.json"
+  ],
+  "artifacts_directory": "artifacts/e06-ubuntu"
+}

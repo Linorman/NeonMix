@@ -1,0 +1,40 @@
+{
+  "platform": "macOS",
+  "scope": "loopback with independent Rust background processes, virtual capture A and synthetic source B",
+  "passed": true,
+  "scenarios": {
+    "pair_text_member_role_binding_and_identity_preserving_rename": true,
+    "actual_virtual_capture_and_two_authenticated_stream_meters": true,
+    "member_own_mute_and_independent_other_stream": true,
+    "server_denies_member_other_stream_control": true,
+    "admin_solo_and_multiple_solo_meters": true,
+    "room_gain_mute_and_real_post_limiter_meter": true,
+    "gain_and_stale_revision_conflict_without_overwrite": true,
+    "numeric_whitelist_diagnostic_export": true,
+    "admin_disconnect_and_allow_does_not_autostart": true,
+    "explicit_sender_restart_and_stop_preserve_hub": true,
+    "binding_disable_enable_remove_and_reopen_status": true,
+    "revoke_closes_active_sender": true
+  },
+  "binary_sha256": {
+    "neonmix-hub": "bd7bac2f9e2926d7bafa4a40c7ee545f017c78df2f8065cd9771c658f7101ff7",
+    "neonmix-audio": "29c459fe9847aac9662ad892e6d008a5916924cea7f8db5b8421805c5d89c230",
+    "neonmix-background": "4c09f7b4186f38da85ba499fcd86dd322c46028c20c90d360f460b091718434e"
+  },
+  "meter_baseline": {
+    "a": {
+      "peak": 0.015988245606422424,
+      "rms": 0.01114920899271965,
+      "stream_id": 1158294319324071
+    },
+    "b": {
+      "peak": 0.01596219465136528,
+      "rms": 0.011191998608410358,
+      "stream_id": 3544280085171326
+    },
+    "output": {
+      "peak": 0.00799721758812666,
+      "rms": 0.003961610142141581
+    }
+  }
+}

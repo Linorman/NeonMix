@@ -1,0 +1,688 @@
+{
+  "scope": "dedicated native Mac Sender to Ubuntu PipeWire output; synthetic tone; last active sample, no empty-after-stop zero substitution",
+  "active_samples": 50,
+  "first_active_at": 1791007388.771089,
+  "last_active_at": 1791007447.7294374,
+  "last_active_remote": {
+    "airplay": {
+      "multi_receiver": false,
+      "receivers": [
+        {
+          "active": false,
+          "admission_denials": {},
+          "discovery_state": "hidden",
+          "enabled": false,
+          "error": null,
+          "failure_stage": null,
+          "format": null,
+          "ingress": {
+            "accepted_packets": 0,
+            "clock_resets": 0,
+            "future_packets": 0,
+            "identity_rejections": 0,
+            "last_mapping_id": "[redacted]",
+            "last_presentation_time_ns": 0,
+            "last_source_rate": 0,
+            "last_source_sample_position": 0,
+            "last_uncertainty_ns": 0,
+            "late_packets": 0,
+            "latency_advance_ns": 0,
+            "malformed_packets": 0,
+            "output_latency_ns": 0,
+            "overflow_packets": 0,
+            "pending_bytes": 0,
+            "pending_frames": 0,
+            "playout_lead_ns": 0,
+            "protocol_lead_ns": 0,
+            "released_packets": 0,
+            "timeline_rejections": 0
+          },
+          "last_media_reset": null,
+          "media_resets": 0,
+          "mix": {
+            "gain_db": 0.0,
+            "muted": false,
+            "solo": false
+          },
+          "pairing_window_open": false,
+          "pairing_window_remaining_seconds": 0,
+          "playback_allowed": true,
+          "playback_mode": "low_latency",
+          "protocol_events": [],
+          "protocol_events_dropped": 0,
+          "queued_blocks": 0,
+          "ready": false,
+          "received_blocks": 0,
+          "rejected_blocks": 0,
+          "released_blocks": 0,
+          "revision": 1,
+          "source_id": "[redacted]",
+          "source_name": "[redacted]",
+          "source_revoked": false,
+          "visibility_reason": "disabled"
+        }
+      ],
+      "revision": 1
+    },
+    "drift_ppm": [
+      151.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "errors": "[redacted]",
+    "fifo_frames": [
+      3765,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "filtered_queues": [
+      5004,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360,
+      3360
+    ],
+    "lane_stream_ids": [
+      5629359618844242,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "last_underrun_fifo_frames": [
+      415,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "last_underrun_needed_frames": [
+      480,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "last_underrun_output_frame": [
+      17105760,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "last_underrun_source_end": [
+      2695200,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "limited_frames": 0,
+    "media_workers": [
+      {
+        "max_loop_gap_ns": 41520542,
+        "max_pump_ns": 2659542,
+        "max_report_ns": 1769000,
+        "pump_timing": {
+          "feedback": {
+            "at_ns": 26766823805,
+            "cpu_ns": 845250,
+            "phase": "feedback",
+            "requested_wait_ns": null,
+            "wall_ns": 844833
+          },
+          "max_wait_lateness_ns": 20994124,
+          "outgoing": {
+            "at_ns": 30607381182,
+            "cpu_ns": 3667,
+            "phase": "outgoing",
+            "requested_wait_ns": null,
+            "wall_ns": 1261833
+          },
+          "receive": {
+            "at_ns": 6462126795,
+            "cpu_ns": 6064209,
+            "phase": "receive",
+            "requested_wait_ns": null,
+            "wall_ns": 10774209
+          },
+          "recent_slow": [
+            {
+              "at_ns": 6462126795,
+              "cpu_ns": 6064209,
+              "phase": "receive",
+              "requested_wait_ns": null,
+              "wall_ns": 10774209
+            },
+            {
+              "at_ns": 6473059004,
+              "cpu_ns": 160416,
+              "phase": "wait",
+              "requested_wait_ns": 19998459,
+              "wall_ns": 30584333
+            },
+            {
+              "at_ns": 30511505765,
+              "cpu_ns": 24918,
+              "phase": "wait",
+              "requested_wait_ns": 5995417,
+              "wall_ns": 16431250
+            },
+            {
+              "at_ns": 30720226182,
+              "cpu_ns": 32529792,
+              "phase": "wait",
+              "requested_wait_ns": 19999459,
+              "wall_ns": 40993583
+            },
+            {
+              "at_ns": 30764112598,
+              "cpu_ns": 24417,
+              "phase": "wait",
+              "requested_wait_ns": 17631166,
+              "wall_ns": 38486250
+            },
+            {
+              "at_ns": 51209708817,
+              "cpu_ns": 11584,
+              "phase": "wait",
+              "requested_wait_ns": 19999500,
+              "wall_ns": 39213125
+            },
+            null,
+            null
+          ],
+          "report": {
+            "at_ns": 42631213354,
+            "cpu_ns": 1770625,
+            "phase": "report",
+            "requested_wait_ns": null,
+            "wall_ns": 1769542
+          },
+          "slow_count": 6,
+          "source": {
+            "at_ns": 38489946560,
+            "cpu_ns": 21749,
+            "phase": "source",
+            "requested_wait_ns": null,
+            "wall_ns": 3480917
+          },
+          "wait": {
+            "at_ns": 30720226182,
+            "cpu_ns": 32529792,
+            "phase": "wait",
+            "requested_wait_ns": 19999459,
+            "wall_ns": 40993583
+          }
+        },
+        "receive_throttles": 0,
+        "scheduling": {
+          "base_priority": 0,
+          "configured": true,
+          "error": null,
+          "nice": -10,
+          "policy": 1073741824
+        }
+      }
+    ],
+    "meters": {
+      "lanes": [
+        {
+          "peak": 0.01634896919131279,
+          "rms": 0.011285312473773956,
+          "stream_id": 5629359618844242
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        },
+        {
+          "peak": 0.0,
+          "rms": 0.0,
+          "stream_id": 0
+        }
+      ],
+      "limiter_gain": 1.0,
+      "output": {
+        "peak": 0.004106675274670124,
+        "rms": 0.002834742423146963
+      },
+      "sample_rate": 48000,
+      "window_frames": 2400
+    },
+    "output_frames": 17253376,
+    "output_stats": {
+      "callback_max_ns": 13909458,
+      "callback_over_budget": 0,
+      "callbacks": 16849,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 17253376,
+      "last_arrival_ns": 359577418213,
+      "last_device_ns": 213455613357259,
+      "last_error": 0,
+      "native_device_frame_position": 17268736,
+      "native_internal_frames": 17267712,
+      "native_stream_frames": 17267712,
+      "no_data_intervals": 0,
+      "peak": 0.004017441067844629,
+      "period_max": 1024,
+      "period_min": 1024,
+      "presented_frames": 17247233,
+      "silent_frames": 14523360,
+      "stale_frames": 0,
+      "submitted_frames": 17253376
+    },
+    "packet_budget_drops": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "pcm_queue_age_max_ns": [
+      79490583,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "queues": [
+      4725,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "receivers": [
+      {
+        "authenticated": true,
+        "authenticated_to_jitter_max_ns": 50740042,
+        "jitter_to_pcm_max_ns": 38441792,
+        "last_buffer_peak": 0.01611328125,
+        "last_buffer_rms": 0.011346121481518976,
+        "last_loss_duration_ns": 0,
+        "last_pcm_pts_ns": 59651684875,
+        "last_pcm_timing_gap": [
+          2670720,
+          2672640,
+          0
+        ],
+        "last_source_position": 2845440,
+        "late_packets": 0,
+        "lost_packets": 452,
+        "native_scheduling": {
+          "configured": 4,
+          "entered": 4,
+          "failed": 0,
+          "max_base_priority": 0,
+          "min_base_priority": 0
+        },
+        "overflow_plc_packets": 444,
+        "packets": {
+          "duplicate": 0,
+          "highest_sequence": 21082,
+          "highest_timestamp": 1711057757,
+          "invalid": "[redacted]",
+          "received": 5921,
+          "reordered": 0,
+          "timestamp_step_errors": 0
+        },
+        "pcm_frames": 2791680,
+        "pcm_peak": 0.018280029296875,
+        "pcm_sink_dropped": 13,
+        "pcm_timing_gap_count": 13,
+        "pcm_timing_gaps": [
+          [
+            204480,
+            206400,
+            0
+          ],
+          [
+            1061280,
+            1061760,
+            0
+          ],
+          [
+            1135200,
+            1137600,
+            0
+          ],
+          [
+            1966080,
+            1968000,
+            0
+          ],
+          [
+            2261760,
+            2267520,
+            0
+          ],
+          [
+            2268000,
+            2277120,
+            64
+          ],
+          [
+            2290080,
+            2297280,
+            64
+          ],
+          [
+            2303040,
+            2304000,
+            0
+          ]
+        ],
+        "pipeline_base_time_ns": 213395866816254,
+        "pipeline_clock_ns": 213455508934241,
+        "plc_samples": 213120,
+        "queue_drops": 0,
+        "retimed_loss_events": 0,
+        "silent_pcm_frames": 1023,
+        "wire_to_authenticated_max_ns": 30711542
+      }
+    ],
+    "sinc_delay_frames": 64,
+    "timed_drift_ppm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timed_late_frames": 0,
+    "timed_phase_error_ns": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "underrun_frames": 21120,
+    "underrun_frames_by_lane": [
+      21120,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "receiver_quality": {
+    "lost_packets": 452,
+    "overflow_plc_packets": 444,
+    "late_packets": 0,
+    "queue_drops": 0,
+    "pcm_sink_dropped": 13,
+    "pcm_timing_gap_count": 13,
+    "silent_pcm_frames": 1023,
+    "wire_to_authenticated_max_ns": 30711542,
+    "authenticated_to_jitter_max_ns": 50740042,
+    "jitter_to_pcm_max_ns": 38441792,
+    "native_scheduling": {
+      "configured": 4,
+      "entered": 4,
+      "failed": 0,
+      "max_base_priority": 0,
+      "min_base_priority": 0
+    }
+  },
+  "mixer_quality": {
+    "underrun_frames": 21120,
+    "timed_late_frames": 0,
+    "output_stats": {
+      "callback_max_ns": 13909458,
+      "callback_over_budget": 0,
+      "callbacks": 16849,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 17253376,
+      "last_arrival_ns": 359577418213,
+      "last_device_ns": 213455613357259,
+      "last_error": 0,
+      "native_device_frame_position": 17268736,
+      "native_internal_frames": 17267712,
+      "native_stream_frames": 17267712,
+      "no_data_intervals": 0,
+      "peak": 0.004017441067844629,
+      "period_max": 1024,
+      "period_min": 1024,
+      "presented_frames": 17247233,
+      "silent_frames": 14523360,
+      "stale_frames": 0,
+      "submitted_frames": 17253376
+    }
+  },
+  "passed": false,
+  "root_duration_seconds": 60.736,
+  "root_active_samples": 28,
+  "root_sender_exit_code": 0
+}

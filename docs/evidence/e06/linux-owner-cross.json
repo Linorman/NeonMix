@@ -1,0 +1,12 @@
+{
+  "host": "macOS arm64",
+  "scope": "Linux compile-time verification only; no Linux runtime tests",
+  "cross_check_command": "tools/dev python3 tools/cross_linux_check.py",
+  "cross_check_exit_code": 0,
+  "macos_owner_lock_test": "second owner rejected without truncating metadata; drop releases lock",
+  "source_sha256": {
+    "adapters/linux/src/lib.rs": "55876682a290e90925c2a14886b38b4dfaed6d1391b77a8c4d6f89d2b1c87a21",
+    "apps/audio/src/virtual_output.rs": "038c382411183342c138051efac3ecfd03a876511d5763471a635a079d1374e3",
+    "apps/hub/src/sender.rs": "ea5861b9731ab41ff78d522094a8624aeaafd7d9456af1a8394ffc37bb85f1a8"
+  }
+}

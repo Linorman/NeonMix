@@ -1,0 +1,126 @@
+--- a/apps/airplay-worker/CMakeLists.txt
++++ b/apps/airplay-worker/CMakeLists.txt
+@@ -44,8 +44,11 @@
+ endif()
+ target_compile_definitions(protocol PRIVATE PLIST_210 PLIST_230 LIBPLIST_STATIC OPENSSL_API_COMPAT=0x10101000L)
+ file(GLOB PLIST_SOURCES "${PLIST}/src/*.c" "${PLIST}/libcnary/*.c")
+-list(FILTER PLIST_SOURCES EXCLUDE REGEX "test|plistutil|cnary.c")
++# Match source filenames only: checkout directories may contain "test".
++list(FILTER PLIST_SOURCES EXCLUDE REGEX "/(test[^/]*|plistutil|cnary)[.]c$")
+ add_library(plist STATIC ${PLIST_SOURCES})
++# These archives are also linked into the shared protocol probe on ELF hosts.
++set_target_properties(protocol plist PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ include(CheckSymbolExists)
+ include(CheckStructHasMember)
+ if(NOT WIN32)
+--- a/apps/airplay-worker/main.cpp
++++ b/apps/airplay-worker/main.cpp
+@@ -59,7 +59,7 @@
+     if(!PLIST_IS_UINT(n))throw std::runtime_error(std::string("integer required: ")+k);
+     uint64_t v=0;plist_get_uint_val(n,&v);return v;
+ }
+-static bool boolean(plist_t p,const char*k,bool fallback=false) {
++static bool boolean_field(plist_t p,const char*k,bool fallback=false) {
+     auto n=plist_dict_get_item(p,k);if(!n)return fallback;
+     if(!PLIST_IS_BOOLEAN(n))throw std::runtime_error(std::string("boolean required: ")+k);
+     uint8_t v=0;plist_get_bool_val(n,&v);return v;
+@@ -243,7 +243,7 @@
+     static void reset(void*cls,int){flush(cls);}
+     void command(plist_t p){auto type=str(p,"type");
+         if(type=="stop"){running=false;admission_cv.notify_all();}
+-        else if(type=="admit"){std::lock_guard<std::mutex>l(state_mutex);if(admission_pending && number(p,"request_id")==admission_id){admission_answer=boolean(p,"allowed");admission_pending=false;admission_cv.notify_all();}}
++        else if(type=="admit"){std::lock_guard<std::mutex>l(state_mutex);if(admission_pending && number(p,"request_id")==admission_id){admission_answer=boolean_field(p,"allowed");admission_pending=false;admission_cv.notify_all();}}
+         else if(type=="grant"){std::lock_guard<std::mutex>l(decode_mutex);set_context(p);granted=true;}
+         else if(type=="allow"){pairing_enabled=true;}
+         else if(type=="disconnect"||type=="revoke"){
+@@ -279,7 +279,7 @@
+         if(device.size()!=12||device.find_first_not_of("0123456789abcdefABCDEF")!=std::string::npos||name.empty()||name.size()>80||pin.size()!=4||pin.find_first_not_of("0123456789")!=std::string::npos)throw std::runtime_error("invalid receiver configuration");
+         if(receiver_uuid.size()!=36 || receiver_uuid[8]!='-' || receiver_uuid[13]!='-' || receiver_uuid[18]!='-' || receiver_uuid[23]!='-' || receiver_uuid.find_first_not_of("0123456789abcdefABCDEF-")!=std::string::npos)throw std::runtime_error("valid stable receiver UUID required");
+         keyfile=platform::private_key_path(keyfile);
+-        worker.known=keyset(config,"known_client_keys");worker.blocked=keyset(config,"blocked_client_keys");if(worker.known.size()+worker.blocked.size()>64)throw std::runtime_error("client key limit exceeded");worker.pairing_enabled=boolean(config,"pairing_allowed",true);worker.protocol_trace_enabled=boolean(config,"protocol_trace",false);worker.pin_deadline=Clock::now()+std::chrono::minutes(10);
++        worker.known=keyset(config,"known_client_keys");worker.blocked=keyset(config,"blocked_client_keys");if(worker.known.size()+worker.blocked.size()>64)throw std::runtime_error("client key limit exceeded");worker.pairing_enabled=boolean_field(config,"pairing_allowed",true);worker.protocol_trace_enabled=boolean_field(config,"protocol_trace",false);worker.pin_deadline=Clock::now()+std::chrono::minutes(10);
+         auto portvalue=number(config,"rtsp_port",0);if(portvalue>65535)throw std::runtime_error("invalid listening port");plist_free(config);
+         if(!getenv("GST_PLUGIN_SYSTEM_PATH_1_0") && platform::set_environment("GST_PLUGIN_SYSTEM_PATH_1_0",NEONMIX_AUDIO_PLUGIN_DIR,1))throw std::runtime_error("plugin environment configuration failed");
+         if(platform::set_environment("GST_PLUGIN_PATH_1_0","",1))throw std::runtime_error("plugin environment configuration failed");
+--- a/crates/airplay-ipc/src/local_windows.rs
++++ b/crates/airplay-ipc/src/local_windows.rs
+@@ -10,8 +10,8 @@
+ };
+ use windows_sys::Win32::{
+     Foundation::{
+-        CloseHandle, ERROR_PIPE_CONNECTED, ERROR_PIPE_LISTENING, GENERIC_READ, HANDLE,
+-        INVALID_HANDLE_VALUE, LocalFree,
++        CloseHandle, ERROR_PIPE_CONNECTED, ERROR_PIPE_LISTENING, HANDLE, INVALID_HANDLE_VALUE,
++        LocalFree,
+     },
+     Security::{
+         Authorization::{
+@@ -19,11 +19,11 @@
+         },
+         GetTokenInformation, SECURITY_ATTRIBUTES, TOKEN_QUERY, TOKEN_USER, TokenUser,
+     },
+-    Storage::FileSystem::ReadFile,
++    Storage::FileSystem::{PIPE_ACCESS_INBOUND, ReadFile},
+     System::{
+         Pipes::{
+             ConnectNamedPipe, CreateNamedPipeW, DisconnectNamedPipe, GetNamedPipeClientProcessId,
+-            PIPE_ACCESS_INBOUND, PIPE_NOWAIT, PIPE_REJECT_REMOTE_CLIENTS, PeekNamedPipe,
++            PIPE_NOWAIT, PIPE_REJECT_REMOTE_CLIENTS, PeekNamedPipe,
+         },
+         Threading::{
+             GetCurrentProcess, OpenProcess, OpenProcessToken, PROCESS_QUERY_LIMITED_INFORMATION,
+--- a/apps/hub/src/server.rs
++++ b/apps/hub/src/server.rs
+@@ -612,7 +612,8 @@
+             &config.output,
+             neonmix_io::OpenOptions {
+                 sample_rate: None,
+-                period_frames: if cfg!(target_os = "linux") {
++                // PipeWire and WASAPI negotiate the device's supported period.
++                period_frames: if cfg!(any(target_os = "linux", target_os = "windows")) {
+                     None
+                 } else {
+                     Some(256)
+@@ -749,7 +750,7 @@
+                     if Instant::now()>=retry_output {
+                         retry_output=Instant::now()+Duration::from_secs(1);
+                         let source=crate::recoverable::RecoverableMixer {mixer:Some(mixer),returned:returned_to.clone()};
+-                        if let Ok(running)=crate::backend().and_then(|b|b.open_output(&output_id,neonmix_io::OpenOptions {sample_rate:None,period_frames:if cfg!(target_os = "linux") {None} else {Some(256)}},source))
++                        if let Ok(running)=crate::backend().and_then(|b|b.open_output(&output_id,neonmix_io::OpenOptions {sample_rate:None,period_frames:if cfg!(any(target_os = "linux", target_os = "windows")) {None} else {Some(256)}},source))
+                             && running.play().is_ok() {if let Ok(mut engine)=shared.lock() {engine.output_stats=running.stats.clone();let _=engine.authority.set_output_available(true);let state=engine.authority.snapshot();let _=engine.resources.prepare(&state,None);}output=Some(running);emit(serde_json::json!({"event":"output_reopened","device":output_id}))?;}
+                     } else {let _=returned_to.try_send(mixer);}
+                 }
+--- a/apps/hub/src/identity.rs
++++ b/apps/hub/src/identity.rs
+@@ -644,7 +644,10 @@
+         let destination = fixture.0.join("moved");
+         std::fs::rename(&source, &destination).unwrap();
+         let loaded = config(&destination.join("server.json")).unwrap();
+-        assert_eq!(loaded.state_path, Some(destination.join("state.json")));
++        assert_eq!(
++            loaded.state_path,
++            Some(destination.join("state.json").canonicalize().unwrap())
++        );
+         assert!(loaded.devices[0].token == token, "moved credential differs");
+         let moved = profiles::token(&destination.join("admin.json")).unwrap();
+         assert_eq!(moved.hub_id, before.hub_id);
+--- a/tools/credential_store_probe.py
++++ b/tools/credential_store_probe.py
+@@ -36,6 +36,17 @@
+     if not sid.startswith('S-1-'):
+         raise RuntimeError('fixture account SID unavailable')
+     access = '(OI)(CI)F' if path.is_dir() else 'F'
++    result = subprocess.run(['icacls', str(path), '/setowner', '*' + sid],
++                            capture_output=True, text=True)
++    if result.returncode:
++        raise RuntimeError('private fixture owner setup failed')
++    # Python 3.13's Windows mkdir(mode=0o700) adds explicit SYSTEM and
++    # Administrators ACEs, which disabling inheritance alone does not remove.
++    result = subprocess.run(['icacls', str(path), '/remove:g',
++                             '*S-1-5-18', '*S-1-5-32-544'],
++                            capture_output=True, text=True)
++    if result.returncode:
++        raise RuntimeError('private fixture extra ACE cleanup failed')
+     result = subprocess.run(['icacls', str(path), '/inheritance:r', '/grant:r', '*' + sid + ':' + access],
+                             capture_output=True, text=True)
+     if result.returncode:

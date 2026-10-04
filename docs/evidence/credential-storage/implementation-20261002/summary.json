@@ -1,0 +1,417 @@
+{
+  "date": "2026-10-02",
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "scope": "macOS only; generated fixtures, no ambient native credential or existing user state access",
+  "commands": {
+    "format": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.33
+    },
+    "clippy": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "neonmix-hub",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 2.896
+    },
+    "tests": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "neonmix-identity",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop-service"
+      ],
+      "exit_code": 0,
+      "seconds": 13.091
+    },
+    "release": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-desktop"
+      ],
+      "exit_code": 0,
+      "seconds": 48.598
+    },
+    "dependency": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/credential_dependency_check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.809
+    },
+    "file-probe": {
+      "command": [
+        "tools/dev",
+        "python3",
+        "tools/credential_store_probe.py",
+        "--release"
+      ],
+      "exit_code": 0,
+      "seconds": 0.77
+    },
+    "migration-tests": {
+      "command": [
+        "tools/credential_migrate",
+        "test",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 0.534
+    },
+    "migration-clippy": {
+      "command": [
+        "tools/credential_migrate",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 0.16
+    },
+    "migration-release": {
+      "command": [
+        "tools/credential_migrate",
+        "build",
+        "--locked",
+        "--release"
+      ],
+      "exit_code": 0,
+      "seconds": 0.136
+    },
+    "tests-hub-final": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "neonmix-hub"
+      ],
+      "exit_code": 0,
+      "seconds": 7.717
+    },
+    "release-hub-final": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "-p",
+        "neonmix-hub"
+      ],
+      "exit_code": 0,
+      "seconds": 46.955
+    },
+    "clippy-desktop-final": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "neonmix-desktop-service",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 3.003
+    },
+    "tests-desktop-final": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "neonmix-desktop-service"
+      ],
+      "exit_code": 0,
+      "seconds": 9.562
+    },
+    "release-desktop-final": {
+      "command": [
+        "tools/dev",
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-desktop"
+      ],
+      "exit_code": 0,
+      "seconds": 23.502
+    }
+  },
+  "workspace_checks_before_final_targeted_changes": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.343
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 7.379
+    },
+    "tests": {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 55.04
+    },
+    "release": {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 58.201
+    }
+  },
+  "targeted_tests_passed": 57,
+  "migration_tests_passed": 18,
+  "native_fixture_tests_ignored": 1,
+  "scenario_counts": {
+    "file_cli": 9,
+    "e05": 16,
+    "airplay": 6,
+    "background": 12
+  },
+  "scenarios": {
+    "e05": {
+      "file_store_write_read_delete": true,
+      "same_name_candidates": [
+        {
+          "capabilities": "opus48-stereo,pair-v1",
+          "endpoints": [
+            {
+              "address": "10.11.11.147:59861",
+              "url": "https://10.11.11.147:59861"
+            },
+            {
+              "address": "10.211.55.2:59861",
+              "url": "https://10.211.55.2:59861"
+            },
+            {
+              "address": "10.254.101.147:59861",
+              "url": "https://10.254.101.147:59861"
+            },
+            {
+              "address": "10.37.129.2:59861",
+              "url": "https://10.37.129.2:59861"
+            },
+            {
+              "address": "127.0.0.1:59861",
+              "url": "https://127.0.0.1:59861"
+            },
+            {
+              "address": "192.168.100.111:59861",
+              "url": "https://192.168.100.111:59861"
+            },
+            {
+              "address": "192.168.100.208:59861",
+              "url": "https://192.168.100.208:59861"
+            }
+          ],
+          "hub_id": "00eeaf42-32d1-40b2-9db7-210c4ec3b70c",
+          "instance": "NeonMix-00eeaf4232d140b29db7210c4ec3b70c-8e612fc7156c._neonmix._tcp.local.",
+          "room_name": "E05 同名房间",
+          "version": 1
+        },
+        {
+          "capabilities": "opus48-stereo,pair-v1",
+          "endpoints": [
+            {
+              "address": "127.0.0.1:59862",
+              "url": "https://127.0.0.1:59862"
+            }
+          ],
+          "hub_id": "7760109c-68e6-45c9-a1bc-ae2391057b7e",
+          "instance": "NeonMix-7760109c68e645c9a1bcae2391057b7e-bdc7000276c5._neonmix._tcp.local.",
+          "room_name": "E05 同名房间",
+          "version": 1
+        }
+      ],
+      "automatic_pair_and_repeat_file_profile": {
+        "credential": "/Volumes/projects-mac/NeonMix/.local/tmp/e05-yh_dc4am/sender.json",
+        "credential_store": "file",
+        "device_id": "2e5afa72-d100-4b06-bfe9-654f30827ae1",
+        "event": "paired",
+        "hub_id": "00eeaf42-32d1-40b2-9db7-210c4ec3b70c"
+      },
+      "unpaired_and_wrong_certificate_rejected": {
+        "http": 401,
+        "client_error": "error sending request for url (https://127.0.0.1:59862/v1/identity)"
+      },
+      "changed_key_rejected_and_duplicate_identity_candidates": {
+        "client_error": "error sending request for url (https://127.0.0.1:59862/v1/identity)",
+        "instances": [
+          "NeonMix-00eeaf4232d140b29db7210c4ec3b70c-8e612fc7156c._neonmix._tcp.local.",
+          "NeonMix-00eeaf4232d140b29db7210c4ec3b70c-bdc7000276c5._neonmix._tcp.local."
+        ]
+      },
+      "same_certificate_foreign_hub_uuid_rejected": "authenticated Hub UUID differs from paired identity",
+      "single_use_exact_retry": {
+        "hub_id": "00eeaf42-32d1-40b2-9db7-210c4ec3b70c",
+        "device_id": "341f5041-4081-4b99-b141-8ce50adabc8a",
+        "revision": 4
+      },
+      "actual_rename_failure_is_atomic_and_grant_retryable": true,
+      "cancel_and_client_server_expiry": true,
+      "revoke_control_and_active_protected_media": {
+        "pcm_before": 52800,
+        "sender_exit": 1,
+        "watch_exit": 1
+      },
+      "goodbye_address_change_persistent_trust_revocation_and_grant_expiry": {
+        "old_port": 59861,
+        "new_port": 59955,
+        "stable_hub_id": "00eeaf42-32d1-40b2-9db7-210c4ec3b70c"
+      },
+      "lost_response_local_recovery": true,
+      "missing_file_secret_fails_closed": true,
+      "ipv6_discovery_media_and_wss_address_recovery": {
+        "media_frames": 51840,
+        "subscriptions": 2
+      },
+      "abrupt_offline_active_verification": true,
+      "product_default_listen_is_discoverable_lan": true
+    },
+    "airplay": {
+      "tls13_trusted_fixture_certificate_and_real_output": true,
+      "two_enable_disable_rounds_and_worker_cleanup": true,
+      "receiver_file_identity_and_trust_survive_worker_restart": true,
+      "admin_only_pin_member_write_denied_stale_revision_denied": true,
+      "missing_corrupt_receiver_key_fails_without_identity_replacement": true,
+      "sigkill_worker_preserves_hub_output_and_authenticated_native_sender": true
+    },
+    "background": {
+      "private_socket_and_state": true,
+      "file_profiles_reference_dedicated_secret_entries": true,
+      "explicit_physical_output_low_level_test_tone": true,
+      "authenticated_viewer_role_and_real_snapshot": true,
+      "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true,
+      "repeat_invitation_after_cancel_uses_ephemeral_file": true,
+      "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true,
+      "diagnostics_redacted_with_real_meters": true,
+      "strict_numeric_whitelist_private_diagnostic_export": true,
+      "media_process_crash_reported_without_unbounded_restart": true,
+      "settings_revision_and_explicit_graceful_stop": true,
+      "explicit_background_shutdown_ends_audio_process": true
+    }
+  },
+  "cleanup": {
+    "generated_fixtures_removed": true,
+    "native_entries_created": 0,
+    "existing_state_migrated": false,
+    "system_route_changed": false
+  },
+  "not_run": [
+    "Windows/Linux native runtime and ACL validation",
+    "real native vault fixture migration (explicit ignored entry provided)",
+    "existing user identity migration or binary replacement",
+    "GUI/Mixer full integration and real Apple source migration regression",
+    "wrong-owner construction requiring another account",
+    "all /v1/me and secret-write/readback fault boundaries"
+  ],
+  "sha256": {
+    "Cargo.toml": "a31690027ad581031718ef241b499f18c97e8c476fc1b61ff87c71a560847b6e",
+    "Cargo.lock": "d638477b340201613a7b41e1c2d967ee863976033bc0b56e3060f42f9cfd0da2",
+    "crates/identity/Cargo.toml": "0d78b86d5b93b54f0d086368210c6d0ff31ad1e80fad50628a7380356178b9e4",
+    "crates/identity/src/lib.rs": "c855f2626c9dca2825941106d1010eaa3e42d3d38f232c9759dea62c3e36b3f6",
+    "crates/identity/src/store.rs": "a6a6180a66e41313ccc939c4ce198092cbf5c6a1cbf385a8f5e489254ca7ef6e",
+    "crates/identity/src/profiles.rs": "bd94e6953cf87648f571ca447c724f0b9f9a118a186243ba217405bf3d54ccb3",
+    "crates/identity/src/files.rs": "e3c384161daa711ff4dee330781e5bf143b0c502fff37095a4e8ee64fe526bcd",
+    "crates/identity/src/files_windows.rs": "41d79d25bbff4f3d0c50307ac9ec9adb112912caf8c39271ad028d2279561bba",
+    "apps/hub/src/identity.rs": "dd09091bd7263ef7663c58141235ef4bd604cce137a5778e8d9195346db5b103",
+    "apps/hub/src/main.rs": "0f7b7c62179b4c864cb0e9f04236a65520b78397b6c59dcf9043609c0a15a801",
+    "apps/hub/src/server.rs": "e6d9d4597b79deee42ae9b8892c7441186ebbc1e70347c324e24a986bd6d5942",
+    "apps/hub/src/airplay.rs": "df2a8730c6665a5702ebe9d04e92470746448b93914b7fa589d630cc58aa4bcb",
+    "crates/desktop-service/src/daemon.rs": "2baf758dd9ba4720667b65ca1b206521afb76346b34015569a48cc4f7a7f3c75",
+    "crates/desktop-service/tests/lifecycle.rs": "a649aef2c877a7c469383321cb79e862ddc40af6f2fccad9383b8a191135ef61",
+    "tools/credential_migrate": "95106590a6b56cf965334aff04ee43939e697fda864eadd3a193ef1e11447b6e",
+    "tools/credential_store_probe.py": "f6a5118039f7a73cc99130b065ddc11075ae5c00191242b9369bce82e21f513a",
+    "tools/archive_policy.py": "61440ecca81ccbf79f4449f0496f34d334c16180d908d7dc008baa3093af8da8",
+    "apps/credential-migrate/Cargo.toml": "7e833997f232d5a720d3c2ed9455d767569bbef3a14eee014bc46079c8c9d3c1",
+    "apps/credential-migrate/Cargo.lock": "3d03562bc73f334454de7367a35d89ddc4f868142ac56a1693eaba5f458631fd",
+    "apps/credential-migrate/README.md": "d85cc1b519361f435459f757ade445a9557fdf3f9f7a9ea483b6e661c469dc0d",
+    "apps/credential-migrate/tests/native_fixture.rs": "5552cbf47e2ef6fea4874dc584f28257d149763c32466ffa76b18353210632d6",
+    "apps/credential-migrate/tests/migration.rs": "b31a0061e827a374824cc1a8c3bd554938bce0ffb5797f9db712a4ac3303ef96",
+    "apps/credential-migrate/src/native.rs": "4effffe9669636978a5e43d03441aee73a48f794db807108bb5060ba112ce660",
+    "apps/credential-migrate/src/lib.rs": "8cfb215266d6d082adf5b9ae0cb9e311a4a1a8f56f49c92d3d1870f7664f902a",
+    "apps/credential-migrate/src/main.rs": "73eee78eabb3b6919d3d783da1b6b0cbda9632cd3ffea9232ceca7564a5a2fc3",
+    "target/release/neonmix-hub": "49ace9b06b6d8697f445c702b96701520c3ecb7e11b43878e18474cc26eddd84",
+    "target/release/neonmix-background": "78ffd9f7645a34844c19e2f25e331f5f11c4e00166da64bf285e9284c679b647",
+    "target/release/neonmix-desktop": "f0707eb34b1539d22ded5e0a06b47f45fa40ddf50f9cb0e847dea537b685fd20",
+    "target/credential-migrate/release/neonmix-credential-migrate": "8c2a6ed77e34485cdb0f941e7bf3918b7225268bdf64581fd6bec9adcd7b597b"
+  },
+  "regression_reports": {
+    "e05": "artifacts/credential-storage/e05-file-regression-20261002-retry/result.json",
+    "airplay": "artifacts/credential-storage/airplay-file-regression-20261002/result.json",
+    "background": "artifacts/credential-storage/e07-background-final-20261002/result.json"
+  }
+}

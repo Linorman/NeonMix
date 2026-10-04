@@ -1,0 +1,15 @@
+{
+  "initial_matrix_native_requested_seconds": 600,
+  "initial_matrix_service_seconds": 23.997,
+  "initial_four_entry_native_alive": false,
+  "initial_exit_code": null,
+  "initial_exit_reason": "not captured; original probe removed native subprocess log",
+  "four_entry_targeted_repeat_seconds": 24,
+  "repeat_native_alive_before_cleanup": true,
+  "repeat_all_12_poll_values": null,
+  "repeat_terminal_events": [
+    "sender_stop_requested",
+    "sender_stopped"
+  ],
+  "conclusion": "repeat did not reproduce early native exit; initial observation remains unexplained"
+}

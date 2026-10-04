@@ -1,0 +1,52 @@
+{
+  "confirmed_findings_resolved": 4,
+  "checks": {
+    "format": {
+      "exit_code": 0,
+      "seconds": 0.249,
+      "command": [
+        "tools/dev",
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ]
+    },
+    "clippy": {
+      "exit_code": 0,
+      "seconds": 9.619,
+      "command": [
+        "tools/dev",
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    "workspace-tests": {
+      "exit_code": 0,
+      "seconds": 42.216,
+      "command": [
+        "tools/dev",
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ]
+    }
+  },
+  "workspace_tests_passed": 140,
+  "release_build_passed": true,
+  "release_warning_count": 0,
+  "native_gui_scenarios": 9,
+  "native_sender_scenarios": 8,
+  "native_screenshot_count": 10,
+  "gui_binary_sha256": "05b90a53008339adac823a8ae2babc790c8ff4afa1f21f58c6f2adc2425061e1",
+  "keychain_cleanup": true,
+  "accepted": true
+}

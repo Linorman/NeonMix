@@ -1,0 +1,12 @@
+{
+  "directory": "/home/parallels/NeonMix/artifacts/packages/u26-211335",
+  "archive": "/home/parallels/NeonMix/artifacts/packages/u26-211335.tar.gz",
+  "bytes": 125292442,
+  "sha256": "8d0319681e94f3c5e0d2e1a51a329df4d1d3d07a256ce8c4d82e06d84017b79c",
+  "files": 418,
+  "archive_members": 428,
+  "no_runtime_state": true,
+  "source_count": 511,
+  "local_archive_path": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-Ubuntu-ARM64-u26-211335.tar.gz",
+  "local_archive_all_files_verified": 417
+}

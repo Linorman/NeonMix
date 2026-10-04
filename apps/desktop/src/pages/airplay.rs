@@ -135,20 +135,23 @@ impl Desktop {
                     .count();
                 let multi = state["multi_receiver"].as_bool() == Some(true);
                 ui.horizontal_wrapped(|ui| {
-                    widgets::caption(
-                        ui,
-                        &format!(
-                            "房间输入容量：{} / {}",
-                            state
-                                .pointer("/capacity/active")
-                                .and_then(Value::as_u64)
-                                .unwrap_or(0),
-                            state
-                                .pointer("/capacity/limit")
-                                .and_then(Value::as_u64)
-                                .unwrap_or(4)
-                        ),
-                    );
+                    let limit = state
+                        .pointer("/capacity/limit")
+                        .and_then(Value::as_u64)
+                        .unwrap_or(4) as usize;
+                    let used: Vec<crate::viz::Slot> = self
+                        .snapshot
+                        .clone()
+                        .map(|s| self.lanes(&s))
+                        .unwrap_or_default()
+                        .into_iter()
+                        .map(|l| crate::viz::Slot {
+                            airplay: l.is_airplay(),
+                            name: l.name,
+                        })
+                        .collect();
+                    widgets::caption(ui, "房间输入容量");
+                    crate::viz::capacity_slots(ui, limit, &used);
                     if self.admin()
                         && widgets::button_enabled(
                             ui,

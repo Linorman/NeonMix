@@ -1,0 +1,37 @@
+{
+  "hub_help": {
+    "exit_code": 0
+  },
+  "devices": {
+    "exit_code": 0
+  },
+  "launcher_exit": 0,
+  "background_status": {
+    "hub": {
+      "error": null,
+      "last_event": null,
+      "metrics": null,
+      "pid": null,
+      "running": false
+    },
+    "hub_settings": null,
+    "output_binding": null,
+    "pid": 545809,
+    "profiles": [],
+    "sender": {
+      "error": null,
+      "last_event": null,
+      "metrics": null,
+      "pid": null,
+      "running": false
+    },
+    "sender_options": null,
+    "version": 1
+  },
+  "gui_pids": [
+    545791
+  ],
+  "gui_alive": true,
+  "background_after_ui_termination": 1,
+  "socket_removed": true
+}

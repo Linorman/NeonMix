@@ -1,0 +1,31 @@
+{
+  "platform": "Linux",
+  "scenarios": {
+    "private_socket_and_state": true,
+    "file_profiles_reference_dedicated_secret_entries": true,
+    "explicit_physical_output_low_level_test_tone": true,
+    "authenticated_viewer_role_and_real_snapshot": true,
+    "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true,
+    "repeat_invitation_after_cancel_uses_ephemeral_file": true,
+    "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true,
+    "diagnostics_redacted_with_real_meters": true,
+    "strict_numeric_whitelist_private_diagnostic_export": true,
+    "media_process_crash_reported_without_unbounded_restart": true,
+    "settings_revision_and_explicit_graceful_stop": true,
+    "explicit_background_shutdown_ends_audio_process": true
+  },
+  "limits": {
+    "ipc_bytes": 262144,
+    "command_timeout_seconds": 25,
+    "explicit_restart_after_failure": true
+  },
+  "build_profile": "release",
+  "listen_port": 54993,
+  "binary_sha256": {
+    "neonmix-background": "0231ade7448e1ca7447b0c7823805e792e7e906c9f20b7363789852bad15b527",
+    "neonmix-audio": "e3077c83d935cf0e272992d49858f3918932445b6f9dfe9278b96877a2138764",
+    "neonmix-hub-real": "5211f8b7a6dcba8093029c0460ad440720952afee6e4e7387f968870c67f9124"
+  },
+  "passed": true,
+  "fixture_removed": true
+}

@@ -1,0 +1,143 @@
+format 0
+clippy 101
+collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+777 ~                         if response.clicked()
+778 ~                             && self.page != page {
+779 |                                 animation::reset_page_transition(ctx, page);
+...
+782 |                                 self.page_transition_start = Some(Instant::now());
+783 ~                             }
+    |
+
+error: this `if` statement can be collapsed
+    --> apps/desktop/src/main.rs:1172:17
+     |
+1172 | /                 if !running && configured {
+1173 | |                     if widgets::primary_button(ui, "开始共享").clicked() {
+1174 | |                         self.request(Request::HubStart);
+1175 | |                     }
+1176 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1172 ~                 if !running && configured
+1173 ~                     && widgets::primary_button(ui, "开始共享").clicked() {
+1174 |                         self.request(Request::HubStart);
+1175 ~                     }
+     |
+
+error: this `if` statement can be collapsed
+    --> apps/desktop/src/main.rs:1177:17
+     |
+1177 | /                 if running {
+1178 | |                     if widgets::danger_button(ui, "停止共享").clicked() {
+1179 | |                         self.request(Request::HubStop);
+1180 | |                     }
+1181 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1177 ~                 if running
+1178 ~                     && widgets::danger_button(ui, "停止共享").clicked() {
+1179 |                         self.request(Request::HubStop);
+1180 ~                     }
+     |
+
+error: this `if` statement can be collapsed
+    --> apps/desktop/src/main.rs:1261:21
+     |
+1261 | /                     if let Some(invitation_id) = self.invite_id {
+1262 | |                         if widgets::secondary_button(ui, "取消邀请").clicked() {
+1263 | |                             self.request(Request::CancelInvite {
+1264 | |                                 credential: self.credential.clone(),
+...    |
+1269 | |                     }
+     | |_____________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+1261 ~                     if let Some(invitation_id) = self.invite_id
+1262 ~                         && widgets::secondary_button(ui, "取消邀请").clicked() {
+1263 |                             self.request(Request::CancelInvite {
+ ...
+1267 |                             });
+1268 ~                         }
+     |
+
+error: this `if` statement can be collapsed
+    --> apps/desktop/src/main.rs:2030:33
+     |
+2030 | / ...                   if let Some(diag) = &self.diagnostics {
+2031 | | ...                       if let Some(queues) =
+2032 | | ...                           diag.get("queues").and_then(Value::as_array)
+...    |
+2041 | | ...                   }
+     | |_______________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2030 ~                                 if let Some(diag) = &self.diagnostics
+2031 ~                                     && let Some(queues) =
+2032 |                                         diag.get("queues").and_then(Value::as_array)
+ ...
+2039 |                                         }
+2040 ~                                     }
+     |
+
+error: this `if` statement can be collapsed
+    --> apps/desktop/src/main.rs:2031:37
+     |
+2031 | / ...                   if let Some(queues) =
+2032 | | ...                       diag.get("queues").and_then(Value::as_array)
+2033 | | ...                   {
+2034 | | ...                       if let Some(queue_frames) =
+...    |
+2040 | | ...                   }
+     | |_______________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2032 ~                                         diag.get("queues").and_then(Value::as_array)
+2033 ~                                         && let Some(queue_frames) =
+2034 |                                             queues.get(stream.id as usize).and_then(Value::as_f64)
+ ...
+2037 |                                             stats.push(("缓冲", format!("{:.1} ms", latency_ms)));
+2038 ~                                         }
+     |
+
+error: this `if` statement can be collapsed
+    --> apps/desktop/src/main.rs:2140:41
+     |
+2140 | / ...                   if self.admin() {
+2141 | | ...                       if widgets::danger_button(ui, "断开设备").clicked()
+2142 | | ...                       {
+2143 | | ...                           self.operation(Operation::Disconnect {
+...    |
+2147 | | ...                   }
+     | |_______________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+help: collapse nested if block
+     |
+2140 ~                                         if self.admin()
+2141 ~                                             && widgets::danger_button(ui, "断开设备").clicked()
+2142 |                                             {
+ ...
+2145 |                                                 });
+2146 ~                                             }
+     |
+
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop") due to 37 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 37 previous errors
+

@@ -1,0 +1,241 @@
+[
+  {
+    "name": "mix-control",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/mix-control.json",
+      "--scenario",
+      "mix-control",
+      "--sources",
+      "2",
+      "--status-readers",
+      "4"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010413.509865,
+    "end_epoch": 1791010418.1688168,
+    "seconds": 4.659
+  },
+  {
+    "name": "management",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/management.json",
+      "--scenario",
+      "management",
+      "--sources",
+      "2"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010418.169038,
+    "end_epoch": 1791010423.965919,
+    "seconds": 5.797
+  },
+  {
+    "name": "four-airplay",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/four-airplay.json",
+      "--sources",
+      "4",
+      "--status-readers",
+      "4",
+      "--steady-seconds",
+      "30",
+      "--fault-cycles",
+      "3"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010423.966105,
+    "end_epoch": 1791010489.3515468,
+    "seconds": 65.385
+  },
+  {
+    "name": "mix-3plus1",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/mix-3plus1.json",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1",
+      "--steady-seconds",
+      "20"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010489.35183,
+    "end_epoch": 1791010521.977608,
+    "seconds": 32.626
+  },
+  {
+    "name": "mix-2plus2",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/mix-2plus2.json",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2",
+      "--steady-seconds",
+      "15",
+      "--fault-cycles",
+      "2"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010521.977804,
+    "end_epoch": 1791010551.750149,
+    "seconds": 29.772
+  },
+  {
+    "name": "mix-1plus3",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/mix-1plus3.json",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3",
+      "--steady-seconds",
+      "15"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010551.750346,
+    "end_epoch": 1791010571.313618,
+    "seconds": 19.563
+  },
+  {
+    "name": "mix-0plus4",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_multi_source_probe.py",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/mix-0plus4.json",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--steady-seconds",
+      "60"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010571.3138409,
+    "end_epoch": 1791010632.743786,
+    "seconds": 61.43
+  },
+  {
+    "name": "single-pcm",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/single-pcm.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010632.744011,
+    "end_epoch": 1791010640.502794,
+    "seconds": 7.759
+  },
+  {
+    "name": "single-alac",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/single-alac.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010640.503016,
+    "end_epoch": 1791010648.298242,
+    "seconds": 7.795
+  },
+  {
+    "name": "single-sync",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      "python3",
+      "tools/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "coreaudio:BlackHole2ch_UID",
+      "--playback-mode",
+      "synchronized",
+      "--report",
+      "/Volumes/projects-mac/NeonMix/.local/tm3/artifacts/serial-results/single-sync.json"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010648.29846,
+    "end_epoch": 1791010654.8869739,
+    "seconds": 6.589
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+      ".local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "start_epoch": 1791010654.887203,
+    "end_epoch": 1791010655.558924,
+    "seconds": 0.672
+  }
+]

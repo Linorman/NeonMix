@@ -1,0 +1,127 @@
+{
+  "platform": "macOS",
+  "build_profile": "release",
+  "output_device": "coreaudio:BlackHole2ch_UID",
+  "native_start_order": "hot",
+  "prefetch_blocks": 0,
+  "codec": "alac",
+  "playback_mode": "low_latency",
+  "protocol_lead_ms": 2000,
+  "pause_seconds": 2.0,
+  "pause_cycles": 5,
+  "resume_lead_ms": 250,
+  "resume_reset": "none",
+  "track_gap": true,
+  "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+  "credential_scope": "explicit init laboratory bearer tokens; receiver private file-store fixture entry",
+  "binary_sha256": {
+    "neonmix-hub": "4d1c1ed97447951fc0b3e637924d72ae8dd6e4478ebdc202adbd4ae7deeab571",
+    "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+  },
+  "passed": true,
+  "scenarios": {
+    "playback_mode_admin_permission_and_persistence": true,
+    "receiver_key_and_trust_survive_worker_restart": true,
+    "room_source_identity_visible_without_control_credentials": true,
+    "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+    "track_gap_recovers_without_flush_setup_or_epoch_reset": true,
+    "same_session_pause_resume_without_route_reselection": true,
+    "steady_timing_without_new_late_packets_or_skipped_samples": true,
+    "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+    "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+    "worker_kill_clears_airplay_and_preserves_native_audio": true
+  },
+  "limitations": [
+    "synthetic FairPlay envelope, no Apple-device interoperability claim",
+    "no saved recording or analog/audio-video latency measurement",
+    "functional debug/release result, not a sustained performance test"
+  ],
+  "pause_resume_cycles": [
+    {
+      "released_before": 27,
+      "released_after": 60,
+      "late_packets": 1,
+      "timeline_rejections": 0,
+      "media_resets": 0,
+      "last_media_reset": null,
+      "lane_rms": 0.08562251180410385,
+      "timed_late_frames": 0
+    },
+    {
+      "released_before": 67,
+      "released_after": 101,
+      "late_packets": 2,
+      "timeline_rejections": 0,
+      "media_resets": 0,
+      "last_media_reset": null,
+      "lane_rms": 0.08570383489131927,
+      "timed_late_frames": 0
+    },
+    {
+      "released_before": 108,
+      "released_after": 129,
+      "late_packets": 3,
+      "timeline_rejections": 0,
+      "media_resets": 0,
+      "last_media_reset": null,
+      "lane_rms": 0.0858745127916336,
+      "timed_late_frames": 0
+    },
+    {
+      "released_before": 135,
+      "released_after": 156,
+      "late_packets": 4,
+      "timeline_rejections": 0,
+      "media_resets": 0,
+      "last_media_reset": null,
+      "lane_rms": 0.08546818047761917,
+      "timed_late_frames": 0
+    },
+    {
+      "released_before": 162,
+      "released_after": 183,
+      "late_packets": 5,
+      "timeline_rejections": 0,
+      "media_resets": 0,
+      "last_media_reset": null,
+      "lane_rms": 0.08397608995437622,
+      "timed_late_frames": 0
+    }
+  ],
+  "pause_resume": {
+    "released_before": 162,
+    "released_after": 183,
+    "late_packets": 5,
+    "timeline_rejections": 0,
+    "media_resets": 0,
+    "last_media_reset": null,
+    "lane_rms": 0.08397608995437622,
+    "timed_late_frames": 0
+  },
+  "timing": {
+    "latency_advance_ns": 1821385063,
+    "protocol_lead_ns": 1934632541,
+    "playout_lead_ns": 113247478,
+    "output_latency_ns": 5312500
+  },
+  "airplay_pcm": {
+    "received_blocks": 571,
+    "released_blocks": 559,
+    "codec": "alac",
+    "source_frame_count": 352,
+    "accepted_packets": 566,
+    "identity_rejections": 0,
+    "source_rate": 44100,
+    "internal_rate": 48000,
+    "lane_rms": 0.08537779748439789,
+    "uncertainty_ns": 8780409,
+    "timed_late_frames": 0
+  },
+  "mixed_output_rms": 0.02121669054031372,
+  "output_frames_around_worker_crash": {
+    "before": 771072,
+    "after": 779776
+  },
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

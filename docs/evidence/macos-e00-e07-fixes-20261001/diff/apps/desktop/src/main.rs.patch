@@ -1,0 +1,278 @@
+--- before/apps/desktop/src/main.rs
++++ after/apps/desktop/src/main.rs
+@@ -798,13 +798,11 @@
+                             response.request_focus();
+                             self.focus_after_modal = false;
+                         }
+-                        if response.clicked() {
+-                            if self.page != page {
+-                                animation::reset_page_transition(ctx, page);
+-                                self.prev_page = Some(self.page);
+-                                self.page = page;
+-                                self.page_transition_start = Some(Instant::now());
+-                            }
++                        if response.clicked() && self.page != page {
++                            animation::reset_page_transition(ctx, page);
++                            self.prev_page = Some(self.page);
++                            self.page = page;
++                            self.page_transition_start = Some(Instant::now());
+                         }
+                     }
+                 });
+@@ -866,42 +864,41 @@
+                                 theme::TEXT_SECONDARY
+                             }),
+                     );
+-
+-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+-                        let response = ui.add_enabled(
+-                            !self.action_busy(),
+-                            egui::Button::new(RichText::new("退出后台").size(13.0))
+-                                .fill(theme::DANGER.gamma_multiply(0.3))
+-                                .stroke(egui::Stroke::new(1.0, theme::DANGER))
+-                                .corner_radius(egui::CornerRadius::same(255))
+-                                .min_size(egui::vec2(0.0, 32.0)),
++                });
++                ui.horizontal_wrapped(|ui| {
++                    let response = ui.add_enabled(
++                        !self.action_busy(),
++                        egui::Button::new(RichText::new("退出后台").size(13.0))
++                            .fill(theme::DANGER.gamma_multiply(0.3))
++                            .stroke(egui::Stroke::new(1.0, theme::DANGER))
++                            .corner_radius(egui::CornerRadius::same(255))
++                            .min_size(egui::vec2(0.0, 32.0)),
++                    );
++                    if response.clicked() {
++                        self.confirmation(
++                            "退出后台".into(),
++                            "停止本实例的共享、发送和全部音频连接。".into(),
++                            Request::Shutdown,
++                            response.id,
+                         );
+-                        if response.clicked() {
+-                            self.confirmation(
+-                                "退出后台".into(),
+-                                "停止本实例的共享、发送和全部音频连接。".into(),
+-                                Request::Shutdown,
+-                                response.id,
+-                            );
++                    }
++
++                    ui.add_space(8.0);
++
++                    if self.status.as_ref().is_some_and(|s| s.sender.running) {
++                        if widgets::secondary_button(ui, "停止发送").clicked() {
++                            self.stop_sender();
+                         }
+-
+                         ui.add_space(8.0);
+-
+-                        if self.status.as_ref().is_some_and(|s| s.sender.running) {
+-                            if widgets::secondary_button(ui, "停止发送").clicked() {
+-                                self.stop_sender();
+-                            }
+-                            ui.add_space(8.0);
++                    }
++
++                    if widgets::secondary_button(ui, "隐藏窗口").clicked() {
++                        if self.tray.is_some() {
++                            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
++                        } else {
++                            ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(true));
+                         }
+-
+-                        if widgets::secondary_button(ui, "隐藏窗口").clicked() {
+-                            if self.tray.is_some() {
+-                                ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+-                            } else {
+-                                ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(true));
+-                            }
+-                        }
+-                    });
++                    }
+                 });
+             });
+         // 主内容区域
+@@ -1193,15 +1190,11 @@
+                     });
+                 }
+ 
+-                if !running && configured {
+-                    if widgets::primary_button(ui, "开始共享").clicked() {
+-                        self.request(Request::HubStart);
+-                    }
+-                }
+-                if running {
+-                    if widgets::danger_button(ui, "停止共享").clicked() {
+-                        self.request(Request::HubStop);
+-                    }
++                if !running && configured && widgets::primary_button(ui, "开始共享").clicked() {
++                    self.request(Request::HubStart);
++                }
++                if running && widgets::danger_button(ui, "停止共享").clicked() {
++                    self.request(Request::HubStop);
+                 }
+             });
+ 
+@@ -1260,13 +1253,15 @@
+                 ui.add_space(16.0);
+                 ui.checkbox(&mut self.show_invitation, "显示邀请内容");
+                 ui.add_space(4.0);
++                let caption = ui.label("邀请内容");
+                 ui.add(
+                     egui::TextEdit::singleline(&mut self.issued_invitation)
+                         .password(!self.show_invitation)
+                         .font(egui::TextStyle::Monospace)
+                         .desired_width(ui.available_width())
+                         .interactive(false),
+-                );
++                )
++                .labelled_by(caption.id);
+ 
+                 if let Some(expiry) = self.invite_expiry {
+                     let now = std::time::SystemTime::now()
+@@ -1282,14 +1277,14 @@
+                     if widgets::secondary_button(ui, "复制邀请").clicked() {
+                         ui.ctx().copy_text(self.issued_invitation.clone());
+                     }
+-                    if let Some(invitation_id) = self.invite_id {
+-                        if widgets::secondary_button(ui, "取消邀请").clicked() {
+-                            self.request(Request::CancelInvite {
+-                                credential: self.credential.clone(),
+-                                hub: self.hub(),
+-                                invitation_id,
+-                            });
+-                        }
++                    if let Some(invitation_id) = self.invite_id
++                        && widgets::secondary_button(ui, "取消邀请").clicked()
++                    {
++                        self.request(Request::CancelInvite {
++                            credential: self.credential.clone(),
++                            hub: self.hub(),
++                            invitation_id,
++                        });
+                     }
+                 });
+             }
+@@ -1549,12 +1544,13 @@
+         });
+         widgets::card(ui, "pair", |ui| {
+             widgets::field(ui, "设备名称", &mut self.sender_name, false);
+-            ui.label("粘贴 Hub 给出的一次性邀请");
++            let caption = ui.label("粘贴 Hub 给出的一次性邀请");
+             ui.add(
+                 egui::TextEdit::singleline(&mut self.invitation)
+                     .password(!self.show_invitation)
+                     .desired_width(ui.available_width()),
+-            );
++            )
++            .labelled_by(caption.id);
+             ui.checkbox(&mut self.show_invitation, "显示邀请");
+             if ui
+                 .add_enabled(
+@@ -1896,13 +1892,14 @@
+                     let mut next_muted = muted;
+                     let mut next_solo = solo;
+                     ui.horizontal(|ui| {
+-                        if {
++                        let res = {
+                             let mute_changed =
+                                 ui.checkbox(&mut next_muted, "AirPlay 静音").changed();
+                             let solo_changed =
+                                 ui.checkbox(&mut next_solo, "AirPlay Solo").changed();
+                             mute_changed || solo_changed
+-                        } {
++                        };
++                        if res {
+                             self.airplay_operation(AirplayAction::Mix {
+                                 gain_db: gain,
+                                 muted: next_muted,
+@@ -2202,17 +2199,14 @@
+                                 let mut stats = Vec::new();
+ 
+                                 // 延迟估计
+-                                if let Some(diag) = &self.diagnostics {
+-                                    if let Some(queues) =
++                                if let Some(diag) = &self.diagnostics
++                                    && let Some(queues) =
+                                         diag.get("queues").and_then(Value::as_array)
+-                                    {
+-                                        if let Some(queue_frames) =
+-                                            queues.get(stream.id as usize).and_then(Value::as_f64)
+-                                        {
+-                                            let latency_ms = queue_frames / 48.0;
+-                                            stats.push(("缓冲", format!("{:.1} ms", latency_ms)));
+-                                        }
+-                                    }
++                                    && let Some(queue_frames) =
++                                        queues.get(stream.id as usize).and_then(Value::as_f64)
++                                {
++                                    let latency_ms = queue_frames / 48.0;
++                                    stats.push(("缓冲", format!("{:.1} ms", latency_ms)));
+                                 }
+ 
+                                 // 网络状态
+@@ -2312,13 +2306,12 @@
+                                             }
+                                         }
+ 
+-                                        if self.admin() {
+-                                            if widgets::danger_button(ui, "断开设备").clicked()
+-                                            {
+-                                                self.operation(Operation::Disconnect {
+-                                                    device_id: stream.device_id,
+-                                                });
+-                                            }
++                                        if self.admin()
++                                            && widgets::danger_button(ui, "断开设备").clicked()
++                                        {
++                                            self.operation(Operation::Disconnect {
++                                                device_id: stream.device_id,
++                                            });
+                                         }
+                                     });
+                                 },
+@@ -2747,6 +2740,43 @@
+ #[cfg(test)]
+ mod tests {
+     use super::*;
++
++    #[test]
++    fn named_fields_publish_accessible_labels_without_exposing_password_text() {
++        let ctx = egui::Context::default();
++        ctx.enable_accesskit();
++        for secret in [false, true] {
++            let mut value = "private-test-value".to_owned();
++            let output = ctx.run(egui::RawInput::default(), |ctx| {
++                egui::CentralPanel::default().show(ctx, |ui| {
++                    widgets::field(ui, "受测字段", &mut value, secret);
++                });
++            });
++            let tree = output.platform_output.accesskit_update.unwrap();
++            let field = tree
++                .nodes
++                .iter()
++                .map(|(_, node)| node)
++                .find(|node| {
++                    matches!(
++                        node.role(),
++                        egui::accesskit::Role::TextInput | egui::accesskit::Role::PasswordInput
++                    )
++                })
++                .expect("field absent from accessibility tree");
++            assert!(!field.labelled_by().is_empty());
++            assert!(
++                field
++                    .labelled_by()
++                    .iter()
++                    .all(|label| tree.nodes.iter().any(|(id, _)| id == label))
++            );
++            if secret {
++                assert_ne!(field.value(), Some(value.as_str()));
++            }
++        }
++    }
++
+     #[test]
+     fn pages_handle_missing_loading_failed_and_stale_states() {
+         let ctx = egui::Context::default();

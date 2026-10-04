@@ -1,0 +1,128 @@
+[
+  {
+    "name": "fmt-members",
+    "samples": 0,
+    "mean": null,
+    "p95": null,
+    "max": null
+  },
+  {
+    "name": "worker-protocol",
+    "samples": 2,
+    "mean": 11.592,
+    "p95": 20.2,
+    "max": 20.2
+  },
+  {
+    "name": "worker-pairing",
+    "samples": 6,
+    "mean": 2.326,
+    "p95": 4.715,
+    "max": 4.715
+  },
+  {
+    "name": "worker-decoder",
+    "samples": 0,
+    "mean": null,
+    "p95": null,
+    "max": null
+  },
+  {
+    "name": "identity",
+    "samples": 10,
+    "mean": 2.071,
+    "p95": 6.234,
+    "max": 6.234
+  },
+  {
+    "name": "single-pcm",
+    "samples": 7,
+    "mean": 9.139,
+    "p95": 17.043,
+    "max": 17.043
+  },
+  {
+    "name": "single-alac",
+    "samples": 8,
+    "mean": 9.287,
+    "p95": 16.958,
+    "max": 16.958
+  },
+  {
+    "name": "synchronized",
+    "samples": 7,
+    "mean": 10.074,
+    "p95": 12.563,
+    "max": 12.563
+  },
+  {
+    "name": "background",
+    "samples": 4,
+    "mean": 6.56,
+    "p95": 13.75,
+    "max": 13.75
+  },
+  {
+    "name": "four-contention",
+    "samples": 34,
+    "mean": 24.559,
+    "p95": 27.569,
+    "max": 28.0
+  },
+  {
+    "name": "3plus1",
+    "samples": 42,
+    "mean": 14.753,
+    "p95": 17.857,
+    "max": 18.159
+  },
+  {
+    "name": "2plus2",
+    "samples": 37,
+    "mean": 15.238,
+    "p95": 17.647,
+    "max": 20.2
+  },
+  {
+    "name": "1plus3",
+    "samples": 35,
+    "mean": 14.719,
+    "p95": 17.092,
+    "max": 22.166
+  },
+  {
+    "name": "0plus4",
+    "samples": 61,
+    "mean": 13.694,
+    "p95": 15.776,
+    "max": 20.5
+  },
+  {
+    "name": "mix-control",
+    "samples": 4,
+    "mean": 17.727,
+    "p95": 24.121,
+    "max": 24.121
+  },
+  {
+    "name": "management",
+    "samples": 5,
+    "mean": 11.509,
+    "p95": 18.953,
+    "max": 18.953
+  },
+  {
+    "name": "four-retake",
+    "samples": 34,
+    "mean": 23.921,
+    "p95": 26.799,
+    "max": 27.068
+  },
+  {
+    "name": "native-lan-active",
+    "samples": 59,
+    "mean": 4.019,
+    "p95": 6.03,
+    "max": 9.067
+  }
+]

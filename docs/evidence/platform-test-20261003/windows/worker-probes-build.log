@@ -1,0 +1,5 @@
+[1/5] Building C object CMakeFiles/neonmix-airplay-probe-crypto.dir/crypto_probe.c.obj
+[2/5] Building C object CMakeFiles/neonmix-airplay-probe-crypto.dir/E_/Desktop/NeonMix-test/r03/.local/airplay/patched/lib/crypto.c.obj
+[3/5] Linking C shared library libneonmix-airplay-probe-crypto.dll
+[4/5] Building CXX object CMakeFiles/neonmix-airplay-audio-probe.dir/audio_probe.cpp.obj
+[5/5] Linking CXX executable neonmix-airplay-audio-probe.exe

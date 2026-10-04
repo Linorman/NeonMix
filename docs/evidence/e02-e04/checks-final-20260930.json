@@ -1,0 +1,136 @@
+{
+  "format": {
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.176
+  },
+  "clippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 1.404
+  },
+  "tests": {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 17.533
+  },
+  "release": {
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 33.384
+  },
+  "simulate": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-audio",
+      "simulate"
+    ],
+    "exit_code": 0,
+    "seconds": 0.868
+  },
+  "hal-sdk-abi": {
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "/Volumes/projects-mac/NeonMix/tools/macos_hal_abi.py"
+    ],
+    "exit_code": 0,
+    "seconds": 1.189
+  },
+  "hal-bundle": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/build_macos_hal.sh"
+    ],
+    "exit_code": 0,
+    "seconds": 0.202
+  },
+  "media-runtime": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "runtime"
+    ],
+    "exit_code": 0,
+    "seconds": 0.463
+  },
+  "media-dual": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 5.096
+  },
+  "media-loss-replay": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "1",
+      "--drop-every",
+      "17",
+      "--replay"
+    ],
+    "exit_code": 0,
+    "seconds": 5.106
+  },
+  "media-reject": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "2",
+      "--streams",
+      "1",
+      "--wrong-fingerprint"
+    ],
+    "exit_code": 0,
+    "seconds": 2.084
+  },
+  "drift": {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "-p",
+      "neonmix-core",
+      "--test",
+      "drift_stability",
+      "--",
+      "--ignored",
+      "--nocapture"
+    ],
+    "exit_code": 0,
+    "seconds": 14.376
+  }
+}

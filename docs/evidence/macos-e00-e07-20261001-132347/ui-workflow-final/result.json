@@ -1,0 +1,35 @@
+{
+  "platform": "macOS",
+  "binary_sha256": "1e142aa0a8f66120e5f8121365f8a9b2fd6bbde316c29be167377b4292e1f5c3",
+  "passed": false,
+  "scenarios": {
+    "native_ax_named_controls": true,
+    "native_chinese_input_preserves_clipboard": true,
+    "native_popup_setup_start_and_real_authority": true,
+    "cmd_w_hides_and_tray_restores_with_audio_owner_retained": true,
+    "actual_gui_crash_audio_continues_and_new_gui_reads_saved_state": true,
+    "native_mixer_controls_commit_server_state": true,
+    "native_diagnostic_export": true,
+    "native_quit_confirmation_escape_preserves_audio": true
+  },
+  "limits": [
+    "native Chinese paste and egui IME event regression covered; full VoiceOver listening audit not performed",
+    "single-host check; other platforms not run"
+  ],
+  "failure": "Command '['/Volumes/projects-mac/NeonMix/tools/dev', '/Volumes/projects-mac/NeonMix/.local/acceptance-source/e00-e07-20261001/target/release/neonmix-desktop', '--state-dir', '/Volumes/projects-mac/NeonMix/.local/tmp/e07-ui-b449a8abb872']' timed out after 10 seconds",
+  "failure_hub_settings": {
+    "name": "影音室 E07",
+    "output": "coreaudio:BuiltInSpeakerDevice"
+  },
+  "failure_hub_running": true,
+  "failure_ui_tree": "group 1 of window NeonMix of application process neonmix-desktop, static text NeonMix of group 1 of window NeonMix of application process neonmix-desktop, button Hub 设置 of group 1 of window NeonMix of application process neonmix-desktop, button Sender of group 1 of window NeonMix of application process neonmix-desktop, button Mixer of group 1 of window NeonMix of application process neonmix-desktop, button 设备管理 of group 1 of window NeonMix of application process neonmix-desktop, button 诊断 of group 1 of window NeonMix of application process neonmix-desktop, static text 1设备 · 0通道 of group 1 of window NeonMix of application process neonmix-desktop, static text Hub of group 1 of window NeonMix of application process neonmix-desktop, static text 在线 of group 1 of window NeonMix of application process neonmix-desktop, static text 脱敏诊断已导出到 diagnostics-redacted.json of group 1 of window NeonMix of application process neonmix-desktop, button 退出后台 of group 1 of window NeonMix of application process neonmix-desktop, button 隐藏窗口 of group 1 of window NeonMix of application process neonmix-desktop, UI element 13 of group 1 of window NeonMix of application process neonmix-desktop, static text 诊断 of group 1 of window NeonMix of application process neonmix-desktop, static text 控制身份 of group 1 of window NeonMix of application process neonmix-desktop, pop up button 控制身份 of group 1 of window NeonMix of application process neonmix-desktop, static text 管理员 of group 1 of window NeonMix of application process neonmix-desktop, button 连接地址（故障排查） of group 1 of window NeonMix of application process neonmix-desktop, static text 连接与进程 of group 1 of window NeonMix of application process neonmix-desktop, static text 本地后台 PID 7345 · Hub 运行 · Sender 停止 of group 1 of window NeonMix of application process neonmix-desktop, static text 房间状态距上次更新 0.0 秒 of group 1 of window NeonMix of application process neonmix-desktop, static text 播放与输出 of group 1 of window NeonMix of application process neonmix-desktop, static text 播放帧（累计）：3470336 of group 1 of window NeonMix of application process neonmix-desktop, static text 输出错误（累计）：0 of group 1 of window NeonMix of application process neonmix-desktop, static text 输出回调超预算（累计）：0 of group 1 of window NeonMix of application process neonmix-desktop, static text 欠载帧（累计）：0 of group 1 of window NeonMix of application process neonmix-desktop, static text 限幅帧（累计）：0 of group 1 of window NeonMix of application process neonmix-desktop, static text 输出故障：\"[redacted]\" of group 1 of window NeonMix of application process neonmix-desktop, static text 缓冲与媒体网络 of group 1 of window NeonMix of application process neonmix-desktop, static text 估计口径：队列帧 / 48 kHz；不含设备、网络与模拟端，不是端到端声音延迟。 of group 1 of window NeonMix of application process neonmix-desktop, button 导出脱敏诊断 of group 1 of window NeonMix of application process neonmix-desktop, static text 导出到 /Volumes/projects-mac/NeonMix/.local/tmp/e07-ui-b449a8abb872/diagnostics-redacted.json；仅保留诊断白名单数值和状态。 of group 1 of window NeonMix of application process neonmix-desktop, static text Sender 采集 of group 1 of window NeonMix of application process neonmix-desktop, static text 当前没有采集统计。开始发送后刷新。 of group 1 of window NeonMix of application process neonmix-desktop, UI element 35 of group 1 of window NeonMix of application process neonmix-desktop, static text 退出后台 of group 1 of window NeonMix of application process neonmix-desktop, static text 停止本实例的共享、发送和全部音频连接。 of group 1 of window NeonMix of application process neonmix-desktop, button 取消 of group 1 of window NeonMix of application process neonmix-desktop, button 退出后台 of group 1 of window NeonMix of application process neonmix-desktop, button 1 of window NeonMix of application process neonmix-desktop, button 2 of window NeonMix of application process neonmix-desktop, group 1 of button 2 of window NeonMix of application process neonmix-desktop, button 3 of window NeonMix of application process neonmix-desktop, static text NeonMix of window NeonMix of application process neonmix-desktop",
+  "probe_adaptations": [
+    "Room name textbox located by ordinal because its AX name is missing",
+    "Navigation now uses buttons rather than the historical checkbox role"
+  ],
+  "accessibility_regression_waived": false,
+  "metadata_correction": {
+    "original_reported_sha256": "3bac9604edcbd5a3166e9bda27e685e3a49b3533d20861ca7c60ff56d4695582",
+    "reason": "Probe read the shared target binary hash after another build; this wrapper actually launched the preserved executable."
+  }
+}

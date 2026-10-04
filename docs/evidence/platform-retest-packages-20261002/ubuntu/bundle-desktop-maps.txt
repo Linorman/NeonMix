@@ -1,0 +1,299 @@
+b74082e50000-b74083a50000 r-xp 00000000 08:02 1082605                    /home/parallels/NeonMix/.local/run copy/u26/bin/neonmix-desktop
+b74083a5e000-b74083aa0000 r--p 00c0e000 08:02 1082605                    /home/parallels/NeonMix/.local/run copy/u26/bin/neonmix-desktop
+b74083aa0000-b74083aa6000 rw-p 00c50000 08:02 1082605                    /home/parallels/NeonMix/.local/run copy/u26/bin/neonmix-desktop
+b74083aa6000-b74083aaa000 rw-p 00000000 00:00 0 
+b740aac68000-b740ab828000 rw-p 00000000 00:00 0                          [heap]
+f9fb1c000000-f9fb1c021000 rw-p 00000000 00:00 0 
+f9fb1c021000-f9fb20000000 ---p 00000000 00:00 0 
+f9fb20000000-f9fb20021000 rw-p 00000000 00:00 0 
+f9fb20021000-f9fb24000000 ---p 00000000 00:00 0 
+f9fb24000000-f9fb24021000 rw-p 00000000 00:00 0 
+f9fb24021000-f9fb28000000 ---p 00000000 00:00 0 
+f9fb28000000-f9fb28021000 rw-p 00000000 00:00 0 
+f9fb28021000-f9fb2c000000 ---p 00000000 00:00 0 
+f9fb2c000000-f9fb2c021000 rw-p 00000000 00:00 0 
+f9fb2c021000-f9fb30000000 ---p 00000000 00:00 0 
+f9fb30000000-f9fb30021000 rw-p 00000000 00:00 0 
+f9fb30021000-f9fb34000000 ---p 00000000 00:00 0 
+f9fb34000000-f9fb34021000 rw-p 00000000 00:00 0 
+f9fb34021000-f9fb38000000 ---p 00000000 00:00 0 
+f9fb3a138000-f9fb3a338000 rw-s 100b89000 00:06 323                       /dev/dri/renderD128
+f9fb3a42a000-f9fb3a52a000 rw-s 10244a000 00:06 323                       /dev/dri/renderD128
+f9fb3a52a000-f9fb3a53a000 ---p 00000000 00:00 0 
+f9fb3a53a000-f9fb3a73a000 rw-p 00000000 00:00 0 
+f9fb3a73a000-f9fb3a74a000 ---p 00000000 00:00 0 
+f9fb3a74a000-f9fb3a94a000 rw-p 00000000 00:00 0 
+f9fb3a94a000-f9fb3a95a000 ---p 00000000 00:00 0 
+f9fb3a95a000-f9fb3ab5a000 rw-p 00000000 00:00 0 
+f9fb3ab5a000-f9fb3ab6a000 ---p 00000000 00:00 0 
+f9fb3ab6a000-f9fb3ad6a000 rw-p 00000000 00:00 0 
+f9fb3ad6a000-f9fb3c021000 rw-p 00000000 00:00 0 
+f9fb3c021000-f9fb40000000 ---p 00000000 00:00 0 
+f9fb40000000-f9fb40021000 rw-p 00000000 00:00 0 
+f9fb40021000-f9fb44000000 ---p 00000000 00:00 0 
+f9fb44000000-f9fb44024000 rw-p 00000000 00:00 0 
+f9fb44024000-f9fb48000000 ---p 00000000 00:00 0 
+f9fb480b0000-f9fb482b1000 rw-p 00000000 00:00 0 
+f9fb482b1000-f9fb482e5000 rw-s 00000000 00:01 21899                      /memfd:smithay-client-toolkit (deleted)
+f9fb482ff000-f9fb4830f000 ---p 00000000 00:00 0 
+f9fb4830f000-f9fb4850f000 rw-p 00000000 00:00 0 
+f9fb4850f000-f9fb4851f000 ---p 00000000 00:00 0 
+f9fb4851f000-f9fb4871f000 rw-p 00000000 00:00 0 
+f9fb4871f000-f9fb4872f000 ---p 00000000 00:00 0 
+f9fb4872f000-f9fb4892f000 rw-p 00000000 00:00 0 
+f9fb4892f000-f9fb4893f000 ---p 00000000 00:00 0 
+f9fb4893f000-f9fb48b3f000 rw-p 00000000 00:00 0 
+f9fb48b3f000-f9fb48c40000 rw-p 00000000 00:00 0 
+f9fb48c40000-f9fb48c41000 r-xp 00000000 08:02 658626                     /usr/lib/aarch64-linux-gnu/libwayland-egl.so.1.22.0
+f9fb48c41000-f9fb48c5f000 ---p 00001000 08:02 658626                     /usr/lib/aarch64-linux-gnu/libwayland-egl.so.1.22.0
+f9fb48c5f000-f9fb48c60000 r--p 0000f000 08:02 658626                     /usr/lib/aarch64-linux-gnu/libwayland-egl.so.1.22.0
+f9fb48c60000-f9fb48c61000 rw-p 00010000 08:02 658626                     /usr/lib/aarch64-linux-gnu/libwayland-egl.so.1.22.0
+f9fb48c6f000-f9fb48c7f000 ---p 00000000 00:00 0 
+f9fb48c7f000-f9fb48e7f000 rw-p 00000000 00:00 0 
+f9fb48e7f000-f9fb48fcf000 rw-p 00000000 00:00 0 
+f9fb48fcf000-f9fb48fdf000 ---p 00000000 00:00 0 
+f9fb48fdf000-f9fb497df000 rw-p 00000000 00:00 0 
+f9fb497df000-f9fb49920000 rw-s 00000000 08:02 1082955                    /home/parallels/NeonMix/.local/run copy/u26/.s/cache/mesa_shader_cache_db/index
+f9fb49920000-f9fb4b67c000 r-xp 00000000 08:02 1082773                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicudata.so.74
+f9fb4b67c000-f9fb4b68f000 ---p 01d5c000 08:02 1082773                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicudata.so.74
+f9fb4b68f000-f9fb4b690000 r--p 01d5f000 08:02 1082773                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicudata.so.74
+f9fb4b690000-f9fb4b691000 rw-p 01d60000 08:02 1082773                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicudata.so.74
+f9fb4b6a0000-f9fb4b6ab000 r-xp 00000000 08:02 1082767                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmd.so.0
+f9fb4b6ab000-f9fb4b6bf000 ---p 0000b000 08:02 1082767                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmd.so.0
+f9fb4b6bf000-f9fb4b6c0000 r--p 0000f000 08:02 1082767                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmd.so.0
+f9fb4b6c0000-f9fb4b6c1000 rw-p 00010000 08:02 1082767                    /home/parallels/NeonMix/.local/run copy/u26/lib/libmd.so.0
+f9fb4b6d0000-f9fb4b6ff000 r-xp 00000000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+f9fb4b6ff000-f9fb4b70f000 ---p 0002f000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+f9fb4b70f000-f9fb4b710000 r--p 0002f000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+f9fb4b710000-f9fb4b711000 rw-p 00030000 08:02 1082619                    /home/parallels/NeonMix/.local/run copy/u26/lib/liblzma.so.5
+f9fb4b720000-f9fb4b928000 r-xp 00000000 08:02 1082730                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicuuc.so.74
+f9fb4b928000-f9fb4b93d000 ---p 00208000 08:02 1082730                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicuuc.so.74
+f9fb4b93d000-f9fb4b950000 r--p 0020d000 08:02 1082730                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicuuc.so.74
+f9fb4b950000-f9fb4b951000 rw-p 00220000 08:02 1082730                    /home/parallels/NeonMix/.local/run copy/u26/lib/libicuuc.so.74
+f9fb4b951000-f9fb4b953000 rw-p 00000000 00:00 0 
+f9fb4b960000-f9fb4b98f000 r-xp 00000000 08:02 656089                     /usr/lib/aarch64-linux-gnu/libtinfo.so.6.4
+f9fb4b98f000-f9fb4b99c000 ---p 0002f000 08:02 656089                     /usr/lib/aarch64-linux-gnu/libtinfo.so.6.4
+f9fb4b99c000-f9fb4b9a0000 r--p 0003c000 08:02 656089                     /usr/lib/aarch64-linux-gnu/libtinfo.so.6.4
+f9fb4b9a0000-f9fb4b9a1000 rw-p 00040000 08:02 656089                     /usr/lib/aarch64-linux-gnu/libtinfo.so.6.4
+f9fb4b9b0000-f9fb4b9c2000 r-xp 00000000 08:02 1082722                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbsd.so.0
+f9fb4b9c2000-f9fb4b9df000 ---p 00012000 08:02 1082722                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbsd.so.0
+f9fb4b9df000-f9fb4b9e0000 r--p 0001f000 08:02 1082722                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbsd.so.0
+f9fb4b9e0000-f9fb4b9e1000 rw-p 00020000 08:02 1082722                    /home/parallels/NeonMix/.local/run copy/u26/lib/libbsd.so.0
+f9fb4b9e1000-f9fb4b9e2000 rw-p 00000000 00:00 0 
+f9fb4b9f0000-f9fb4bbda000 r-xp 00000000 08:02 1082659                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxml2.so.2
+f9fb4bbda000-f9fb4bbe7000 ---p 001ea000 08:02 1082659                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxml2.so.2
+f9fb4bbe7000-f9fb4bbf0000 r--p 001f7000 08:02 1082659                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxml2.so.2
+f9fb4bbf0000-f9fb4bbf1000 rw-p 00200000 08:02 1082659                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxml2.so.2
+f9fb4bbf1000-f9fb4bbf2000 rw-p 00000000 00:00 0 
+f9fb4bc00000-f9fb4bc33000 r-xp 00000000 08:02 658104                     /usr/lib/aarch64-linux-gnu/libedit.so.2.0.72
+f9fb4bc33000-f9fb4bc4e000 ---p 00033000 08:02 658104                     /usr/lib/aarch64-linux-gnu/libedit.so.2.0.72
+f9fb4bc4e000-f9fb4bc50000 r--p 0003e000 08:02 658104                     /usr/lib/aarch64-linux-gnu/libedit.so.2.0.72
+f9fb4bc50000-f9fb4bc51000 rw-p 00040000 08:02 658104                     /usr/lib/aarch64-linux-gnu/libedit.so.2.0.72
+f9fb4bc51000-f9fb4bc55000 rw-p 00000000 00:00 0 
+f9fb4bc60000-f9fb4bc65000 r-xp 00000000 08:02 1082780                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXdmcp.so.6
+f9fb4bc65000-f9fb4bc7f000 ---p 00005000 08:02 1082780                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXdmcp.so.6
+f9fb4bc7f000-f9fb4bc80000 r--p 0000f000 08:02 1082780                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXdmcp.so.6
+f9fb4bc80000-f9fb4bc81000 rw-p 00010000 08:02 1082780                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXdmcp.so.6
+f9fb4bc90000-f9fb4bc92000 r-xp 00000000 08:02 1082779                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXau.so.6
+f9fb4bc92000-f9fb4bcaf000 ---p 00002000 08:02 1082779                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXau.so.6
+f9fb4bcaf000-f9fb4bcb0000 r--p 0000f000 08:02 1082779                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXau.so.6
+f9fb4bcb0000-f9fb4bcb1000 rw-p 00010000 08:02 1082779                    /home/parallels/NeonMix/.local/run copy/u26/lib/libXau.so.6
+f9fb4bcc0000-f9fb4bf2d000 r-xp 00000000 08:02 1082655                    /home/parallels/NeonMix/.local/run copy/u26/lib/libstdc++.so.6
+f9fb4bf2d000-f9fb4bf35000 ---p 0026d000 08:02 1082655                    /home/parallels/NeonMix/.local/run copy/u26/lib/libstdc++.so.6
+f9fb4bf35000-f9fb4bf40000 r--p 00275000 08:02 1082655                    /home/parallels/NeonMix/.local/run copy/u26/lib/libstdc++.so.6
+f9fb4bf40000-f9fb4bf43000 rw-p 00280000 08:02 1082655                    /home/parallels/NeonMix/.local/run copy/u26/lib/libstdc++.so.6
+f9fb4bf43000-f9fb4bf47000 rw-p 00000000 00:00 0 
+f9fb4bf50000-f9fb4bf5a000 r-xp 00000000 08:02 658087                     /usr/lib/aarch64-linux-gnu/libdrm_amdgpu.so.1.0.0
+f9fb4bf5a000-f9fb4bf6f000 ---p 0000a000 08:02 658087                     /usr/lib/aarch64-linux-gnu/libdrm_amdgpu.so.1.0.0
+f9fb4bf6f000-f9fb4bf70000 r--p 0000f000 08:02 658087                     /usr/lib/aarch64-linux-gnu/libdrm_amdgpu.so.1.0.0
+f9fb4bf70000-f9fb4bf71000 rw-p 00010000 08:02 658087                     /usr/lib/aarch64-linux-gnu/libdrm_amdgpu.so.1.0.0
+f9fb4bf80000-f9fb4bf9e000 r-xp 00000000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+f9fb4bf9e000-f9fb4bfaf000 ---p 0001e000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+f9fb4bfaf000-f9fb4bfb0000 r--p 0001f000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+f9fb4bfb0000-f9fb4bfb1000 rw-p 00020000 08:02 1082620                    /home/parallels/NeonMix/.local/run copy/u26/lib/libelf.so.1
+f9fb4bfc0000-f9fb4bfc2000 r-xp 00000000 08:02 658673                     /usr/lib/aarch64-linux-gnu/libxshmfence.so.1.0.0
+f9fb4bfc2000-f9fb4bfdf000 ---p 00002000 08:02 658673                     /usr/lib/aarch64-linux-gnu/libxshmfence.so.1.0.0
+f9fb4bfdf000-f9fb4bfe0000 r--p 0000f000 08:02 658673                     /usr/lib/aarch64-linux-gnu/libxshmfence.so.1.0.0
+f9fb4bfe0000-f9fb4bfe1000 rw-p 00010000 08:02 658673                     /usr/lib/aarch64-linux-gnu/libxshmfence.so.1.0.0
+f9fb4bff0000-f9fb4bff6000 r-xp 00000000 08:02 658659                     /usr/lib/aarch64-linux-gnu/libxcb-sync.so.1.0.0
+f9fb4bff6000-f9fb4c00f000 ---p 00006000 08:02 658659                     /usr/lib/aarch64-linux-gnu/libxcb-sync.so.1.0.0
+f9fb4c00f000-f9fb4c010000 r--p 0000f000 08:02 658659                     /usr/lib/aarch64-linux-gnu/libxcb-sync.so.1.0.0
+f9fb4c010000-f9fb4c011000 rw-p 00010000 08:02 658659                     /usr/lib/aarch64-linux-gnu/libxcb-sync.so.1.0.0
+f9fb4c020000-f9fb4c02d000 r-xp 00000000 08:02 658514                     /usr/lib/aarch64-linux-gnu/libsensors.so.5.0.0
+f9fb4c02d000-f9fb4c03f000 ---p 0000d000 08:02 658514                     /usr/lib/aarch64-linux-gnu/libsensors.so.5.0.0
+f9fb4c03f000-f9fb4c040000 r--p 0000f000 08:02 658514                     /usr/lib/aarch64-linux-gnu/libsensors.so.5.0.0
+f9fb4c040000-f9fb4c041000 rw-p 00010000 08:02 658514                     /usr/lib/aarch64-linux-gnu/libsensors.so.5.0.0
+f9fb4c050000-f9fb4c0eb000 r-xp 00000000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+f9fb4c0eb000-f9fb4c0ff000 ---p 0009b000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+f9fb4c0ff000-f9fb4c100000 r--p 0009f000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+f9fb4c100000-f9fb4c101000 rw-p 000a0000 08:02 1082622                    /home/parallels/NeonMix/.local/run copy/u26/lib/libzstd.so.1
+f9fb4c110000-f9fb4c12a000 r-xp 00000000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+f9fb4c12a000-f9fb4c13f000 ---p 0001a000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+f9fb4c13f000-f9fb4c140000 r--p 0001f000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+f9fb4c140000-f9fb4c141000 rw-p 00020000 08:02 1082621                    /home/parallels/NeonMix/.local/run copy/u26/lib/libz.so.1
+f9fb4c150000-f9fb5327a000 r-xp 00000000 08:02 657868                     /usr/lib/aarch64-linux-gnu/libLLVM.so.19.1
+f9fb5327a000-f9fb53295000 ---p 0712a000 08:02 657868                     /usr/lib/aarch64-linux-gnu/libLLVM.so.19.1
+f9fb53295000-f9fb53800000 r--p 07135000 08:02 657868                     /usr/lib/aarch64-linux-gnu/libLLVM.so.19.1
+f9fb53800000-f9fb53848000 rw-p 076a0000 08:02 657868                     /usr/lib/aarch64-linux-gnu/libLLVM.so.19.1
+f9fb53848000-f9fb538e7000 rw-p 00000000 00:00 0 
+f9fb538f0000-f9fb538f2000 r-xp 00000000 08:02 658652                     /usr/lib/aarch64-linux-gnu/libxcb-present.so.0.0.0
+f9fb538f2000-f9fb5390f000 ---p 00002000 08:02 658652                     /usr/lib/aarch64-linux-gnu/libxcb-present.so.0.0.0
+f9fb5390f000-f9fb53910000 r--p 0000f000 08:02 658652                     /usr/lib/aarch64-linux-gnu/libxcb-present.so.0.0.0
+f9fb53910000-f9fb53911000 rw-p 00010000 08:02 658652                     /usr/lib/aarch64-linux-gnu/libxcb-present.so.0.0.0
+f9fb53920000-f9fb53924000 r-xp 00000000 08:02 1082765                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-dri3.so.0
+f9fb53924000-f9fb5393f000 ---p 00004000 08:02 1082765                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-dri3.so.0
+f9fb5393f000-f9fb53940000 r--p 0000f000 08:02 1082765                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-dri3.so.0
+f9fb53940000-f9fb53941000 rw-p 00010000 08:02 1082765                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-dri3.so.0
+f9fb53950000-f9fb53963000 r-xp 00000000 08:02 658627                     /usr/lib/aarch64-linux-gnu/libwayland-server.so.0.22.0
+f9fb53963000-f9fb5397e000 ---p 00013000 08:02 658627                     /usr/lib/aarch64-linux-gnu/libwayland-server.so.0.22.0
+f9fb5397e000-f9fb53980000 r--p 0001e000 08:02 658627                     /usr/lib/aarch64-linux-gnu/libwayland-server.so.0.22.0
+f9fb53980000-f9fb53981000 rw-p 00020000 08:02 658627                     /usr/lib/aarch64-linux-gnu/libwayland-server.so.0.22.0
+f9fb53990000-f9fb539a5000 r-xp 00000000 08:02 1082701                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdrm.so.2
+f9fb539a5000-f9fb539bf000 ---p 00015000 08:02 1082701                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdrm.so.2
+f9fb539bf000-f9fb539c0000 r--p 0001f000 08:02 1082701                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdrm.so.2
+f9fb539c0000-f9fb539c1000 rw-p 00020000 08:02 1082701                    /home/parallels/NeonMix/.local/run copy/u26/lib/libdrm.so.2
+f9fb539d0000-f9fb539d2000 r-xp 00000000 08:02 1082756                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-shm.so.0
+f9fb539d2000-f9fb539ef000 ---p 00002000 08:02 1082756                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-shm.so.0
+f9fb539ef000-f9fb539f0000 r--p 0000f000 08:02 1082756                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-shm.so.0
+f9fb539f0000-f9fb539f1000 rw-p 00010000 08:02 1082756                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb-shm.so.0
+f9fb53a00000-f9fb53a08000 r-xp 00000000 08:02 658661                     /usr/lib/aarch64-linux-gnu/libxcb-xfixes.so.0.0.0
+f9fb53a08000-f9fb53a1f000 ---p 00008000 08:02 658661                     /usr/lib/aarch64-linux-gnu/libxcb-xfixes.so.0.0.0
+f9fb53a1f000-f9fb53a20000 r--p 0000f000 08:02 658661                     /usr/lib/aarch64-linux-gnu/libxcb-xfixes.so.0.0.0
+f9fb53a20000-f9fb53a21000 rw-p 00010000 08:02 658661                     /usr/lib/aarch64-linux-gnu/libxcb-xfixes.so.0.0.0
+f9fb53a30000-f9fb53a40000 r-xp 00000000 08:02 658653                     /usr/lib/aarch64-linux-gnu/libxcb-randr.so.0.1.0
+f9fb53a40000-f9fb53a4f000 ---p 00010000 08:02 658653                     /usr/lib/aarch64-linux-gnu/libxcb-randr.so.0.1.0
+f9fb53a4f000-f9fb53a50000 r--p 0001f000 08:02 658653                     /usr/lib/aarch64-linux-gnu/libxcb-randr.so.0.1.0
+f9fb53a50000-f9fb53a51000 rw-p 00020000 08:02 658653                     /usr/lib/aarch64-linux-gnu/libxcb-randr.so.0.1.0
+f9fb53a60000-f9fb53a8c000 r-xp 00000000 08:02 1082754                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb.so.1
+f9fb53a8c000-f9fb53a9f000 ---p 0002c000 08:02 1082754                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb.so.1
+f9fb53a9f000-f9fb53aa0000 r--p 0002f000 08:02 1082754                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb.so.1
+f9fb53aa0000-f9fb53aa1000 rw-p 00030000 08:02 1082754                    /home/parallels/NeonMix/.local/run copy/u26/lib/libxcb.so.1
+f9fb53ab0000-f9fb53ab1000 r-xp 00000000 08:02 1082764                    /home/parallels/NeonMix/.local/run copy/u26/lib/libX11-xcb.so.1
+f9fb53ab1000-f9fb53acf000 ---p 00001000 08:02 1082764                    /home/parallels/NeonMix/.local/run copy/u26/lib/libX11-xcb.so.1
+f9fb53acf000-f9fb53ad0000 r--p 0000f000 08:02 1082764                    /home/parallels/NeonMix/.local/run copy/u26/lib/libX11-xcb.so.1
+f9fb53ad0000-f9fb53ad1000 rw-p 00010000 08:02 1082764                    /home/parallels/NeonMix/.local/run copy/u26/lib/libX11-xcb.so.1
+f9fb53ae0000-f9fb53b07000 r-xp 00000000 08:02 1082727                    /home/parallels/NeonMix/.local/run copy/u26/lib/libexpat.so.1
+f9fb53b07000-f9fb53b1e000 ---p 00027000 08:02 1082727                    /home/parallels/NeonMix/.local/run copy/u26/lib/libexpat.so.1
+f9fb53b1e000-f9fb53b20000 r--p 0002e000 08:02 1082727                    /home/parallels/NeonMix/.local/run copy/u26/lib/libexpat.so.1
+f9fb53b20000-f9fb53b21000 rw-p 00030000 08:02 1082727                    /home/parallels/NeonMix/.local/run copy/u26/lib/libexpat.so.1
+f9fb53b21000-f9fb53b23000 rw-s 1006ca000 00:06 323                       /dev/dri/renderD128
+f9fb53b23000-f9fb53b25000 rw-s 10069a000 00:06 323                       /dev/dri/renderD128
+f9fb53b27000-f9fb53b28000 rw-s 102427000 00:06 323                       /dev/dri/renderD128
+f9fb53b28000-f9fb53b30000 rw-s 100681000 00:06 323                       /dev/dri/renderD128
+f9fb53b30000-f9fb55afc000 r-xp 00000000 08:02 658151                     /usr/lib/aarch64-linux-gnu/libgallium-25.0.7-0ubuntu0.24.04.1.so
+f9fb55afc000-f9fb55b0b000 ---p 01fcc000 08:02 658151                     /usr/lib/aarch64-linux-gnu/libgallium-25.0.7-0ubuntu0.24.04.1.so
+f9fb55b0b000-f9fb55c60000 r--p 01fdb000 08:02 658151                     /usr/lib/aarch64-linux-gnu/libgallium-25.0.7-0ubuntu0.24.04.1.so
+f9fb55c60000-f9fb55c84000 rw-p 02130000 08:02 658151                     /usr/lib/aarch64-linux-gnu/libgallium-25.0.7-0ubuntu0.24.04.1.so
+f9fb55c84000-f9fb55e46000 rw-p 00000000 00:00 0 
+f9fb55e46000-f9fb55e50000 rw-s 100671000 00:06 323                       /dev/dri/renderD128
+f9fb55e50000-f9fb55ea0000 r-xp 00000000 08:02 657852                     /usr/lib/aarch64-linux-gnu/libEGL_mesa.so.0.0.0
+f9fb55ea0000-f9fb55ea3000 ---p 00050000 08:02 657852                     /usr/lib/aarch64-linux-gnu/libEGL_mesa.so.0.0.0
+f9fb55ea3000-f9fb55eb0000 r--p 00053000 08:02 657852                     /usr/lib/aarch64-linux-gnu/libEGL_mesa.so.0.0.0
+f9fb55eb0000-f9fb55eb1000 rw-p 00060000 08:02 657852                     /usr/lib/aarch64-linux-gnu/libEGL_mesa.so.0.0.0
+f9fb55eb1000-f9fb55eb2000 rw-s 100689000 00:06 323                       /dev/dri/renderD128
+f9fb55eb2000-f9fb55eb3000 rw-s 1042ae000 00:06 323                       /dev/dri/renderD128
+f9fb55eb3000-f9fb55eb4000 rw-s 1042ad000 00:06 323                       /dev/dri/renderD128
+f9fb55eb4000-f9fb55eb5000 ---p 00000000 00:00 0 
+f9fb55eb5000-f9fb55eb9000 rw-p 00000000 00:00 0 
+f9fb55eb9000-f9fb55ec0000 rw-s 107d1b000 00:06 323                       /dev/dri/renderD128
+f9fb55ec0000-f9fb56016000 r-xp 00000000 08:02 657866                     /usr/lib/aarch64-linux-gnu/libGLdispatch.so.0.0.0
+f9fb56016000-f9fb56024000 ---p 00156000 08:02 657866                     /usr/lib/aarch64-linux-gnu/libGLdispatch.so.0.0.0
+f9fb56024000-f9fb56040000 r--p 00164000 08:02 657866                     /usr/lib/aarch64-linux-gnu/libGLdispatch.so.0.0.0
+f9fb56040000-f9fb56041000 rw-p 00180000 08:02 657866                     /usr/lib/aarch64-linux-gnu/libGLdispatch.so.0.0.0
+f9fb56041000-f9fb56049000 rw-p 00000000 00:00 0 
+f9fb56049000-f9fb5604a000 rw-s 1019e9000 00:06 323                       /dev/dri/renderD128
+f9fb5604b000-f9fb5604c000 rw-s 107d23000 00:06 323                       /dev/dri/renderD128
+f9fb5604c000-f9fb5604d000 rw-s 107d22000 00:06 323                       /dev/dri/renderD128
+f9fb5604d000-f9fb56057000 rw-s 102216000 00:06 323                       /dev/dri/renderD128
+f9fb56057000-f9fb56058000 rw-s 1019f8000 00:06 323                       /dev/dri/renderD128
+f9fb56058000-f9fb56076000 rw-p 00000000 00:00 0 
+f9fb56076000-f9fb56077000 rw-s 1006a3000 00:06 323                       /dev/dri/renderD128
+f9fb56077000-f9fb5607a000 rw-s 101a80000 00:06 323                       /dev/dri/renderD128
+f9fb5607a000-f9fb5607e000 rw-s 1006d7000 00:06 323                       /dev/dri/renderD128
+f9fb5607e000-f9fb56080000 rw-s 1006a1000 00:06 323                       /dev/dri/renderD128
+f9fb56080000-f9fb56084000 r-xp 00000000 08:02 658154                     /usr/lib/aarch64-linux-gnu/libgbm.so.1.0.0
+f9fb56084000-f9fb5609f000 ---p 00004000 08:02 658154                     /usr/lib/aarch64-linux-gnu/libgbm.so.1.0.0
+f9fb5609f000-f9fb560a0000 r--p 0000f000 08:02 658154                     /usr/lib/aarch64-linux-gnu/libgbm.so.1.0.0
+f9fb560a0000-f9fb560a1000 rw-p 00010000 08:02 658154                     /usr/lib/aarch64-linux-gnu/libgbm.so.1.0.0
+f9fb560a1000-f9fb560a3000 rw-s 1006df000 00:06 323                       /dev/dri/renderD128
+f9fb560a3000-f9fb560a4000 rw-s 1006de000 00:06 323                       /dev/dri/renderD128
+f9fb560a4000-f9fb560a5000 rw-s 10064b000 00:06 323                       /dev/dri/renderD128
+f9fb560a5000-f9fb560a6000 rw-s 10064a000 00:06 323                       /dev/dri/renderD128
+f9fb560a7000-f9fb560a8000 rw-s 1042ba000 00:06 323                       /dev/dri/renderD128
+f9fb560a8000-f9fb560b0000 rw-s 1026ca000 00:06 323                       /dev/dri/renderD128
+f9fb560b0000-f9fb560c1000 r-xp 00000000 08:02 657851                     /usr/lib/aarch64-linux-gnu/libEGL.so.1.1.0
+f9fb560c1000-f9fb560df000 ---p 00011000 08:02 657851                     /usr/lib/aarch64-linux-gnu/libEGL.so.1.1.0
+f9fb560df000-f9fb560e0000 r--p 0001f000 08:02 657851                     /usr/lib/aarch64-linux-gnu/libEGL.so.1.1.0
+f9fb560e0000-f9fb560e1000 rw-p 00020000 08:02 657851                     /usr/lib/aarch64-linux-gnu/libEGL.so.1.1.0
+f9fb560e1000-f9fb560e2000 rw-s 1026d2000 00:06 323                       /dev/dri/renderD128
+f9fb560e2000-f9fb560e8000 rw-s 10222f000 00:06 323                       /dev/dri/renderD128
+f9fb560e8000-f9fb560e9000 rw-s 1042b9000 00:06 323                       /dev/dri/renderD128
+f9fb560e9000-f9fb560f0000 rw-s 1042b2000 00:06 323                       /dev/dri/renderD128
+f9fb560f0000-f9fb56135000 r-xp 00000000 08:02 658667                     /usr/lib/aarch64-linux-gnu/libxkbcommon.so.0.0.0
+f9fb56135000-f9fb5614e000 ---p 00045000 08:02 658667                     /usr/lib/aarch64-linux-gnu/libxkbcommon.so.0.0.0
+f9fb5614e000-f9fb56150000 r--p 0004e000 08:02 658667                     /usr/lib/aarch64-linux-gnu/libxkbcommon.so.0.0.0
+f9fb56150000-f9fb56151000 rw-p 00050000 08:02 658667                     /usr/lib/aarch64-linux-gnu/libxkbcommon.so.0.0.0
+f9fb56151000-f9fb56152000 rw-s 101a7d000 00:06 323                       /dev/dri/renderD128
+f9fb56152000-f9fb5615c000 rw-s 101a73000 00:06 323                       /dev/dri/renderD128
+f9fb5615c000-f9fb5615d000 rw-s 1042bd000 00:06 323                       /dev/dri/renderD128
+f9fb5615d000-f9fb56160000 rw-s 100693000 00:06 323                       /dev/dri/renderD128
+f9fb56160000-f9fb56168000 r-xp 00000000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+f9fb56168000-f9fb5617f000 ---p 00008000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+f9fb5617f000-f9fb56180000 r--p 0000f000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+f9fb56180000-f9fb56181000 rw-p 00010000 08:02 1082618                    /home/parallels/NeonMix/.local/run copy/u26/lib/libffi.so.8
+f9fb56181000-f9fb56182000 rw-s 1042bc000 00:06 323                       /dev/dri/renderD128
+f9fb56182000-f9fb56186000 rw-s 1042f5000 00:06 323                       /dev/dri/renderD128
+f9fb56186000-f9fb56188000 rw-s 1006cc000 00:06 323                       /dev/dri/renderD128
+f9fb56188000-f9fb5618a000 rw-s 100610000 00:06 323                       /dev/dri/renderD128
+f9fb5618a000-f9fb56190000 rw-s 10428e000 00:06 323                       /dev/dri/renderD128
+f9fb56190000-f9fb5619d000 r-xp 00000000 08:02 658624                     /usr/lib/aarch64-linux-gnu/libwayland-client.so.0.22.0
+f9fb5619d000-f9fb561ae000 ---p 0000d000 08:02 658624                     /usr/lib/aarch64-linux-gnu/libwayland-client.so.0.22.0
+f9fb561ae000-f9fb561b0000 r--p 0000e000 08:02 658624                     /usr/lib/aarch64-linux-gnu/libwayland-client.so.0.22.0
+f9fb561b0000-f9fb561b1000 rw-p 00010000 08:02 658624                     /usr/lib/aarch64-linux-gnu/libwayland-client.so.0.22.0
+f9fb561b1000-f9fb561b2000 rw-s 1006b8000 00:06 323                       /dev/dri/renderD128
+f9fb561b2000-f9fb561b3000 rw-s 100542000 00:06 323                       /dev/dri/renderD128
+f9fb561b3000-f9fb561bb000 rw-s 107d40000 00:06 323                       /dev/dri/renderD128
+f9fb561bb000-f9fb561bc000 ---p 00000000 00:00 0 
+f9fb561bc000-f9fb561c0000 rw-p 00000000 00:00 0 
+f9fb561c0000-f9fb5635a000 r-xp 00000000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+f9fb5635a000-f9fb5636d000 ---p 0019a000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+f9fb5636d000-f9fb56370000 r--p 0019d000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+f9fb56370000-f9fb56372000 rw-p 001a0000 08:02 658024                     /usr/lib/aarch64-linux-gnu/libc.so.6
+f9fb56372000-f9fb5637e000 rw-p 00000000 00:00 0 
+f9fb5637e000-f9fb5637f000 rw-s 100541000 00:06 323                       /dev/dri/renderD128
+f9fb56380000-f9fb56405000 r-xp 00000000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+f9fb56405000-f9fb5641f000 ---p 00085000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+f9fb5641f000-f9fb56420000 r--p 0008f000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+f9fb56420000-f9fb56421000 rw-p 00090000 08:02 658325                     /usr/lib/aarch64-linux-gnu/libm.so.6
+f9fb56421000-f9fb56422000 ---p 00000000 00:00 0 
+f9fb56422000-f9fb56426000 rw-p 00000000 00:00 0 
+f9fb56426000-f9fb56427000 ---p 00000000 00:00 0 
+f9fb56427000-f9fb5642b000 rw-p 00000000 00:00 0 
+f9fb5642b000-f9fb5642c000 ---p 00000000 00:00 0 
+f9fb5642c000-f9fb56430000 rw-p 00000000 00:00 0 
+f9fb56430000-f9fb5644f000 r-xp 00000000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+f9fb5644f000-f9fb5645f000 ---p 0001f000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+f9fb5645f000-f9fb56460000 r--p 0001f000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+f9fb56460000-f9fb56461000 rw-p 00020000 08:02 1082713                    /home/parallels/NeonMix/.local/run copy/u26/lib/libgcc_s.so.1
+f9fb56461000-f9fb56462000 ---p 00000000 00:00 0 
+f9fb56462000-f9fb56466000 rw-p 00000000 00:00 0 
+f9fb56466000-f9fb56467000 ---p 00000000 00:00 0 
+f9fb56467000-f9fb5646b000 rw-p 00000000 00:00 0 
+f9fb5646b000-f9fb5646c000 ---p 00000000 00:00 0 
+f9fb5646c000-f9fb56470000 rw-p 00000000 00:00 0 
+f9fb56470000-f9fb56497000 r-xp 00000000 08:02 657792                     /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+f9fb56497000-f9fb5649a000 rw-p 00000000 00:00 0 
+f9fb5649a000-f9fb5649b000 rw-s 10039c000 00:06 323                       /dev/dri/renderD128
+f9fb5649b000-f9fb5649c000 r--p 00000000 00:01 1270                       /memfd:mutter-shared (deleted)
+f9fb5649c000-f9fb5649d000 ---p 00000000 00:00 0 
+f9fb5649d000-f9fb564a1000 rw-p 00000000 00:00 0 
+f9fb564a1000-f9fb564a2000 rw-s 107d48000 00:06 323                       /dev/dri/renderD128
+f9fb564a2000-f9fb564a3000 rw-s 00000000 00:01 21898                      /memfd:smithay-client-toolkit (deleted)
+f9fb564a3000-f9fb564a4000 ---p 00000000 00:00 0 
+f9fb564a4000-f9fb564a8000 rw-p 00000000 00:00 0 
+f9fb564a8000-f9fb564aa000 rw-p 00000000 00:00 0 
+f9fb564aa000-f9fb564ac000 r--p 00000000 00:00 0                          [vvar]
+f9fb564ac000-f9fb564ae000 r-xp 00000000 00:00 0                          [vdso]
+f9fb564ae000-f9fb564b0000 r--p 0002e000 08:02 657792                     /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+f9fb564b0000-f9fb564b2000 rw-p 00030000 08:02 657792                     /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+ffffe073d000-ffffe075e000 rw-p 00000000 00:00 0                          [stack]

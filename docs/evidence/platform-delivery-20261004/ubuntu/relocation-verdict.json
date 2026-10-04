@@ -1,0 +1,14 @@
+{
+  "at": 1791045798.3420608,
+  "functional_relocation_and_gui_background_maps_passed": true,
+  "airplay_quality_passed": false,
+  "overall_acceptance_passed": false,
+  "airplay_quality": {
+    "output_frames_delta": 244736,
+    "timed_late_frames_delta": 0,
+    "underrun_frames_delta": 48,
+    "errors": 0,
+    "rms": 0.014163834974169731
+  },
+  "reason": "Raw relocation report passed refers to functional relocatability/lifecycle; separate quality field failed and overall audio acceptance is false."
+}

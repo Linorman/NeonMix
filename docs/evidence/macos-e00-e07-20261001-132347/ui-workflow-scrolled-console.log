@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 86, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 72, in main
+    probe.main()
+    ~~~~~~~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/e07_native_ui_probe.py", line 98, in main
+    app.press('创建房间');wait_for(lambda:ipc(state,'status')['hub_settings'])
+    ~~~~~~~~~^^^^^^^^^^^^
+  File "/Volumes/projects-mac/NeonMix/tools/macos_ui_workflow_probe.py", line 66, in press
+    raise RuntimeError(f"Native button unavailable after scrolling: {label}; {last_error}")
+RuntimeError: Native button unavailable after scrolling: 创建房间; 164:172: execution error: System Events got an error: Can’t make item 1 of entire contents of window 1 of application process "neonmix-desktop" into type specifier. (-1700)

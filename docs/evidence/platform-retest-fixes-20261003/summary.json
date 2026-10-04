@@ -1,0 +1,174 @@
+{
+  "four-airplay": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 24,
+    "windows": 73,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": {
+      "readers": 4,
+      "successful": 28909,
+      "errors": 0
+    },
+    "cpu_mean": 68.731,
+    "cpu_max": 83.042,
+    "fixture_files_removed": true
+  },
+  "mix-3plus1": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 6,
+    "windows": 19,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "cpu_mean": 57.005,
+    "cpu_max": 75.462,
+    "fixture_files_removed": true
+  },
+  "mix-2plus2": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 8,
+    "windows": 25,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "cpu_mean": 50.604,
+    "cpu_max": 64.16,
+    "fixture_files_removed": true
+  },
+  "mix-1plus3": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 2,
+    "windows": 7,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "cpu_mean": 37.59,
+    "cpu_max": 50.629,
+    "fixture_files_removed": true
+  },
+  "mix-0plus4": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 0,
+    "windows": 1,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": {
+      "readers": 0,
+      "successful": 0,
+      "errors": 0
+    },
+    "cpu_mean": 30.147,
+    "cpu_max": 53.428,
+    "fixture_files_removed": true
+  },
+  "single-pcm": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 0,
+    "windows": 0,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": null,
+    "cpu_mean": 34.455,
+    "cpu_max": 47.627,
+    "fixture_files_removed": true
+  },
+  "single-alac": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 0,
+    "windows": 0,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": null,
+    "cpu_mean": 35.916,
+    "cpu_max": 44.081,
+    "fixture_files_removed": true
+  },
+  "single-sync": {
+    "passed": true,
+    "exit_code": 0,
+    "recoveries": 0,
+    "windows": 0,
+    "timed_late_delta": 0,
+    "survivor_underrun_delta": 0,
+    "ingress_late_delta": 0,
+    "status_reads": null,
+    "cpu_mean": 39.352,
+    "cpu_max": 48.495,
+    "fixture_files_removed": true
+  },
+  "workspace": {
+    "passed": 232,
+    "failed": 0,
+    "ignored": 5
+  },
+  "cpu_policy": "1 Hz observation only; no admission/abort CPU threshold or hard cap; own builds and runtime tests run sequentially",
+  "ui": {
+    "passed": true,
+    "scope": "macOS native preview windows, actual Command shortcuts, normal/minimum sizes; no background or audio started",
+    "checks": [
+      {
+        "width": 1100,
+        "height": 760,
+        "command_k_opens_palette": true,
+        "escape_closes_palette": true,
+        "command_2_navigates": true,
+        "palette_footer_within_window": true
+      },
+      {
+        "width": 600,
+        "height": 440,
+        "command_k_opens_palette": true,
+        "escape_closes_palette": true,
+        "command_2_navigates": true,
+        "palette_footer_within_window": true
+      }
+    ],
+    "binary_sha256": "4a32fef046842f95c4f2fe8aa5fd699828388ffdc41eca59006c5b7469d05e5b"
+  },
+  "cleanup": {
+    "original_neonmix_processes_preserved": true,
+    "no_new_neonmix_processes_left": true
+  },
+  "native_dual_soak": {
+    "passed": true,
+    "seconds": 60,
+    "captured_frames": 2880000,
+    "silent_frames": 0,
+    "underrun_frames": 0,
+    "lost_packets": [
+      0,
+      0
+    ],
+    "plc_samples": [
+      0,
+      0
+    ]
+  }
+}

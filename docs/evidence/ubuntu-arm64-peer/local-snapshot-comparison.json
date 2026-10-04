@@ -1,0 +1,14 @@
+{
+  "changed_after_snapshot": [
+    "crates/audio-core/src/mixer.rs",
+    "crates/audio-core/tests/mixer.rs",
+    "crates/media/src/transport.rs",
+    "crates/media/tests/security.rs",
+    "docs/E02-E04-AUDIT.md",
+    "docs/E02-E04.md",
+    "docs/MEDIA-CONTROL-CONTRACT.md",
+    "docs/STATUS.md",
+    "tools/mirror_switch.py"
+  ],
+  "scope": "Tests refer to the immutable peer snapshot; concurrent E02-E04 edits were not copied into the running test build."
+}

@@ -1,0 +1,9 @@
+{
+  "tag": "platform-retest-20261003-022352",
+  "frozen_at": "2026-10-03T02:23:52.564220+08:00",
+  "file_count": 516,
+  "canonical_manifest_sha256": "3ef7d6f5ea47a98b671768030311a494bd95c317c1b032bbc38bd00c038b9c84",
+  "archive_sha256": "8360bc83eca215b0fb81a99c4916f69e26ce62ffef3f1d253bdffc22cc97f352",
+  "archive": "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/source.tar.gz",
+  "manifest": "/Volumes/projects-mac/NeonMix/artifacts/platform-retest-20261003-022352/source-manifest.json"
+}

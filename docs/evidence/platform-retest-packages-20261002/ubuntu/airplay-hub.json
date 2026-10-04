@@ -1,0 +1,26 @@
+{
+  "platform": "Linux",
+  "build_profile": "release",
+  "scope": "isolated loopback TLS Hub API, real PipeWire output, integrated Speaker worker lifecycle, synthetic native SRTP Sender",
+  "credential_scope": "explicit init laboratory bearer tokens; not production credential-storage acceptance",
+  "binary_sha256": {
+    "neonmix-hub": "12edff0f26236b17d581e505234a4aeb843b24493045ff1b56a37690aaeb317b",
+    "neonmix-airplay-worker": "45fc57fd87532aa825927162b2b2bbc308bdc8e2d9011403b38136e141d29d4d"
+  },
+  "output_device": "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+  "room_gain_db": -12,
+  "native_sender_gain_db": -36,
+  "passed": false,
+  "scenarios": {
+    "tls13_trusted_fixture_certificate_and_real_output": true
+  },
+  "limitations": [
+    "no Apple AirPlay sender was attached",
+    "no analog latency or audio/video synchronization measurement",
+    "no output unplug/loss injection"
+  ],
+  "output_frames_at_start": 9216,
+  "failure": "administrator enable rejected",
+  "fixture_processes_stopped": true,
+  "fixture_files_removed": true
+}

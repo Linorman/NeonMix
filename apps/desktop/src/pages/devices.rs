@@ -2,7 +2,7 @@
 //! AirPlay source). Each row: who (avatar, name, role), state, actions.
 use super::*;
 use crate::widgets::{Kind, Tone};
-use egui::{Align, CornerRadius, Layout, Margin, Stroke};
+use egui::{Align, Layout, Margin};
 
 const FILTERS: [&str; 4] = ["全部", "发送中", "已断开", "已撤销"];
 
@@ -106,68 +106,94 @@ impl Desktop {
             })
             .collect();
         let count = matches.len() + airplay_matches.len();
-        egui::Frame::new()
-            .fill(theme::SURFACE)
-            .stroke(Stroke::new(1.0, theme::BORDER))
-            .corner_radius(CornerRadius::same(theme::RADIUS))
-            .inner_margin(Margin::symmetric(16, 12))
-            .show(ui, |ui| {
+        if count == 0 {
+            widgets::surface(ui, None, Margin::symmetric(16, 12), |ui| {
                 ui.set_min_width(ui.available_width());
-                ui.spacing_mut().item_spacing.y = 8.0;
-                if count == 0 {
-                    if needle.is_empty() && filter == 0 {
-                        widgets::empty(
-                            ui,
-                            "暂无设备",
-                            "Sender 配对或 AirPlay 来源连接后，设备会显示在这里。",
-                        );
-                    } else {
-                        widgets::empty(
-                            ui,
-                            "无匹配结果",
-                            "没有符合搜索和筛选条件的设备，清除条件后重试。",
-                        );
-                    }
-                    return;
-                }
-                let mut first = true;
-                let mut divider = |ui: &mut egui::Ui| {
-                    if !first {
-                        ui.separator();
-                    }
-                    first = false;
-                };
-                for source in airplay_matches
-                    .iter()
-                    .filter(|s| s["active"].as_bool() == Some(true))
-                {
-                    divider(ui);
-                    ui.push_id(source["source_id"].as_str().unwrap_or("airplay"), |ui| {
-                        ui.add_space(4.0);
-                        self.airplay_device_row(ui, source);
-                        ui.add_space(4.0);
-                    });
-                }
-                for device in matches {
-                    divider(ui);
-                    let streams = streams_of(device.id);
-                    ui.push_id(device.id, |ui| {
-                        self.device_row(ui, &state, &device, streams);
-                    });
-                }
-                for source in airplay_matches
-                    .iter()
-                    .filter(|s| s["active"].as_bool() != Some(true))
-                {
-                    divider(ui);
-                    ui.push_id(source["source_id"].as_str().unwrap_or("airplay"), |ui| {
-                        ui.add_space(4.0);
-                        self.airplay_device_row(ui, source);
-                        ui.add_space(4.0);
-                    });
+                if needle.is_empty() && filter == 0 {
+                    widgets::empty(
+                        ui,
+                        "暂无设备",
+                        "Sender 配对或 AirPlay 来源连接后，设备会显示在这里。",
+                    );
+                } else {
+                    widgets::empty(
+                        ui,
+                        "无匹配结果",
+                        "没有符合搜索和筛选条件的设备，清除条件后重试。",
+                    );
                 }
             });
+        } else {
+            // Active AirPlay first, then paired devices, then idle AirPlay.
+            let active = |s: &&Value| s["active"].as_bool() == Some(true);
+            let mut cards: Vec<Card> = airplay_matches
+                .iter()
+                .filter(active)
+                .map(|s| Card::Airplay((*s).clone()))
+                .collect();
+            cards.extend(matches.into_iter().map(|d| {
+                let n = streams_of(d.id);
+                Card::Device(d, n)
+            }));
+            cards.extend(
+                airplay_matches
+                    .iter()
+                    .filter(|s| !active(s))
+                    .map(|s| Card::Airplay((*s).clone())),
+            );
+            let cols = widgets::columns_for(ui, 300.0, 3);
+            ui.columns(cols, |c| {
+                for column in c.iter_mut() {
+                    column.spacing_mut().item_spacing.y = 10.0;
+                }
+                for (i, card) in cards.iter().enumerate() {
+                    self.device_card(&mut c[i % cols], &state, card);
+                }
+            });
+        }
         self.local_devices(ui);
+    }
+
+    fn device_card(&mut self, ui: &mut egui::Ui, state: &Snapshot, card: &Card) {
+        let (key, color, revoked) = match card {
+            Card::Airplay(s) => (
+                s["source_id"].as_str().unwrap_or("airplay").to_owned(),
+                theme::SRC_AIRPLAY,
+                s["revoked"].as_bool() == Some(true),
+            ),
+            Card::Device(d, _) => (d.id.to_string(), theme::SRC_NATIVE, d.revoked),
+        };
+        let shown = widgets::surface(ui, None, Margin::symmetric(14, 12), |ui| {
+            ui.set_min_width(ui.available_width());
+            ui.spacing_mut().item_spacing.y = 8.0;
+            // `ui.columns` hands out justified layouts; cards keep natural
+            // widths and left-aligned text.
+            ui.with_layout(Layout::top_down(Align::Min), |ui| {
+                ui.push_id(&key, |ui| match card {
+                    Card::Airplay(source) => self.airplay_device_row(ui, source),
+                    Card::Device(device, streams) => self.device_row(ui, state, device, *streams),
+                });
+            });
+        });
+        let rect = shown.response.rect;
+        let painter = ui.painter();
+        painter.rect_filled(
+            egui::Rect::from_min_size(
+                rect.min + egui::vec2(16.0, 1.0),
+                egui::vec2(rect.width() - 32.0, 3.0),
+            ),
+            egui::CornerRadius::same(2),
+            if revoked { theme::TEXT_3 } else { color },
+        );
+        if revoked {
+            // Revoked identities stay listed but read as struck out.
+            crate::fx::hatch(
+                painter,
+                rect.shrink(2.0),
+                theme::DANGER.gamma_multiply(0.10),
+                9.0,
+            );
+        }
     }
 
     fn device_row(
@@ -315,13 +341,14 @@ impl Desktop {
 }
 
 pub(crate) fn empty_card(ui: &mut egui::Ui, title: &str, description: &str) {
-    egui::Frame::new()
-        .fill(theme::SURFACE)
-        .stroke(Stroke::new(1.0, theme::BORDER))
-        .corner_radius(CornerRadius::same(theme::RADIUS))
-        .inner_margin(Margin::same(16))
-        .show(ui, |ui| {
-            ui.set_min_width(ui.available_width());
-            widgets::empty(ui, title, description);
-        });
+    widgets::surface(ui, None, Margin::same(16), |ui| {
+        ui.set_min_width(ui.available_width());
+        widgets::empty(ui, title, description);
+    });
+}
+
+/// One card in the device grid.
+enum Card {
+    Airplay(Value),
+    Device(neonmix_control::Device, usize),
 }

@@ -1,0 +1,39 @@
+patching file lib/crypto.c
+patching file lib/crypto.h
+patching file lib/dnssd.h
+patching file lib/dnssdint.h
+patching file lib/fairplay_playfair.c
+patching file lib/http_request.c
+patching file lib/http_response.c
+patching file lib/http_response.h
+patching file lib/httpd.c
+patching file lib/httpd.h
+patching file lib/pairing.c
+patching file lib/raop.c
+patching file lib/raop.h
+patching file lib/raop_handlers.h
+patching file lib/raop_ntp.c
+patching file lib/raop_ntp.h
+patching file lib/raop_rtp.c
+patching file lib/stream.h
+patching file lib/raop_handlers.h
+patching file lib/raop_rtp.c
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: E:/Desktop/NeonMix-test/.local/airplay/build
+[1/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/fairplay_playfair.c.obj
+[2/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/http_request.c.obj
+[3/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/pairing.c.obj
+[4/15] Building C object CMakeFiles/protocol.dir/disabled_media.c.obj
+[5/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/crypto.c.obj
+[6/15] Building C object CMakeFiles/protocol.dir/speaker_profile.c.obj
+[7/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop_buffer.c.obj
+[8/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/http_response.c.obj
+[9/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/httpd.c.obj
+[10/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop_ntp.c.obj
+[11/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop_rtp.c.obj
+[12/15] Building C object CMakeFiles/protocol.dir/E_/Desktop/NeonMix-test/.local/airplay/patched/lib/raop.c.obj
+[13/15] Linking C static library libprotocol.a
+[14/15] Building CXX object CMakeFiles/neonmix-airplay-worker.dir/main.cpp.obj
+[15/15] Linking CXX executable neonmix-airplay-worker.exe
+E:\Desktop\NeonMix-test\.local\airplay\build\neonmix-airplay-worker.exe

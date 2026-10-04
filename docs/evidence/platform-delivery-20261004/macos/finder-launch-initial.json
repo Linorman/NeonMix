@@ -1,0 +1,6 @@
+{
+  "scope": "LaunchServices open of relocated signed .app, equivalent to Finder launch",
+  "passed": false,
+  "open_exit_code": 0,
+  "fixture_removed": true
+}

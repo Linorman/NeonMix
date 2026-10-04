@@ -1,0 +1,246 @@
+{
+  "passed": false,
+  "binary_sha256": "1e142aa0a8f66120e5f8121365f8a9b2fd6bbde316c29be167377b4292e1f5c3",
+  "scenarios": {
+    "native_discovery_shows_actual_room": false,
+    "native_invitation_paste_pair_commits_member_identity": true
+  },
+  "limits": [
+    "unnamed fields located by ordinal; accessibility regression remains",
+    "single host; no real IME composition or VoiceOver listening"
+  ],
+  "discovery_ipc_comparison": [
+    {
+      "candidate": {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.254.101.147:7443",
+            "url": "https://10.254.101.147:7443"
+          }
+        ],
+        "hub_id": "01a2a86c-3845-448d-9c3f-839ac3f1f43b",
+        "instance": "NeonMix-01a2a86c3845448d9c3f839ac3f1f43b-c242c209a813._neonmix._tcp.local.",
+        "room_name": "本机 UI 验收房间",
+        "version": 1
+      },
+      "event": "resolved",
+      "trusted": false
+    },
+    {
+      "candidate": {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.254.101.147:7443",
+            "url": "https://10.254.101.147:7443"
+          },
+          {
+            "address": "192.168.100.111:7443",
+            "url": "https://192.168.100.111:7443"
+          },
+          {
+            "address": "192.168.100.208:7443",
+            "url": "https://192.168.100.208:7443"
+          }
+        ],
+        "hub_id": "01a2a86c-3845-448d-9c3f-839ac3f1f43b",
+        "instance": "NeonMix-01a2a86c3845448d9c3f839ac3f1f43b-c242c209a813._neonmix._tcp.local.",
+        "room_name": "本机 UI 验收房间",
+        "version": 1
+      },
+      "event": "resolved",
+      "trusted": false
+    },
+    {
+      "candidate": {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:7443",
+            "url": "https://10.11.11.147:7443"
+          },
+          {
+            "address": "10.254.101.147:7443",
+            "url": "https://10.254.101.147:7443"
+          },
+          {
+            "address": "192.168.100.111:7443",
+            "url": "https://192.168.100.111:7443"
+          },
+          {
+            "address": "192.168.100.208:7443",
+            "url": "https://192.168.100.208:7443"
+          }
+        ],
+        "hub_id": "01a2a86c-3845-448d-9c3f-839ac3f1f43b",
+        "instance": "NeonMix-01a2a86c3845448d9c3f839ac3f1f43b-c242c209a813._neonmix._tcp.local.",
+        "room_name": "本机 UI 验收房间",
+        "version": 1
+      },
+      "event": "resolved",
+      "trusted": false
+    },
+    {
+      "candidate": {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:7443",
+            "url": "https://10.11.11.147:7443"
+          },
+          {
+            "address": "10.211.55.2:7443",
+            "url": "https://10.211.55.2:7443"
+          },
+          {
+            "address": "10.254.101.147:7443",
+            "url": "https://10.254.101.147:7443"
+          },
+          {
+            "address": "192.168.100.111:7443",
+            "url": "https://192.168.100.111:7443"
+          },
+          {
+            "address": "192.168.100.208:7443",
+            "url": "https://192.168.100.208:7443"
+          }
+        ],
+        "hub_id": "01a2a86c-3845-448d-9c3f-839ac3f1f43b",
+        "instance": "NeonMix-01a2a86c3845448d9c3f839ac3f1f43b-c242c209a813._neonmix._tcp.local.",
+        "room_name": "本机 UI 验收房间",
+        "version": 1
+      },
+      "event": "resolved",
+      "trusted": false
+    },
+    {
+      "candidate": {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:7443",
+            "url": "https://10.11.11.147:7443"
+          },
+          {
+            "address": "10.211.55.2:7443",
+            "url": "https://10.211.55.2:7443"
+          },
+          {
+            "address": "10.254.101.147:7443",
+            "url": "https://10.254.101.147:7443"
+          },
+          {
+            "address": "127.0.0.1:7443",
+            "url": "https://127.0.0.1:7443"
+          },
+          {
+            "address": "192.168.100.111:7443",
+            "url": "https://192.168.100.111:7443"
+          },
+          {
+            "address": "192.168.100.208:7443",
+            "url": "https://192.168.100.208:7443"
+          }
+        ],
+        "hub_id": "01a2a86c-3845-448d-9c3f-839ac3f1f43b",
+        "instance": "NeonMix-01a2a86c3845448d9c3f839ac3f1f43b-c242c209a813._neonmix._tcp.local.",
+        "room_name": "本机 UI 验收房间",
+        "version": 1
+      },
+      "event": "resolved",
+      "trusted": false
+    },
+    {
+      "candidate": {
+        "capabilities": "opus48-stereo,pair-v1",
+        "endpoints": [
+          {
+            "address": "10.11.11.147:7443",
+            "url": "https://10.11.11.147:7443"
+          },
+          {
+            "address": "10.211.55.2:7443",
+            "url": "https://10.211.55.2:7443"
+          },
+          {
+            "address": "10.254.101.147:7443",
+            "url": "https://10.254.101.147:7443"
+          },
+          {
+            "address": "10.37.129.2:7443",
+            "url": "https://10.37.129.2:7443"
+          },
+          {
+            "address": "127.0.0.1:7443",
+            "url": "https://127.0.0.1:7443"
+          },
+          {
+            "address": "192.168.100.111:7443",
+            "url": "https://192.168.100.111:7443"
+          },
+          {
+            "address": "192.168.100.208:7443",
+            "url": "https://192.168.100.208:7443"
+          }
+        ],
+        "hub_id": "01a2a86c-3845-448d-9c3f-839ac3f1f43b",
+        "instance": "NeonMix-01a2a86c3845448d9c3f839ac3f1f43b-c242c209a813._neonmix._tcp.local.",
+        "room_name": "本机 UI 验收房间",
+        "version": 1
+      },
+      "event": "resolved",
+      "trusted": false
+    },
+    {
+      "candidates": [
+        {
+          "capabilities": "opus48-stereo,pair-v1",
+          "endpoints": [
+            {
+              "address": "10.11.11.147:7443",
+              "url": "https://10.11.11.147:7443"
+            },
+            {
+              "address": "10.211.55.2:7443",
+              "url": "https://10.211.55.2:7443"
+            },
+            {
+              "address": "10.254.101.147:7443",
+              "url": "https://10.254.101.147:7443"
+            },
+            {
+              "address": "10.37.129.2:7443",
+              "url": "https://10.37.129.2:7443"
+            },
+            {
+              "address": "127.0.0.1:7443",
+              "url": "https://127.0.0.1:7443"
+            },
+            {
+              "address": "192.168.100.111:7443",
+              "url": "https://192.168.100.111:7443"
+            },
+            {
+              "address": "192.168.100.208:7443",
+              "url": "https://192.168.100.208:7443"
+            }
+          ],
+          "hub_id": "01a2a86c-3845-448d-9c3f-839ac3f1f43b",
+          "instance": "NeonMix-01a2a86c3845448d9c3f839ac3f1f43b-c242c209a813._neonmix._tcp.local.",
+          "room_name": "本机 UI 验收房间",
+          "version": 1
+        }
+      ],
+      "event": "discovery_complete"
+    }
+  ],
+  "masked_invitation_readback": true,
+  "failure": "No enabled visible button: 添加虚拟输出",
+  "failure_ui_tree": "group 1 of window NeonMix of application process neonmix-desktop, static text NeonMix of group 1 of window NeonMix of application process neonmix-desktop, button Hub 设置 of group 1 of window NeonMix of application process neonmix-desktop, button Sender of group 1 of window NeonMix of application process neonmix-desktop, button Mixer of group 1 of window NeonMix of application process neonmix-desktop, button 设备管理 of group 1 of window NeonMix of application process neonmix-desktop, button 诊断 of group 1 of window NeonMix of application process neonmix-desktop, static text 在线 of group 1 of window NeonMix of application process neonmix-desktop, static text 操作已完成 of group 1 of window NeonMix of application process neonmix-desktop, button 退出后台 of group 1 of window NeonMix of application process neonmix-desktop, button 隐藏窗口 of group 1 of window NeonMix of application process neonmix-desktop, UI element 11 of group 1 of window NeonMix of application process neonmix-desktop, static text Sender of group 1 of window NeonMix of application process neonmix-desktop, static text 发送范围：系统选择到此虚拟输出的所有应用声音。停止发送始终可从底部或托盘执行。 of group 1 of window NeonMix of application process neonmix-desktop, static text 目标房间：本机 UI 验收房间 of group 1 of window NeonMix of application process neonmix-desktop, button 发现局域网房间 of group 1 of window NeonMix of application process neonmix-desktop, static text 尚未发现房间。确保 Hub 正在共享且位于同一局域网，然后重新发现。 of group 1 of window NeonMix of application process neonmix-desktop, static text 设备名称 of group 1 of window NeonMix of application process neonmix-desktop, text field 1 of group 1 of window NeonMix of application process neonmix-desktop, static text 粘贴 Hub 给出的一次性邀请 of group 1 of window NeonMix of application process neonmix-desktop, text field 2 of group 1 of window NeonMix of application process neonmix-desktop, checkbox 显示邀请 of group 1 of window NeonMix of application process neonmix-desktop, button 配对房间 of group 1 of window NeonMix of application process neonmix-desktop, button 删除本机配对… of group 1 of window NeonMix of application process neonmix-desktop, static text 控制身份 of group 1 of window NeonMix of application process neonmix-desktop, pop up button 控制身份 of group 1 of window NeonMix of application process neonmix-desktop, static text 成员 of group 1 of window NeonMix of application process neonmix-desktop, button 连接地址（故障排查） of group 1 of window NeonMix of application process neonmix-desktop, static text 虚拟输出名称 of group 1 of window NeonMix of application process neonmix-desktop, text field 3 of group 1 of window NeonMix of application process neonmix-desktop, static text 虚拟输出提供者 of group 1 of window NeonMix of application process neonmix-desktop, pop up button 虚拟输出提供者 of group 1 of window NeonMix of application process neonmix-desktop, UI element 32 of group 1 of window NeonMix of application process neonmix-desktop, checkbox NeonMix 虚拟输出 of group 1 of window NeonMix of application process neonmix-desktop, checkbox BlackHole（外部提供者） of group 1 of window NeonMix of application process neonmix-desktop, button 添加虚拟输出 of group 1 of window NeonMix of application process neonmix-desktop, button 读取已添加输出 of group 1 of window NeonMix of application process neonmix-desktop, static text 需要已配对的 Sender 身份及已安装的虚拟设备。缺少驱动时请按 E06 安装说明处理。 of group 1 of window NeonMix of application process neonmix-desktop, static text Sender 已停止 of group 1 of window NeonMix of application process neonmix-desktop, UI element 39 of group 1 of window NeonMix of application process neonmix-desktop, button 1 of window NeonMix of application process neonmix-desktop, button 2 of window NeonMix of application process neonmix-desktop, group 1 of button 2 of window NeonMix of application process neonmix-desktop, group 1 of group 1 of button 2 of window NeonMix of application process neonmix-desktop, button 3 of window NeonMix of application process neonmix-desktop, static text NeonMix of window NeonMix of application process neonmix-desktop",
+  "keychain_cleanup": [
+    true,
+    true,
+    true
+  ]
+}

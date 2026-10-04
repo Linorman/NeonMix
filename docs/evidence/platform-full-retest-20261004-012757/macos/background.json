@@ -1,0 +1,31 @@
+{
+  "platform": "macOS",
+  "scenarios": {
+    "private_socket_and_state": true,
+    "file_profiles_reference_dedicated_secret_entries": true,
+    "explicit_physical_output_low_level_test_tone": true,
+    "authenticated_viewer_role_and_real_snapshot": true,
+    "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true,
+    "repeat_invitation_after_cancel_uses_ephemeral_file": true,
+    "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true,
+    "diagnostics_redacted_with_real_meters": true,
+    "strict_numeric_whitelist_private_diagnostic_export": true,
+    "media_process_crash_reported_without_unbounded_restart": true,
+    "settings_revision_and_explicit_graceful_stop": true,
+    "explicit_background_shutdown_ends_audio_process": true
+  },
+  "limits": {
+    "ipc_bytes": 262144,
+    "command_timeout_seconds": 25,
+    "explicit_restart_after_failure": true
+  },
+  "build_profile": "release",
+  "listen_port": 62780,
+  "binary_sha256": {
+    "neonmix-background": "f38dfa098a32053c79b23d7170620cfcd32efe41bac139005f0259ec2401496d",
+    "neonmix-audio": "25ba6ef308f2d62e19d53f112383d26fde6de65af69457d643f09200baa0f106",
+    "neonmix-hub-real": "7176a5e18651a0b72816bf5738e1fee75c73c6a82e44fb08e3a3adb238795470"
+  },
+  "passed": true,
+  "fixture_removed": true
+}

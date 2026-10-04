@@ -1,0 +1,142 @@
+[
+  {
+    "name": "fmt-members",
+    "samples": 0,
+    "mean": null,
+    "p95": null,
+    "max": null
+  },
+  {
+    "name": "worker-protocol",
+    "samples": 2,
+    "mean": 12.302,
+    "p95": 19.603,
+    "max": 19.603
+  },
+  {
+    "name": "worker-pairing",
+    "samples": 6,
+    "mean": 2.374,
+    "p95": 3.759,
+    "max": 3.759
+  },
+  {
+    "name": "worker-decoder",
+    "samples": 1,
+    "mean": 2.736,
+    "p95": 2.736,
+    "max": 2.736
+  },
+  {
+    "name": "identity",
+    "samples": 9,
+    "mean": 2.051,
+    "p95": 4.963,
+    "max": 4.963
+  },
+  {
+    "name": "credentials",
+    "samples": 0,
+    "mean": null,
+    "p95": null,
+    "max": null
+  },
+  {
+    "name": "single-pcm",
+    "samples": 8,
+    "mean": 9.352,
+    "p95": 12.281,
+    "max": 12.281
+  },
+  {
+    "name": "single-alac",
+    "samples": 8,
+    "mean": 9.051,
+    "p95": 13.5,
+    "max": 13.5
+  },
+  {
+    "name": "synchronized",
+    "samples": 7,
+    "mean": 9.84,
+    "p95": 12.782,
+    "max": 12.782
+  },
+  {
+    "name": "background",
+    "samples": 4,
+    "mean": 5.133,
+    "p95": 8.772,
+    "max": 8.772
+  },
+  {
+    "name": "four-contention",
+    "samples": 54,
+    "mean": 21.786,
+    "p95": 25.0,
+    "max": 26.055
+  },
+  {
+    "name": "3plus1",
+    "samples": 41,
+    "mean": 13.456,
+    "p95": 14.467,
+    "max": 18.5
+  },
+  {
+    "name": "2plus2",
+    "samples": 38,
+    "mean": 13.372,
+    "p95": 14.358,
+    "max": 15.96
+  },
+  {
+    "name": "1plus3",
+    "samples": 34,
+    "mean": 12.951,
+    "p95": 14.61,
+    "max": 16.08
+  },
+  {
+    "name": "0plus4",
+    "samples": 61,
+    "mean": 12.696,
+    "p95": 13.995,
+    "max": 16.332
+  },
+  {
+    "name": "mix-control",
+    "samples": 4,
+    "mean": 16.027,
+    "p95": 21.608,
+    "max": 21.608
+  },
+  {
+    "name": "management",
+    "samples": 5,
+    "mean": 12.27,
+    "p95": 21.357,
+    "max": 21.357
+  },
+  {
+    "name": "gui-x11",
+    "samples": 21,
+    "mean": 5.629,
+    "p95": 8.794,
+    "max": 16.04
+  },
+  {
+    "name": "gui-narrow-x11",
+    "samples": 16,
+    "mean": 5.812,
+    "p95": 12.0,
+    "max": 12.0
+  },
+  {
+    "name": "native-lan-active",
+    "samples": 55,
+    "mean": 4.233,
+    "p95": 5.0,
+    "max": 5.263
+  }
+]

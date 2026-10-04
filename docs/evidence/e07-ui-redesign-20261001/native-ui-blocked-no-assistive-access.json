@@ -1,0 +1,13 @@
+{
+  "platform": "macOS",
+  "binary_sha256": "3ec387712b329c7ee701b16fc2896ed990937414f6529de5c79fc644d168c308",
+  "passed": false,
+  "scenarios": {},
+  "limits": [
+    "native Chinese paste and egui IME event regression covered; full VoiceOver listening audit not performed",
+    "single-host check; other platforms not run"
+  ],
+  "failure": "Command '['/Volumes/projects-mac/NeonMix/tools/dev', '/usr/bin/osascript', '-e', 'tell application \"System Events\"\\nset p to first application process whose unix id is 85794\\nset frontmost of p to true\\nreturn count of windows of p\\nend tell']' timed out after 12 seconds",
+  "failure_hub_settings": null,
+  "failure_hub_running": false
+}

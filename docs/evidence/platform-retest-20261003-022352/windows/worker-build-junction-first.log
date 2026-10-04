@@ -1,0 +1,12 @@
+usage: prepare_airplay.py [-h] [--sources-only] [--gst-prefix GST_PREFIX]
+                          [--sdk-prefix SDK_PREFIX] [--build-dir BUILD_DIR]
+                          [--cmake-arg CMAKE_ARG] [--no-copy]
+prepare_airplay.py: error: argument --gst-prefix: AirPlay development paths must stay inside the project
+Traceback (most recent call last):
+  File "E:\Desktop\NeonMix-test\r04\worker-build.py", line 5, in <module>
+    subprocess.run([sys.executable,'tools/prepare_airplay.py','--gst-prefix',prefix,'--cmake-arg=-DCMAKE_C_COMPILER=C:/msys64/mingw64/bin/gcc.exe','--cmake-arg=-DCMAKE_CXX_COMPILER=C:/msys64/mingw64/bin/g++.exe'],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['C:\\Python313\\python.exe', 'tools/prepare_airplay.py', '--gst-prefix', 'E:\\Desktop\\NeonMix-test\\r04\\.local\\gst', '--cmake-arg=-DCMAKE_C_COMPILER=C:/msys64/mingw64/bin/gcc.exe', '--cmake-arg=-DCMAKE_CXX_COMPILER=C:/msys64/mingw64/bin/g++.exe']' returned non-zero exit status 2.

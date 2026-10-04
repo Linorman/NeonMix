@@ -1,0 +1,12 @@
+{
+  "total_samples": 137,
+  "active_receiver_samples": 29,
+  "max_output_errors": 0,
+  "max_callback_over_budget": 0,
+  "max_mixer_underrun_frames": 0,
+  "max_receiver_lost_packets": 0,
+  "max_receiver_pcm_sink_dropped": 0,
+  "max_output_peak": 0.0040399436838924885,
+  "first_output_frames": 4700736,
+  "last_output_frames": 7422816
+}

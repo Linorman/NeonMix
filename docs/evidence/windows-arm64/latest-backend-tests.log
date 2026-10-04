@@ -1,0 +1,251 @@
+warning: function `frames_to_duration` is never used
+   --> vendor\cpal\src\host\mod.rs:242:15
+    |
+242 | pub(crate) fn frames_to_duration(
+    |               ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cpal` (lib) generated 1 warning
+   Compiling neonmix-desktop-service v0.1.0 (C:\Users\linorman\NeonMix-test-20261001\crates\desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.44s
+     Running unittests src\main.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_audio-f6d455befda95558.exe)
+
+running 4 tests
+test measurement::tests::never_counts_a_gap_as_continuous_source_time ... ok
+test measurement::tests::measures_received_tone_and_does_not_invent_one_for_silence ... ok
+test virtual_output::tests::rejected_second_owner_preserves_live_lock_and_drop_releases_it ... ok
+test measurement::tests::source_restart_does_not_count_intervening_silence_as_tone_time ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\cli.rs (target\aarch64-pc-windows-gnullvm\debug\deps\cli-e6e3e21319d60b66.exe)
+
+running 3 tests
+test invalid_format_fails_without_claiming_success ... ok
+test unsupported_platform_sink_fails_explicitly ... ok
+test offline_probe_returns_parseable_metrics ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+
+     Running tests\output_reopen.rs (target\aarch64-pc-windows-gnullvm\debug\deps\output_reopen-dab615c5b36aa071.exe)
+
+running 1 test
+test same_process_reopen_rebuilds_output_clock ... ignored, requires explicit NEONMIX_TEST_OUTPUT_DEVICE and physical native audio hardware
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_control-d36db17a6efc2acb.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\authority.rs (target\aarch64-pc-windows-gnullvm\debug\deps\authority-3f9f079b2573a41b.exe)
+
+running 11 tests
+test member_cannot_solo_or_change_others_and_master ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running unittests src\lib.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_core-855f34d99239d741.exe)
+
+running 2 tests
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\audio_contract.rs (target\aarch64-pc-windows-gnullvm\debug\deps\audio_contract-4831d01e09c1a707.exe)
+
+running 18 tests
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test malicious_pcm_is_sanitized ... ok
+test mute_advances_signal_position ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test silence_is_data_but_idle_is_not ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.72s
+
+     Running tests\drift_stability.rs (target\aarch64-pc-windows-gnullvm\debug\deps\drift_stability-bf52b4f466c523a2.exe)
+
+running 3 tests
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ignored, Run with --release --ignored: four accelerated 600-second drift cases
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ignored, Release-only accelerated 300-second delivery-stall regression
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ignored, Release-only accelerated over-limit drift degradation
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\mixer.rs (target\aarch64-pc-windows-gnullvm\debug\deps\mixer-8c765a7f2ac292b2.exe)
+
+running 8 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s
+
+     Running tests\mixer_realtime.rs (target\aarch64-pc-windows-gnullvm\debug\deps\mixer_realtime-5e0f3cb0eb48159f.exe)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.54s
+
+     Running tests\realtime.rs (target\aarch64-pc-windows-gnullvm\debug\deps\realtime-91f0b81e720b6180.exe)
+
+running 1 test
+test steady_state_capture_and_sinc_output_do_not_allocate_or_free ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.86s
+
+     Running unittests src\lib.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_desktop_service-4a778d7a3d93a317.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\neonmix-background.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_background-1cf276f5ad2d5194.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\lifecycle.rs (target\aarch64-pc-windows-gnullvm\debug\deps\lifecycle-cd0ecc7bdf6be778.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\windows_native_ipc.rs (target\aarch64-pc-windows-gnullvm\debug\deps\windows_native_ipc-77245e23bc027536.exe)
+
+running 1 test
+test current_user_pipe_rejects_duplicate_owner_and_reopens_after_shutdown ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running unittests src\lib.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_identity-b8225e5fd1e16a42.exe)
+
+running 6 tests
+test discovery::tests::incompatible_or_incomplete_records_do_not_become_candidates ... ok
+test discovery::tests::names_are_distinct_candidates_and_all_usable_addresses_survive ... ok
+test pairing::tests::expiration_cancellation_single_use_and_exact_retry ... ok
+test pairing::tests::quota_reclaims_expired_grants ... ok
+test files::tests::failed_replace_preserves_destination_and_cleans_its_own_temporary_file ... ok
+test files::tests::private_replace_is_exclusive_and_removes_an_old_insecure_file_mode ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\native_vault.rs (target\aarch64-pc-windows-gnullvm\debug\deps\native_vault-f89c8aee7cc51a0b.exe)
+
+running 1 test
+test native_credential_round_trip_and_deletion ... ignored, requires explicit access to the native platform credential store
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_io-dc32b121fa50d90a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\pipewire_buffer.rs (target\aarch64-pc-windows-gnullvm\debug\deps\pipewire_buffer-abf17e1447665479.exe)
+
+running 2 tests
+test pipewire_buffer::tests::clamps_native_size_but_rejects_partial_frames_or_short_scratch ... ok
+test pipewire_buffer::tests::honors_offset_modulo_and_wrapped_chunks ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_output_binding-2b2ddaeb786e03d6.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\persistence.rs (target\aarch64-pc-windows-gnullvm\debug\deps\persistence-ec2ccedd36847545.exe)
+
+running 4 tests
+test reopen_rename_and_repeated_add_preserve_identity ... ok
+test disable_enable_and_recreation_cannot_reauthorize_an_old_sender ... ok
+test concurrent_writers_use_revision_conflicts_and_never_publish_partial_json ... ok
+test corrupt_or_oversized_records_fail_closed_and_are_not_replaced ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running unittests src\lib.rs (target\aarch64-pc-windows-gnullvm\debug\deps\neonmix_windows-79f48b0412276758.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_control
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_desktop_service
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_identity
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_io
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_output_binding
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_windows
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

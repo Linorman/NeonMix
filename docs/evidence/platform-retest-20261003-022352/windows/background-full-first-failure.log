@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "E:\Desktop\NeonMix-test\r04\native-background-harness.py", line 39, in <module>
+    module.main()
+    ~~~~~~~~~~~^^
+  File "E:\Desktop\NeonMix-test\r04\tools\e07_background_probe.py", line 161, in main
+    wait_for(lambda: ipc(directory, "status"))
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Desktop\NeonMix-test\r04\tools\e07_background_probe.py", line 58, in wait_for
+    raise RuntimeError(f"probe condition timed out: {last}")
+RuntimeError: probe condition timed out: None

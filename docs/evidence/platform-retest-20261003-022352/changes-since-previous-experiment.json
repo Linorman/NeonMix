@@ -1,0 +1,26 @@
+{
+  "added": [
+    "apps/airplay-worker/identity_probe.c",
+    "docs/PLATFORM-FIXES-20261003.md",
+    "docs/PLATFORM-TEST-20261003.md",
+    "tools/airplay_identity_probe.py"
+  ],
+  "removed": [],
+  "changed": [
+    "apps/airplay-worker/CMakeLists.txt",
+    "apps/airplay-worker/README.md",
+    "apps/airplay-worker/main.cpp",
+    "apps/airplay-worker/platform.h",
+    "apps/hub/src/airplay.rs",
+    "crates/airplay-ipc/Cargo.toml",
+    "crates/airplay-ipc/src/local_unix.rs",
+    "crates/airplay-ipc/src/local_windows.rs",
+    "crates/media/src/transport.rs",
+    "docs/AIRPLAY-IPC-CONTRACT.md",
+    "docs/MEDIA-CONTROL-CONTRACT.md",
+    "docs/STATUS.md",
+    "patches/airplay-audio-only.patch",
+    "tools/airplay_multi_source_probe.py",
+    "tools/e07_background_probe.py"
+  ]
+}

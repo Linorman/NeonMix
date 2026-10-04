@@ -1,0 +1,9 @@
+no_source: passed
+pause_resume: passed
+system_mute: passed
+source_stop_restart: passed
+{
+  "passed": true,
+  "folder": "/Volumes/projects-mac/NeonMix/artifacts/blackhole/lifecycle/20261001-132555",
+  "failure": null
+}

@@ -1,0 +1,63 @@
+{
+  "host": "macOS",
+  "foreign_programs_executed": false,
+  "targets": {
+    "windows": {
+      "target": "x86_64-pc-windows-gnu",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--all-targets",
+        "-p",
+        "neonmix-identity",
+        "-p",
+        "neonmix-control",
+        "--target",
+        "x86_64-pc-windows-gnu"
+      ],
+      "exit_code": 0,
+      "header_dependency": {
+        "Package": "mingw-w64-common",
+        "Version": "11.0.1-3build1",
+        "Filename": "pool/universe/m/mingw-w64/mingw-w64-common_11.0.1-3build1_all.deb",
+        "SHA256": "4a42fd30fbc3838c58c929d8a4882682fc12408bb7a0e6cafa913c0f0a57c187"
+      },
+      "log": "artifacts/e05/review/cross-windows.log"
+    },
+    "linux": {
+      "target": "x86_64-unknown-linux-gnu",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--all-targets",
+        "-p",
+        "neonmix-identity",
+        "-p",
+        "neonmix-control",
+        "--target",
+        "x86_64-unknown-linux-gnu"
+      ],
+      "exit_code": 0,
+      "header_dependency": {
+        "sysroot": ".local/cross-linux/sysroot"
+      },
+      "log": "artifacts/e05/review/cross-linux.log"
+    }
+  },
+  "passed": true,
+  "source_sha256": {
+    "crates/identity/Cargo.toml": "1ca29eaf5e9a1458b1ee69d8c6cf446d87292758f825d0acb725174ae0c6c1b5",
+    "crates/identity/src/discovery.rs": "19d8a4ee637a6ebd15408e6dc88dc10e8e5a1effa17be8bb753305f1abe3522e",
+    "crates/identity/src/lib.rs": "f16989e092e595d26bae87180e08f8856849be1daa4d1afc764e7fe440f92ef3",
+    "crates/identity/src/files.rs": "e6cff9f1e95d07b7cccf9113083ec9614c5d43e73a89f8bbbbd03972b95ca6e2",
+    "crates/identity/src/files_windows.rs": "2ab937357c54c1d39209de1813b7bacfce75c1e2f05364c9e831038e3de3149b",
+    "crates/identity/src/pairing.rs": "60367537c4aed4b827f8684dc1a64933210c6619dada17eab5ce9036b11269ad",
+    "crates/identity/src/trust.rs": "664ba78f983483bdba4e535e36dcb082d3de1ee642e34dcb27dcf7bb1503fdce",
+    "crates/identity/src/vault.rs": "bc395ae29f0e476eacfc8cce122ea32f3012a4a70bed8a9835a1d9374d7305fd",
+    "crates/control/Cargo.toml": "15eae055e94306447a33943626b2aef30f6b0e409337933245924cbcbfd7e516",
+    "crates/control/tests/authority.rs": "ea2ef83ec1d36411ae4903cc78125e24558ef673aeed3db9b7f720e21cebb7e1",
+    "crates/control/src/lib.rs": "bdf716c94aab2fc1c1244a56565b18579712717e355b4ccdc43a6b3356b4a147"
+  }
+}

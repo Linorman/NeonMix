@@ -1,0 +1,112 @@
+{
+  "platform": "macOS",
+  "date": "2026-10-02",
+  "engine": "UxPlay 1.73.7 audio-only worker",
+  "normal_tests_passed": 53,
+  "clippy_warnings_denied": true,
+  "worker_protocol_trace_probe_passed": true,
+  "offline_pcm_alac_aac_probe_passed": true,
+  "final_scenarios": {
+    "final-brief-resume.json": {
+      "passed": true,
+      "pause_resume": {
+        "released_before": 28,
+        "released_after": 60,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 1,
+        "last_media_reset": "timestamp_jump"
+      },
+      "cycles": 0,
+      "timed_late_frames": 0,
+      "binary_sha256": {
+        "neonmix-hub": "5869562504d33db2746ba88a7b8f19abd5d858c5b3005a031985895187640d3e",
+        "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+      }
+    },
+    "final-five-resume-setups.json": {
+      "passed": true,
+      "pause_resume": {
+        "released_before": 153,
+        "released_after": 174,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 5,
+        "last_media_reset": "stream_setup"
+      },
+      "cycles": 5,
+      "timed_late_frames": 0,
+      "binary_sha256": {
+        "neonmix-hub": "5869562504d33db2746ba88a7b8f19abd5d858c5b3005a031985895187640d3e",
+        "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+      }
+    },
+    "final-resume-flush.json": {
+      "passed": true,
+      "pause_resume": {
+        "released_before": 28,
+        "released_after": 49,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 1,
+        "last_media_reset": "protocol"
+      },
+      "cycles": 0,
+      "timed_late_frames": 0,
+      "binary_sha256": {
+        "neonmix-hub": "5869562504d33db2746ba88a7b8f19abd5d858c5b3005a031985895187640d3e",
+        "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+      }
+    },
+    "final-resume-setup.json": {
+      "passed": true,
+      "pause_resume": {
+        "released_before": 28,
+        "released_after": 50,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 1,
+        "last_media_reset": "stream_setup"
+      },
+      "cycles": 0,
+      "timed_late_frames": 0,
+      "binary_sha256": {
+        "neonmix-hub": "5869562504d33db2746ba88a7b8f19abd5d858c5b3005a031985895187640d3e",
+        "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+      }
+    },
+    "final-synchronized-resume.json": {
+      "passed": true,
+      "pause_resume": {
+        "released_before": 261,
+        "released_after": 286,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 1,
+        "last_media_reset": "timestamp_jump"
+      },
+      "cycles": 0,
+      "timed_late_frames": 0,
+      "binary_sha256": {
+        "neonmix-hub": "5869562504d33db2746ba88a7b8f19abd5d858c5b3005a031985895187640d3e",
+        "neonmix-airplay-worker": "ec49db55c9af324393aec26528f1480481d1075db68e7ba3a1854e98e0a6a76f"
+      }
+    }
+  },
+  "prefetch_no_unexpected_media_reset": true,
+  "source_sha256": {
+    "apps/airplay-worker/main.cpp": "d043f29677d7e855daf4b885cf0fbab14db4f8aec33a7e5f1cb0a4aec1b731d1",
+    "apps/hub/src/airplay.rs": "a04b4a2f43cb83fc480bbbf8dc4453e224bd507b1585d04b5465cd0112ab4433",
+    "crates/airplay-ipc/src/lib.rs": "c22ef4cb68519bbb955087497393898a78eeaaff720c2c38687cc5d891586c3d",
+    "patches/airplay-audio-only.patch": "c8033e48b15e7c0ce5efd6d5f3cf21f1670d595fc580ff39b3411dd1598e4908",
+    "tools/airplay_mixer_probe.py": "adc8e16dde8994fca04a171d44f023d9a3c1fd2187cdf7c9a2acbcf470db19ed"
+  },
+  "iphone_real_pause_resume_confirmed": false,
+  "limitations": [
+    "No complete real iPhone pause/resume capture yet",
+    "Synthetic encrypted ALAC exercises real macOS worker/Hub/CoreAudio",
+    "No Windows/Linux execution"
+  ],
+  "candidate_startup": "waiting_on_macos_keychain_read",
+  "startup_evidence": "startup-observation.json"
+}

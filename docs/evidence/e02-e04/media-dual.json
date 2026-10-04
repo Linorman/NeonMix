@@ -1,0 +1,58 @@
+{
+  "drop_every": 0,
+  "limited_frames": 0,
+  "output": null,
+  "output_frames": 240000,
+  "output_stats": null,
+  "peak": 0.00805000588297844,
+  "platform": "macos",
+  "receivers": [
+    {
+      "authenticated": true,
+      "late_packets": 0,
+      "lost_packets": 0,
+      "packets": {
+        "duplicate": 0,
+        "highest_sequence": 29838,
+        "highest_timestamp": 2992545686,
+        "invalid": 0,
+        "received": 498,
+        "reordered": 0,
+        "timestamp_step_errors": 0
+      },
+      "pcm_frames": 236160,
+      "pcm_peak": 0.016082763671875,
+      "pcm_timing_gaps": [],
+      "plc_samples": 0,
+      "queue_drops": 0,
+      "silent_pcm_frames": 77
+    },
+    {
+      "authenticated": true,
+      "late_packets": 0,
+      "lost_packets": 0,
+      "packets": {
+        "duplicate": 0,
+        "highest_sequence": 13078,
+        "highest_timestamp": 2217103692,
+        "invalid": 0,
+        "received": 498,
+        "reordered": 0,
+        "timestamp_step_errors": 0
+      },
+      "pcm_frames": 236160,
+      "pcm_peak": 0.016082763671875,
+      "pcm_timing_gaps": [],
+      "plc_samples": 0,
+      "queue_drops": 0,
+      "silent_pcm_frames": 115
+    }
+  ],
+  "rejected": 0,
+  "replay": false,
+  "rms": 0.003925290852085604,
+  "seconds": 5,
+  "streams": 2,
+  "underrun_frames": 0,
+  "wrong_fingerprint": false
+}

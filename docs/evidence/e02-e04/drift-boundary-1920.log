@@ -1,0 +1,17 @@
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.18s
+     Running tests/drift_stability.rs (target/release/deps/drift_stability-430423d6f86df5b9)
+
+running 2 tests
+{"injected_ppm":-2000,"seconds":300,"max_water":2400,"dropped_frames":0,"underrun_frames":7200,"resets":0}
+{"injected_ppm":-1000,"seconds":300,"max_water":2400,"dropped_frames":0,"underrun_frames":0,"resets":0}
+{"injected_ppm":-500,"duration_seconds":600,"commanded_ppm":-251.822,"min_queue_frames":1293,"max_queue_frames":2216,"frequency_hz":437.1,"rms":0.0028150328556124757,"underrun_frames":0}
+{"injected_ppm":1000,"seconds":300,"max_water":2816,"dropped_frames":0,"underrun_frames":0,"resets":0}
+{"injected_ppm":2000,"seconds":300,"max_water":5218,"dropped_frames":2400,"underrun_frames":0,"resets":5}
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ok
+{"injected_ppm":-100,"duration_seconds":600,"commanded_ppm":4.619,"min_queue_frames":1440,"max_queue_frames":2216,"frequency_hz":437.1,"rms":0.0028150242467394333,"underrun_frames":0}
+{"injected_ppm":100,"duration_seconds":600,"commanded_ppm":-4.609,"min_queue_frames":1855,"max_queue_frames":2400,"frequency_hz":437,"rms":0.0028150227426456905,"underrun_frames":0}
+{"injected_ppm":500,"duration_seconds":600,"commanded_ppm":251.882,"min_queue_frames":1727,"max_queue_frames":2491,"frequency_hz":437,"rms":0.0028150298560070085,"underrun_frames":0}
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.27s
+

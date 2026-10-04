@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python",
+    "native-background-harness.py",
+    "--release",
+    "--listen-port",
+    "7443",
+    "--output",
+    "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+    "--evidence",
+    "E:\\Desktop\\NeonMix-test\\r04\\artifacts\\platform-retest-20261003-022352\\windows\\background-full.json"
+  ],
+  "exit_code": 0,
+  "seconds": 13.53,
+  "harness_change": "Private Windows ACL applied to the invocation-owned fixture directory instead of relying on POSIX mkdir mode0700"
+}

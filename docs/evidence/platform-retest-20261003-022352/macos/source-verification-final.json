@@ -1,0 +1,8 @@
+{
+  "tag": "platform-retest-20261003-022352",
+  "canonical_manifest_sha256": "3ef7d6f5ea47a98b671768030311a494bd95c317c1b032bbc38bd00c038b9c84",
+  "files": 516,
+  "mismatch": [],
+  "unchanged": true,
+  "binary_unchanged": true
+}

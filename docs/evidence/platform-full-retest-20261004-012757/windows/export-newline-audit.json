@@ -1,0 +1,7 @@
+{
+  "reason": "Windows text output uses CRLF; inherited exporter recorded hash of in-memory LF string rather than actual saved file bytes",
+  "fix": "hash actual bytes from saved reviewed-export files; separately retain logical LF SHA256",
+  "first_export_audit_retained": true,
+  "original_test_data_changed": false,
+  "product_source_changed": false
+}

@@ -1,0 +1,53 @@
+{
+  "scope": "actual native window rendering with recorded public state; preview actions do not commit to a server",
+  "binary_sha256": "05b90a53008339adac823a8ae2babc790c8ff4afa1f21f58c6f2adc2425061e1",
+  "screens": {
+    "hub-1100": {
+      "bounds": "410,73,1100,792",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "sender-1100": {
+      "bounds": "410,73,1100,792",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "mixer-1100": {
+      "bounds": "410,73,1100,792",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "devices-1100": {
+      "bounds": "410,73,1100,792",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "diagnostics-1100": {
+      "bounds": "410,73,1100,792",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "hub-600": {
+      "bounds": "660,153,600,472",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "sender-600": {
+      "bounds": "660,153,600,472",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "mixer-600": {
+      "bounds": "660,153,600,472",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "devices-600": {
+      "bounds": "660,153,600,472",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    },
+    "diagnostics-600": {
+      "bounds": "660,153,600,472",
+      "fixture": "docs/evidence/macos-e00-e07-20261001-132347/mixer/ui-real-state.json"
+    }
+  },
+  "checks": {
+    "chinese_paste_and_draft_preserved_across_navigation": true,
+    "navigation_button_keyboard_space_activation": true,
+    "device_search_no_results_and_clear": true
+  },
+  "errors": {},
+  "passed": true
+}

@@ -1,0 +1,162 @@
+[
+  {
+    "name": "fmt-members",
+    "command": [
+      "python3",
+      "-c",
+      "import subprocess,json; m=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version=1'])); ids=m['workspace_members']; raise SystemExit(max(subprocess.call(['cargo','fmt','--manifest-path',p['manifest_path'],'--check']) for p in m['packages'] if p['id'] in ids))"
+    ],
+    "exit_code": 0,
+    "seconds": 0.726,
+    "started_at": 1791009482.2066371,
+    "ended_at": 1791009482.9325323
+  },
+  {
+    "name": "worker-protocol",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.123,
+    "started_at": 1791009482.9327283,
+    "ended_at": 1791009485.0560784
+  },
+  {
+    "name": "worker-pairing",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/pairing_probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 5.586,
+    "started_at": 1791009485.0566974,
+    "ended_at": 1791009490.6429625
+  },
+  {
+    "name": "worker-decoder",
+    "command": [
+      "/home/parallels/NeonMix/.local/tl3/.local/airplay/build/neonmix-airplay-audio-probe"
+    ],
+    "exit_code": 0,
+    "seconds": 0.64,
+    "started_at": 1791009490.6435845,
+    "ended_at": 1791009491.2832255
+  },
+  {
+    "name": "identity",
+    "command": [
+      "python3",
+      "tools/airplay_identity_probe.py",
+      "--worker",
+      "/home/parallels/NeonMix/.local/tl3/.local/airplay/build/neonmix-airplay-worker",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/identity.json"
+    ],
+    "exit_code": 0,
+    "seconds": 9.4,
+    "started_at": 1791009491.2834716,
+    "ended_at": 1791009500.6833591
+  },
+  {
+    "name": "credentials",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/credential_store_probe.py",
+      "--release",
+      "--binary",
+      "/home/parallels/NeonMix/.local/tl3/target/release/neonmix-hub"
+    ],
+    "exit_code": 0,
+    "seconds": 0.174,
+    "started_at": 1791009500.6836329,
+    "ended_at": 1791009500.8574386
+  },
+  {
+    "name": "single-pcm",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/single-pcm.json"
+    ],
+    "exit_code": 0,
+    "seconds": 7.953,
+    "started_at": 1791009500.8576968,
+    "ended_at": 1791009508.810862
+  },
+  {
+    "name": "single-alac",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/single-alac.json"
+    ],
+    "exit_code": 0,
+    "seconds": 7.597,
+    "started_at": 1791009508.8118093,
+    "ended_at": 1791009516.4089723
+  },
+  {
+    "name": "synchronized",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/airplay_mixer_probe.py",
+      "--profile",
+      "release",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--playback-mode",
+      "synchronized",
+      "--report",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/synchronized.json"
+    ],
+    "exit_code": 0,
+    "seconds": 7.104,
+    "started_at": 1791009516.4092016,
+    "ended_at": 1791009523.5135105
+  },
+  {
+    "name": "background",
+    "command": [
+      "python3",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/harness/e07_background_probe.py",
+      "--release",
+      "--binary-directory",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/bin",
+      "--output",
+      "pipewire:alsa_output.pci-0000_00_01.0.analog-stereo",
+      "--evidence",
+      "/home/parallels/NeonMix/.local/tl3/artifacts/s1430/background.json"
+    ],
+    "exit_code": 0,
+    "seconds": 3.86,
+    "started_at": 1791009523.5137775,
+    "ended_at": 1791009527.3733993
+  }
+]

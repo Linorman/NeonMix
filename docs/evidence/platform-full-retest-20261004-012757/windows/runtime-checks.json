@@ -1,0 +1,371 @@
+{
+  "worker-suite": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "worker-native-suite.py"
+    ],
+    "start_utc": "2026-10-03T17:37:53.953094+00:00",
+    "end_utc": "2026-10-03T17:38:13.806540+00:00",
+    "seconds": 19.853470599999127
+  },
+  "worker-pipe-security": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "pipe-security.py"
+    ],
+    "start_utc": "2026-10-03T17:38:13.807267+00:00",
+    "end_utc": "2026-10-03T17:38:15.637466+00:00",
+    "seconds": 1.8302120000007562
+  },
+  "media-runtime": {
+    "exit_code": 0,
+    "command": [
+      "E:\\Desktop\\NeonMix-test\\r06\\target\\release\\neonmix-hub.exe",
+      "runtime"
+    ],
+    "start_utc": "2026-10-03T17:38:15.638144+00:00",
+    "end_utc": "2026-10-03T17:38:16.136331+00:00",
+    "seconds": 0.4982040000031702
+  },
+  "media-dual": {
+    "exit_code": 0,
+    "command": [
+      "E:\\Desktop\\NeonMix-test\\r06\\target\\release\\neonmix-hub.exe",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "2"
+    ],
+    "start_utc": "2026-10-03T17:38:16.137047+00:00",
+    "end_utc": "2026-10-03T17:38:21.530447+00:00",
+    "seconds": 5.3934155000024475
+  },
+  "media-loss": {
+    "exit_code": 0,
+    "command": [
+      "E:\\Desktop\\NeonMix-test\\r06\\target\\release\\neonmix-hub.exe",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "1",
+      "--drop-every",
+      "17",
+      "--replay"
+    ],
+    "start_utc": "2026-10-03T17:38:21.531198+00:00",
+    "end_utc": "2026-10-03T17:38:26.649667+00:00",
+    "seconds": 5.118486999999732
+  },
+  "media-reject": {
+    "exit_code": 0,
+    "command": [
+      "E:\\Desktop\\NeonMix-test\\r06\\target\\release\\neonmix-hub.exe",
+      "probe",
+      "--seconds",
+      "2",
+      "--streams",
+      "1",
+      "--wrong-fingerprint"
+    ],
+    "start_utc": "2026-10-03T17:38:26.650438+00:00",
+    "end_utc": "2026-10-03T17:38:28.805165+00:00",
+    "seconds": 2.154745099993306
+  },
+  "credential-locale": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "credential-locale.py"
+    ],
+    "start_utc": "2026-10-03T17:38:28.805872+00:00",
+    "end_utc": "2026-10-03T17:38:29.479072+00:00",
+    "seconds": 0.6732144999987213
+  },
+  "background": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-background-harness.py",
+      "--release",
+      "--listen-port",
+      "7443",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--evidence",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\background.json"
+    ],
+    "start_utc": "2026-10-03T17:38:29.479755+00:00",
+    "end_utc": "2026-10-03T17:38:43.052480+00:00",
+    "seconds": 13.57273819999682
+  },
+  "single-pcm": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--codec",
+      "pcm",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\single-pcm.json"
+    ],
+    "start_utc": "2026-10-03T17:38:43.053291+00:00",
+    "end_utc": "2026-10-03T17:38:52.178065+00:00",
+    "seconds": 9.12493440000253
+  },
+  "single-alac": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--codec",
+      "alac",
+      "--pause-seconds",
+      "1",
+      "--pause-cycles",
+      "2",
+      "--resume-reset",
+      "setup",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\single-alac.json"
+    ],
+    "start_utc": "2026-10-03T17:38:52.178927+00:00",
+    "end_utc": "2026-10-03T17:39:01.565178+00:00",
+    "seconds": 9.386273899996013
+  },
+  "synchronized": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "mixer",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--playback-mode",
+      "synchronized",
+      "--codec",
+      "alac",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\synchronized.json"
+    ],
+    "start_utc": "2026-10-03T17:39:01.566181+00:00",
+    "end_utc": "2026-10-03T17:39:09.365634+00:00",
+    "seconds": 7.799468899997009
+  },
+  "mix-control": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--scenario",
+      "mix-control",
+      "--sources",
+      "2",
+      "--native-sources",
+      "0",
+      "--fault-cycles",
+      "1",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\mix-control.json"
+    ],
+    "start_utc": "2026-10-03T17:39:09.366548+00:00",
+    "end_utc": "2026-10-03T17:39:17.201939+00:00",
+    "seconds": 7.835408499995538
+  },
+  "management": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--scenario",
+      "management",
+      "--sources",
+      "2",
+      "--native-sources",
+      "0",
+      "--fault-cycles",
+      "1",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\management.json"
+    ],
+    "start_utc": "2026-10-03T17:39:17.202733+00:00",
+    "end_utc": "2026-10-03T17:39:26.235997+00:00",
+    "seconds": 9.033279999996012
+  },
+  "4plus0": {
+    "exit_code": 1,
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "4",
+      "--native-sources",
+      "0",
+      "--steady-seconds",
+      "30",
+      "--fault-cycles",
+      "3",
+      "--status-readers",
+      "4",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\4plus0.json"
+    ],
+    "start_utc": "2026-10-03T17:39:26.236791+00:00",
+    "end_utc": "2026-10-03T17:40:10.582666+00:00",
+    "seconds": 44.34589050000068
+  },
+  "3plus1": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "3",
+      "--native-sources",
+      "1",
+      "--steady-seconds",
+      "30",
+      "--fault-cycles",
+      "1",
+      "--status-readers",
+      "0",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\3plus1.json"
+    ],
+    "start_utc": "2026-10-03T17:40:10.583602+00:00",
+    "end_utc": "2026-10-03T17:41:00.894293+00:00",
+    "seconds": 50.31070570000156
+  },
+  "2plus2": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "2",
+      "--native-sources",
+      "2",
+      "--steady-seconds",
+      "30",
+      "--fault-cycles",
+      "2",
+      "--status-readers",
+      "0",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\2plus2.json"
+    ],
+    "start_utc": "2026-10-03T17:41:00.895120+00:00",
+    "end_utc": "2026-10-03T17:41:53.648979+00:00",
+    "seconds": 52.75387529999716
+  },
+  "1plus3": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "1",
+      "--native-sources",
+      "3",
+      "--steady-seconds",
+      "30",
+      "--fault-cycles",
+      "1",
+      "--status-readers",
+      "0",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\1plus3.json"
+    ],
+    "start_utc": "2026-10-03T17:41:53.649852+00:00",
+    "end_utc": "2026-10-03T17:42:31.124065+00:00",
+    "seconds": 37.47422960000404
+  },
+  "0plus4": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "native-harness.py",
+      "multi",
+      "--profile",
+      "release",
+      "--output",
+      "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+      "--sources",
+      "0",
+      "--native-sources",
+      "4",
+      "--steady-seconds",
+      "60",
+      "--fault-cycles",
+      "1",
+      "--status-readers",
+      "0",
+      "--report",
+      "E:\\Desktop\\NeonMix-test\\r06\\artifacts\\platform-full-retest-20261004-012757\\windows\\0plus4.json"
+    ],
+    "start_utc": "2026-10-03T17:42:31.125075+00:00",
+    "end_utc": "2026-10-03T17:43:33.249698+00:00",
+    "seconds": 62.12464110000292
+  },
+  "gui": {
+    "exit_code": 0,
+    "command": [
+      "python",
+      "gui.py"
+    ],
+    "start_utc": "2026-10-03T17:43:33.250938+00:00",
+    "end_utc": "2026-10-03T17:44:30.701511+00:00",
+    "seconds": 57.45058639999479
+  }
+}

@@ -1,0 +1,1999 @@
+{
+  "platform": "Windows",
+  "tests": {
+    "targets": 42,
+    "passed": 221,
+    "failed": 0,
+    "ignored": 5
+  },
+  "matrix": [
+    {
+      "name": "0plus4",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "timed_late_frames_by_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late": {
+          "last_timed_late_stream_id": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_epoch": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_output_frame": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_target_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_presentation_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "output_frames": 2881440,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 4,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 0,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "windows": 1,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        }
+      ],
+      "cpu_mean": 4.938358340895019,
+      "cpu_max": 20.314033366045148
+    },
+    {
+      "name": "1plus3",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "timed_late_frames_by_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late": {
+          "last_timed_late_stream_id": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_epoch": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_output_frame": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_target_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_presentation_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "output_frames": 1441440,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 2,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "windows": 7,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": []
+        }
+      ],
+      "cpu_mean": 5.1655832464050055,
+      "cpu_max": 19.61462450592886
+    },
+    {
+      "name": "2plus2",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "timed_late_frames_by_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late": {
+          "last_timed_late_stream_id": [
+            0,
+            0,
+            0,
+            6,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_epoch": [
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_output_frame": [
+            0,
+            0,
+            0,
+            258816,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_target_ns": [
+            0,
+            0,
+            0,
+            5468822634,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_presentation_ns": [
+            0,
+            0,
+            0,
+            5468903667,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "output_frames": 1440960,
+        "global_timed_late_frames_before": 3,
+        "global_timed_late_frames_after": 3,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 8,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "windows": 25,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0
+          ]
+        }
+      ],
+      "cpu_mean": 5.574258665996383,
+      "cpu_max": 17.434373452204067
+    },
+    {
+      "name": "3plus1",
+      "passed": true,
+      "failure_phase": null,
+      "failure": null,
+      "steady": {
+        "timed_late_frames_by_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late": {
+          "last_timed_late_stream_id": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_epoch": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_output_frame": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_target_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_presentation_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "output_frames": 1441440,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 899,
+            "underrun_frames_after": 899,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "recovered": 6,
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "windows": 19,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0
+          ]
+        }
+      ],
+      "cpu_mean": 5.454658046597881,
+      "cpu_max": 13.366093366093368
+    },
+    {
+      "name": "4plus0",
+      "passed": false,
+      "failure_phase": "cycle 1 disconnect source 2 recovery digital timing quality",
+      "failure": "recovery_interval Mixer skipped timed PCM",
+      "steady": {
+        "timed_late_frames_by_lane_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "last_timed_late": {
+          "last_timed_late_stream_id": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_epoch": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_output_frame": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_target_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "last_timed_late_presentation_ns": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "output_frames": 1440000,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 783,
+            "underrun_frames_after": 783,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 4,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          }
+        ]
+      },
+      "recovered": 2,
+      "status_reads": {
+        "readers": 4,
+        "successful": 10800,
+        "errors": 0
+      },
+      "windows": 7,
+      "quality": [
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 0,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "aggregate_late": 5,
+          "survivor_underrun": [
+            0,
+            0,
+            0
+          ],
+          "survivor_ingress_late": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "cpu_mean": 6.188288495859236,
+      "cpu_max": 11.709946104850566
+    }
+  ],
+  "background": {
+    "platform": "Windows",
+    "scenarios": {
+      "private_namedpipe_and_state": true,
+      "file_profiles_reference_dedicated_secret_entries": true,
+      "explicit_physical_output_low_level_test_tone": true,
+      "authenticated_viewer_role_and_real_snapshot": true,
+      "ui_client_crash_does_not_stop_audio_and_reopen_is_authoritative": true,
+      "repeat_invitation_after_cancel_uses_ephemeral_file": true,
+      "interactive_invitation_cancel_self_connection_rejected_and_temporary_cleanup": true,
+      "diagnostics_redacted_with_real_meters": true,
+      "strict_numeric_whitelist_private_diagnostic_export": true,
+      "media_process_crash_reported_without_unbounded_restart": true,
+      "settings_revision_and_explicit_graceful_stop": true,
+      "explicit_background_shutdown_ends_audio_process": true
+    },
+    "limits": {
+      "ipc_bytes": 262144,
+      "command_timeout_seconds": 25,
+      "explicit_restart_after_failure": true
+    },
+    "build_profile": "release",
+    "listen_port": 7443,
+    "binary_sha256": {
+      "neonmix-background.exe": "3c91c8a6d0ea038b330885ae55578382811bd6594403ec6627a0e2772e32a274",
+      "neonmix-audio.exe": "d5de043ef5e59a72c9cdade9f234e430e0a1c2dc3295babd44baba5b7a5c4dbe",
+      "neonmix-hub.exe": "327107542694c40cf012dfc159f9c51a8927fe3c3fc7eb4062fe0933cb4ebea6"
+    },
+    "passed": true,
+    "fixture_removed": true
+  },
+  "identity": {
+    "platform": "win32",
+    "checks": {
+      "v1": "same identity and signature",
+      "ring_v2": "same identity and signature",
+      "legacy_ring_v2": "same identity and signature",
+      "crlf_v2": "same identity and signature",
+      "missing": "clean rejection",
+      "empty": "clean rejection",
+      "truncated_pem": "clean rejection",
+      "truncated_der": "clean rejection",
+      "wrong_algorithm": "clean rejection",
+      "wrong_v2_public": "clean rejection",
+      "wrong_v2_seed": "clean rejection",
+      "wrong_version": "clean rejection",
+      "wrong_public_tag": "clean rejection",
+      "trailing_der": "clean rejection",
+      "trailing_pem": "clean rejection",
+      "encrypted_label": "clean rejection",
+      "oversized": "clean rejection"
+    },
+    "worker_startup": true,
+    "fixtures": "RFC 8032 section 7.1 test 1",
+    "probe_sha256": "96ba04aff49ea46fe5c143c12e7dbabb71ed43fce8482dceabce94a3ddff8bd9",
+    "worker_sha256": "1dd293d163a2bdd3686ca0edb307d687ba285d31bb3539286c0ea78310894480",
+    "startup": {
+      "v1": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "ring_v2": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "legacy_ring_v2": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "crlf_v2": {
+        "exit_code": 0,
+        "ready": true,
+        "errors": []
+      },
+      "missing": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "private key open failed"
+        ]
+      },
+      "empty": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "truncated_pem": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "truncated_der": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_algorithm": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_v2_public": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_v2_seed": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_version": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "wrong_public_tag": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "trailing_der": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "trailing_pem": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "encrypted_label": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      },
+      "oversized": {
+        "exit_code": 1,
+        "ready": false,
+        "errors": [
+          "receiver identity initialization failed"
+        ]
+      }
+    }
+  },
+  "pairing": {
+    "platform": "macOS",
+    "passed": true,
+    "checks": {
+      "pin_response_and_signed_verify_bind_same_receiver_key": true,
+      "persisted_client_key_reconnects_after_process_restart_without_pin": true,
+      "missing_receiver_record_requires_pin_and_can_be_repaired": true,
+      "revocation_overrides_persisted_known_key": true,
+      "copying_client_list_cannot_repair_changed_receiver_identity": true
+    },
+    "worker_sha256": "1dd293d163a2bdd3686ca0edb307d687ba285d31bb3539286c0ea78310894480",
+    "fixture_files_removed": true,
+    "scope": "synthetic SRP and mutually authenticated pair-verify across worker restarts",
+    "limitations": [
+      "does not control the iPhone PIN UI",
+      "does not replace real Apple-source retesting"
+    ]
+  },
+  "namedpipe": {
+    "scope": "Actual native NamedPipe parent PID/current SID/owner-only protected ACL verification; synthetic RFC8032 key; no alternate-user login or recycled-PID simulation",
+    "cases": {
+      "private_parent": {
+        "passed": true,
+        "exit_code": 0,
+        "ready": true,
+        "token_bytes_received": 65,
+        "events": [
+          {
+            "type": "ready",
+            "control_version": 2,
+            "worker_generation": 7,
+            "port": 7653,
+            "public_key": "c5ece04f49cc748fdf5b9a3cfc4f0c57fa785b24a264219ae8fdfdb5c21e98cb",
+            "features": 1209817600
+          }
+        ],
+        "stderr": ""
+      },
+      "broad_dacl": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC pipe requires a protected owner-only DACL"
+          }
+        ],
+        "stderr": ""
+      },
+      "unprotected_dacl": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC pipe requires a protected owner-only DACL"
+          }
+        ],
+        "stderr": ""
+      },
+      "wrong_server_pid": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC Hub identity mismatch"
+          }
+        ],
+        "stderr": ""
+      },
+      "missing_pipe": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "media IPC pipe connection failed"
+          }
+        ],
+        "stderr": ""
+      },
+      "invalid_name": {
+        "passed": true,
+        "exit_code": 1,
+        "ready": false,
+        "token_bytes_received": 0,
+        "events": [
+          {
+            "type": "fatal",
+            "message": "invalid private media pipe"
+          }
+        ],
+        "stderr": ""
+      }
+    },
+    "passed": true,
+    "owned_fixture_files_removed": true,
+    "all_owned_processes_stopped": true
+  },
+  "gui": {
+    "scope": "Actual current snapshot Windows desktop launch; SSH session limitations recorded",
+    "binary_sha256": "f6f0f18f90e2f2203ccc67f66a42f8792e826d5e11d13ae4f0394b8527cc2daa",
+    "cases": {
+      "hub": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "sender": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "mixer": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "devices": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "diagnostics": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      },
+      "formal": {
+        "shortcut_scope": "Ctrl hints and 600x440 palette require a visible native window; no console-switch attempted",
+        "session_id": 0,
+        "windows": [
+          {
+            "visible": false,
+            "title": "NeonMix"
+          },
+          {
+            "visible": false,
+            "title": ""
+          },
+          {
+            "visible": false,
+            "title": "__wglDummyWindowFodder"
+          },
+          {
+            "visible": false,
+            "title": "NVOGLDC invisible"
+          },
+          {
+            "visible": false,
+            "title": ""
+          }
+        ],
+        "exit_before_cleanup": null,
+        "visible_window": false
+      }
+    }
+  }
+}

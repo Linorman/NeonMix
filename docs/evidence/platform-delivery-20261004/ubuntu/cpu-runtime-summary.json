@@ -1,0 +1,37 @@
+{
+  "four-contention": {
+    "samples": 34,
+    "mean_percent": 23.992882352941177,
+    "max_percent": 29.545
+  },
+  "3plus1": {
+    "samples": 39,
+    "mean_percent": 15.964923076923075,
+    "max_percent": 18.367
+  },
+  "2plus2": {
+    "samples": 33,
+    "mean_percent": 17.938060606060606,
+    "max_percent": 25.831
+  },
+  "1plus3": {
+    "samples": 34,
+    "mean_percent": 17.020794117647057,
+    "max_percent": 21.303
+  },
+  "0plus4": {
+    "samples": 62,
+    "mean_percent": 12.400758064516129,
+    "max_percent": 18.797
+  },
+  "mix-control": {
+    "samples": 4,
+    "mean_percent": 19.853749999999998,
+    "max_percent": 25.758
+  },
+  "management": {
+    "samples": 5,
+    "mean_percent": 11.474,
+    "max_percent": 13.25
+  }
+}

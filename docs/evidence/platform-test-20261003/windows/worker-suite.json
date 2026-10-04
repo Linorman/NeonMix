@@ -1,0 +1,11 @@
+{
+  "worker-protocol": {
+    "exit_code": 1
+  },
+  "worker-pairing": {
+    "exit_code": 1
+  },
+  "worker-codecs": {
+    "exit_code": 0
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "directory": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-macos-arm64-20261004",
+  "archive": "/Volumes/projects-mac/NeonMix/artifacts/packages/NeonMix-macos-arm64-20261004.zip",
+  "archive_sha256": "96b379e1e7e42d175fc00a221a2e302280f7ed3c9df41c098072bb7bc1d5f2f1",
+  "archive_bytes": 49745906,
+  "files": 1127,
+  "manifest_files_checked": 1126,
+  "mismatches": [],
+  "excluded_runtime_paths": [],
+  "launcher_modes": {
+    "neonmix": 493,
+    "Start-NeonMix.command": 493,
+    "NeonMix.app/Contents/MacOS/NeonMix": 493
+  },
+  "smoke_report": "package-smoke.json"
+}

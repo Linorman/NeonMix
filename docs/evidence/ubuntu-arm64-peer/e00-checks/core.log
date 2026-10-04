@@ -1,0 +1,47 @@
+   Compiling syn v3.0.6
+   Compiling stats_alloc v0.1.10
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde v1.0.229
+   Compiling neonmix-core v0.1.0 (/home/parallels/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 8.69s
+     Running unittests src/lib.rs (target/release/deps/neonmix_core-f1f6d828b154430c)
+
+running 2 tests
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/audio_contract.rs (target/release/deps/audio_contract-0886e0d5bf51625a)
+
+running 18 tests
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test malicious_pcm_is_sanitized ... ok
+test mute_advances_signal_position ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test silence_is_data_but_idle_is_not ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/realtime.rs (target/release/deps/realtime-236d7b3257cb7231)
+
+running 1 test
+test steady_state_capture_and_sinc_output_do_not_allocate_or_free ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

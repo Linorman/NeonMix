@@ -1,0 +1,242 @@
+[
+  {
+    "filename": "gstreamer1.0-plugins-bad_1.24.2-1ubuntu4_arm64.deb",
+    "fields": "Package: gstreamer1.0-plugins-bad\nVersion: 1.24.2-1ubuntu4\nArchitecture: arm64",
+    "sha256": "4948ce79d4e173ec50605188784082f2161e7fd374a584e28db38d44e8cf46ff"
+  },
+  {
+    "filename": "gstreamer1.0-tools_1.24.2-1ubuntu0.1_arm64.deb",
+    "fields": "Package: gstreamer1.0-tools\nVersion: 1.24.2-1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "f1e42af0a6626f5c575ae5746559354c6211614e6cb389cecc8e3ba2945cdee4"
+  },
+  {
+    "filename": "libasound2-dev_1.2.11-1ubuntu0.3_arm64.deb",
+    "fields": "Package: libasound2-dev\nVersion: 1.2.11-1ubuntu0.3\nArchitecture: arm64",
+    "sha256": "21a6f4948138f88652b33de0986ddcfdb27e9d37a9c12ada4f1b01fbcf1618ea"
+  },
+  {
+    "filename": "libasound2t64_1.2.11-1ubuntu0.3_arm64.deb",
+    "fields": "Package: libasound2t64\nVersion: 1.2.11-1ubuntu0.3\nArchitecture: arm64",
+    "sha256": "de49425b8480c651eae0ffbe24a1f1d88b2ea578f95a291b95f78fae10662ec6"
+  },
+  {
+    "filename": "libblkid-dev_2.39.3-9ubuntu6.6_arm64.deb",
+    "fields": "Package: libblkid-dev\nVersion: 2.39.3-9ubuntu6.6\nArchitecture: arm64",
+    "sha256": "6eb614e62d79b11c294f1c971e3e116345075eff6b76b14e7224c81f89169877"
+  },
+  {
+    "filename": "libblkid1_2.39.3-9ubuntu6.6_arm64.deb",
+    "fields": "Package: libblkid1\nVersion: 2.39.3-9ubuntu6.6\nArchitecture: arm64",
+    "sha256": "a1750e39d8e446267f6334562e993795c25030c320852fba2fb589a0dc9e52d3"
+  },
+  {
+    "filename": "libclang-common-18-dev_1%3a18.1.3-1ubuntu1_arm64.deb",
+    "fields": "Package: libclang-common-18-dev\nVersion: 1:18.1.3-1ubuntu1\nArchitecture: arm64",
+    "sha256": "b9475c49e5613ce2f98630a269864fb34651e3de275d40dffb2dbdc9863f7fb9"
+  },
+  {
+    "filename": "libdw-dev_0.190-1.1ubuntu0.1_arm64.deb",
+    "fields": "Package: libdw-dev\nVersion: 0.190-1.1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "7784711b4f07b151cc02f012a99e750c02afeaa561c9a4c5647658bc3b45d916"
+  },
+  {
+    "filename": "libdw1t64_0.190-1.1ubuntu0.1_arm64.deb",
+    "fields": "Package: libdw1t64\nVersion: 0.190-1.1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "c6810b73985d5613fb5905c7930d7fe723c934d587e4e0db374fadb7a5afb719"
+  },
+  {
+    "filename": "libelf-dev_0.190-1.1ubuntu0.1_arm64.deb",
+    "fields": "Package: libelf-dev\nVersion: 0.190-1.1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "ae8132ea400d639da2181fdb6e4b1093bbe987cd8d66f777f4c5e797dc25ea9e"
+  },
+  {
+    "filename": "libelf1t64_0.190-1.1ubuntu0.1_arm64.deb",
+    "fields": "Package: libelf1t64\nVersion: 0.190-1.1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "ba200bd93e3a1ade40e2c71540f55e7016c60f11e1b9fe1a76ef975de99b87f5"
+  },
+  {
+    "filename": "libffi-dev_3.4.6-1build1_arm64.deb",
+    "fields": "Package: libffi-dev\nVersion: 3.4.6-1build1\nArchitecture: arm64",
+    "sha256": "887755d6aa91c12ee0eb3404b61f6dc138c4c59234aa2add0264baf270337708"
+  },
+  {
+    "filename": "libgl-dev_1.7.0-1build1_arm64.deb",
+    "fields": "Package: libgl-dev\nVersion: 1.7.0-1build1\nArchitecture: arm64",
+    "sha256": "9bc28c1265bb82ff2498c234893cbb891529e43fa6b100c007ba677c0a77bbc1"
+  },
+  {
+    "filename": "libglib2.0-0t64_2.80.0-6ubuntu3.9_arm64.deb",
+    "fields": "Package: libglib2.0-0t64\nVersion: 2.80.0-6ubuntu3.9\nArchitecture: arm64",
+    "sha256": "e8ed0414ac46a406c7b8c18b28572075dcc6807b1cfc48fa88198c0db0a7dcf9"
+  },
+  {
+    "filename": "libglib2.0-dev-bin_2.80.0-6ubuntu3.9_arm64.deb",
+    "fields": "Package: libglib2.0-dev-bin\nVersion: 2.80.0-6ubuntu3.9\nArchitecture: arm64",
+    "sha256": "08a3c19bd31e66a508ae7d913f2ef30ceb6afdd8c6e9f16cd4f4e92f830bbab4"
+  },
+  {
+    "filename": "libglib2.0-dev_2.80.0-6ubuntu3.9_arm64.deb",
+    "fields": "Package: libglib2.0-dev\nVersion: 2.80.0-6ubuntu3.9\nArchitecture: arm64",
+    "sha256": "b943e43170f01f21f264b52a6f9c240c24f0eb4ffdb7e939f7f126813bfeee34"
+  },
+  {
+    "filename": "libglx-dev_1.7.0-1build1_arm64.deb",
+    "fields": "Package: libglx-dev\nVersion: 1.7.0-1build1\nArchitecture: arm64",
+    "sha256": "dc75223f01a41118e9ba8a7861ed9c0a01578c85cf303a9fecf48515b82fe352"
+  },
+  {
+    "filename": "libgstreamer-plugins-bad1.0-0_1.24.2-1ubuntu4_arm64.deb",
+    "fields": "Package: libgstreamer-plugins-bad1.0-0\nVersion: 1.24.2-1ubuntu4\nArchitecture: arm64",
+    "sha256": "917784636880a70102884e4842b4bf226feafb5b29417fdd71522dff4253c2ec"
+  },
+  {
+    "filename": "libgstreamer-plugins-base1.0-0_1.24.2-1ubuntu0.5_arm64.deb",
+    "fields": "Package: libgstreamer-plugins-base1.0-0\nVersion: 1.24.2-1ubuntu0.5\nArchitecture: arm64",
+    "sha256": "cf52b2547943fc6444a6d674c2fe1fc2f9cc9ff1e3ff5f4a88b8f07da4a55dd4"
+  },
+  {
+    "filename": "libgstreamer-plugins-base1.0-dev_1.24.2-1ubuntu0.5_arm64.deb",
+    "fields": "Package: libgstreamer-plugins-base1.0-dev\nVersion: 1.24.2-1ubuntu0.5\nArchitecture: arm64",
+    "sha256": "336ceee32f7d13acbc3e33c4979b1e80f18b03ecd2e59449b43832b3b63251a9"
+  },
+  {
+    "filename": "libgstreamer1.0-0_1.24.2-1ubuntu0.1_arm64.deb",
+    "fields": "Package: libgstreamer1.0-0\nVersion: 1.24.2-1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "48c930493054b261621ca7ea887ee4c49488bb216f0a42d8572189e5a3e291f0"
+  },
+  {
+    "filename": "libgstreamer1.0-dev_1.24.2-1ubuntu0.1_arm64.deb",
+    "fields": "Package: libgstreamer1.0-dev\nVersion: 1.24.2-1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "4d48cec747ec4b6e30450b04f4c08c567f8d2199b65022b357a46c06f87a8705"
+  },
+  {
+    "filename": "liblzma-dev_5.6.1+really5.4.5-1ubuntu0.3_arm64.deb",
+    "fields": "Package: liblzma-dev\nVersion: 5.6.1+really5.4.5-1ubuntu0.3\nArchitecture: arm64",
+    "sha256": "bc7e8b334e1fabcf5a1364ab99948a3cdbd265c0abe5c8c423e5592bf835cdd2"
+  },
+  {
+    "filename": "libmount-dev_2.39.3-9ubuntu6.6_arm64.deb",
+    "fields": "Package: libmount-dev\nVersion: 2.39.3-9ubuntu6.6\nArchitecture: arm64",
+    "sha256": "31c4b0a1554ac414b035fbe4e57cb3562fe4cc79d386cfc337e2ad8189cf0db3"
+  },
+  {
+    "filename": "libmount1_2.39.3-9ubuntu6.6_arm64.deb",
+    "fields": "Package: libmount1\nVersion: 2.39.3-9ubuntu6.6\nArchitecture: arm64",
+    "sha256": "7c1a65b7f2b61e8bb4fa48ece49f065a88d2f1559a1b1b5be85f4898a2d818fe"
+  },
+  {
+    "filename": "liborc-0.4-0t64_1%3a0.4.38-1ubuntu0.1_arm64.deb",
+    "fields": "Package: liborc-0.4-0t64\nVersion: 1:0.4.38-1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "fb8248d89d37a06145b8112aed200ffd2f4960d294d95ddc8471a0b43beafb3c"
+  },
+  {
+    "filename": "liborc-0.4-dev_1%3a0.4.38-1ubuntu0.1_arm64.deb",
+    "fields": "Package: liborc-0.4-dev\nVersion: 1:0.4.38-1ubuntu0.1\nArchitecture: arm64",
+    "sha256": "1162b6af94756e677cfe1e8f6aa753e877c94e8fc6e7fbdef61f66bd0e76a8da"
+  },
+  {
+    "filename": "libpcre2-dev_10.42-4ubuntu2.1_arm64.deb",
+    "fields": "Package: libpcre2-dev\nVersion: 10.42-4ubuntu2.1\nArchitecture: arm64",
+    "sha256": "7a7701e6c1224666b7fbd4cacface20ad80dd9c3345ccdcf7ee56fb0babe9ffe"
+  },
+  {
+    "filename": "libpipewire-0.3-0t64_1.0.5-1ubuntu3.3_arm64.deb",
+    "fields": "Package: libpipewire-0.3-0t64\nVersion: 1.0.5-1ubuntu3.3\nArchitecture: arm64",
+    "sha256": "2be10a9a87efa3d4456ca178a89673db79e4258bc52935fdea204434caacd252"
+  },
+  {
+    "filename": "libpipewire-0.3-dev_1.0.5-1ubuntu3.3_arm64.deb",
+    "fields": "Package: libpipewire-0.3-dev\nVersion: 1.0.5-1ubuntu3.3\nArchitecture: arm64",
+    "sha256": "64b0265107acac5d7dda408754f21f7532d02c20dc38ef67cf9a0ce9158965ac"
+  },
+  {
+    "filename": "libpkgconf3_1.8.1-2build1_arm64.deb",
+    "fields": "Package: libpkgconf3\nVersion: 1.8.1-2build1\nArchitecture: arm64",
+    "sha256": "f476cb81e1ecec6bf974f21181469cf5edcc749c4ead621469cdbf584dfd3be8"
+  },
+  {
+    "filename": "libselinux1-dev_3.5-2ubuntu2.1_arm64.deb",
+    "fields": "Package: libselinux1-dev\nVersion: 3.5-2ubuntu2.1\nArchitecture: arm64",
+    "sha256": "91a5fbaed73a74f19bf441254d0b1850b0736deeec5c0ef7bfb73e2606d87221"
+  },
+  {
+    "filename": "libselinux1_3.5-2ubuntu2.1_arm64.deb",
+    "fields": "Package: libselinux1\nVersion: 3.5-2ubuntu2.1\nArchitecture: arm64",
+    "sha256": "56630c4f009754e76808bf755072e634f8785a4dfbc8b1445213149e682f1502"
+  },
+  {
+    "filename": "libsepol-dev_3.5-2build1_arm64.deb",
+    "fields": "Package: libsepol-dev\nVersion: 3.5-2build1\nArchitecture: arm64",
+    "sha256": "a683217cd059d5989b9e89b2f740ec546f92d6e11ac52457657d8598717fa60b"
+  },
+  {
+    "filename": "libsepol2_3.5-2build1_arm64.deb",
+    "fields": "Package: libsepol2\nVersion: 3.5-2build1\nArchitecture: arm64",
+    "sha256": "43339b502a91d0900b2e96ba9c30a3cc0175797a916d4d91dae26870f6d4655a"
+  },
+  {
+    "filename": "libspa-0.2-dev_1.0.5-1ubuntu3.3_arm64.deb",
+    "fields": "Package: libspa-0.2-dev\nVersion: 1.0.5-1ubuntu3.3\nArchitecture: arm64",
+    "sha256": "9621299a86017a44d8d4af7e64aa40b19288d6efe24ded25be5325486d5b2b7f"
+  },
+  {
+    "filename": "libsrtp2-1_2.5.0-3build1_arm64.deb",
+    "fields": "Package: libsrtp2-1\nVersion: 2.5.0-3build1\nArchitecture: arm64",
+    "sha256": "118c6f8508b0441607e3bcbe69667ef5cae743596b4b89cf87274ddb70595e14"
+  },
+  {
+    "filename": "libunwind-dev_1.6.2-3build1.1_arm64.deb",
+    "fields": "Package: libunwind-dev\nVersion: 1.6.2-3build1.1\nArchitecture: arm64",
+    "sha256": "631594537a13c46231601abc0b3f6e708953bb9d4493799fe5c9b3023dc21c14"
+  },
+  {
+    "filename": "libunwind8_1.6.2-3build1.1_arm64.deb",
+    "fields": "Package: libunwind8\nVersion: 1.6.2-3build1.1\nArchitecture: arm64",
+    "sha256": "26f2bf9c0d9b42d8230aa2c070076054b0ed06519bb9141c05a9c3164732fef1"
+  },
+  {
+    "filename": "libwayland-dev_1.22.0-2.1build1_arm64.deb",
+    "fields": "Package: libwayland-dev\nVersion: 1.22.0-2.1build1\nArchitecture: arm64",
+    "sha256": "6d94b723710aae35d0ff765978818601f4320c1dc4e0eec57e73b000943a1758"
+  },
+  {
+    "filename": "libx11-dev_2%3a1.8.7-1build1_arm64.deb",
+    "fields": "Package: libx11-dev\nVersion: 2:1.8.7-1build1\nArchitecture: arm64",
+    "sha256": "69b028d3917aae9fb44b2c56aa94739c7a1711afd3c86ccc7117dbf63a91c3c3"
+  },
+  {
+    "filename": "libxi-dev_2%3a1.8.1-1build1_arm64.deb",
+    "fields": "Package: libxi-dev\nVersion: 2:1.8.1-1build1\nArchitecture: arm64",
+    "sha256": "f7596e9d21f81ebef7149f07ca7014c0544fb732e234f5ce0ab19a6586a5b0c9"
+  },
+  {
+    "filename": "libxkbcommon-dev_1.6.0-1build1_arm64.deb",
+    "fields": "Package: libxkbcommon-dev\nVersion: 1.6.0-1build1\nArchitecture: arm64",
+    "sha256": "de01e5d50d114ddc5419d61cde552d8a956a2dc9e6c004ce50b7f37a02a47c1d"
+  },
+  {
+    "filename": "libxrandr-dev_2%3a1.5.2-2build1_arm64.deb",
+    "fields": "Package: libxrandr-dev\nVersion: 2:1.5.2-2build1\nArchitecture: arm64",
+    "sha256": "7f965ded4be71fee097bddcbb051e42ef425f5018b59888533457cc83923e554"
+  },
+  {
+    "filename": "libzstd-dev_1.5.5+dfsg2-2build1.1_arm64.deb",
+    "fields": "Package: libzstd-dev\nVersion: 1.5.5+dfsg2-2build1.1\nArchitecture: arm64",
+    "sha256": "b7cfd2e0637aa0e44bbd342f9fc8b18db545df53151d252c10731540e9dfdf78"
+  },
+  {
+    "filename": "pkgconf-bin_1.8.1-2build1_arm64.deb",
+    "fields": "Package: pkgconf-bin\nVersion: 1.8.1-2build1\nArchitecture: arm64",
+    "sha256": "bcd0d24c48b8b73ed7ba20ffc21a3575d5d9bdd53c3cee5a8051b7bde5fbf638"
+  },
+  {
+    "filename": "pkgconf_1.8.1-2build1_arm64.deb",
+    "fields": "Package: pkgconf\nVersion: 1.8.1-2build1\nArchitecture: arm64",
+    "sha256": "818ac3b4ae09f3747098872c7d5a9e387118798155b0107bb1625c2ab675664b"
+  },
+  {
+    "filename": "zlib1g-dev_1%3a1.3.dfsg-3.1ubuntu2.2_arm64.deb",
+    "fields": "Package: zlib1g-dev\nVersion: 1:1.3.dfsg-3.1ubuntu2.2\nArchitecture: arm64",
+    "sha256": "de750f2515144715015e792c391bfa2ab4a926db6c370ba519af576bb3f131b5"
+  }
+]

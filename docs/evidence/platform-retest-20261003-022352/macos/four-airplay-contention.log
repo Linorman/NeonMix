@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/tools/airplay_multi_source_probe.py", line 914, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/.local/t04m/tools/airplay_multi_source_probe.py", line 702, in main
+    time.sleep(max(11, args.steady_seconds) if args.sources else args.steady_seconds)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

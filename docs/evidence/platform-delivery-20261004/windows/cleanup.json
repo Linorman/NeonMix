@@ -1,0 +1,25 @@
+{
+  "source_file_count": 522,
+  "final_source_mismatches": [],
+  "packaged_source_mismatches": [],
+  "zip_sha256": "46823171e47bf939c70cad966b522fbb61989587ed41cad20786480dd5dfdfd7",
+  "zip_bytes": 65450836,
+  "remaining_owned_neonmix_processes": [],
+  "verification_copy_removed": true,
+  "final_package_contains_runtime_data": false,
+  "final_package_contains_logs": false,
+  "archive_forbidden_runtime_members": [],
+  "removed_only_owned_fixture_paths": [
+    ".local/tmp"
+  ],
+  "kept_directory": "E:\\Desktop\\NeonMix-test\\packages\\NeonMix-windows-x64-20261004-source322fda1b",
+  "kept_zip": "E:\\Desktop\\NeonMix-test\\packages\\NeonMix-windows-x64-20261004-source322fda1b.zip",
+  "kept_source": "E:\\Desktop\\NeonMix-test\\r05",
+  "system_settings_changed": false,
+  "outside_test_root_files_deleted": false,
+  "font_requirements": {
+    "regular_windows_font": "C:\\Windows\\Fonts\\msyh.ttc",
+    "regular_font_present": true,
+    "bold_font_present": true
+  }
+}

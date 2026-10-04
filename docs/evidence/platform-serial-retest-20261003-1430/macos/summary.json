@@ -1,0 +1,1148 @@
+{
+  "platform": "macOS",
+  "passed_scoped_checks": true,
+  "snapshot": {
+    "tag": "platform-serial-retest-20261003-1430",
+    "created_utc": "2026-10-03T06:29:56.269711+00:00",
+    "file_count": 519,
+    "canonical_manifest_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+    "archive_sha256": "f0cdbce09265121b1257d99c996585618fa75271b1d1adf5d15b0d5be3152c18",
+    "changed_from_previous": [],
+    "policy": "Ubuntu complete including cleanup, then macOS; no simultaneous compilation or runtime tests; Mac only as Ubuntu LAN sender within assigned window"
+  },
+  "workspace_test_counts": {
+    "passed": 232,
+    "failed": 0,
+    "ignored": 5,
+    "suite_summaries": 54
+  },
+  "workspace_format_scope": "explicit workspace members via cargo metadata (nested snapshot; unmodified source); not cargo fmt --all path-dependency scan",
+  "fresh_build_checks": [
+    {
+      "name": "member-fmt",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+        "python3",
+        "-c",
+        "import subprocess,json;d=json.loads(subprocess.check_output(['cargo','metadata','--no-deps','--format-version','1','--locked']));cmd=['cargo','fmt'];[cmd.extend(['-p',p['name']]) for p in d['packages'] if p['id'] in d['workspace_members']];raise SystemExit(subprocess.run(cmd+['--','--check']).returncode)"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791010103.5661702,
+      "end_epoch": 1791010104.124563,
+      "seconds": 0.558
+    },
+    {
+      "name": "strict-clippy",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791010104.1248078,
+      "end_epoch": 1791010105.520364,
+      "seconds": 1.396
+    },
+    {
+      "name": "workspace-tests",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791010105.5206358,
+      "end_epoch": 1791010159.548287,
+      "seconds": 54.028
+    },
+    {
+      "name": "release",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791010159.5485709,
+      "end_epoch": 1791010160.482414,
+      "seconds": 0.934
+    },
+    {
+      "name": "worker-build",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+        "python3",
+        "tools/prepare_airplay.py"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791010160.482671,
+      "end_epoch": 1791010163.1861498,
+      "seconds": 2.703
+    },
+    {
+      "name": "worker-probes-build",
+      "command": [
+        "/Volumes/projects-mac/NeonMix/.local/tm3/tools/dev",
+        "cmake",
+        "--build",
+        ".local/airplay/build",
+        "--target",
+        "neonmix-airplay-probe-crypto",
+        "neonmix-airplay-audio-probe",
+        "neonmix-airplay-identity-probe",
+        "--parallel",
+        "2"
+      ],
+      "exit_code": 0,
+      "start_epoch": 1791010163.186499,
+      "end_epoch": 1791010165.094275,
+      "seconds": 1.908
+    }
+  ],
+  "worker_protocol_count": 23,
+  "worker_identity_count": 17,
+  "worker_pairing_count": 5,
+  "worker_decoder_codecs": [
+    "PCM",
+    "ALAC",
+    "AAC"
+  ],
+  "credential_scenarios": 9,
+  "background_scenarios": 12,
+  "formal_gui": {
+    "platform": "macOS",
+    "passed": true,
+    "scope": "formal non-preview isolated desktop, actual AX interactions and real CoreAudio/Hub authority",
+    "scenarios": {
+      "formal_window_owned_background_and_ax_controls": true,
+      "five_page_navigation_chinese_clipboard_paste_and_draft_persistence": true,
+      "native_physical_output_popup_and_create_room_without_audio_start": true,
+      "native_popup_create_start_blackhole_and_authenticated_authority": true,
+      "native_mixer_mute_commits_and_unmutes_server": true,
+      "formal_normal_and_minimum_window_command_shortcuts": true,
+      "native_redacted_diagnostic_export": true,
+      "command_w_hides_tray_restores_hub_pid_retained": true,
+      "gui_crash_audio_continues_and_reopen_loads_saved_room": true,
+      "command_q_confirmation_escape_keeps_audio": true,
+      "confirmed_quit_ends_gui_background_and_hub": true
+    },
+    "limits": [
+      "not VoiceOver listening or genuine IME composition",
+      "explicit BlackHole digital output; no physical listening"
+    ],
+    "binary_sha256": {
+      "neonmix-desktop": "bef1ee0b4640dda99ee0103063526264aa2d7cf0902fa42d3595a69a30ae9195",
+      "neonmix-background": "1939f2d22fde5db9dd97594220a3562fa5c162fd137603fa42065e18f13a0132",
+      "neonmix-hub-real": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51"
+    },
+    "listen_port": 53693,
+    "fixture_adaptation": "GUI physical selector intentionally omits BlackHole; after native create, owned background hub_settings selects BlackHole before starting any audio; reopened UI loads that authoritative fixture.",
+    "shortcut_checks": [
+      {
+        "requested_content_width": 1100,
+        "requested_content_height": 760,
+        "actual_window_size": "1100,792",
+        "native_titlebar_height": 32,
+        "command_k_opens_palette": true,
+        "escape_closes_palette": true,
+        "command_2_navigates": true,
+        "palette_footer_within_window": true
+      },
+      {
+        "requested_content_width": 600,
+        "requested_content_height": 440,
+        "actual_window_size": "600,472",
+        "native_titlebar_height": 32,
+        "command_k_opens_palette": true,
+        "escape_closes_palette": true,
+        "command_2_navigates": true,
+        "palette_footer_within_window": true
+      }
+    ],
+    "fixture_removed": true
+  },
+  "matrix": [
+    {
+      "name": "four-airplay",
+      "airplay_sources": 4,
+      "native_sources": 0,
+      "passed": true,
+      "recovery_count": 24,
+      "quality_windows": 73,
+      "timed_late_delta_max": 0,
+      "lane_underrun_delta_max": 0,
+      "ingress_late_delta_max": 0,
+      "steady_continuity": {
+        "output_frames": 1440512,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 4,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          }
+        ]
+      },
+      "steady_meter": {
+        "output_rms": 0.028791217133402824,
+        "active": 4,
+        "lane_rms": [
+          0.05636793002486229,
+          0.05651189759373665,
+          0.0566834956407547,
+          0.056523244827985764
+        ],
+        "native_lane_rms": []
+      },
+      "status_reads": {
+        "readers": 4,
+        "successful": 32495,
+        "errors": 0
+      },
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true,
+      "cpu": {
+        "samples": 65,
+        "mean": 71.485,
+        "max": 91.152,
+        "policy": "observation only; no cap or admission/abort threshold"
+      },
+      "phase_quality": {
+        "steady": {
+          "windows": 1,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "baseline": {
+          "windows": 24,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "fault_interval": {
+          "windows": 24,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "recovery_interval": {
+          "windows": 24,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        }
+      }
+    },
+    {
+      "name": "mix-3plus1",
+      "airplay_sources": 3,
+      "native_sources": 1,
+      "passed": true,
+      "recovery_count": 6,
+      "quality_windows": 19,
+      "timed_late_delta_max": 0,
+      "lane_underrun_delta_max": 0,
+      "ingress_late_delta_max": 0,
+      "steady_continuity": {
+        "output_frames": 960256,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 1,
+            "underrun_frames_before": 1009,
+            "underrun_frames_after": 1009,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 3,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "steady_meter": {
+        "output_rms": 0.024817410856485367,
+        "active": 4,
+        "lane_rms": [
+          0.05633457377552986,
+          0.05651179701089859,
+          0.05643454194068909
+        ],
+        "native_lane_rms": [
+          0.011259190738201141
+        ]
+      },
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true,
+      "cpu": {
+        "samples": 33,
+        "mean": 55.686,
+        "max": 68.36,
+        "policy": "observation only; no cap or admission/abort threshold"
+      },
+      "phase_quality": {
+        "steady": {
+          "windows": 1,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "baseline": {
+          "windows": 6,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "fault_interval": {
+          "windows": 6,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "recovery_interval": {
+          "windows": 6,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        }
+      }
+    },
+    {
+      "name": "mix-2plus2",
+      "airplay_sources": 2,
+      "native_sources": 2,
+      "passed": true,
+      "recovery_count": 8,
+      "quality_windows": 25,
+      "timed_late_delta_max": 0,
+      "lane_underrun_delta_max": 0,
+      "ingress_late_delta_max": 0,
+      "steady_continuity": {
+        "output_frames": 720384,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "airplay",
+            "source_index": 2,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "steady_meter": {
+        "output_rms": 0.02053755708038807,
+        "active": 4,
+        "lane_rms": [
+          0.056323565542697906,
+          0.05657500773668289
+        ],
+        "native_lane_rms": [
+          0.011224901303648949,
+          0.011200574226677418
+        ]
+      },
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true,
+      "cpu": {
+        "samples": 29,
+        "mean": 46.653,
+        "max": 55.621,
+        "policy": "observation only; no cap or admission/abort threshold"
+      },
+      "phase_quality": {
+        "steady": {
+          "windows": 1,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "baseline": {
+          "windows": 8,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "fault_interval": {
+          "windows": 8,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "recovery_interval": {
+          "windows": 8,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        }
+      }
+    },
+    {
+      "name": "mix-1plus3",
+      "airplay_sources": 1,
+      "native_sources": 3,
+      "passed": true,
+      "recovery_count": 2,
+      "quality_windows": 7,
+      "timed_late_delta_max": 0,
+      "lane_underrun_delta_max": 0,
+      "ingress_late_delta_max": 0,
+      "steady_continuity": {
+        "output_frames": 720128,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "airplay",
+            "source_index": 1,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0,
+            "late_packets_before": 0,
+            "late_packets_after": 0,
+            "late_packets_delta": 0,
+            "counter_reset": false
+          },
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "steady_meter": {
+        "output_rms": 0.015033786185085773,
+        "active": 4,
+        "lane_rms": [
+          0.056550707668066025
+        ],
+        "native_lane_rms": [
+          0.011277438141405582,
+          0.011244908906519413,
+          0.011264399625360966
+        ]
+      },
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true,
+      "cpu": {
+        "samples": 20,
+        "mean": 38.632,
+        "max": 51.003,
+        "policy": "observation only; no cap or admission/abort threshold"
+      },
+      "phase_quality": {
+        "steady": {
+          "windows": 1,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "baseline": {
+          "windows": 2,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "fault_interval": {
+          "windows": 2,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "recovery_interval": {
+          "windows": 2,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        }
+      }
+    },
+    {
+      "name": "mix-0plus4",
+      "airplay_sources": 0,
+      "native_sources": 4,
+      "passed": true,
+      "recovery_count": 0,
+      "quality_windows": 1,
+      "timed_late_delta_max": 0,
+      "lane_underrun_delta_max": 0,
+      "ingress_late_delta_max": 0,
+      "steady_continuity": {
+        "output_frames": 2880512,
+        "global_timed_late_frames_before": 0,
+        "global_timed_late_frames_after": 0,
+        "global_timed_late_frames_delta": 0,
+        "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+        "lanes": [
+          {
+            "kind": "native",
+            "source_index": 1,
+            "lane": 0,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 2,
+            "lane": 1,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 3,
+            "lane": 2,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          },
+          {
+            "kind": "native",
+            "source_index": 4,
+            "lane": 3,
+            "underrun_frames_before": 0,
+            "underrun_frames_after": 0,
+            "underrun_frames_delta": 0
+          }
+        ]
+      },
+      "steady_meter": {
+        "output_rms": 0.005684518255293369,
+        "active": 4,
+        "lane_rms": [],
+        "native_lane_rms": [
+          0.011250714771449566,
+          0.011247131042182446,
+          0.01121541578322649,
+          0.011179283261299133
+        ]
+      },
+      "status_reads": {
+        "readers": 0,
+        "successful": 0,
+        "errors": 0
+      },
+      "fixture_process_stopped": true,
+      "native_processes_stopped": true,
+      "fixture_files_removed": true,
+      "cpu": {
+        "samples": 61,
+        "mean": 31.644,
+        "max": 52.759,
+        "policy": "observation only; no cap or admission/abort threshold"
+      },
+      "phase_quality": {
+        "steady": {
+          "windows": 1,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "baseline": {
+          "windows": 0,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "fault_interval": {
+          "windows": 0,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        },
+        "recovery_interval": {
+          "windows": 0,
+          "aggregate_timed_late_delta_sum": 0,
+          "aggregate_timed_late_delta_max": 0,
+          "surviving_lane_underrun_delta_sum": 0,
+          "surviving_lane_underrun_delta_max": 0,
+          "ingress_late_delta_sum": 0,
+          "ingress_late_delta_max": 0,
+          "counter_reset_count": 0
+        }
+      }
+    }
+  ],
+  "total_recoveries": 40,
+  "total_quality_windows": 125,
+  "single_pcm": {
+    "platform": "macOS",
+    "build_profile": "release",
+    "output_device": "coreaudio:BlackHole2ch_UID",
+    "native_start_order": "prewarm",
+    "prefetch_blocks": 0,
+    "codec": "pcm",
+    "playback_mode": "low_latency",
+    "protocol_lead_ms": 2000,
+    "pause_seconds": 1.0,
+    "pause_cycles": 2,
+    "resume_lead_ms": 250,
+    "resume_reset": "setup",
+    "track_gap": false,
+    "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+    "credential_scope": "explicit init laboratory bearer tokens; receiver private file-store fixture entry",
+    "binary_sha256": {
+      "neonmix-hub": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51",
+      "neonmix-airplay-worker": "4d5a52c2dcb6be9e58bc603997f4ebed81240b448058c6f21dbf9443d7c5a888"
+    },
+    "passed": true,
+    "scenarios": {
+      "playback_mode_admin_permission_and_persistence": true,
+      "receiver_key_and_trust_survive_worker_restart": true,
+      "room_source_identity_visible_without_control_credentials": true,
+      "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+      "same_session_pause_resume_without_route_reselection": true,
+      "steady_timing_without_new_late_packets_or_skipped_samples": true,
+      "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+      "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+      "worker_kill_clears_airplay_and_preserves_native_audio": true
+    },
+    "limitations": [
+      "synthetic FairPlay envelope, no Apple-device interoperability claim",
+      "no saved recording or analog/audio-video latency measurement",
+      "functional debug/release result, not a sustained performance test"
+    ],
+    "airplay_binding": {
+      "session_id": 1,
+      "stream_id": 2,
+      "lane": 1
+    },
+    "pause_resume_cycles": [
+      {
+        "released_before": 40,
+        "released_after": 73,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 1,
+        "last_media_reset": "stream_setup",
+        "lane_rms": 0.08483915776014328,
+        "timed_late_frames": 0
+      },
+      {
+        "released_before": 80,
+        "released_after": 113,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 2,
+        "last_media_reset": "stream_setup",
+        "lane_rms": 0.08483830839395523,
+        "timed_late_frames": 0
+      }
+    ],
+    "pause_resume": {
+      "released_before": 80,
+      "released_after": 113,
+      "late_packets": 0,
+      "timeline_rejections": 0,
+      "media_resets": 2,
+      "last_media_reset": "stream_setup",
+      "lane_rms": 0.08483830839395523,
+      "timed_late_frames": 0
+    },
+    "timing": {
+      "latency_advance_ns": 72535392,
+      "protocol_lead_ns": 197034558,
+      "playout_lead_ns": 124499166,
+      "output_latency_ns": 5333333
+    },
+    "airplay_pcm": {
+      "received_blocks": 497,
+      "released_blocks": 489,
+      "codec": "pcm_s16",
+      "source_frame_count": 352,
+      "accepted_packets": 497,
+      "identity_rejections": 0,
+      "source_rate": 44100,
+      "internal_rate": 48000,
+      "lane_rms": 0.08483817428350449,
+      "uncertainty_ns": 8650549,
+      "timed_late_frames": 0
+    },
+    "mixed_output_rms": 0.02149457111954689,
+    "output_frames_around_worker_crash": {
+      "before": 345600,
+      "after": 352000
+    },
+    "fixture_processes_stopped": true,
+    "fixture_files_removed": true
+  },
+  "single_alac": {
+    "platform": "macOS",
+    "build_profile": "release",
+    "output_device": "coreaudio:BlackHole2ch_UID",
+    "native_start_order": "prewarm",
+    "prefetch_blocks": 0,
+    "codec": "alac",
+    "playback_mode": "low_latency",
+    "protocol_lead_ms": 2000,
+    "pause_seconds": 1.0,
+    "pause_cycles": 2,
+    "resume_lead_ms": 250,
+    "resume_reset": "setup",
+    "track_gap": false,
+    "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+    "credential_scope": "explicit init laboratory bearer tokens; receiver private file-store fixture entry",
+    "binary_sha256": {
+      "neonmix-hub": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51",
+      "neonmix-airplay-worker": "4d5a52c2dcb6be9e58bc603997f4ebed81240b448058c6f21dbf9443d7c5a888"
+    },
+    "passed": true,
+    "scenarios": {
+      "playback_mode_admin_permission_and_persistence": true,
+      "receiver_key_and_trust_survive_worker_restart": true,
+      "room_source_identity_visible_without_control_credentials": true,
+      "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+      "same_session_pause_resume_without_route_reselection": true,
+      "steady_timing_without_new_late_packets_or_skipped_samples": true,
+      "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+      "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+      "worker_kill_clears_airplay_and_preserves_native_audio": true
+    },
+    "limitations": [
+      "synthetic FairPlay envelope, no Apple-device interoperability claim",
+      "no saved recording or analog/audio-video latency measurement",
+      "functional debug/release result, not a sustained performance test"
+    ],
+    "airplay_binding": {
+      "session_id": 1,
+      "stream_id": 2,
+      "lane": 1
+    },
+    "pause_resume_cycles": [
+      {
+        "released_before": 40,
+        "released_after": 73,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 1,
+        "last_media_reset": "stream_setup",
+        "lane_rms": 0.08491763472557068,
+        "timed_late_frames": 0
+      },
+      {
+        "released_before": 80,
+        "released_after": 113,
+        "late_packets": 0,
+        "timeline_rejections": 0,
+        "media_resets": 2,
+        "last_media_reset": "stream_setup",
+        "lane_rms": 0.08378662914037704,
+        "timed_late_frames": 0
+      }
+    ],
+    "pause_resume": {
+      "released_before": 80,
+      "released_after": 113,
+      "late_packets": 0,
+      "timeline_rejections": 0,
+      "media_resets": 2,
+      "last_media_reset": "stream_setup",
+      "lane_rms": 0.08378662914037704,
+      "timed_late_frames": 0
+    },
+    "timing": {
+      "latency_advance_ns": 67963346,
+      "protocol_lead_ns": 190430012,
+      "playout_lead_ns": 122466666,
+      "output_latency_ns": 5333333
+    },
+    "airplay_pcm": {
+      "received_blocks": 497,
+      "released_blocks": 490,
+      "codec": "alac",
+      "source_frame_count": 352,
+      "accepted_packets": 497,
+      "identity_rejections": 0,
+      "source_rate": 44100,
+      "internal_rate": 48000,
+      "lane_rms": 0.08488667756319046,
+      "uncertainty_ns": 8699374,
+      "timed_late_frames": 0
+    },
+    "mixed_output_rms": 0.021515196189284325,
+    "output_frames_around_worker_crash": {
+      "before": 346368,
+      "after": 353024
+    },
+    "fixture_processes_stopped": true,
+    "fixture_files_removed": true
+  },
+  "single_sync": {
+    "platform": "macOS",
+    "build_profile": "release",
+    "output_device": "coreaudio:BlackHole2ch_UID",
+    "native_start_order": "prewarm",
+    "prefetch_blocks": 0,
+    "codec": "pcm",
+    "playback_mode": "synchronized",
+    "protocol_lead_ms": 2000,
+    "pause_seconds": 0.0,
+    "pause_cycles": 1,
+    "resume_lead_ms": 250,
+    "resume_reset": "none",
+    "track_gap": false,
+    "scope": "real Hub/worker with synthetic authenticated encrypted AirPlay audio and a native SRTP Sender; real CoreAudio output; in-memory Mixer meter evidence",
+    "credential_scope": "explicit init laboratory bearer tokens; receiver private file-store fixture entry",
+    "binary_sha256": {
+      "neonmix-hub": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51",
+      "neonmix-airplay-worker": "4d5a52c2dcb6be9e58bc603997f4ebed81240b448058c6f21dbf9443d7c5a888"
+    },
+    "passed": true,
+    "scenarios": {
+      "playback_mode_admin_permission_and_persistence": true,
+      "receiver_key_and_trust_survive_worker_restart": true,
+      "room_source_identity_visible_without_control_credentials": true,
+      "random_pin_srp20_signed_verify_fairplay_and_hub_admission": true,
+      "steady_timing_without_new_late_packets_or_skipped_samples": true,
+      "dynamic_hub_context_normalized_pcm_released_to_timed_mixer": true,
+      "encrypted_airplay_and_native_sender_one_plus_one_mixing": true,
+      "worker_kill_clears_airplay_and_preserves_native_audio": true
+    },
+    "limitations": [
+      "synthetic FairPlay envelope, no Apple-device interoperability claim",
+      "no saved recording or analog/audio-video latency measurement",
+      "functional debug/release result, not a sustained performance test"
+    ],
+    "airplay_binding": {
+      "session_id": 1,
+      "stream_id": 2,
+      "lane": 1
+    },
+    "timing": {
+      "latency_advance_ns": 0,
+      "protocol_lead_ns": 1944558532,
+      "playout_lead_ns": 1944558532,
+      "output_latency_ns": 5333333
+    },
+    "airplay_pcm": {
+      "received_blocks": 632,
+      "released_blocks": 397,
+      "codec": "pcm_s16",
+      "source_frame_count": 352,
+      "accepted_packets": 632,
+      "identity_rejections": 0,
+      "source_rate": 44100,
+      "internal_rate": 48000,
+      "lane_rms": 0.08483811467885971,
+      "uncertainty_ns": 8662174,
+      "timed_late_frames": 0
+    },
+    "mixed_output_rms": 0.021499453112483025,
+    "output_frames_around_worker_crash": {
+      "before": 289792,
+      "after": 296192
+    },
+    "fixture_processes_stopped": true,
+    "fixture_files_removed": true
+  },
+  "retry_policy": "all runtime tests passed first attempt; no reduced-load or additional retries",
+  "binary_provenance": {
+    "snapshot_canonical_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+    "binary_sha256": {
+      "neonmix-audio": "301a3b366974554a9d703c74140668331d240e045a553cd7f8b8b3fd66fb47ce",
+      "neonmix-hub": "21114bb1229f895eeec41ccd7db8ff8d51198cc0a669855b9490f75030175b51",
+      "neonmix-desktop": "bef1ee0b4640dda99ee0103063526264aa2d7cf0902fa42d3595a69a30ae9195",
+      "neonmix-background": "1939f2d22fde5db9dd97594220a3562fa5c162fd137603fa42065e18f13a0132",
+      "neonmix-airplay-worker": "4d5a52c2dcb6be9e58bc603997f4ebed81240b448058c6f21dbf9443d7c5a888",
+      "libneonmix-airplay-probe-crypto.dylib": "2701477b82d5b34da36a9b62e758d3c47c20b1fb59dc19cedf6bc0ee0beeea3a",
+      "neonmix-airplay-audio-probe": "5a736190842c9be496a91aa365e35ceb06dfc477c4bd58fed9385a0c761ca8c0",
+      "neonmix-airplay-identity-probe": "212df2fa27bfa2c438b3002cf9e3cd3a6db4a6588948eb3af83c329e9ed7a6ab"
+    },
+    "binary_paths": {
+      "neonmix-audio": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-audio",
+      "neonmix-hub": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-hub",
+      "neonmix-desktop": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-desktop",
+      "neonmix-background": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-background",
+      "neonmix-airplay-worker": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-airplay-worker",
+      "libneonmix-airplay-probe-crypto.dylib": "/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/build/libneonmix-airplay-probe-crypto.dylib",
+      "neonmix-airplay-audio-probe": "/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/build/neonmix-airplay-audio-probe",
+      "neonmix-airplay-identity-probe": "/Volumes/projects-mac/NeonMix/.local/tm3/.local/airplay/build/neonmix-airplay-identity-probe"
+    },
+    "dynamic_dependencies": {
+      "neonmix-audio": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-audio:\n\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)\n\t/System/Library/Frameworks/AVFAudio.framework/Versions/A/AVFAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/AudioToolbox.framework/Versions/A/AudioToolbox (compatibility version 1.0.0, current version 1000.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n",
+      "neonmix-hub": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-hub:\n\t/System/Library/Frameworks/CoreAudio.framework/Versions/A/CoreAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)\n\t/System/Library/Frameworks/AVFAudio.framework/Versions/A/AVFAudio (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/AudioToolbox.framework/Versions/A/AudioToolbox (compatibility version 1.0.0, current version 1000.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t@rpath/libgstrtp-1.0.0.dylib (compatibility version 2808.0.0, current version 2808.0.0)\n\t@rpath/libgstapp-1.0.0.dylib (compatibility version 2808.0.0, current version 2808.0.0)\n\t@rpath/libgstbase-1.0.0.dylib (compatibility version 2808.0.0, current version 2808.0.0)\n\t@rpath/libgstreamer-1.0.0.dylib (compatibility version 2808.0.0, current version 2808.0.0)\n\t@rpath/libgio-2.0.0.dylib (compatibility version 8201.0.0, current version 8201.4.0)\n\t@rpath/libgobject-2.0.0.dylib (compatibility version 8201.0.0, current version 8201.4.0)\n\t@rpath/libglib-2.0.0.dylib (compatibility version 8201.0.0, current version 8201.4.0)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n",
+      "neonmix-desktop": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-desktop:\n\t/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)\n\t/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 2775.0.0)\n\t/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics (compatibility version 64.0.0, current version 2050.0.0)\n\t/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 5027.0.69)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 5027.0.69)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n\t/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)\n\t/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 66.0.0)\n\t/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo (compatibility version 1.2.0, current version 758.27.0)\n\t/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon (compatibility version 2.0.0, current version 170.0.0)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/System/Library/Frameworks/ColorSync.framework/Versions/A/ColorSync (compatibility version 1.0.0, current version 3929.0.0)\n\t/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 1226.0.0)\n",
+      "neonmix-background": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-background:\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n",
+      "neonmix-airplay-worker": "/Volumes/projects-mac/NeonMix/.local/tm3/target/release/neonmix-airplay-worker:\n\t@rpath/libgstreamer-1.0.0.dylib (compatibility version 2808.0.0, current version 2808.0.0)\n\t@rpath/libgstapp-1.0.0.dylib (compatibility version 2808.0.0, current version 2808.0.0)\n\t@rpath/libgobject-2.0.0.dylib (compatibility version 8201.0.0, current version 8201.4.0)\n\t@rpath/libglib-2.0.0.dylib (compatibility version 8201.0.0, current version 8201.4.0)\n\t@rpath/libcrypto.3.dylib (compatibility version 3.0.0, current version 3.0.0)\n\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.27.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n"
+    }
+  },
+  "cleanup": {
+    "verified_epoch": 1791010753.903211,
+    "runtime_session": 63759,
+    "runtime_session_terminal_exit_code": 0,
+    "owned_live_processes": [],
+    "preexisting_pids_alive": {
+      "81271": true,
+      "98624": true,
+      "98625": true,
+      "98648": true
+    },
+    "owned_temp_children": [],
+    "settings_changed": [],
+    "native_default_route_modified": false
+  },
+  "limitations": [
+    "Synthetic authenticated encrypted AirPlay senders; not real Apple-device interoperability",
+    "CoreAudio/BlackHole digital output and mixer meter counters; no saved analog sound/audio-video latency measurements",
+    "30s/20s/15s/15s/60s steady windows; not 8/24h long soak",
+    "GUI native AX interactions, not VoiceOver or genuine IME composition",
+    "Mac native round serial after Ubuntu cleanup; cross-platform LAN results belong to primary report"
+  ],
+  "four_source_status_reads": {
+    "readers": 4,
+    "successful": 32495,
+    "errors": 0
+  },
+  "decoder_error_observation": "No decoder_input_queue / pcm_output_queue / decoder_metadata_queue failure observed in this round; decoder and protocol checks plus all multistream scenes succeeded; report does not invent an unexposed decoder error counter."
+}

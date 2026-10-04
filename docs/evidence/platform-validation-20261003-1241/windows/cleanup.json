@@ -1,0 +1,35 @@
+{
+  "owned_processes_before_cleanup": [],
+  "stopped_gui_background_pids": [],
+  "remaining_owned_neonmix_processes": [],
+  "preserved_ambient_processes": [],
+  "removed_owned_fixture_paths": [
+    ".local\\windows-lan"
+  ],
+  "system_settings_changed": false,
+  "outside_authorized_root_deleted": false,
+  "preserved": "v20261003-1241 fresh source/target/native worker/artifacts; all previous roots/packages/manual sessions",
+  "lan_sampler_remaining": [],
+  "lan_hub_pid": 26920,
+  "lan_ssh_runner_exit_code": 0,
+  "local_private_invite_remaining": false,
+  "terminal": true,
+  "round": "platform-validation-20261003-1241",
+  "closure_check": {
+    "round": "platform-validation-20261003-1241",
+    "status": "terminal",
+    "scope": "Read-only closure/provenance check; no new Windows testing",
+    "checked_unix": 1791009178.8374329,
+    "source_files": 519,
+    "source_mismatches": [],
+    "canonical_manifest_sha256": "53ee66ce3ed30a46bb08dafa9a47dfe955aac41313e4d3b15e345f8dbe3d8e5e",
+    "archive_sha256": "c47b1f27c16b9e84f90c28fb09ea394d3ad9690b91d19ccd24b56477811aacc0",
+    "owned_neonmix_or_lan_sampler_processes": [],
+    "private_fixture_paths_remaining": {
+      ".local/windows-lan": false,
+      ".local/gui-test-state": false,
+      ".local/airplay/probe": false
+    },
+    "multi_fixture_paths_remaining": []
+  }
+}

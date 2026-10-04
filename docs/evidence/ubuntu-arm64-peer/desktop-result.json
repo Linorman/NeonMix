@@ -1,0 +1,6 @@
+{
+  "launched_and_alive_5s": true,
+  "exit_code_after_termination": -15,
+  "session": "parallels Wayland desktop",
+  "scope": "startup smoke test; no visual/accessibility acceptance claim"
+}

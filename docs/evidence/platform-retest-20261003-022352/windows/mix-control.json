@@ -1,0 +1,263 @@
+{
+  "scenario": "mix-control",
+  "platform": "Windows",
+  "os_version": "Windows-11-10.0.26100-SP0",
+  "architecture": "AMD64",
+  "build_profile": "release",
+  "sources": 2,
+  "native_sources": 0,
+  "output_device": "wasapi:{0.0.0.00000000}.{b5553555-0ff1-440a-a2a0-c2cc504e62d6}",
+  "scope": "isolated profile; independent encrypted digital AirPlay sources through one Hub and real WASAPI output",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub.exe": "1590ba2de63fbab8e7411e141fe9ad99b5353285a9b8e9aca4347931f3059dd1",
+    "neonmix-airplay-worker.exe": "14fcaadc940cbf97b5c65cf8415c2a81813d1dc65b646868696fc4220b084cd6"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "ed641fbf6bfad1ba5279e00e7e0c6ca907d015693915f9a50a0e952ea379755c",
+  "steady_seconds": null,
+  "airplay_frequencies_hz": [
+    317,
+    439
+  ],
+  "native_frequencies_hz": [],
+  "passed": true,
+  "scenarios": {
+    "explicit_idle_pairing_window_renews_without_worker_restart": true,
+    "targeted_gain_mute_single_solo_multi_solo_and_clear": true,
+    "gain_mute_persist_and_solo_clears_on_same_source_reconnect": true,
+    "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+  },
+  "isolation_checks": [],
+  "mix_control_checks": [
+    {
+      "operation": "A_minus_6dB_B_unchanged",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.028293799608945847,
+          "ratio": 0.5023544000413785,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.056490208953619,
+          "ratio": 0.9978525472360315,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_muted_B_unchanged",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05659765005111694,
+          "ratio": 0.9997504048436069,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_solo_B_silent",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.028460105881094933,
+          "ratio": 0.5053071560770918,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_and_B_multi_solo",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.028228916227817535,
+          "ratio": 0.5012024002234021,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05660363286733627,
+          "ratio": 0.9998560863150456,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "clear_all_solo",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.028441693633794785,
+          "ratio": 0.5049802479356007,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05660201609134674,
+          "ratio": 0.9998275273121786,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "muted_A_solo_before_disconnect",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        },
+        {
+          "source_index": 2,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "B_audible_after_solo_owner_disconnect",
+      "meters": [
+        {
+          "source_index": 2,
+          "rms": 0.056612059473991394,
+          "ratio": 1.0000049353115554,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "A_reconnect_retains_mute_B_audible",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.0,
+          "ratio": 0.0,
+          "expected_ratio": 0
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05655841529369354,
+          "ratio": 0.9990573554929261,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    },
+    {
+      "operation": "explicit_unmute_restores_persisted_minus_6dB",
+      "meters": [
+        {
+          "source_index": 1,
+          "rms": 0.02831975929439068,
+          "ratio": 0.5028153124104185,
+          "expected_ratio": 0.5011872336272722
+        },
+        {
+          "source_index": 2,
+          "rms": 0.05661829560995102,
+          "ratio": 1.000115091465471,
+          "expected_ratio": 1
+        }
+      ],
+      "source_B_context_unchanged": true,
+      "stable_50ms_windows": 3
+    }
+  ],
+  "baseline_lane_rms": [
+    0.05632238835096359,
+    0.05661178007721901
+  ],
+  "mix_control_reconnect": {
+    "gain_db": -6,
+    "muted_preference_preserved": true,
+    "solo_cleared": true,
+    "source_identity_preserved": true,
+    "new_session": true,
+    "source_B_context_unchanged": true,
+    "continuity": {
+      "output_frames": 54240,
+      "global_timed_late_frames_before": 0,
+      "global_timed_late_frames_after": 0,
+      "global_timed_late_frames_delta": 0,
+      "global_late_attribution": "Mixer aggregate; cannot attribute solely to survivors",
+      "lanes": [
+        {
+          "kind": "airplay",
+          "source_index": 2,
+          "lane": 1,
+          "underrun_frames_before": 0,
+          "underrun_frames_after": 0,
+          "underrun_frames_delta": 0,
+          "late_packets_before": 0,
+          "late_packets_after": 0,
+          "late_packets_delta": 0,
+          "counter_reset": false
+        }
+      ]
+    }
+  },
+  "global_disable": {
+    "receivers": [
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      },
+      {
+        "enabled": false,
+        "ready": false,
+        "active": false,
+        "discovery_state": "hidden"
+      }
+    ],
+    "reserved": 0,
+    "owned_worker_count": 0
+  },
+  "status_reads": {
+    "readers": 0,
+    "successful": 0,
+    "errors": 0
+  },
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

@@ -1,0 +1,18 @@
+{
+  "platform": "macOS",
+  "passed": true,
+  "checks": {
+    "pin_response_and_signed_verify_bind_same_receiver_key": true,
+    "persisted_client_key_reconnects_after_process_restart_without_pin": true,
+    "missing_receiver_record_requires_pin_and_can_be_repaired": true,
+    "revocation_overrides_persisted_known_key": true,
+    "copying_client_list_cannot_repair_changed_receiver_identity": true
+  },
+  "worker_sha256": "57a07e6a304228c06c0511aff7cfcf10c5e5041f9f1e375d668550ef28a44d39",
+  "fixture_files_removed": true,
+  "scope": "synthetic SRP and mutually authenticated pair-verify across worker restarts",
+  "limitations": [
+    "does not control the iPhone PIN UI",
+    "does not replace real Apple-source retesting"
+  ]
+}

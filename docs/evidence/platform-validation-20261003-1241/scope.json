@@ -1,0 +1,12 @@
+{
+  "objective": "Retest updated common source natively on macOS, Ubuntu, Windows and issue a new experimental report",
+  "required_evidence": {
+    "source_identity": "all three platforms equal 519-file SHA256 manifest; final recheck of test trees",
+    "build_and_tests": "native Rust/member format/strict Clippy/tests/release and current worker build per platform",
+    "airplay_regression": "identity/protocol/codec tests, single-source pause/SETUP/sync, multi-source real Hub/output steady-quality and recovery",
+    "native_lan": "same-snapshot macOS client to both remote targets, 60s diagnostics including overflow PLC/PCM/Mixer/output, first failures retained",
+    "desktop_background_credentials": "current native GUI observations, lifecycle/IPC/file credential probes; explicit Session0 or other untested boundaries",
+    "report": "new current-run report with commands/logs/hash/first-fail/retest/limitations and comparison to previous source",
+    "cleanup": "stop owned test instances and remove owned credentials/invites without altering user sessions/system configuration"
+  }
+}
