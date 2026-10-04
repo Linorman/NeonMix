@@ -89,7 +89,7 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or $runtime -notmatch 'opusenc') { throw "hub runtime failed: $runtime" }
           $env:GST_PLUGIN_SYSTEM_PATH_1_0 = "$target\airplay\plugins"
           $env:GST_REGISTRY = Join-Path $env:RUNNER_TEMP 'installed-airplay-registry.bin'
-          $worker = '' | & "$target\bin\neonmix-airplay-worker.exe" 2>&1 | Out-String
+          $worker = '' | & "$target\airplay\bin\neonmix-airplay-worker.exe" 2>&1 | Out-String
           if ($worker -notmatch 'startup control') { throw "worker did not start (exit $LASTEXITCODE): $worker" }
           $version = & "$target\bin\neonmix-desktop.exe" --version
           Write-Host $version
