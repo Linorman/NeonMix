@@ -103,7 +103,17 @@ enum Outcome {
     Action(Request, Value),
 }
 fn call(client: &Client, request: &Request) -> Result<Value, String> {
-    let reply = client.request(request)?;
+    let reply = match client.request(request) {
+        // With no background there is nothing left to stop; quitting must
+        // still close the UI instead of leaving a hidden window behind.
+        Err(_)
+            if matches!(request, Request::Shutdown)
+                && client.request(&Request::Status).is_err() =>
+        {
+            return Ok(Value::Null);
+        }
+        reply => reply?,
+    };
     if reply.ok {
         Ok(reply.data)
     } else {
