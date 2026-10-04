@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""macOS E05: actual DNS-SD, Keychain, pinned HTTPS/WSS and protected media.
+"""macOS E05: actual DNS-SD, file credentials, pinned HTTPS/WSS and protected media.
 
 Run through tools/dev. No system routing or audio settings are changed.
 All invitations and credential profiles are temporary and removed at the end.
@@ -22,15 +22,20 @@ import time
 import traceback
 import uuid
 
+from credential_fixture import remove_owned_fixture
+
 ROOT = Path(__file__).resolve().parents[1]
 if sys.platform != 'darwin':
     raise SystemExit('E05 runtime probe is macOS only')
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output', default='coreaudio:BlackHole2ch_UID')
 parser.add_argument('--link-local-interface', help='Also verify scoped IPv6 media on a real macOS interface')
+parser.add_argument('--skip-default-listen', action='store_true', help='Skip only the product-default 7443 listener check when another project session owns that port')
+parser.add_argument('--report-dir', type=Path, help='New project-local directory for this invocation logs and result')
 args = parser.parse_args()
 BINARY = ROOT / 'target/release/neonmix-hub'
-OUT = ROOT / 'artifacts/e05' / time.strftime('%Y%m%d-%H%M%S')
+OUT = (args.report_dir or ROOT / 'artifacts/e05' / time.strftime('%Y%m%d-%H%M%S')).resolve()
+OUT.relative_to(ROOT)
 OUT.mkdir(parents=True)
 LAB = Path(tempfile.mkdtemp(prefix='e05-', dir=ROOT / '.local/tmp'))
 children, handles = [], []
@@ -116,8 +121,8 @@ def command(directory, url, operation, name):
     return run('control', '--credential', directory / 'admin.json', '--hub', url, '--command', path)[0]
 
 try:
-    run('vault-probe')
-    report['scenarios']['native_vault_write_read_delete'] = True
+    run('credential-store-probe', '--directory', LAB)
+    report['scenarios']['file_store_write_read_delete'] = True
     real, fake = LAB / 'real', LAB / 'fake'
     configured = run('setup', '--directory', real, '--output', args.output, '--name', 'E05 同名房间')[0]
     run('setup', '--directory', fake, '--output', args.output, '--name', 'E05 同名房间')
@@ -137,12 +142,14 @@ try:
     report['pairing_seconds_single_sample']=round(time.monotonic()-began,4)
     assert paired['hub_id'] == configured['hub_id']
     data = json.loads(profile.read_text())
+    assert data['version'] == 2 and data['credential_store'] == 'file' and data['profile_kind'] == 'member'
+    assert configured['credential_store'] == 'file'
     assert not data['pending'] and 'token' not in data and 'private_key' not in json.loads((real/'server.json').read_text())
     assert (profile.stat().st_mode & 0o777) == 0o600
     assert (invitation_path.stat().st_mode & 0o777) == 0o600
     run('snapshot', '--credential', profile)
     assert run('pair', '--invite', invitation_path, '--credential', profile, '--name', 'E05 Sender')[0]['device_id'] == paired['device_id']
-    report['scenarios']['automatic_pair_and_repeat_native_profile'] = paired
+    report['scenarios']['automatic_pair_and_repeat_file_profile'] = paired
     assert raw(url, invitation['certificate'], '/v1/hub', secrets.token_hex(32))[0] == 401
     denial = run('snapshot', '--credential', profile, '--hub', fake_url, ok=False)
     report['scenarios']['unpaired_and_wrong_certificate_rejected'] = {'http': 401, 'client_error': denial}
@@ -150,6 +157,8 @@ try:
     stop(impostor)
     fake_state=json.loads((fake/'state.json').read_text());fake_state['hub_id']=configured['hub_id']
     (fake/'state.json').write_text(json.dumps(fake_state))
+    fake_admin=json.loads((fake/'admin.json').read_text());fake_admin['hub_id']=configured['hub_id']
+    (fake/'admin.json').write_text(json.dumps(fake_admin))
     impostor,_=hub(fake,'changed-key',f'127.0.0.1:{p2}')
     denial=run('snapshot','--credential',profile,'--hub',fake_url,ok=False)
     run('snapshot','--credential',profile)
@@ -160,10 +169,12 @@ try:
     stop(impostor)
     # Identical certificate/key and credential state, deliberately changed UUID.
     clone = LAB / 'clone'
-    clone.mkdir()
+    shutil.copytree(real, clone)
     state = json.loads((real/'state.json').read_text()); state['hub_id'] = str(uuid.uuid4())
     (clone/'state.json').write_text(json.dumps(state))
-    config = json.loads((real/'server.json').read_text()); config['state_path'] = str(clone/'state.json')
+    clone_admin=json.loads((clone/'admin.json').read_text());clone_admin['hub_id']=state['hub_id']
+    (clone/'admin.json').write_text(json.dumps(clone_admin))
+    config = json.loads((real/'server.json').read_text()); config['state_path'] = 'state.json'
     (clone/'server.json').write_text(json.dumps(config))
     p3 = port(); cloned, _ = hub(clone, 'clone', f'127.0.0.1:{p3}')
     denial = run('snapshot', '--credential', profile, '--hub', f'https://127.0.0.1:{p3}', ok=False)
@@ -203,14 +214,15 @@ try:
     cancelled_path, cancelled = invite(real, url, 'cancelled')
     run('cancel-invite', '--credential', real/'admin.json', '--hub', url, '--invitation-id', cancelled['invitation_id'])
     canceled_profile = LAB/'cancelled-sender.json'
-    assert 'pairing_unauthorized' in run('pair', '--invite', cancelled_path, '--credential', canceled_profile, '--name', 'Cancelled', '--hub', url, ok=False)
+    cancelled_error = run('pair', '--invite', cancelled_path, '--credential', canceled_profile, '--name', 'Cancelled', '--hub', url, ok=False)
+    assert 'pairing rejected:' in cancelled_error and '401' in cancelled_error
     expired_path, expired = invite(real, url, 'expired', seconds=1)
     time.sleep(1.2)
     assert 'expired' in run('pair', '--invite', expired_path, '--credential', LAB/'expired-sender.json', '--name', 'Expired', '--hub', url, ok=False)
     bad = dict(request, invitation_id=expired['invitation_id'], request_id=str(uuid.uuid4()))
     assert raw(url, expired['certificate'], '/v1/pairing/complete', expired['secret'], bad)[0] == 401
     report['scenarios']['cancel_and_client_server_expiry'] = True
-    # Begin actual protected media from the platform-protected credential.
+    # Begin actual protected media from the file credential.
     sending = start('sender', 'send', '--credential', profile, '--seconds', 30, '--frequency', 437)
     watch = start('watch', 'watch', '--credential', profile, '--seconds', 30)
     def diagnostics():
@@ -246,9 +258,9 @@ try:
     report['scenarios']['lost_response_local_recovery'] = True
     # Credential store loss fails closed, without a laboratory-token fallback.
     meta=json.loads(recovered_profile.read_text());meta['secret_ref']=str(uuid.uuid4())
-    missing=LAB/'missing.json';missing.write_text(json.dumps(meta))
+    missing=LAB/'missing.json';missing.write_text(json.dumps(meta));missing.chmod(0o600)
     run('snapshot','--credential',missing,'--hub',new_url,ok=False)
-    report['scenarios']['missing_vault_secret_fails_closed'] = True
+    report['scenarios']['missing_file_secret_fails_closed'] = True
     browser.wait(timeout=20)
     # Control subscription re-discovers the same identity at an IPv6 endpoint.
     live_watch=start('moving-watch','watch','--credential',recovered_profile,'--seconds',30)
@@ -289,15 +301,18 @@ try:
     wait(lambda:rows('abrupt-browser'),lambda values:any(v['event']=='removed' and v['candidate']['hub_id']==configured['hub_id'] for v in values),seconds=8)
     abrupt_browser.wait(timeout=12)
     report['scenarios']['abrupt_offline_active_verification']=True
-    # The ordinary product entry publishes to LAN without a diagnostic --listen.
-    with socket.socket() as reserve:
-        reserve.bind(('0.0.0.0',7443))
-    default_hub=start('default-listen','serve','--config',real/'server.json')
-    started=wait(lambda:rows('default-listen'))[0]
-    assert started['listen']=='0.0.0.0:7443'
-    assert snapshot(real)['hub_id']==configured['hub_id']
-    report['scenarios']['product_default_listen_is_discoverable_lan']=True
-    stop(default_hub)
+    if args.skip_default_listen:
+        report['not_run']={'product_default_listen_is_discoverable_lan': 'Explicit --skip-default-listen; other session may own 7443'}
+    else:
+        # The ordinary product entry publishes to LAN without a diagnostic --listen.
+        with socket.socket() as reserve:
+            reserve.bind(('0.0.0.0',7443))
+        default_hub=start('default-listen','serve','--config',real/'server.json')
+        started=wait(lambda:rows('default-listen'))[0]
+        assert started['listen']=='0.0.0.0:7443'
+        assert snapshot(real)['hub_id']==configured['hub_id']
+        report['scenarios']['product_default_listen_is_discoverable_lan']=True
+        stop(default_hub)
     report['passed'] = True
 except Exception as error:
     report['error'] = str(error)
@@ -307,21 +322,8 @@ finally:
         stop(child)
     for handle in handles:
         handle.close()
-    references=set()
-    for path in LAB.rglob('*.json'):
-        try:
-            data=json.loads(path.read_text())
-            for field in ('secret_ref','private_key_ref','admin_token_ref'):
-                if field in data:references.add(data[field])
-        except (ValueError,OSError):
-            pass
-    failed=[]
-    for reference in references:
-        result=subprocess.run(['/usr/bin/security','delete-generic-password','-s','com.neonmix.identity.v1','-a',reference],capture_output=True,text=True)
-        if result.returncode not in (0,44):failed.append(reference)
-    report['cleanup']={'platform_entries_attempted':len(references),'failed':failed,'temporary_profiles_removed':True}
-    shutil.rmtree(LAB)
-    if failed:report['passed']=False
+    remove_owned_fixture(LAB)
+    report['cleanup']={'credential_store':'file','temporary_fixture_removed':not LAB.exists()}
     (OUT/'result.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'passed':report['passed'],'report':str(OUT/'result.json'),'error':report.get('error')},ensure_ascii=False))
 raise SystemExit(0 if report['passed'] else 1)

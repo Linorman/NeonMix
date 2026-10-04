@@ -6,6 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
+neonmix-airplay-adapter = { path = "../airplay-adapter" }
 neonmix-control = { path = "../control" }
 neonmix-identity = { path = "../identity" }
 serde.workspace = true

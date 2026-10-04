@@ -30,7 +30,7 @@ struct Cli {
 }
 #[derive(Subcommand)]
 enum Command {
-    /// Configure a Hub with native platform secrets and stable identity.
+    /// Configure a Hub with private credential files and stable identity.
     Setup {
         #[arg(long)]
         directory: PathBuf,
@@ -78,7 +78,10 @@ enum Command {
         #[arg(long)]
         credential: PathBuf,
     },
-    VaultProbe,
+    CredentialStoreProbe {
+        #[arg(long)]
+        directory: PathBuf,
+    },
 
     /// Explicit plaintext laboratory provisioning; product credentials use setup.
     Init {
@@ -145,6 +148,25 @@ enum Command {
         hub: Option<String>,
         #[arg(long)]
         command: PathBuf,
+    },
+    /// Inspect or control the audio-only AirPlay Speaker (administrator writes).
+    Airplay {
+        #[arg(long)]
+        credential: PathBuf,
+        #[arg(long)]
+        hub: Option<String>,
+        /// JSON AirplayCommand; omitted to read receiver state.
+        #[arg(long)]
+        command: Option<PathBuf>,
+    },
+    AirplayV2 {
+        #[arg(long)]
+        credential: PathBuf,
+        #[arg(long)]
+        hub: Option<String>,
+        /// JSON AirplayCommandV2; omitted to read receiver state.
+        #[arg(long)]
+        command: Option<PathBuf>,
     },
     Runtime,
     /// Inspect the exact virtual-device binding without starting a media session.
@@ -235,7 +257,10 @@ pub struct Provisioned {
     pub token: String,
 }
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ServerConfig {
+    #[serde(skip)]
+    pub require_existing_state: bool,
     #[serde(default)]
     pub room_name: Option<String>,
     #[serde(default)]
@@ -247,6 +272,7 @@ pub struct ServerConfig {
     pub devices: Vec<Provisioned>,
 }
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Credential {
     #[serde(skip)]
     pub route: Option<neonmix_identity::discovery::Endpoint>,
@@ -318,6 +344,7 @@ fn init(directory: &Path, output: String, hosts: Vec<String>) -> Result<()> {
     })
     .collect();
     let config = ServerConfig {
+        require_existing_state: false,
         room_name: None,
         state_path: Some(directory.canonicalize()?.join("state.json")),
         output,
@@ -342,7 +369,7 @@ fn init(directory: &Path, output: String, hosts: Vec<String>) -> Result<()> {
         )?;
     }
     emit(
-        serde_json::json!({"directory":directory.canonicalize()?,"hub_certificate_sha256":neonmix_media::certificate_fingerprint(&certificate)?,"credentials":"explicit laboratory provisioning; E05 platform credential storage is separate"}),
+        serde_json::json!({"directory":directory.canonicalize()?,"hub_certificate_sha256":neonmix_media::certificate_fingerprint(&certificate)?,"credentials":"explicit laboratory provisioning; E05 file credential storage is separate"}),
     )
 }
 #[tokio::main]
@@ -361,16 +388,17 @@ async fn main() {
             Command::CancelInvite {credential,hub,invitation_id}=>identity::cancel(&credential,hub,invitation_id).await,
             Command::Pair {invite,credential,name,hub}=>identity::pair(&invite,&credential,name,hub).await,
             Command::Forget {credential}=>identity::forget(&credential),
-            Command::VaultProbe=>{neonmix_identity::vault::probe()?;emit(serde_json::json!({"event":"platform_vault_verified"}))},
+            Command::CredentialStoreProbe{directory}=>identity::store_probe(&directory),
             Command::Init {
                 directory,
                 output,
                 hosts,
             } => init(&directory, output, hosts),
             Command::Serve { config, listen } => {
+                let profile_directory=config.parent().unwrap_or_else(||Path::new(".")).to_path_buf();
                 let config=identity::config(&config)?;
                 let listen=listen.unwrap_or_else(||SocketAddr::from((if config.room_name.is_some() {[0,0,0,0]} else {[127,0,0,1]},7443)));
-                server::serve(config,listen).await
+                server::serve(config,listen,profile_directory).await
             },
             Command::Send {
                 credential,
@@ -468,6 +496,36 @@ async fn main() {
                     Err(format!("control rejected: {status}").into())
                 }
             }
+            Command::Airplay { credential, hub, command } => {
+                let mut c = identity::credential(&credential)?;
+                let hub = identity::endpoint(&mut c, hub).await?;
+                let client = sender::client(&c)?;
+                let state: neonmix_control::Snapshot = client.get(format!("{hub}/v1/hub"))
+                    .bearer_auth(&c.token).send().await?.error_for_status()?.json().await?;
+                identity::check_hub(&c, state.hub_id)?;
+                let response = if let Some(path) = command {
+                    let body: neonmix_airplay_adapter::control::AirplayCommand = read(&path)?;
+                    client.post(format!("{hub}/v1/airplay")).bearer_auth(&c.token).json(&body).send().await?
+                } else { client.get(format!("{hub}/v1/airplay")).bearer_auth(&c.token).send().await? };
+                let status = response.status();
+                emit(response.json::<serde_json::Value>().await?)?;
+                if status.is_success() { Ok(()) } else { Err(format!("AirPlay control rejected: {status}").into()) }
+            },
+            Command::AirplayV2 { credential, hub, command } => {
+                let mut c = identity::credential(&credential)?;
+                let hub = identity::endpoint(&mut c, hub).await?;
+                let client = sender::client(&c)?;
+                let state: neonmix_control::Snapshot = client.get(format!("{hub}/v1/hub"))
+                    .bearer_auth(&c.token).send().await?.error_for_status()?.json().await?;
+                identity::check_hub(&c, state.hub_id)?;
+                let response = if let Some(path) = command {
+                    let body: neonmix_airplay_adapter::control::AirplayCommandV2 = read(&path)?;
+                    client.post(format!("{hub}/v2/airplay")).bearer_auth(&c.token).json(&body).send().await?
+                } else { client.get(format!("{hub}/v2/airplay")).bearer_auth(&c.token).send().await? };
+                let status = response.status();
+                emit(response.json::<serde_json::Value>().await?)?;
+                if status.is_success() { Ok(()) } else { Err(format!("AirPlay control rejected: {status}").into()) }
+            },
             Command::Runtime => emit(neonmix_media::runtime_probe()?),
             Command::Probe {
                 seconds,

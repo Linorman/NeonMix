@@ -1,6 +1,6 @@
 --- a/Filters/minipairs.h
 +++ b/Filters/minipairs.h
-@@ -1,177 +1,124 @@
+@@ -1,177 +1,116 @@
 -/*++
 -
 -Copyright (c) Microsoft Corporation All Rights Reserved
@@ -289,17 +289,9 @@
 +
 +//=============================================================================
 +//
-+// Capture miniport pairs. NOTE: the split of render and capture is arbitrary and
-+// unnessary, this array could contain render endpoints.
-+//
-+static PENDPOINT_MINIPAIR g_CaptureEndpoints[] = { NULL };
-+#define g_cCaptureEndpoints 0
-+
-+//=============================================================================
-+//
 +// Total miniports = # endpoints * 2 (topology + wave).
 +//
-+#define g_MaxMiniports  ((g_cRenderEndpoints + g_cCaptureEndpoints) * 2)
++#define g_MaxMiniports  (g_cRenderEndpoints * 2)
 +
 +#endif // _SIMPLEAUDIOSAMPLE_MINIPAIRS_H_
 --- a/Filters/speakertopo.cpp
@@ -4680,7 +4672,7 @@
 +#endif//_NEW_DELETE_OPERATORS_
 --- a/Main/adapter.cpp
 +++ b/Main/adapter.cpp
-@@ -1,845 +1,768 @@
+@@ -1,845 +1,711 @@
 -/*++
 -
 -Copyright (c) Microsoft Corporation All Rights Reserved
@@ -6068,57 +6060,6 @@
 +    return ntStatus;
 +}
 +
-+#pragma code_seg("PAGE")
-+NTSTATUS
-+InstallEndpointCaptureFilters(
-+    _In_ PDEVICE_OBJECT     _pDeviceObject,
-+    _In_ PIRP               _pIrp,
-+    _In_ PADAPTERCOMMON     _pAdapterCommon,
-+    _In_ PENDPOINT_MINIPAIR _pAeMiniports
-+)
-+{
-+    NTSTATUS    ntStatus = STATUS_SUCCESS;
-+
-+    PAGED_CODE();
-+
-+    UNREFERENCED_PARAMETER(_pDeviceObject);
-+
-+    ntStatus = _pAdapterCommon->InstallEndpointFilters(
-+        _pIrp,
-+        _pAeMiniports,
-+        NULL,
-+        NULL,
-+        NULL,
-+        NULL, NULL);
-+
-+    return ntStatus;
-+}
-+
-+#pragma code_seg("PAGE")
-+NTSTATUS
-+InstallAllCaptureFilters(
-+    _In_ PDEVICE_OBJECT _pDeviceObject,
-+    _In_ PIRP           _pIrp,
-+    _In_ PADAPTERCOMMON _pAdapterCommon
-+)
-+{
-+    NTSTATUS            ntStatus;
-+    PENDPOINT_MINIPAIR* ppAeMiniports = g_CaptureEndpoints;
-+
-+    PAGED_CODE();
-+
-+    for (ULONG i = 0; i < g_cCaptureEndpoints; ++i, ++ppAeMiniports)
-+    {
-+        ntStatus = InstallEndpointCaptureFilters(_pDeviceObject, _pIrp, _pAdapterCommon, *ppAeMiniports);
-+        IF_FAILED_JUMP(ntStatus, Exit);
-+    }
-+
-+    ntStatus = STATUS_SUCCESS;
-+
-+Exit:
-+    return ntStatus;
-+}
-+
 +//=============================================================================
 +#pragma code_seg("PAGE")
 +NTSTATUS
@@ -6194,12 +6135,6 @@
 +    // Install wave+topology filters for render devices
 +    //
 +    ntStatus = InstallAllRenderFilters(DeviceObject, Irp, pAdapterCommon);
-+    IF_FAILED_JUMP(ntStatus, Exit);
-+
-+    //
-+    // Install wave+topology filters for capture devices
-+    //
-+    ntStatus = InstallAllCaptureFilters(DeviceObject, Irp, pAdapterCommon);
 +    IF_FAILED_JUMP(ntStatus, Exit);
 +
 +Exit:
@@ -16243,6 +16178,7 @@
 +--*/
 +{
 +    UNREFERENCED_PARAMETER(PinId);
++    UNREFERENCED_PARAMETER(ResultantFormat);
 +
 +    ULONG                   requiredSize;
 +
@@ -17683,7 +17619,6 @@
 +}
 +
 +#pragma code_seg()
-+
 --- a/Main/minwavert.h
 +++ b/Main/minwavert.h
 @@ -1,250 +1,250 @@

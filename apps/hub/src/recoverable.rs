@@ -7,6 +7,11 @@ pub struct RecoverableMixer {
     pub returned: SyncSender<Mixer>,
 }
 impl StereoSource for RecoverableMixer {
+    fn set_presentation_time(&mut self, at: std::time::Instant) {
+        if let Some(mixer) = self.mixer.as_mut() {
+            mixer.set_presentation_time(at);
+        }
+    }
     fn next_frame(&mut self) -> [f32; 2] {
         self.mixer
             .as_mut()

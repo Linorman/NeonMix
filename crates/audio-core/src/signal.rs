@@ -17,6 +17,9 @@ pub enum ChannelPattern {
 }
 /// Source advances on demand from the output callback, independent of callback block size.
 pub trait StereoSource: Send {
+    /// Predicted speaker presentation time of the next output frame. This is
+    /// an in-process Instant, never an independently started worker clock.
+    fn set_presentation_time(&mut self, _at: std::time::Instant) {}
     fn next_frame(&mut self) -> [f32; 2];
 }
 pub struct TestSignal {

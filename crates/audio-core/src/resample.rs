@@ -13,6 +13,12 @@ pub struct RateConverter<S> {
     available: usize,
     failed: bool,
     delay: usize,
+    output_rate: u32,
+    input_rate: u32,
+    presentation: Option<std::time::Instant>,
+    output_anchor_frame: u64,
+    rendered_frames: u64,
+    drawn_frames: u64,
 }
 impl<S: StereoSource> RateConverter<S> {
     pub fn new(source: S, input_rate: u32, output_rate: u32) -> Result<Self, AudioError> {
@@ -51,6 +57,12 @@ impl<S: StereoSource> RateConverter<S> {
             available: 0,
             failed: false,
             delay,
+            output_rate,
+            input_rate,
+            presentation: None,
+            output_anchor_frame: 0,
+            rendered_frames: 0,
+            drawn_frames: 0,
         })
     }
     pub fn delay_frames(&self) -> usize {
@@ -61,6 +73,13 @@ impl<S: StereoSource> RateConverter<S> {
     }
 }
 impl<S: StereoSource> StereoSource for RateConverter<S> {
+    fn set_presentation_time(&mut self, at: std::time::Instant) {
+        self.presentation = Some(at);
+        self.output_anchor_frame = self.rendered_frames;
+        if self.resampler.is_none() {
+            self.source.set_presentation_time(at);
+        }
+    }
     fn next_frame(&mut self) -> [f32; 2] {
         let Some(resampler) = &mut self.resampler else {
             return self.source.next_frame();
@@ -69,11 +88,29 @@ impl<S: StereoSource> StereoSource for RateConverter<S> {
             return [0.0; 2];
         }
         if self.cursor >= self.available {
+            if let Some(at) = self.presentation {
+                // SincFixedIn retains source lookahead and returns a shortened
+                // first output chunk. Its output_delay is not extra leading
+                // silence (verified by an impulse). Map actual source/output
+                // coordinates instead of adding that delay again per chunk.
+                let source_ns = crate::clock::frames_to_ns(self.drawn_frames, self.input_rate);
+                let output_ns =
+                    crate::clock::frames_to_ns(self.output_anchor_frame, self.output_rate);
+                let mapped = if source_ns >= output_ns {
+                    at.checked_add(std::time::Duration::from_nanos(source_ns - output_ns))
+                } else {
+                    at.checked_sub(std::time::Duration::from_nanos(output_ns - source_ns))
+                };
+                if let Some(mapped) = mapped {
+                    self.source.set_presentation_time(mapped);
+                }
+            }
             for i in 0..CHUNK {
                 let frame = self.source.next_frame();
                 self.input[0][i] = frame[0];
                 self.input[1][i] = frame[1];
             }
+            self.drawn_frames = self.drawn_frames.saturating_add(CHUNK as u64);
             match resampler.process_into_buffer(&self.input, &mut self.output, None) {
                 Ok((_, written)) if written > 0 => {
                     self.available = written;
@@ -87,6 +124,7 @@ impl<S: StereoSource> StereoSource for RateConverter<S> {
         }
         let frame = [self.output[0][self.cursor], self.output[1][self.cursor]];
         self.cursor += 1;
+        self.rendered_frames = self.rendered_frames.saturating_add(1);
         frame
     }
 }

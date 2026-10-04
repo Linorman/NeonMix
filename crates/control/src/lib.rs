@@ -250,6 +250,8 @@ pub enum ControlError {
     RevisionConflict,
     #[error("invalid_argument")]
     InvalidArgument,
+    #[error("upgrade_required")]
+    UpgradeRequired,
     #[error("incompatible_version")]
     IncompatibleVersion,
     #[error("not_found")]
@@ -271,6 +273,7 @@ pub enum ControlError {
 pub fn token_digest(token: &str) -> [u8; 32] {
     Sha256::digest(token.as_bytes()).into()
 }
+#[derive(Clone)]
 pub struct Authority {
     last_published: Option<Snapshot>,
     state: Snapshot,
@@ -278,6 +281,37 @@ pub struct Authority {
     events: VecDeque<Event>,
     receipts: VecDeque<(Uuid, Command, Receipt)>,
     preferences: BTreeMap<Uuid, Mix>,
+    pending: Option<PendingTransaction>,
+}
+#[derive(Clone)]
+struct PendingTransaction {
+    token: Uuid,
+    original_available: bool,
+    changes: Vec<DeferredChange>,
+}
+#[derive(Clone)]
+enum DeferredChange {
+    Session(Uuid, SessionStatus),
+    Output(bool),
+}
+pub struct PreparedCommand {
+    token: Uuid,
+    next: Box<Authority>,
+    receipt: Receipt,
+}
+impl PreparedCommand {
+    pub fn token(&self) -> Uuid {
+        self.token
+    }
+    pub fn snapshot(&self) -> &Snapshot {
+        self.next.current()
+    }
+    pub fn persistent(&self) -> PersistentState {
+        self.next.persistent()
+    }
+    pub fn receipt(&self) -> &Receipt {
+        &self.receipt
+    }
 }
 /// No media keys, RTP counters, buffers, PCM or live sessions are persisted.
 #[derive(Serialize, Deserialize)]
@@ -319,6 +353,7 @@ impl Authority {
             events: VecDeque::with_capacity(EVENT_CAPACITY),
             receipts: VecDeque::with_capacity(128),
             preferences: BTreeMap::new(),
+            pending: None,
         };
         this.add_device(admin_name, Role::Admin, admin_token)?;
         Ok(this)
@@ -330,6 +365,9 @@ impl Authority {
         role: Role,
         token: &str,
     ) -> Result<Uuid, ControlError> {
+        if self.pending.is_some() {
+            return Err(ControlError::Busy);
+        }
         if name.is_empty() || name.len() > 128 || token.len() < 32 {
             return Err(ControlError::InvalidArgument);
         }
@@ -439,6 +477,7 @@ impl Authority {
             events: VecDeque::with_capacity(EVENT_CAPACITY),
             receipts: VecDeque::with_capacity(128),
             preferences: saved.preferences,
+            pending: None,
         };
         this.publish()?;
         Ok(this)
@@ -475,6 +514,9 @@ impl Authority {
         command: Command,
         prepare: impl FnOnce(&Snapshot, &PersistentState) -> Result<(), ControlError>,
     ) -> Result<Receipt, ControlError> {
+        if self.pending.is_some() {
+            return Err(ControlError::Busy);
+        }
         let live = self
             .state
             .devices
@@ -748,11 +790,83 @@ impl Authority {
             .push_back((principal.device, command, receipt.clone()));
         Ok(receipt)
     }
+    /// Stage a durable command while holding only the short control mutex.
+    /// The owner must commit or abort the returned token after external work.
+    /// Other durable mutations return Busy; health updates are retained.
+    pub fn prepare_transaction(
+        &mut self,
+        principal: Principal,
+        command: Command,
+    ) -> Result<PreparedCommand, ControlError> {
+        if self.pending.is_some() {
+            return Err(ControlError::Busy);
+        }
+        let mut next = self.clone();
+        let receipt = next.execute(principal, command, |_| Ok(()))?;
+        let token = Uuid::new_v4();
+        self.pending = Some(PendingTransaction {
+            token,
+            original_available: self.state.output.available,
+            changes: Vec::new(),
+        });
+        Ok(PreparedCommand {
+            token,
+            next: Box::new(next),
+            receipt,
+        })
+    }
+    pub fn commit_transaction(
+        &mut self,
+        prepared: PreparedCommand,
+    ) -> Result<Receipt, ControlError> {
+        if self
+            .pending
+            .as_ref()
+            .is_none_or(|p| p.token != prepared.token)
+        {
+            return Err(ControlError::Busy);
+        }
+        let pending = self.pending.take().unwrap();
+        *self = *prepared.next;
+        self.replay_health(pending);
+        Ok(prepared.receipt)
+    }
+    pub fn abort_transaction(&mut self, token: Uuid) -> Result<(), ControlError> {
+        if self.pending.as_ref().is_none_or(|p| p.token != token) {
+            return Err(ControlError::Busy);
+        }
+        let pending = self.pending.take().unwrap();
+        self.state.output.available = pending.original_available;
+        self.replay_health(pending);
+        Ok(())
+    }
+    fn replay_health(&mut self, pending: PendingTransaction) {
+        for change in pending.changes {
+            match change {
+                DeferredChange::Session(id, status) => {
+                    let _ = self.set_session_status(id, status);
+                }
+                DeferredChange::Output(available) => {
+                    let _ = self.set_output_available(available);
+                }
+            }
+        }
+    }
     pub fn set_session_status(
         &mut self,
         id: Uuid,
         status: SessionStatus,
     ) -> Result<(), ControlError> {
+        if let Some(pending) = self.pending.as_mut() {
+            if !self.state.sessions.contains_key(&id) {
+                return Err(ControlError::NotFound);
+            }
+            pending
+                .changes
+                .retain(|c| !matches!(c, DeferredChange::Session(existing, _) if *existing == id));
+            pending.changes.push(DeferredChange::Session(id, status));
+            return Ok(());
+        }
         let s = self
             .state
             .sessions
@@ -775,6 +889,16 @@ impl Authority {
         self.publish()
     }
     pub fn set_output_available(&mut self, available: bool) -> Result<(), ControlError> {
+        if let Some(pending) = self.pending.as_mut() {
+            // Availability is a live safety observation even while durable state
+            // is frozen; callers must reject new admission immediately.
+            self.state.output.available = available;
+            pending
+                .changes
+                .retain(|c| !matches!(c, DeferredChange::Output(_)));
+            pending.changes.push(DeferredChange::Output(available));
+            return Ok(());
+        }
         if self.state.output.available == available {
             return Ok(());
         }

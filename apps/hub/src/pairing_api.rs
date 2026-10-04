@@ -12,6 +12,11 @@ use serde::Deserialize;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
+// Book.open may evict expired grants and cancel removes them. Serialize these
+// operations with redemption until its durable commit and Book.finish, while
+// leaving Engine available to all audio/control workers during filesystem I/O.
+static PAIRING_TRANSACTION: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
 pub(super) enum Error {
     Control(ControlError),
     Pairing(PairError),
@@ -80,6 +85,7 @@ pub(super) async fn open(
     headers: HeaderMap,
     Json(open): Json<Open>,
 ) -> std::result::Result<Json<Invitation>, Error> {
+    let _transaction = PAIRING_TRANSACTION.lock().await;
     let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
     let issuer = admin(&engine, &headers)?;
     let (id, secret) = engine
@@ -110,6 +116,7 @@ pub(super) async fn cancel(
     headers: HeaderMap,
     Json(cancel): Json<Cancel>,
 ) -> std::result::Result<Json<serde_json::Value>, ApiError> {
+    let _transaction = PAIRING_TRANSACTION.lock().await;
     let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
     admin(&engine, &headers)?;
     engine.pairings.cancel(cancel.invitation_id);
@@ -119,6 +126,40 @@ pub(super) async fn complete(
     State(shared): State<Shared>,
     headers: HeaderMap,
     Json(request): Json<Request>,
+) -> std::result::Result<Json<Completion>, Error> {
+    complete_with(shared, headers, request, persist_saved).await
+}
+
+pub(super) async fn complete_with(
+    shared: Shared,
+    headers: HeaderMap,
+    request: Request,
+    save: impl FnOnce(
+        Option<&std::path::PathBuf>,
+        &neonmix_control::PersistentState,
+    ) -> std::result::Result<(), ControlError>
+    + Send
+    + 'static,
+) -> std::result::Result<Json<Completion>, Error> {
+    let transaction = PAIRING_TRANSACTION.lock().await;
+    // The blocking task owns the entire transaction, including the Book gate.
+    // Dropping an HTTP request/JoinHandle cannot abandon a frozen Authority or
+    // allow cancellation/open to erase the grant after the file was committed.
+    tokio::task::spawn_blocking(move || {
+        let _transaction = transaction;
+        complete_locked(shared, headers, request, save)
+    })
+    .await
+    .map_err(|_| Error::Control(ControlError::Busy))?
+}
+fn complete_locked(
+    shared: Shared,
+    headers: HeaderMap,
+    request: Request,
+    save: impl FnOnce(
+        Option<&std::path::PathBuf>,
+        &neonmix_control::PersistentState,
+    ) -> std::result::Result<(), ControlError>,
 ) -> std::result::Result<Json<Completion>, Error> {
     let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
     // A global fixed window bounds untrusted redemption work and memory.
@@ -154,7 +195,7 @@ pub(super) async fn complete(
     // Revalidate issuer and commit disk before publishing the registered identity.
     let path = engine.state_path.clone();
     let revision = engine.authority.current().revision;
-    let receipt = engine.authority.execute_durable(
+    let prepared = engine.authority.prepare_transaction(
         issuer,
         Command {
             request_id: request.request_id,
@@ -165,8 +206,19 @@ pub(super) async fn complete(
                 token_sha256: request.token_sha256.clone(),
             },
         },
-        |_, saved| persist_saved(path.as_ref(), saved),
     )?;
+    let token = prepared.token();
+    let saved = prepared.persistent();
+    drop(engine);
+    let persisted =
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| save(path.as_ref(), &saved)))
+            .unwrap_or(Err(ControlError::Busy));
+    let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
+    if let Err(error) = persisted {
+        engine.authority.abort_transaction(token)?;
+        return Err(error.into());
+    }
+    let receipt = engine.authority.commit_transaction(prepared)?;
     let done = Completion {
         hub_id: engine.authority.current().hub_id,
         device_id: receipt.device_id.ok_or(ControlError::Busy)?,

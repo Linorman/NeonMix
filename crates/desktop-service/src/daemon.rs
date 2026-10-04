@@ -16,6 +16,21 @@ use tokio::{
 
 const COMMAND_TIMEOUT: Duration = Duration::from_secs(25);
 const LOG_LINE_LIMIT: usize = 16_384;
+
+fn discovery_result(value: Value) -> Result<Value> {
+    let completion = match value {
+        Value::Array(events) => events
+            .into_iter()
+            .rev()
+            .find(|event| event["event"] == "discovery_complete"),
+        event if event["event"] == "discovery_complete" => Some(event),
+        _ => None,
+    };
+    completion
+        .filter(|event| event["candidates"].is_array())
+        .ok_or_else(|| "发现结果缺少完成事件或房间列表".into())
+}
+
 fn audio_command(executable: &Path, args: Vec<String>) -> Command {
     let mut command = Command::new(executable);
     command
@@ -129,6 +144,15 @@ fn terminate(pid: u32) -> Result<()> {
 }
 fn classify_error(message: &str) -> String {
     let m = message.to_lowercase();
+    if m.contains("credential_")
+        || m.contains("migration_required")
+        || m.contains("administrator_credential_protected")
+    {
+        return profile_error(message);
+    }
+    if m.contains("setup_incomplete") {
+        return "Hub 资料不完整，请恢复完整目录；不能重新初始化覆盖".into();
+    }
     if m.contains("revok")
         || m.contains("unauthoriz")
         || m.contains("permission")
@@ -191,18 +215,33 @@ pub fn redact(value: &mut Value, diagnostic: bool) {
         Value::Object(map) => {
             for (key, value) in map {
                 let key = key.to_lowercase();
+                let numeric_phase_diagnostic = key == "timed_phase_error_ns"
+                    && value.as_array().is_some_and(|items| {
+                        items.len() == 16 && items.iter().all(Value::is_number)
+                    });
                 if key.contains("token")
                     || key.contains("secret")
                     || key.contains("certificate")
                     || key.contains("private_key")
+                    || key.contains("pairing_pin")
+                    || key.contains("client_public_key")
+                    || matches!(
+                        key.as_str(),
+                        "public_key" | "known_keys" | "blocked_keys" | "key_reference"
+                    )
                     || key == "pem"
                     || key == "credential"
                     || key == "file"
                     || key == "directory"
                     || key == "reason"
-                    || (key.contains("error") && !value.is_number())
+                    || (key.contains("error")
+                        && !value.is_number()
+                        && !value.is_null()
+                        && !value.is_boolean()
+                        && !numeric_phase_diagnostic)
                     || (diagnostic
-                        && (key.contains("name")
+                        && (key == "alias"
+                            || key.contains("name")
                             || (key.ends_with("id") && key != "stream_id")
                             || key.contains("address")
                             || key.contains("endpoint")
@@ -226,6 +265,42 @@ pub fn redact(value: &mut Value, diagnostic: bool) {
     }
 }
 
+fn redact_control_reply(event: &mut Value, preserve_airplay_pin: bool) {
+    let pin = event
+        .get("pairing_pin")
+        .cloned()
+        .filter(|_| preserve_airplay_pin);
+    let receiver_pins: Vec<_> = if preserve_airplay_pin {
+        event
+            .get("receivers")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(|r| Some((r.get("receiver_id")?.clone(), r.get("pairing_pin")?.clone())))
+            .collect()
+    } else {
+        Vec::new()
+    };
+    redact(event, false);
+    if let Some(receivers) = event.get_mut("receivers").and_then(Value::as_array_mut) {
+        for receiver in receivers {
+            if let Some((_, pin)) = receiver_pins
+                .iter()
+                .find(|(id, _)| receiver.get("receiver_id") == Some(id))
+            {
+                receiver["pairing_pin"] = pin.clone();
+            }
+        }
+    }
+    // Only the authenticated AirPlay control response carries an administrator PIN.
+    // It never enters process logs, persisted UI state or diagnostic history.
+    if let Some(pin) = pin
+        && let Some(object) = event.as_object_mut()
+    {
+        object.insert("pairing_pin".into(), pin);
+    }
+}
+
 /// Only numeric/boolean telemetry under known structural keys is exported.
 /// Unknown keys, arbitrary strings, names, routes and protocol credentials are
 /// excluded even if future runtimes add them to diagnostics.
@@ -241,6 +316,24 @@ pub fn export_whitelist(value: &Value) -> Value {
             )),
             Value::Object(map) => {
                 const KEYS: &[&str] = &[
+                    "airplay",
+                    "sessions",
+                    "capacity",
+                    "limit",
+                    "active",
+                    "reserved",
+                    "media_resets",
+                    "ingress",
+                    "latency_advance_ns",
+                    "protocol_lead_ns",
+                    "playout_lead_ns",
+                    "output_latency_ns",
+                    "late_packets",
+                    "rejected_blocks",
+                    "received_blocks",
+                    "released_blocks",
+                    "pending_frames",
+                    "pending_bytes",
                     "available",
                     "command_fault",
                     "operation_failed",
@@ -443,24 +536,15 @@ impl Runtime {
     }
     fn credential(&self, path: &Path) -> Result<String> {
         let path = self.path(path)?;
-        let profile: Value = serde_json::from_slice(
-            &std::fs::read(&path).map_err(|_| "无法读取所选配对文件".to_string())?,
-        )
-        .map_err(|_| "配对文件无效".to_string())?;
-        if profile.get("secret_ref").and_then(Value::as_str).is_none()
-            || profile.get("token").is_some()
-        {
-            return Err("桌面仅接受 platform vault 配对文件".into());
-        }
+        neonmix_identity::profiles::token(&path).map_err(profile_error)?;
         Ok(path.to_string_lossy().into_owned())
     }
     fn settings(&self) -> Option<HubSettings> {
-        let profile: Value =
-            serde_json::from_slice(&std::fs::read(self.directory.join("hub/server.json")).ok()?)
-                .ok()?;
+        let profile =
+            neonmix_identity::profiles::hub(&self.directory.join("hub/server.json")).ok()?;
         Some(HubSettings {
-            name: profile.get("room_name")?.as_str()?.into(),
-            output: profile.get("output")?.as_str()?.into(),
+            name: profile.room_name,
+            output: profile.output,
         })
     }
     fn profiles(&self) -> Vec<ProfileInfo> {
@@ -481,31 +565,30 @@ impl Runtime {
             .filter_map(|path| {
                 let relative = path.strip_prefix(&self.directory).ok()?;
                 self.path(relative).ok()?;
-                let value: Value = serde_json::from_slice(&std::fs::read(&path).ok()?).ok()?;
-                value.get("secret_ref")?;
-                let role = if relative == Path::new("hub/admin.json") {
+                let profile = neonmix_identity::profiles::token(&path).ok()?;
+                let role = if relative == Path::new("hub/admin.json")
+                    && profile.profile_kind == neonmix_identity::profiles::ProfileKind::Admin
+                {
                     Some(neonmix_control::Role::Admin)
                 } else {
                     self.viewer
                         .as_ref()
-                        .filter(|viewer| viewer.get("device_id") == value.get("device_id"))
-                        .and_then(|viewer| viewer.get("role"))
+                        .filter(|v| {
+                            v.get("device_id")
+                                .and_then(Value::as_str)
+                                .and_then(|s| uuid::Uuid::parse_str(s).ok())
+                                == profile.device_id
+                        })
+                        .and_then(|v| v.get("role"))
                         .and_then(|v| serde_json::from_value(v.clone()).ok())
                 };
                 Some(ProfileInfo {
                     credential: relative.into(),
-                    device_id: value
-                        .get("device_id")
-                        .and_then(|v| serde_json::from_value(v.clone()).ok()),
-                    hub_id: value
-                        .get("hub_id")
-                        .and_then(|v| serde_json::from_value(v.clone()).ok()),
-                    name: value.get("name").and_then(Value::as_str).map(str::to_owned),
+                    device_id: profile.device_id,
+                    hub_id: Some(profile.hub_id),
+                    name: Some(profile.name),
                     role,
-                    pending: value
-                        .get("pending")
-                        .and_then(Value::as_bool)
-                        .unwrap_or(true),
+                    pending: profile.pending,
                 })
             })
             .collect()
@@ -534,6 +617,9 @@ impl Runtime {
         }
     }
     async fn run(&self, executable: &Path, args: Vec<String>) -> Result<Value> {
+        let preserve_airplay_pin = args
+            .first()
+            .is_some_and(|arg| matches!(arg.as_str(), "airplay" | "airplay-v2"));
         let mut child = audio_command(executable, args)
             .spawn()
             .map_err(|_| "无法启动同目录工具；请先完成构建".to_string())?;
@@ -611,6 +697,16 @@ impl Runtime {
                     "invalid_argument",
                     "not_found",
                     "quota_exceeded",
+                    "receiver_busy",
+                    "room_capacity_full",
+                    "source_already_active",
+                    "source_blocked",
+                    "pairing_revoked",
+                    "stale_revision",
+                    "session_changed",
+                    "output_unavailable",
+                    "worker_unavailable",
+                    "upgrade_required",
                 ]
                 .contains(&error.as_str())
             {
@@ -624,7 +720,7 @@ impl Runtime {
             .map(|line| serde_json::from_slice(line).map_err(|_| "操作返回无效 JSON".to_string()))
             .collect::<Result<_>>()?;
         for event in &mut events {
-            redact(event, false);
+            redact_control_reply(event, preserve_airplay_pin);
         }
         Ok(if events.len() == 1 {
             events.remove(0)
@@ -691,7 +787,14 @@ impl Runtime {
                     return Err("发送运行中，无法配置同机 Hub".into());
                 }
                 let directory = self.path(Path::new("hub"))?;
-                self.parent(&directory.join("server.json"))?;
+                let profile = directory.join("server.json");
+                if std::fs::symlink_metadata(&profile).is_ok() {
+                    // An old profile must show migration guidance even when the UI
+                    // cannot populate its settings from the current schema.
+                    neonmix_identity::profiles::hub(&profile).map_err(profile_error)?;
+                    return Err("已有 Hub 资料，请修改设置；不能再次初始化".into());
+                }
+                self.parent(&profile)?;
                 self.hub_command(vec![
                     "setup".into(),
                     "--directory".into(),
@@ -708,12 +811,7 @@ impl Runtime {
                     return Err("本实例正在发送；请先停止发送".into());
                 }
                 let profile = self.path(Path::new("hub/server.json"))?;
-                let value: Value =
-                    serde_json::from_slice(&std::fs::read(&profile).map_err(|_| "请先设置 Hub")?)
-                        .map_err(|_| "Hub profile invalid")?;
-                if value.get("private_key_ref").is_none() {
-                    return Err("仅允许 platform vault Hub profile".into());
-                }
+                neonmix_identity::profiles::hub(&profile).map_err(profile_error)?;
                 self.hub.start(
                     &self.hub_bin,
                     vec![
@@ -736,26 +834,35 @@ impl Runtime {
                     return Err("修改 Hub 设置前请停止播放".into());
                 }
                 let config = self.path(Path::new("hub/server.json"))?;
-                let state = self.path(Path::new("hub/state.json"))?;
-                let mut profile: Value =
-                    serde_json::from_slice(&std::fs::read(&config).map_err(|_| "请先配置 Hub")?)
-                        .map_err(|_| "invalid profile")?;
-                if profile.get("private_key_ref").is_none() {
-                    return Err("仅允许 platform vault Hub profile".into());
-                }
-                let original = std::fs::read(&state).map_err(|e| e.to_string())?;
-                let mut persistent: Value =
-                    serde_json::from_slice(&original).map_err(|e| e.to_string())?;
-                persistent["output"]["id"] = json!(settings.output);
-                persistent["revision"] = json!(
-                    persistent
-                        .get("revision")
-                        .and_then(Value::as_u64)
-                        .unwrap_or(0)
-                        .saturating_add(1)
-                );
-                profile["output"] = json!(settings.output);
-                profile["room_name"] = json!(settings.name);
+                let _profile_lock = neonmix_identity::profiles::operation_lock(
+                    &neonmix_identity::profiles::profile_lock_path(&config),
+                )
+                .map_err(profile_error)?;
+                let mut profile =
+                    neonmix_identity::profiles::hub(&config).map_err(profile_error)?;
+                let state = neonmix_identity::profiles::state_path(&config, &profile)
+                    .map_err(profile_error)?;
+                let _state_lock =
+                    neonmix_identity::profiles::operation_lock(&state.with_extension("lock"))
+                        .map_err(profile_error)?;
+                let original = neonmix_identity::files::read_private(
+                    &state,
+                    neonmix_identity::profiles::MAX_STATE_BYTES,
+                )
+                .map_err(|_| "无法读取 Hub 私有状态")?;
+                let mut persistent: neonmix_control::PersistentState =
+                    serde_json::from_slice(&original).map_err(|_| "Hub 状态损坏")?;
+                neonmix_control::Authority::restore(
+                    serde_json::from_slice(&original).map_err(|_| "Hub 状态损坏")?,
+                )
+                .map_err(|_| "Hub 状态损坏")?;
+                persistent.output.id = settings.output.clone();
+                persistent.revision = persistent
+                    .revision
+                    .checked_add(1)
+                    .ok_or("Hub revision 已到上限")?;
+                profile.output = settings.output.clone();
+                profile.room_name = settings.name.clone();
                 neonmix_identity::files::replace(
                     &state,
                     &serde_json::to_vec_pretty(&persistent).map_err(|e| e.to_string())?,
@@ -774,12 +881,14 @@ impl Runtime {
                 if !(1..=10).contains(&seconds) {
                     return Err("发现窗口必须为 1..10 秒".into());
                 }
-                self.hub_command(vec![
-                    "discover".into(),
-                    "--seconds".into(),
-                    seconds.to_string(),
-                ])
-                .await
+                let events = self
+                    .hub_command(vec![
+                        "discover".into(),
+                        "--seconds".into(),
+                        seconds.to_string(),
+                    ])
+                    .await?;
+                discovery_result(events)
             }
             Request::Invite {
                 credential,
@@ -980,15 +1089,14 @@ impl Runtime {
                     return Err("只能删除 Sender 配对，Hub 管理身份不能从此入口删除".into());
                 }
                 let path = self.credential(&credential)?;
-                let selected: Value =
-                    serde_json::from_slice(&std::fs::read(&path).map_err(|e| e.to_string())?)
-                        .map_err(|e| e.to_string())?;
-                if let Ok(admin) = std::fs::read(self.directory.join("hub/admin.json")) {
-                    let admin: Value = serde_json::from_slice(&admin).map_err(|e| e.to_string())?;
-                    if selected.get("secret_ref") == admin.get("secret_ref") {
-                        return Err("不能删除共享的 Hub 管理凭证".into());
-                    }
-                }
+                let selected =
+                    neonmix_identity::profiles::token(Path::new(&path)).map_err(profile_error)?;
+                neonmix_identity::profiles::check_forget(
+                    Path::new(&path),
+                    &selected,
+                    &[self.directory.join("hub/admin.json")],
+                )
+                .map_err(profile_error)?;
                 self.sender.stop().await?;
                 self.sender_options = None;
                 let mut disabled = false;
@@ -1089,6 +1197,58 @@ impl Runtime {
                 )
                 .map_err(|_| "无法保存诊断导出")?;
                 Ok(json!({"file":"diagnostics-redacted.json","diagnostics":safe}))
+            }
+            Request::Airplay {
+                credential,
+                hub,
+                command,
+            } => {
+                let credential = self.credential(&credential)?;
+                let mut args = vec!["airplay".into(), "--credential".into(), credential];
+                Self::endpoint(&mut args, hub)?;
+                let mut temporary = None;
+                if let Some(command) = command {
+                    let path = self
+                        .directory
+                        .join("commands")
+                        .join(format!("airplay-{}.json", Uuid::new_v4()));
+                    neonmix_identity::files::write_new(
+                        &path,
+                        &serde_json::to_vec(&command).map_err(|e| e.to_string())?,
+                    )
+                    .map_err(|e| e.to_string())?;
+                    args.extend(["--command".into(), path.to_string_lossy().into_owned()]);
+                    temporary = Some(TemporaryGuard(path));
+                }
+                let result = self.hub_command(args).await;
+                drop(temporary);
+                result
+            }
+            Request::AirplayV2 {
+                credential,
+                hub,
+                command,
+            } => {
+                let credential = self.credential(&credential)?;
+                let mut args = vec!["airplay-v2".into(), "--credential".into(), credential];
+                Self::endpoint(&mut args, hub)?;
+                let mut temporary = None;
+                if let Some(command) = command {
+                    let path = self
+                        .directory
+                        .join("commands")
+                        .join(format!("airplay-{}.json", Uuid::new_v4()));
+                    neonmix_identity::files::write_new(
+                        &path,
+                        &serde_json::to_vec(&command).map_err(|e| e.to_string())?,
+                    )
+                    .map_err(|e| e.to_string())?;
+                    args.extend(["--command".into(), path.to_string_lossy().into_owned()]);
+                    temporary = Some(TemporaryGuard(path));
+                }
+                let result = self.hub_command(args).await;
+                drop(temporary);
+                result
             }
             Request::Control {
                 credential,
@@ -1337,6 +1497,8 @@ async fn connection(
                     | Request::Discover { .. }
                     | Request::Snapshot { .. }
                     | Request::Diagnostics { .. }
+                    | Request::Airplay { command: None, .. }
+                    | Request::AirplayV2 { command: None, .. }
                     | Request::ExportDiagnostics { .. }
             );
             let epoch = cancellation.epoch.load(Ordering::Acquire);
@@ -1402,4 +1564,80 @@ async fn connection(
     result
         .map_err(|_| "IPC write timeout")?
         .map_err(|e| e.to_string())
+}
+
+fn profile_error(error: impl std::fmt::Display) -> String {
+    let message = error.to_string();
+    if message.contains("migration_required") {
+        "旧配对资料需要离线迁移，请运行 neonmix-credential-migrate".into()
+    } else if message.contains("credential_missing") {
+        "凭证文件缺失，请恢复完整资料目录".into()
+    } else if message.contains("credential_permission_denied") {
+        "凭证文件权限不正确或无法访问".into()
+    } else if message.contains("credential_store_busy") {
+        "凭证正在使用，请稍后重试".into()
+    } else if message.contains("administrator_credential_protected") {
+        "不能删除 Hub 管理凭证".into()
+    } else if message.contains("credential_io_failed") {
+        "无法读写凭证文件，请检查目录和磁盘".into()
+    } else {
+        "配对资料格式无效或版本不受支持".into()
+    }
+}
+
+#[cfg(test)]
+mod discovery_tests {
+    use super::*;
+    #[test]
+    fn receiver_pins_only_survive_authenticated_control_replies() {
+        let original = json!({"receivers":[{"receiver_id":"a","pairing_pin":"1111"},{"receiver_id":"b","pairing_pin":"2222"}],"history":[{"pairing_pin":"3333"}],"secret_ref":"private"});
+        let mut control = original.clone();
+        redact_control_reply(&mut control, true);
+        assert_eq!(control["receivers"][0]["pairing_pin"], "1111");
+        assert_eq!(control["receivers"][1]["pairing_pin"], "2222");
+        assert_eq!(control["history"][0]["pairing_pin"], "[redacted]");
+        assert_eq!(control["secret_ref"], "[redacted]");
+        let mut other = original;
+        redact_control_reply(&mut other, false);
+        assert_eq!(other["receivers"][0]["pairing_pin"], "[redacted]");
+        assert!(!export_whitelist(&control).to_string().contains("1111"));
+    }
+
+    #[test]
+    fn discovery_returns_the_final_candidate_snapshot_instead_of_transient_events() {
+        let candidate = json!({"hub_id":"test-hub", "room_name":"客厅"});
+        let completion = json!({"event":"discovery_complete", "candidates":[candidate]});
+        let events = json!([
+            {"event":"resolved", "candidate":candidate},
+            {"event":"resolved", "candidate":candidate},
+            completion,
+        ]);
+        assert_eq!(discovery_result(events).unwrap(), completion);
+    }
+
+    #[test]
+    fn discovery_empty_completion_clears_removed_candidates_and_supports_single_line_output() {
+        let completion = json!({"event":"discovery_complete", "candidates":[]});
+        assert_eq!(discovery_result(completion.clone()).unwrap(), completion);
+        assert_eq!(
+            discovery_result(json!([
+                {"event":"resolved", "candidate":{"hub_id":"removed-hub"}},
+                completion,
+            ]))
+            .unwrap(),
+            completion,
+        );
+    }
+
+    #[test]
+    fn discovery_incomplete_or_malformed_output_is_an_error() {
+        for value in [
+            Value::Null,
+            json!([]),
+            json!([{"event":"resolved", "candidate":{}}]),
+            json!({"event":"discovery_complete", "candidates":"invalid"}),
+        ] {
+            assert!(discovery_result(value).is_err());
+        }
+    }
 }

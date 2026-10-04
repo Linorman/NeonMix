@@ -13,6 +13,8 @@ import time
 import traceback
 import uuid
 from e07_background_probe import ipc, wait_for
+from credential_fixture import remove_owned_fixture
+
 ROOT=Path(__file__).resolve().parents[1]
 DEV=ROOT/'tools/dev'
 HUB=ROOT/'target/release/neonmix-hub'
@@ -52,6 +54,8 @@ def main():
         ipc(hub_dir,'hub_start');wait_for(snapshot)
         invite=ipc(hub_dir,'invite',credential='hub/admin.json',hub=URL,out='invitations/a.json',seconds=120)
         paired=ipc(sender_dir,'pair_text',invitation=invite['invitation'],name='E07 真实采集 A',hub=URL)
+        metadata=json.loads((sender_dir/'profiles/sender.json').read_text())
+        assert metadata['version']==2 and metadata['credential_store']=='file' and metadata['profile_kind']=='member'
         member_id=paired['device_id']
         state=ipc(sender_dir,'snapshot',credential='profiles/sender.json',hub=URL)
         assert state['viewer']['role']=='member'
@@ -152,17 +156,8 @@ def main():
                 try:child.wait(timeout=8)
                 except subprocess.TimeoutExpired:child.kill();child.wait()
         for handle in handles:handle.close()
-        references=set()
-        for path in base.rglob('*.json'):
-            try:
-                value=json.loads(path.read_text())
-                references.update(value[key] for key in ['secret_ref','private_key_ref','admin_token_ref'] if key in value)
-            except (ValueError,TypeError):pass
-        for reference in references:
-            result=subprocess.run([str(DEV),'/usr/bin/security','delete-generic-password','-s','com.neonmix.identity.v1','-a',reference],capture_output=True,cwd=ROOT)
-            assert result.returncode in (0,44),'failed to remove fixture Keychain entry'
-        if report['passed']:shutil.rmtree(base)
-        else:report['failure_artifacts']=str(base.relative_to(ROOT))
+        remove_owned_fixture(base)
+        report['fixture_files_removed']=not base.exists()
         path=ROOT/'docs/evidence/e07/mixer-macos.json';path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n')
     print(json.dumps(report,ensure_ascii=False))
 

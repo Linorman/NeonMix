@@ -4,3 +4,15 @@
 **/__pycache__/
 .DS_Store
 /.local/
+
+# Product identity and offline migration secrets are never source artifacts.
+**/.credentials/
+**/runtime-key-*
+**/.neonmix-migration-*.staging/
+
+# Private receiver identity recovery journals.
+**/receiver.json.pending
+
+# Local network-node connection material is never a source artifact.
+/node-*
+/.ssh-node-known-hosts

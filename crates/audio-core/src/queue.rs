@@ -53,6 +53,9 @@ pub fn block_queue(
     ))
 }
 impl BlockProducer {
+    pub fn remaining_capacity(&self) -> usize {
+        self.inner.slots()
+    }
     pub fn push(&mut self, block: AudioBlock) -> bool {
         let frames = u64::from(block.header.frame_count);
         let entry = QueuedBlock {
@@ -72,6 +75,11 @@ impl BlockProducer {
     }
 }
 impl BlockConsumer {
+    pub fn next_is_timed(&self) -> bool {
+        self.inner
+            .peek()
+            .is_ok_and(|entry| entry.block.header.presentation_time_ns.is_some())
+    }
     pub fn queued_blocks(&self) -> usize {
         self.inner.slots()
     }

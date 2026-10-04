@@ -109,16 +109,8 @@ PENDPOINT_MINIPAIR  g_RenderEndpoints[] =
 
 //=============================================================================
 //
-// Capture miniport pairs. NOTE: the split of render and capture is arbitrary and
-// unnessary, this array could contain render endpoints.
-//
-static PENDPOINT_MINIPAIR g_CaptureEndpoints[] = { NULL };
-#define g_cCaptureEndpoints 0
-
-//=============================================================================
-//
 // Total miniports = # endpoints * 2 (topology + wave).
 //
-#define g_MaxMiniports  ((g_cRenderEndpoints + g_cCaptureEndpoints) * 2)
+#define g_MaxMiniports  (g_cRenderEndpoints * 2)
 
 #endif // _SIMPLEAUDIOSAMPLE_MINIPAIRS_H_

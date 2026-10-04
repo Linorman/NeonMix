@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Preserve native binaries, debug symbols, dependency licenses and source hashes."""
 import hashlib
+import argparse
 import json
 import os
 import platform
@@ -11,8 +12,14 @@ import subprocess
 import sys
 import zipfile
 
+from archive_policy import assert_clean, copy_ignore, excluded
+
 ROOT = Path(__file__).resolve().parents[1]
-NAME = f'neonmix-{"e04" if sys.platform == "darwin" else "e01"}-{sys.platform}-{platform.machine()}'
+parser = argparse.ArgumentParser()
+parser.add_argument('--native-media', action='store_true')
+args = parser.parse_args()
+native_media = sys.platform == 'darwin' or args.native_media
+NAME = f'neonmix-{"e07" if native_media else "e01"}-{sys.platform}-{platform.machine()}'
 OUT = ROOT / 'artifacts' / NAME
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -90,7 +97,16 @@ if sys.platform == 'darwin':
         hal_binary = hal_bundle / 'Contents/MacOS/NeonMixHAL'
         report['files_sha256']['NeonMixHAL.driver/Contents/MacOS/NeonMixHAL'] = hashlib.sha256(hal_binary.read_bytes()).hexdigest()
         macos_symbols(hal_binary, OUT / 'NeonMixHAL.dSYM')
-for name in ['neonmix-audio', 'neonmix-desktop', 'neonmix-background'] + (['neonmix-hub'] if sys.platform == 'darwin' else []):
+if sys.platform == 'win32' and native_media:
+    report['gstreamer_archive'] = json.loads((ROOT / '.local/gstreamer-windows/lock.json').read_text())
+    gst_prefix = Path(report['gstreamer_archive']['prefix'])
+    # A Windows archive must include the native DLLs and plugins needed by Hub.
+    for directory in ['bin', 'lib/gstreamer-1.0', 'libexec', 'share/licenses']:
+        source = gst_prefix / directory
+        if source.exists():
+            shutil.copytree(source, OUT / 'gstreamer' / directory, dirs_exist_ok=True)
+    (OUT / 'run.cmd').write_text('@echo off\r\nset "PATH=%~dp0gstreamer\\bin;%PATH%"\r\nset "GST_PLUGIN_SYSTEM_PATH_1_0=%~dp0gstreamer\\lib\\gstreamer-1.0"\r\n"%~dp0neonmix-desktop.exe" %*\r\n', encoding='utf-8')
+for name in ['neonmix-audio', 'neonmix-desktop', 'neonmix-background'] + (['neonmix-hub'] if native_media else []):
     binary = name + ('.exe' if sys.platform == 'win32' else '')
     source = ROOT / 'target/release' / binary
     shutil.copy2(source, OUT / binary)
@@ -106,15 +122,16 @@ for name in ['neonmix-audio', 'neonmix-desktop', 'neonmix-background'] + (['neon
         shutil.copy2(pdb, OUT / pdb.name)
     else:
         subprocess.run(['objcopy', '--only-keep-debug', str(source), str(OUT / (name + '.debug'))], check=True)
-shutil.copytree(ROOT / 'docs', OUT / 'docs', dirs_exist_ok=True)
+shutil.copytree(ROOT / 'docs', OUT / 'docs', dirs_exist_ok=True, ignore=copy_ignore)
 shutil.copy2(ROOT / 'vendor/cpal/LICENSE', OUT / 'CPAL-LICENSE')
 shutil.copy2(ROOT / 'vendor/tympan-aspl/LICENSE-MIT', OUT / 'TYMPAN-LICENSE-MIT')
 shutil.copy2(ROOT / 'vendor/tympan-aspl/LICENSE-APACHE', OUT / 'TYMPAN-LICENSE-APACHE')
 for name in ['Cargo.lock', 'rust-toolchain.toml', 'README.md', 'native-dependencies.toml', '01_NeonMix_设计方案与技术选型.md', '02_NeonMix_完整开发计划.md']:
     shutil.copy2(ROOT / name, OUT / name)
 (OUT / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
+assert_clean(OUT)
 with zipfile.ZipFile(ROOT / 'artifacts' / (NAME + '.zip'), 'w', zipfile.ZIP_DEFLATED) as archive:
     for file in OUT.rglob('*'):
-        if file.is_file():
+        if file.is_file() and not excluded(file.relative_to(OUT)):
             archive.write(file, file.relative_to(OUT.parent))
 print(OUT)

@@ -5,4 +5,10 @@
   <Import Project="$(NeonMixPackages)Microsoft.Windows.WDK.x64.10.0.26100.6584\build\native\Microsoft.Windows.WDK.x64.props" Condition="Exists('$(NeonMixPackages)Microsoft.Windows.WDK.x64.10.0.26100.6584\build\native\Microsoft.Windows.WDK.x64.props')" />
   <Import Project="$(NeonMixPackages)Microsoft.Windows.SDK.CPP.x64.10.0.26100.6584\build\native\Microsoft.Windows.SDK.cpp.x64.props" Condition="Exists('$(NeonMixPackages)Microsoft.Windows.SDK.CPP.x64.10.0.26100.6584\build\native\Microsoft.Windows.SDK.cpp.x64.props')" />
   <Import Project="$(NeonMixPackages)Microsoft.Windows.SDK.CPP.10.0.26100.6584\build\native\Microsoft.Windows.SDK.cpp.props" Condition="Exists('$(NeonMixPackages)Microsoft.Windows.SDK.CPP.10.0.26100.6584\build\native\Microsoft.Windows.SDK.cpp.props')" />
+  <PropertyGroup>
+    <!-- WDK defaults may select absent x86 tools from this x64-only package. -->
+    <WDKContentRoot>$(NeonMixPackages)Microsoft.Windows.WDK.x64.10.0.26100.6584\c\</WDKContentRoot>
+    <WDKBinRoot>$(WDKContentRoot)bin\10.0.26100.0</WDKBinRoot>
+    <InfToolPath>$(WDKBinRoot)\x64\</InfToolPath>
+  </PropertyGroup>
 </Project>

@@ -232,6 +232,8 @@ fn native_jitter_reorders_and_discards_late_packets_with_real_plc() {
     assert!(stats.plc_samples >= 480);
     assert!(stats.pcm_frames > 4800);
     assert!(stats.pcm_timing_gaps.is_empty());
+    assert_eq!(stats.jitter_queued_packets, 0);
+    assert!(!stats.jitter_capacity_exhausted);
     #[cfg(target_os = "macos")]
     {
         assert!(stats.native_scheduling.entered > 0);
@@ -241,4 +243,63 @@ fn native_jitter_reorders_and_discards_late_packets_with_real_plc() {
         );
         assert_eq!(stats.native_scheduling.failed, 0);
     }
+}
+
+#[test]
+fn sub_deadline_network_batches_do_not_evict_authenticated_audio() {
+    let sender_pem = pem();
+    let hub_pem = pem();
+    let s = session(&sender_pem);
+    let mut receiver = Receiver::new(s.clone(), &hub_pem, Instant::now()).unwrap();
+    let mut sender =
+        Sender::new(&s, &sender_pem, &certificate_fingerprint(&hub_pem).unwrap()).unwrap();
+    handshake(&sender, &receiver);
+    let (mut producer, mut consumer) = block_queue(16, Arc::new(AudioStats::default())).unwrap();
+    let start = Instant::now();
+    let mut source_frames = 0u64;
+    let mut next_delivery = Duration::from_millis(30);
+    let mut pending = Vec::new();
+    let mut next_pcm = 0;
+    while start.elapsed() < Duration::from_millis(1500) {
+        let elapsed = start.elapsed();
+        if source_frames < 48000
+            && elapsed.as_micros() >= u128::from(source_frames) * 1_000_000 / 48000
+        {
+            sender.push_frames(&[[0.01; 2]; 480]).unwrap();
+            source_frames += 480;
+        }
+        pending.extend(sender.outgoing());
+        if elapsed >= next_delivery {
+            // A 30 ms receive burst is inside the negotiated 40 ms jitter
+            // deadline. It must not be mistaken for a full/expired queue.
+            for packet in pending.drain(..) {
+                receiver.ingest(&packet).unwrap();
+            }
+            next_delivery += Duration::from_millis(30);
+        }
+        receiver.pump_pcm(&mut producer).unwrap();
+        while let Some(block) = consumer.pop_fresh(0, u64::MAX) {
+            assert_eq!(block.header.source_sample_position, next_pcm);
+            next_pcm += u64::from(block.header.frame_count);
+        }
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    let stats = receiver.stats();
+    println!(
+        "received={} pcm={} lost={} overflow={} late={}",
+        stats.packets.received,
+        stats.pcm_frames,
+        stats.lost_packets,
+        stats.overflow_plc_packets,
+        stats.late_packets
+    );
+    assert!(stats.packets.received >= 99);
+    assert!(stats.pcm_frames >= 47520);
+    assert_eq!(stats.lost_packets, 0);
+    assert_eq!(stats.overflow_plc_packets, 0);
+    assert_eq!(stats.jitter_queued_packets, 0);
+    assert!(!stats.jitter_capacity_exhausted);
+    assert_eq!(stats.pcm_sink_dropped, 0);
+    assert_eq!(stats.queue_drops, 0);
+    assert_eq!(stats.pcm_timing_gap_count, 0);
 }

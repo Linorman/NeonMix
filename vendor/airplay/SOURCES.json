@@ -1,0 +1,25 @@
+{
+  "uxplay": {
+    "tag": "v1.73.7",
+    "commit": "df67c212a433cf6dda3676dd40c097900d24e645",
+    "archive_sha256": "168de53ed688f87c4022d79357ce91f9608ad5c53236bff95134d19b88efeb3f",
+    "url": "https://codeload.github.com/FDH2/UxPlay/tar.gz/df67c212a433cf6dda3676dd40c097900d24e645",
+    "patch": "patches/airplay-audio-only.patch"
+  },
+  "libplist": {
+    "tag": "2.6.0",
+    "archive_sha256": "e6491c2fa3370e556ac41b8705dd7f8f0e772c8f78641c3878cabd45bd84d950",
+    "url": "https://codeload.github.com/libimobiledevice/libplist/tar.gz/refs/tags/2.6.0"
+  },
+  "gstreamer_sdk": {
+    "version": "1.28.7",
+    "archive_sha256": "72a44870cf02472cbf6e9a84bcc25ee6807dd1c26659a112066373544d365e7a",
+    "url": "https://gstreamer.freedesktop.org/data/pkg/osx/1.28.7/gstreamer-1.0-devel-1.28.7-universal.pkg"
+  },
+  "gstreamer_runtime": {
+    "version": "1.28.7",
+    "archive_sha256": "529fdf4a4027d942e59b5b3564f6400adaa008f63ce5f3fed4ffe35d73911994",
+    "preparation": "tools/prepare_gstreamer.py"
+  },
+  "validation": "macOS arm64 developer build and synthetic protocol/audio probes; no Apple device interoperability evidence"
+}

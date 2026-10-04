@@ -540,57 +540,6 @@ Exit:
     return ntStatus;
 }
 
-#pragma code_seg("PAGE")
-NTSTATUS
-InstallEndpointCaptureFilters(
-    _In_ PDEVICE_OBJECT     _pDeviceObject,
-    _In_ PIRP               _pIrp,
-    _In_ PADAPTERCOMMON     _pAdapterCommon,
-    _In_ PENDPOINT_MINIPAIR _pAeMiniports
-)
-{
-    NTSTATUS    ntStatus = STATUS_SUCCESS;
-
-    PAGED_CODE();
-
-    UNREFERENCED_PARAMETER(_pDeviceObject);
-
-    ntStatus = _pAdapterCommon->InstallEndpointFilters(
-        _pIrp,
-        _pAeMiniports,
-        NULL,
-        NULL,
-        NULL,
-        NULL, NULL);
-
-    return ntStatus;
-}
-
-#pragma code_seg("PAGE")
-NTSTATUS
-InstallAllCaptureFilters(
-    _In_ PDEVICE_OBJECT _pDeviceObject,
-    _In_ PIRP           _pIrp,
-    _In_ PADAPTERCOMMON _pAdapterCommon
-)
-{
-    NTSTATUS            ntStatus;
-    PENDPOINT_MINIPAIR* ppAeMiniports = g_CaptureEndpoints;
-
-    PAGED_CODE();
-
-    for (ULONG i = 0; i < g_cCaptureEndpoints; ++i, ++ppAeMiniports)
-    {
-        ntStatus = InstallEndpointCaptureFilters(_pDeviceObject, _pIrp, _pAdapterCommon, *ppAeMiniports);
-        IF_FAILED_JUMP(ntStatus, Exit);
-    }
-
-    ntStatus = STATUS_SUCCESS;
-
-Exit:
-    return ntStatus;
-}
-
 //=============================================================================
 #pragma code_seg("PAGE")
 NTSTATUS
@@ -666,12 +615,6 @@ Return Value:
     // Install wave+topology filters for render devices
     //
     ntStatus = InstallAllRenderFilters(DeviceObject, Irp, pAdapterCommon);
-    IF_FAILED_JUMP(ntStatus, Exit);
-
-    //
-    // Install wave+topology filters for capture devices
-    //
-    ntStatus = InstallAllCaptureFilters(DeviceObject, Irp, pAdapterCommon);
     IF_FAILED_JUMP(ntStatus, Exit);
 
 Exit:

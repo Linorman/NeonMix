@@ -12,6 +12,8 @@ import subprocess
 import time
 import uuid
 from e07_background_probe import ipc, wait_for
+from credential_fixture import remove_owned_fixture
+
 ROOT=Path(__file__).resolve().parents[1]
 DEV=ROOT/'tools/dev'
 UI=ROOT/'target/release/neonmix-desktop'
@@ -32,24 +34,19 @@ class NativeUI:
         self.ax('return entire contents of window 1 of p')
         wait_for(lambda:'text field' in self.ax('return entire contents of window 1 of p'))
     def press(self,label):
+        target = f'button "{label}" of group 1 of window 1 of p'
+        if label == '退出后台':
+            target = '(last button of group 1 of window 1 of p whose name is "退出后台")'
         body=f'''try
-if enabled of button "{label}" of group 1 of window 1 of p then
-click button "{label}" of group 1 of window 1 of p
+if enabled of {target} then
+click {target}
 return "pressed"
 end if
 end try
-repeat with candidateElement in entire contents of window 1 of p
-set e to contents of candidateElement
-try
-if role of e is "AXButton" and (name of e is "{label}" or description of e is "{label}") and enabled of e then
-click e
-return "pressed"
-end if
-end try
-end repeat
 return "unavailable"'''
         wait_for(lambda:self.ax(body)=='pressed')
     def paste(self,label,value):
+        wait_for(lambda:self.ax(f'return enabled of text field "{label}" of group 1 of window 1 of p')=='true')
         escaped=value.replace('\\','\\\\').replace('"','\\"')
         script=f'''set oldClipboard to the clipboard
 try
@@ -96,6 +93,8 @@ def main():
         wait_for(lambda:'MacBook Pro Speakers' in app.ax('return entire contents of window 1 of p'))
         app.ax('click checkbox "MacBook Pro Speakers" of group 1 of window 1 of p')
         app.press('创建房间');wait_for(lambda:ipc(state,'status')['hub_settings'])
+        metadata=json.loads((state/'hub/server.json').read_text())
+        assert metadata['version']==2 and metadata['credential_store']=='file'
         app.press('开始共享');snapshot=wait_for(lambda:ipc(state,'snapshot',credential='hub/admin.json',hub=URL))
         assert snapshot['viewer']['room_name']=='影音室 E07' and snapshot['output']['id']=='coreaudio:BuiltInSpeakerDevice'
         report['scenarios']['native_popup_setup_start_and_real_authority']=True
@@ -112,12 +111,12 @@ def main():
         app=NativeUI(state);app.activate()
         wait_for(lambda:app.ax('return value of text field "房间名称" of group 1 of window 1 of p')=='影音室 E07')
         report['scenarios']['actual_gui_crash_audio_continues_and_new_gui_reads_saved_state']=True
-        app.ax('click checkbox "Mixer" of group 1 of window 1 of p')
+        app.ax('click button "Mixer" of group 1 of window 1 of p')
         wait_for(lambda:'总音量' in app.ax('return entire contents of window 1 of p'))
         app.press('总静音');wait_for(lambda:ipc(state,'snapshot',credential='hub/admin.json',hub=URL)['output']['muted'])
         app.press('取消总静音');wait_for(lambda:not ipc(state,'snapshot',credential='hub/admin.json',hub=URL)['output']['muted'])
         report['scenarios']['native_mixer_controls_commit_server_state']=True
-        app.ax('click checkbox "诊断" of group 1 of window 1 of p')
+        app.ax('click button "诊断" of group 1 of window 1 of p')
         app.press('导出脱敏诊断');wait_for(lambda:(state/'diagnostics-redacted.json').exists())
         exported=(state/'diagnostics-redacted.json').read_text()
         assert '影音室' not in exported and 'coreaudio:' not in exported and str(state) not in exported
@@ -144,14 +143,7 @@ def main():
         try:ipc(state,'shutdown')
         except (OSError,RuntimeError):pass
         if app:app.close()
-        path=state/'hub/server.json'
-        if path.exists():
-            config=json.loads(path.read_text())
-            for reference in [config.get('private_key_ref'),config.get('admin_token_ref')]:
-                if reference:
-                    result=subprocess.run([str(DEV),'/usr/bin/security','delete-generic-password','-s','com.neonmix.identity.v1','-a',reference],capture_output=True,cwd=ROOT)
-                    assert result.returncode in (0,44),'failed to delete fixture Keychain entry'
-        shutil.rmtree(state)
+        remove_owned_fixture(state)
         evidence=ROOT/'docs/evidence/e07/native-ui-macos.json';evidence.parent.mkdir(parents=True,exist_ok=True);evidence.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(report,ensure_ascii=False))
 

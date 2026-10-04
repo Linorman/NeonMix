@@ -12,6 +12,8 @@ import sys
 import tempfile
 from xml.sax.saxutils import escape
 
+from archive_policy import assert_clean
+
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--release', action='store_true', help='Require existing Developer ID bundle and installer signing identity')
@@ -26,6 +28,7 @@ OUT = ROOT / 'artifacts/macos/packages'
 OUT.mkdir(parents=True, exist_ok=True)
 identifier = 'com.neonmix.audio.hal'
 installer_identity = os.environ.get('NEONMIX_INSTALLER_SIGN_IDENTITY', '')
+assert_clean(BUNDLE)
 subprocess.run(['codesign', '--verify', '--strict', str(BUNDLE)], check=True)
 signature = subprocess.run(['codesign', '-dvvv', str(BUNDLE)], capture_output=True, text=True, check=True)
 if args.release:
