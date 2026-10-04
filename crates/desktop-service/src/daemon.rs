@@ -16,6 +16,8 @@ use tokio::{
 
 const COMMAND_TIMEOUT: Duration = Duration::from_secs(25);
 const LOG_LINE_LIMIT: usize = 16_384;
+/// Up to 10 s for `hub serve` to bind or fail (first launch scans GStreamer).
+const HUB_START_POLLS: u32 = 200;
 
 fn discovery_result(value: Value) -> Result<Value> {
     let completion = match value {
@@ -152,6 +154,14 @@ fn classify_error(message: &str) -> String {
     }
     if m.contains("setup_incomplete") {
         return "Hub 资料不完整，请恢复完整目录；不能重新初始化覆盖".into();
+    }
+    // EADDRINUSE on macOS/Linux, WSAEADDRINUSE on Windows (localized text).
+    if m.contains("address already in use")
+        || m.contains("os error 48)")
+        || m.contains("os error 98)")
+        || m.contains("os error 10048)")
+    {
+        return "Hub 端口 7443 已被占用；请先退出其他 NeonMix Hub 或占用该端口的程序".into();
     }
     if m.contains("revok")
         || m.contains("unauthoriz")
@@ -820,8 +830,29 @@ impl Runtime {
                         profile.to_string_lossy().into_owned(),
                     ],
                 )?;
-                tokio::time::sleep(Duration::from_millis(250)).await;
-                self.hub.reap();
+                // Report a startup failure (busy port, missing runtime) as the
+                // result of this request rather than as a later status change.
+                for _ in 0..HUB_START_POLLS {
+                    tokio::time::sleep(Duration::from_millis(50)).await;
+                    self.hub.reap();
+                    if !self.hub.status().running {
+                        // Let the stderr reader classify the final line.
+                        tokio::time::sleep(Duration::from_millis(100)).await;
+                        return Err(self
+                            .hub
+                            .status()
+                            .error
+                            .unwrap_or_else(|| "Hub 启动后立即退出；请检查运行时和配置".into()));
+                    }
+                    if self
+                        .hub
+                        .status()
+                        .last_event
+                        .is_some_and(|e| e["event"] == "hub_started")
+                    {
+                        break;
+                    }
+                }
                 Ok(serde_json::to_value(self.status()).map_err(|e| e.to_string())?)
             }
             Request::HubStop => {

@@ -4,6 +4,8 @@
 #define UNICODE
 #define _UNICODE
 #include <windows.h>
+#include <aclapi.h>
+#include <sddl.h>
 #include <shlobj.h>
 #include <wchar.h>
 
@@ -15,6 +17,59 @@ static void fail(const wchar_t *message) {
 static void join(wchar_t *out, const wchar_t *base, const wchar_t *tail) {
     if (_snwprintf_s(out, MAX_PATH, _TRUNCATE, L"%ls\\%ls", base, tail) < 0) {
         fail(L"安装路径过长。");
+    }
+}
+
+/* The background accepts only directories owned by the user's own SID. An
+ * elevated token (the built-in Administrator, or "Run as administrator")
+ * defaults new objects to BUILTIN\Administrators, so the owner is explicit. */
+static PSID user_sid(void) {
+    static DWORD buffer[256];
+    HANDLE token;
+    DWORD size = sizeof(buffer);
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) fail(L"无法读取当前用户。");
+    BOOL ok = GetTokenInformation(token, TokenUser, buffer, size, &size);
+    CloseHandle(token);
+    if (!ok) fail(L"无法读取当前用户。");
+    return ((TOKEN_USER *)buffer)->User.Sid;
+}
+
+static void private_dir(const wchar_t *path) {
+    PSID user = user_sid();
+    wchar_t *sid = NULL, sddl[256];
+    if (!ConvertSidToStringSidW(user, &sid)) fail(L"无法读取当前用户。");
+    _snwprintf_s(sddl, 256, _TRUNCATE, L"O:%lsD:P(A;OICI;FA;;;%ls)", sid, sid);
+    LocalFree(sid);
+    SECURITY_ATTRIBUTES attributes = {sizeof(attributes), NULL, FALSE};
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(
+            sddl, SDDL_REVISION_1, &attributes.lpSecurityDescriptor, NULL)) {
+        fail(L"无法建立数据目录权限。");
+    }
+    BOOL created = CreateDirectoryW(path, &attributes);
+    DWORD error = GetLastError();
+    LocalFree(attributes.lpSecurityDescriptor);
+    if (created) return;
+    if (error != ERROR_ALREADY_EXISTS) fail(L"无法创建数据目录。");
+    DWORD flags = GetFileAttributesW(path);
+    if (flags == INVALID_FILE_ATTRIBUTES || !(flags & FILE_ATTRIBUTE_DIRECTORY) ||
+        (flags & FILE_ATTRIBUTE_REPARSE_POINT)) {
+        fail(L"数据目录无效。");
+    }
+    PSID owner = NULL;
+    PSECURITY_DESCRIPTOR descriptor = NULL;
+    if (GetNamedSecurityInfoW(path, SE_FILE_OBJECT, OWNER_SECURITY_INFORMATION, &owner, NULL,
+                              NULL, NULL, &descriptor) != ERROR_SUCCESS) {
+        fail(L"无法读取数据目录所有者。");
+    }
+    BOOL mine = EqualSid(owner, user);
+    BOOL administrators = IsWellKnownSid(owner, WinBuiltinAdministratorsSid);
+    LocalFree(descriptor);
+    if (mine) return;
+    // Repair a directory an elevated earlier launch created for this user.
+    if (!administrators || SetNamedSecurityInfoW((LPWSTR)path, SE_FILE_OBJECT,
+                                                 OWNER_SECURITY_INFORMATION, user, NULL, NULL,
+                                                 NULL) != ERROR_SUCCESS) {
+        fail(L"数据目录不属于当前用户。请删除 %LOCALAPPDATA%\\NeonMix 后重试。");
     }
 }
 
@@ -38,8 +93,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR arguments, int
     }
     join(state, local, L"NeonMix");
     join(temp, state, L"tmp");
-    if (!CreateDirectoryW(state, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) fail(L"无法创建数据目录。");
-    if (!CreateDirectoryW(temp, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) fail(L"无法创建临时目录。");
+    private_dir(state);
+    private_dir(temp);
 
     join(bin, root, L"bin");
     join(desktop, bin, L"neonmix-desktop.exe");

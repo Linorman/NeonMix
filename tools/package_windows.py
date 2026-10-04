@@ -132,7 +132,7 @@ def stage(root, mingw, worker):
     # Launcher: GUI-subsystem, no console window.
     subprocess.run(['cl', '/nologo', '/O2', '/W3', '/WX', '/utf-8', f'/Fe:{root / "NeonMix.exe"}',
                     f'/Fo:{root.parent / "launcher.obj"}', str(PACKAGING / 'launcher.c'),
-                    '/link', '/SUBSYSTEM:WINDOWS', 'user32.lib', 'shell32.lib'], check=True)
+                    '/link', '/SUBSYSTEM:WINDOWS', 'user32.lib', 'shell32.lib', 'advapi32.lib'], check=True)
     return owner
 
 
