@@ -32,7 +32,7 @@ fn active_native_starvation_counts_every_internal_frame_after_dsp_reset() {
             assert!(inputs[0].push(block));
         }
         // Consume valid PCM and go well beyond FIFO exhaustion.
-        mixer.render_block(&mut [[0.; 2]; 9600]);
+        mixer.render_block(&mut vec![[0.; 2]; 9600]);
         let before = stats.underrun_frames.load(Relaxed);
         let mut output = vec![[0.; 2]; period];
         let mut remaining = 48000;
@@ -101,7 +101,7 @@ fn active_timed_starvation_counts_one_second_and_stops_on_remove() {
     mixer.render_block(&mut [[0.; 2]; 480]);
     let before = stats.underrun_frames.load(Relaxed);
     mixer.set_presentation_time(origin + Duration::from_millis(1010));
-    mixer.render_block(&mut [[0.; 2]; 48000]);
+    mixer.render_block(&mut vec![[0.; 2]; 48000]);
     assert_eq!(stats.underrun_frames.load(Relaxed) - before, 48000);
     config.lanes[0] = LaneMix::default();
     control.apply(config).unwrap();
