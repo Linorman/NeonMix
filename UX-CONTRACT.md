@@ -116,3 +116,5 @@ Canonical owner：measurement.rs的ObservationClock/CounterHistory、lanes.rs的
 Sender真实目标来自后台锁存的sender_started认证Hub/设备/房间名；当前控制房间与身份不覆盖它。目标未确认显示正在确认发送目标，远端输出/通道/电平只采用相同Hub的快照和目标设备。旧组件缺少metrics_age_ms时不把反复读取的累计值当作新采样；相同采样序号不制造新计数增量，Sender/后台实例变更清空计数基线。脱敏导出只新增数值age/sequence字段，不导出sender_target、Hub/设备身份或房间名。实际IME/读屏与其他平台仍单独验收。
 
 电平的sample_age_ms另取实际音频publication时钟；诊断GET持续成功不能刷新冻结callback的样本。measurement.rs::meter_measurement统一服务现场/顶栏/行式/控制台，年龄超限显示空电平与未知输出健康，不影响独立有效网络/采集读数。
+
+AirPlay 通道的静音/Solo 可用性与整行透明度不使用电平采样期限：Mixer 的 750ms 电平过期仍显示未知读数，但不等同于权限丢失或静音。控制继续绑定原 source/session/runtime 和配置条件，实际服务器重新校验。明确不可用、runtime 变化和持续读取失败仍使操作不可用；整行淡出只跟随已知的静音、Solo 与输出状态。
