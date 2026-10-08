@@ -215,9 +215,11 @@ impl Desktop {
                 gain: mix("gain_db").and_then(Value::as_f64).unwrap_or(0.0) as f32,
                 muted,
                 solo,
-                can_mix: self.admin() && current,
-                can_solo: self.admin() && current,
-                audible: current && state.output.available && !muted && !solo_elsewhere,
+                can_mix: self.admin() && self.airplay_controls_available(),
+                can_solo: self.admin() && self.airplay_controls_available(),
+                // Missing telemetry is not evidence of mute. Dimming the
+                // entire channel here also makes enabled buttons look disabled.
+                audible: state.output.available && !muted && !solo_elsewhere,
                 peak,
                 rms,
                 device_id: None,
@@ -415,6 +417,86 @@ impl AirplayMix {
 #[cfg(test)]
 mod freshness_tests {
     use super::*;
+    #[test]
+    fn airplay_meter_deadline_never_changes_controls_or_channel_opacity() {
+        let data: Value = serde_json::from_str(include_str!(
+            "../../../docs/evidence/ui-rebuild-20261004/fixtures/full.json"
+        ))
+        .unwrap();
+        let mut app = Desktop::empty(
+            Client::new(".local/test-airplay-control-freshness"),
+            true,
+            false,
+        );
+        app.load_preview(&data);
+        for stream in app.snapshot.as_mut().unwrap().streams.values_mut() {
+            stream.mix.muted = false;
+            stream.mix.solo = false;
+        }
+        for session in app.airplay.as_mut().unwrap()["sessions"]
+            .as_array_mut()
+            .unwrap()
+        {
+            session["mix"]["muted"] = Value::Bool(false);
+            session["mix"]["solo"] = Value::Bool(false);
+        }
+        let state = app.snapshot.clone().unwrap();
+        for page in [Page::Mixer, Page::Live] {
+            app.page = page;
+            for age_ms in [100, 800, 1500, 3500] {
+                app.airplay_clock.success(
+                    app.airplay.as_ref().unwrap(),
+                    Some(state.runtime_epoch),
+                    Instant::now() - Duration::from_millis(age_ms),
+                );
+                let lanes: Vec<_> = app
+                    .lanes(&state)
+                    .into_iter()
+                    .filter(|lane| lane.airplay_target.is_some())
+                    .collect();
+                assert_eq!(lanes.len(), 2);
+                for lane in lanes {
+                    assert!(
+                        lane.can_mix && lane.can_solo,
+                        "{page:?}/{age_ms}: telemetry disabled buttons"
+                    );
+                    assert!(
+                        lane.audible,
+                        "{page:?}/{age_ms}: telemetry dimmed the channel"
+                    );
+                    if age_ms > app.poll_interval().as_millis() as u64 * 3 {
+                        assert!(
+                            lane.rms.is_none(),
+                            "stale audio readings must stay unavailable"
+                        );
+                    }
+                }
+            }
+        }
+        app.airplay_clock.failed();
+        app.airplay_clock.success(
+            app.airplay.as_ref().unwrap(),
+            Some(state.runtime_epoch),
+            Instant::now() - Duration::from_secs(5),
+        );
+        app.airplay_clock.failed();
+        assert!(
+            app.lanes(&state)
+                .iter()
+                .filter(|lane| lane.airplay_target.is_some())
+                .all(|lane| !lane.can_mix)
+        );
+        app.airplay_clock.success(
+            app.airplay.as_ref().unwrap(),
+            Some(uuid::Uuid::new_v4()),
+            Instant::now(),
+        );
+        assert!(
+            !app.airplay_controls_available(),
+            "other runtime cannot authorize controls"
+        );
+    }
+
     #[test]
     fn current_mixer_starvation_and_failed_diagnostics_are_shared_by_all_lane_views() {
         let fixture: Value = serde_json::from_str(include_str!(

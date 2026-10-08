@@ -372,6 +372,31 @@ impl crate::Desktop {
             .current()
             .is_some()
     }
+    /// A telemetry deadline is not a permission change. Session/configuration
+    /// conditions stay bound in the command and are checked by the server;
+    /// stale meters alone must not disable a visible channel's controls.
+    pub(crate) fn airplay_controls_available(&self) -> bool {
+        if !self.writable() {
+            return false;
+        }
+        let epoch = self.snapshot.as_ref().map(|s| s.runtime_epoch);
+        match self.airplay_clock.inspect(
+            self.airplay.as_ref(),
+            epoch,
+            Instant::now(),
+            self.poll_interval(),
+        ) {
+            Measurement::Available(_) | Measurement::Stale { .. } => true,
+            Measurement::Unavailable {
+                reason: UnavailableReason::ReadFailed,
+                last_good: Some(sample),
+            } => {
+                sample.runtime_epoch == epoch
+                    && sample.received_at.elapsed() < Duration::from_secs(4)
+            }
+            _ => false,
+        }
+    }
     pub(crate) fn observation_note(&self, measurement: Measurement<&Value>) -> String {
         use crate::Message;
         match measurement {
