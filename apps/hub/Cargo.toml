@@ -38,6 +38,7 @@ objc2 = "=0.6.4"
 objc2-foundation = { version = "=0.3.2", default-features = false, features = ["std", "NSProcessInfo", "NSString"] }
 [target.'cfg(target_os = "windows")'.dependencies]
 neonmix-windows = { path = "../../adapters/windows" }
+windows-sys = { version = "0.59", features = ["Win32_System_Threading"] }
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2"
 neonmix-linux = { path = "../../adapters/linux" }

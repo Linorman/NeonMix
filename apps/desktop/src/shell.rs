@@ -40,7 +40,7 @@ impl Desktop {
             .frame(
                 egui::Frame::new()
                     .fill(self.status_fill())
-                    .inner_margin(Margin::symmetric(20, 6)),
+                    .inner_margin(Margin::symmetric(20, 2)),
             )
             .show(ctx, |ui| self.status_strip(ui));
         egui::CentralPanel::default()
@@ -482,6 +482,7 @@ impl Desktop {
                 ui.spacing_mut().button_padding = egui::vec2(10.0, 4.0);
                 let response = egui::ComboBox::from_id_salt("credential")
                     .width(width - 4.0)
+                    .truncate()
                     .selected_text(RichText::new(selected).size(theme::SMALL + 1.0))
                     .show_ui(ui, |ui| {
                         if let Some(status) = &self.status {
@@ -587,20 +588,39 @@ impl Desktop {
                     1.0,
                 );
             }
-            let width = ui.max_rect().width();
+            // The chip shares this row with the title and emblem. Bounding
+            // it by the whole row lets a long name push actions off-window.
+            let width = ui.available_width();
             let _ = widgets::pill_sized(ui, &chip, room_tone, width)
                 .on_hover_text(format!("{chip}\n{shell_room_tooltip}"));
         };
-        if ui.available_width() >= 640.0 {
+        let actions_width = self.top_bar_actions_width(ui);
+        let title_width = ui.fonts(|f| {
+            f.layout_no_wrap(title.clone(), theme::heading(theme::TITLE), theme::TEXT)
+                .size()
+                .x
+        });
+        // Reserve actions first, using the actual localized labels instead
+        // of a fixed breakpoint that only fits one language.
+        if ui.available_width() >= actions_width + title_width + 190.0 {
             ui.horizontal(|ui| {
-                left(ui);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    self.top_bar_actions(ui)
-                });
+                    ui.allocate_ui_with_layout(
+                        egui::vec2(actions_width, theme::CONTROL_HEIGHT),
+                        Layout::right_to_left(Align::Center),
+                        |ui| self.top_bar_actions(ui),
+                    );
+                    ui.allocate_ui_with_layout(
+                        egui::vec2(ui.available_width(), theme::CONTROL_HEIGHT),
+                        Layout::left_to_right(Align::Center),
+                        left,
+                    );
+                })
             });
         } else {
-            ui.horizontal_wrapped(left);
+            ui.horizontal(left);
             ui.horizontal_wrapped(|ui| {
+                ui.spacing_mut().item_spacing.x = 6.0;
                 self.top_bar_actions(ui);
             });
         }
@@ -612,6 +632,30 @@ impl Desktop {
                     .render(&Message::ShellFontMissing),
             );
         }
+    }
+
+    fn top_bar_actions_width(&self, ui: &egui::Ui) -> f32 {
+        let button_width = |text: String| {
+            ui.fonts(|f| {
+                f.layout_no_wrap(text, egui::FontId::proportional(theme::BODY), theme::TEXT)
+                    .size()
+                    .x
+            }) + 2.0 * ui.spacing().button_padding.x
+        };
+        let mut width = button_width(self.tr(&Message::ShellQuickActions {
+            shortcut: widgets::command_hint("K"),
+        }))
+        .max(theme::CONTROL_HEIGHT);
+        if self.page != Page::Mixer && self.snapshot.is_some() {
+            width += 10.0 + 76.0 + 96.0 + 4.0 * ui.spacing().item_spacing.x;
+            if self.controls_room() {
+                width += button_width(self.tr(&Message::ShellMasterMute))
+                    .max(button_width(self.tr(&Message::ShellMasterUnmute)))
+                    .max(theme::CONTROL_HEIGHT)
+                    + ui.spacing().item_spacing.x;
+            }
+        }
+        width.ceil()
     }
 
     /// Right-to-left: ⌘K first (rightmost), then the master glance.
@@ -671,7 +715,19 @@ impl Desktop {
             meter.and_then(|v| v["peak"].as_f64()),
             meter.and_then(|v| v["rms"].as_f64()),
         );
-        let level = widgets::level(ui, "topbar-master", egui::vec2(96.0, 6.0), peak, rms)
+        // In a wrapped row the meter may use the remaining width; forcing
+        // 96 px would create a mostly empty extra header row in English.
+        let meter_width = if ui.layout().main_wrap() {
+            let remaining = ui.available_size_before_wrap().x;
+            if remaining >= 24.0 {
+                remaining.min(96.0)
+            } else {
+                96.0
+            }
+        } else {
+            96.0
+        };
+        let level = widgets::level(ui, "topbar-master", egui::vec2(meter_width, 6.0), peak, rms)
             .interact(egui::Sense::click())
             .on_hover_text(shell_output_tooltip.as_str());
         if level.clicked() {
@@ -740,10 +796,19 @@ impl Desktop {
         // New text eases in; nothing else in the strip moves or blinks.
         let appear = 0.35 + 0.65 * animation::fade_in(ui.ctx(), self.message_since.elapsed(), 0.22);
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            ui.spacing_mut().item_spacing.x = 14.0;
+            let compact = ui.available_width() < 600.0;
+            ui.spacing_mut().item_spacing.x = if compact { 8.0 } else { 14.0 };
+            // Secondary process states retain their complete accessible name
+            // and tooltip when the strip needs room for feedback and Undo.
+            let process_dot = |ui: &mut egui::Ui, text: &str, tone: Tone| {
+                let response = widgets::dot(ui, if compact { "" } else { text }, tone);
+                response
+                    .widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Label, true, text));
+                response.on_hover_text(text)
+            };
             let status = self.status.as_ref();
             if status.is_some_and(|s| s.sender.running) {
-                widgets::dot(ui, shell_sending.as_str(), Tone::Success);
+                process_dot(ui, shell_sending.as_str(), Tone::Success);
             }
             match status.map(|s| s.hub.running) {
                 Some(true) => widgets::dot(ui, shell_hub_sharing.as_str(), Tone::Success),
@@ -751,11 +816,11 @@ impl Desktop {
                 None => widgets::dot(ui, shell_hub_unknown.as_str(), Tone::Neutral),
             };
             if self.preview {
-                widgets::dot(ui, shell_preview_badge.as_str(), Tone::Accent);
+                process_dot(ui, shell_preview_badge.as_str(), Tone::Accent);
             } else if self.online {
-                widgets::dot(ui, shell_online.as_str(), Tone::Success);
+                process_dot(ui, shell_online.as_str(), Tone::Success);
             } else {
-                widgets::dot(ui, shell_offline.as_str(), Tone::Warning);
+                process_dot(ui, shell_offline.as_str(), Tone::Warning);
             }
             // 还原: the last mixer change, for a few seconds.
             if self
@@ -797,12 +862,25 @@ impl Desktop {
                     self.restore_last();
                 }
                 if let Some(undo) = &self.undo {
-                    ui.label(
-                        RichText::new(self.tr(&Message::ShellAdjusted {
-                            change: self.tr(&undo.label),
-                        }))
-                        .size(theme::SMALL)
-                        .color(theme::TEXT_2),
+                    let label = self.tr(&Message::ShellAdjusted {
+                        change: self.tr(&undo.label),
+                    });
+                    let width = ((ui.available_width() - ui.spacing().item_spacing.x) * 0.5)
+                        .clamp(1.0, 280.0);
+                    ui.allocate_ui_with_layout(
+                        egui::vec2(width, 22.0),
+                        Layout::left_to_right(Align::Center),
+                        |ui| {
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new(&label)
+                                        .size(theme::SMALL)
+                                        .color(theme::TEXT_2),
+                                )
+                                .truncate(),
+                            )
+                            .on_hover_text(&label);
+                        },
                     );
                 }
             }

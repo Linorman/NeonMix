@@ -1,5 +1,11 @@
 # NeonMix 实现状态
 
+## 共享启动与界面布局修复（2026-10-08）
+
+Windows AirPlay worker 启动补齐 `CREATE_NO_WINDOW`，消除控制台程序默认创建窗口的路径；后台和 Hub 自身的标志不会由子进程继承。桌面普通 worker 忙时保留一个冻结参数的后续操作，队列满明确反馈；共享启动时 Hub 开关、现场和快速操作可立即停止，并取消尚未发送的启动。修复长房间名挤出顶栏操作、英文身份框撑宽侧栏、底栏还原按钮裁切与长说明越界，保留完整 tooltip/AX。
+
+Desktop 84 项、Hub AirPlay 14 项测试通过，严格 Clippy、格式、746 条双语资源与 UI AST 检查通过。Windows Hub/Desktop 全 targets 交叉类型检查通过；macOS release 的中英文原生预览覆盖 600×440 / 1100×760，布局自动回归含 200% 缩放。此次未执行 Windows 实际桌面/焦点复测，也未重打 Windows 安装包，不能将代码修复和交叉检查等同于该平台闪烁已实机验收。开发日志和截图位于 `artifacts/ui-fix-20261008/`。
+
 ## UI 多语言开发交付（2026-10-07）
 
 已完成默认Auto、简体中文和English；首期七页/AirPlay、动态语义反馈/事件、tooltip/AX、原生菜单、偏好兼容与英文回退，724条消息/20双语模块严格检查通过。当前desktop/service/i18n联合113测试、严格Clippy与格式通过；macOS固定release54次实际语言/菜单/焦点/隐藏恢复回归通过，Windows固定源原生功能测试/构建通过，Linux仅离线交叉检查。

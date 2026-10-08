@@ -1106,6 +1106,14 @@ fn run_worker(
         .join(sibling.file_name().unwrap_or_default());
     let executable = if private.is_file() { private } else { sibling };
     let mut process = std::process::Command::new(executable);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        // The Hub's CREATE_NO_WINDOW flag is not inherited by its children.
+        // Redirecting stdio alone still permits the console worker to open a
+        // window when sharing starts (or a receiver is restarted).
+        process.creation_flags(windows_sys::Win32::System::Threading::CREATE_NO_WINDOW);
+    }
     process
         .env("GST_PLUGIN_SYSTEM_PATH_1_0", runtime.join("plugins"))
         .env("GST_PLUGIN_PATH_1_0", "")
