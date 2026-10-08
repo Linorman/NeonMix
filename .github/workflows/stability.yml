@@ -50,8 +50,26 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./tools/dev.ps1 python tools/review_check.py
-      - uses: actions/upload-artifact@v4
+      - name: Check results in the job summary
         if: always()
+        shell: python
+        run: |
+          import json, os
+          from pathlib import Path
+          result = Path('artifacts/review-checks/result.json')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              if result.exists():
+                  data = json.loads(result.read_text())
+                  summary.write('| Check | Exit code | Seconds |\n|---|---:|---:|\n')
+                  for name, value in data.items():
+                      summary.write(f"| {name} | {value['exit_code']} | {value['seconds']} |\n")
+                  summary.write('\nArtifact upload is separate from these checks; its failure remains visible in the step log.\n')
+              else:
+                  summary.write('No check result was produced. Inspect the failed setup/check step.\n')
+      - name: Archive check logs (optional)
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
         with:
           name: stability-${{ matrix.os }}-${{ github.sha }}
           path: artifacts/review-checks/
