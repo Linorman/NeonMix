@@ -100,15 +100,24 @@ impl Desktop {
                 let action = |this: &mut Self, ui: &mut egui::Ui| {
                     if configured {
                         // One switch: its accessible name is the action it performs.
-                        let busy = this.pending("hub-start") || this.pending("hub-stop");
-                        let label = if running {
+                        let starting = this.pending("hub-start");
+                        let stopping = this.pending("hub-stop")
+                            || (this.pending_stop
+                                && matches!(this.urgent_target, crate::LocalStop::Hub));
+                        let can_stop = running || starting;
+                        let label = if can_stop {
                             text_hub_stop_sharing.as_str()
                         } else {
                             text_hub_start_sharing.as_str()
                         };
-                        let switch =
-                            crate::viz::switch(ui, running || !dirty, running, busy, label);
-                        let switch = if running {
+                        let switch = crate::viz::switch(
+                            ui,
+                            (can_stop || !dirty) && !stopping,
+                            running,
+                            starting || stopping,
+                            label,
+                        );
+                        let switch = if can_stop {
                             switch.on_hover_text(
                                 text_hub_stop_sharing_the_room_stops_playing_paired_devices
                                     .as_str(),
@@ -121,8 +130,8 @@ impl Desktop {
                                 text_hub_start_sharing_devices_on_your_local_network_can.as_str(),
                             )
                         };
-                        if switch.clicked() && !busy && (running || !dirty) {
-                            this.request(if running {
+                        if switch.clicked() && !stopping && (can_stop || !dirty) {
+                            this.request(if can_stop {
                                 Request::HubStop
                             } else {
                                 Request::HubStart

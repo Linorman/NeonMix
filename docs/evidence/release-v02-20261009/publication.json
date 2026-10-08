@@ -1,0 +1,32 @@
+{
+  "release_url": "https://github.com/Linorman/NeonMix/releases/tag/v0.2",
+  "commit": "571cceaa3083f3a9a48b5b841fc3fb3bcc22f1f5",
+  "remote_assets_verified": {
+    "NeonMix-0.2.0-macos-arm64.dmg": {
+      "size": 31451455,
+      "digest": "sha256:7f1b2464aa2fc31a165a2d4592c1edf1aa99da6dbddb4efcb9ff2e456b6ba8c0",
+      "url": "https://github.com/Linorman/NeonMix/releases/download/v0.2/NeonMix-0.2.0-macos-arm64.dmg"
+    },
+    "NeonMix-0.2.0-macos-arm64.json": {
+      "size": 6887,
+      "digest": "sha256:9d7487cfbf79062d49b1ff3002065a7fffd0f39d104a98dc437ea7566b93caa3",
+      "url": "https://github.com/Linorman/NeonMix/releases/download/v0.2/NeonMix-0.2.0-macos-arm64.json"
+    },
+    "NeonMix-0.2.0-windows-x64-setup.exe": {
+      "size": 22575377,
+      "digest": "sha256:123a150efb636c8f7695edffeb04bd45b5f515e08aed5dc3ad349e2ff734562b",
+      "url": "https://github.com/Linorman/NeonMix/releases/download/v0.2/NeonMix-0.2.0-windows-x64-setup.exe"
+    },
+    "NeonMix-0.2.0-windows-x64.json": {
+      "size": 8444,
+      "digest": "sha256:549907aecb15bb6d552fef0c546ee5e7bf036af42b7c234d95f6b19317f2f572",
+      "url": "https://github.com/Linorman/NeonMix/releases/download/v0.2/NeonMix-0.2.0-windows-x64.json"
+    },
+    "SHA256SUMS.txt": {
+      "size": 198,
+      "digest": "sha256:06ee61cc803e36c04c6d67a8dfa483aec4e645dc0d2f0fee6ea75ce9124fee2b",
+      "url": "https://github.com/Linorman/NeonMix/releases/download/v0.2/SHA256SUMS.txt"
+    }
+  },
+  "release_notes_verified": true
+}

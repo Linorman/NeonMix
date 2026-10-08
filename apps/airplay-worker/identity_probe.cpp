@@ -47,6 +47,21 @@ static std::string utf8(const wchar_t *value) {
     path.pop_back();return path;
 }
 int wmain(int argc, wchar_t **argv) {
+    if(argc==2 && std::wstring(argv[1])==L"--path-roots") {
+        using V=std::vector<std::wstring>;
+        const std::pair<std::wstring,V> cases[]={
+            {L"E:\\key.pem",{L"E:\\"}},
+            {L"E:\\state\\key.pem",{L"E:\\",L"E:\\state"}},
+            {L"\\\\?\\E:\\state\\key.pem",{L"\\\\?\\E:\\",L"\\\\?\\E:\\state"}},
+            {L"\\\\server\\share\\state\\key.pem",{L"\\\\server\\share\\",L"\\\\server\\share\\state"}},
+            {L"\\\\?\\UNC\\server\\share\\state\\key.pem",{L"\\\\?\\UNC\\server\\share\\",L"\\\\?\\UNC\\server\\share\\state"}}
+        };
+        for(const auto &test:cases)if(platform::private_key_parents(test.first)!=test.second)return 1;
+        for(const auto &path:{L"\\\\?\\",L"relative\\key.pem",L"\\\\server\\",L"\\\\?\\UNC\\server\\"}) {
+            try{platform::private_key_parents(path);return 1;}catch(const std::runtime_error&){}
+        }
+        puts("windows_path_roots_ok");return 0;
+    }
     if(argc!=2&&argc!=3)return 2;
     if(argc==3)replacement=std::filesystem::path(argv[2]);
     return probe(utf8(argv[1]));

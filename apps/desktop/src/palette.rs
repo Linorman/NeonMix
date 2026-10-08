@@ -108,7 +108,7 @@ impl Desktop {
         }
         let status = self.status.as_ref();
         let configured = status.is_some_and(|s| s.hub_settings.is_some());
-        let sharing = status.is_some_and(|s| s.hub.running);
+        let sharing = status.is_some_and(|s| s.hub.running) || self.pending("hub-start");
         if configured && !sharing {
             push(
                 Message::PaletteRoomGroup,

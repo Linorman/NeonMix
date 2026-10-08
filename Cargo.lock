@@ -2978,7 +2978,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-airplay-adapter"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "neonmix-airplay-ipc",
  "neonmix-core",
@@ -2988,7 +2988,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-airplay-ipc"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "libc",
  "serde",
@@ -2999,7 +2999,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-audio"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "libc",
@@ -3016,7 +3016,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-control"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3027,7 +3027,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "rtrb",
  "rubato",
@@ -3038,7 +3038,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-desktop"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "eframe",
@@ -3062,7 +3062,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-desktop-service"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "libc",
@@ -3081,7 +3081,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-hal"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "stats_alloc",
  "tympan-aspl",
@@ -3089,7 +3089,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-hub"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "axum",
  "axum-server",
@@ -3123,11 +3123,12 @@ dependencies = [
  "tokio",
  "tokio-tungstenite",
  "uuid",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
 name = "neonmix-i18n"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "fluent-bundle",
  "fluent-syntax",
@@ -3142,7 +3143,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-identity"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "libc",
@@ -3163,7 +3164,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-io"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cpal",
  "neonmix-core",
@@ -3171,7 +3172,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-lifecycle"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "libc",
  "serde",
@@ -3182,7 +3183,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-linux"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cpal",
  "neonmix-core",
@@ -3192,7 +3193,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-macos"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cpal",
  "neonmix-core",
@@ -3202,7 +3203,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-media"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dbus 0.9.12",
  "gstreamer",
@@ -3221,7 +3222,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-output-binding"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "libc",
  "serde",
@@ -3232,7 +3233,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-windows"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cpal",
  "neonmix-core",

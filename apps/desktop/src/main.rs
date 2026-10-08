@@ -213,87 +213,10 @@ fn worker(
                     };
                     result.map(|data| Outcome::Action(Box::new(original), data))
                 }
-                Work::Poll { credential, hub } => (|| {
-                    let status =
-                        serde_json::from_value::<ServiceStatus>(call(&client, &Request::Status)?)
-                            .map_err(|e| e.to_string())?;
-                    let mut data = PollData {
-                        received: PollTimes {
-                            status: Some(Instant::now()),
-                            ..Default::default()
-                        },
-                        credential: credential.clone(),
-                        hub: hub.clone(),
-                        room_name: None,
-                        status,
-                        snapshot: None,
-                        diagnostics: None,
-                        airplay: None,
-                        partial: false,
-                        error: None,
-                    };
-                    if fetches_room(&credential, &data.status) {
-                        match call(
-                            &client,
-                            &Request::Snapshot {
-                                credential: credential.clone(),
-                                hub: hub.clone(),
-                            },
-                        ) {
-                            Ok(value) => {
-                                data.room_name = value
-                                    .pointer("/viewer/room_name")
-                                    .and_then(Value::as_str)
-                                    .map(str::to_owned);
-                                match serde_json::from_value(value) {
-                                    Ok(s) => {
-                                        data.snapshot = Some(s);
-                                        data.received.snapshot = Some(Instant::now());
-                                    }
-                                    Err(_e) => {
-                                        data.error = Some(UiError::from(
-                                            "invalid_backend_response".to_owned(),
-                                        ))
-                                    }
-                                }
-                            }
-                            Err(e) => data.error = Some(e),
-                        }
-                        if data.snapshot.is_some() {
-                            match call(
-                                &client,
-                                &Request::AirplayV2 {
-                                    credential: credential.clone(),
-                                    hub: hub.clone(),
-                                    command: None,
-                                },
-                            ) {
-                                Ok(v) => {
-                                    data.airplay = Some(v);
-                                    data.received.airplay = Some(Instant::now());
-                                }
-                                Err(_) => data.partial = true,
-                            }
-                            match call(
-                                &client,
-                                &Request::Diagnostics {
-                                    credential: credential.clone(),
-                                    hub: hub.clone(),
-                                },
-                            ) {
-                                Ok(v) => {
-                                    data.diagnostics = Some(v);
-                                    data.received.diagnostics = Some(Instant::now());
-                                }
-                                Err(e) => {
-                                    data.partial = true;
-                                    data.error = Some(e);
-                                }
-                            }
-                        }
-                    }
-                    Ok(Outcome::Poll(Box::new(data)))
-                })(),
+                Work::Poll { credential, hub } => {
+                    read_poll(credential, hub, |request| call(&client, &request))
+                        .map(|data| Outcome::Poll(Box::new(data)))
+                }
             };
             if done.send(result).is_err() {
                 break;
@@ -303,6 +226,99 @@ fn worker(
     });
     (tx, rx)
 }
+/// Read optional observations before the authoritative control snapshot. A
+/// slow diagnostics/helper process must not age the snapshot in the worker
+/// queue before the UI can use it. Each observation retains its own timestamp.
+fn read_poll(
+    credential: PathBuf,
+    hub: Option<String>,
+    mut read: impl FnMut(Request) -> Result<Value, UiError>,
+) -> Result<PollData, UiError> {
+    let status = serde_json::from_value::<ServiceStatus>(read(Request::Status)?)
+        .map_err(|_| UiError::from("invalid_backend_response"))?;
+    let mut data = PollData {
+        received: PollTimes {
+            status: Some(Instant::now()),
+            ..Default::default()
+        },
+        credential: credential.clone(),
+        hub: hub.clone(),
+        room_name: None,
+        status,
+        snapshot: None,
+        diagnostics: None,
+        airplay: None,
+        partial: false,
+        error: None,
+    };
+    if !fetches_room(&credential, &data.status) {
+        return Ok(data);
+    }
+    match read(Request::AirplayV2 {
+        credential: credential.clone(),
+        hub: hub.clone(),
+        command: None,
+    }) {
+        Ok(value) => {
+            data.airplay = Some(value);
+            data.received.airplay = Some(Instant::now());
+        }
+        Err(_) => data.partial = true,
+    }
+    match read(Request::Diagnostics {
+        credential: credential.clone(),
+        hub: hub.clone(),
+    }) {
+        Ok(value) => {
+            data.diagnostics = Some(value);
+            data.received.diagnostics = Some(Instant::now());
+        }
+        Err(error) => {
+            data.partial = true;
+            data.error = Some(error);
+        }
+    }
+    match read(Request::Snapshot { credential, hub }) {
+        Ok(value) => {
+            data.room_name = value
+                .pointer("/viewer/room_name")
+                .and_then(Value::as_str)
+                .map(str::to_owned);
+            match serde_json::from_value(value) {
+                Ok(snapshot) => {
+                    data.snapshot = Some(snapshot);
+                    data.received.snapshot = Some(Instant::now());
+                }
+                Err(_) => {
+                    data.partial = false;
+                    data.error = Some("invalid_backend_response".into());
+                }
+            }
+        }
+        Err(error) => {
+            data.partial = false;
+            data.error = Some(error);
+        }
+    }
+    if let Some(snapshot) = &data.snapshot {
+        let epoch = snapshot.runtime_epoch.to_string();
+        for observation in [&mut data.airplay, &mut data.diagnostics] {
+            let replaced = observation.as_ref().is_some_and(|value| {
+                value
+                    .get("remote")
+                    .unwrap_or(value)
+                    .get("runtime_epoch")
+                    .is_some_and(|value| value.as_str() != Some(epoch.as_str()))
+            });
+            if replaced {
+                *observation = None;
+                data.partial = true;
+            }
+        }
+    }
+    Ok(data)
+}
+
 /// A write the user made while the previous one was still in flight. Only
 /// the latest intent is kept and it is sent against the next fresh revision,
 /// so rapid input neither conflicts nor greys out the controls.
@@ -351,7 +367,6 @@ struct Desktop {
     preferences: preferences::Preferences,
     localization: localization::Localization,
     page: Page,
-    page_since: Instant,
     shown_message: Option<Message>,
     /// Whether the message on screen is an error (repeated errors swap text
     /// without re-running the fade-in).
@@ -668,7 +683,6 @@ impl Desktop {
                 Some(vec!["zh-CN".into()]),
             ),
             page: Page::Live,
-            page_since: Instant::now() - Duration::from_secs(5),
             shown_message: None,
             shown_error: false,
             message_since: Instant::now() - Duration::from_secs(5),
@@ -791,6 +805,19 @@ impl Desktop {
         (self.busy && !self.polling) || self.pending_action.is_some() || self.pending_stop
     }
     fn request(&mut self, request: Request) {
+        // A stop cancels a start which has not reached the worker yet. The
+        // frozen generation is still required for starts already in flight.
+        if let Some(queued) = &self.pending_action {
+            let cancel = match &request {
+                Request::HubStop => request_key(queued) == "hub-start",
+                Request::SenderStop => request_key(queued) == "sender-start",
+                Request::Shutdown => true,
+                _ => false,
+            };
+            if cancel {
+                self.pending_action = None;
+            }
+        }
         match &request {
             Request::Control { operation, .. } => {
                 self.write(Write::Control(operation.clone()));
@@ -826,9 +853,17 @@ impl Desktop {
             }
         };
         if self.busy {
-            if !self.polling || self.pending_action.is_some() {
+            if self.pending(request_key(&request)) {
                 return;
             }
+            if self.pending_action.is_some() {
+                self.message = Message::IntentQueueFull;
+                self.error = true;
+                return;
+            }
+            // Keep one frozen follow-up while any worker operation runs, not
+            // just a poll. Otherwise enabled buttons silently lose clicks
+            // during the slower platform startup/device enumeration calls.
             self.pending_action = Some(request);
         } else {
             self.queue(Work::Action(request));
@@ -1091,7 +1126,11 @@ impl Desktop {
                         {
                             self.binding_name = name.into();
                         }
-                        if data.credential == self.credential && data.hub == self.hub() {
+                        if data.credential == self.credential
+                            && data.hub == self.hub()
+                            && (data.snapshot.is_some()
+                                || !fetches_room(&data.credential, &data.status))
+                        {
                             self.remote_room = data.room_name;
                         }
                         self.binding = data.status.output_binding.clone();
@@ -1110,7 +1149,9 @@ impl Desktop {
                             self.status = Some(data.status);
                         }
                         if let Some(snapshot) = data.snapshot.filter(|_| {
-                            data.credential == self.credential && data.hub == self.hub()
+                            !outdated
+                                && data.credential == self.credential
+                                && data.hub == self.hub()
                         }) {
                             // A single failed AirPlay/diagnostics read keeps the
                             // last readings of the same room: blanking them made
@@ -1173,10 +1214,12 @@ impl Desktop {
                             }
                             self.fresh = Some(data.received.snapshot.unwrap_or(now));
                             self.synced = self.fresh;
-                            if self.poll_error && data.error.is_none() {
+                            if self.poll_error {
                                 self.poll_error = false;
-                                self.error = false;
-                                self.message = Message::ShellRecovered;
+                                if data.error.is_none() {
+                                    self.error = false;
+                                    self.message = Message::ShellRecovered;
+                                }
                             }
                             if data.diagnostics.as_ref().is_some_and(|v| {
                                 v.get("remote").unwrap_or(v)["available"].as_bool() != Some(false)
@@ -1192,9 +1235,23 @@ impl Desktop {
                             self.refresh_applications(application.as_ref());
                         } else {
                             self.fresh = None;
-                            self.synced = None;
-                            self.airplay = None;
-                            self.diagnostics = None;
+                            self.poll_error = data.error.is_some();
+                            // A transient refresh failure is not a new room or
+                            // revoked permission. Keep the last presentation;
+                            // sending still requires a new authoritative read.
+                            let transient =
+                                data.error.as_ref().is_some_and(UiError::transient_read);
+                            let same_route =
+                                data.credential == self.credential && data.hub == self.hub();
+                            let still_running = self
+                                .status
+                                .as_ref()
+                                .is_some_and(|s| fetches_room(&self.credential, s));
+                            if outdated || !same_route || !still_running || !transient {
+                                self.synced = None;
+                                self.airplay = None;
+                                self.diagnostics = None;
+                            }
                             self.airplay_clock.failed();
                             self.diagnostics_clock.failed();
                         }
@@ -1206,7 +1263,8 @@ impl Desktop {
                         {
                             self.message = user_error(e);
                             self.error = true;
-                            self.fresh = None;
+                            // Optional telemetry errors do not invalidate the
+                            // independently successful control snapshot.
                         }
                     }
                     Ok(Outcome::Action(request, data)) => {
@@ -1356,9 +1414,14 @@ impl Desktop {
     /// Controls are interactive while the last authoritative state is recent.
     /// Writes themselves are gated by `ready()` and queued meanwhile.
     fn writable(&self) -> bool {
-        self.synced
-            .is_some_and(|t| t.elapsed() < Duration::from_secs(4))
-            && !self.pending_stop
+        self.synced.is_some_and(|t| {
+            let age = t.elapsed();
+            age < Duration::from_secs(4)
+                    // Keep accepting bound intentions while a bounded request
+                    // is in flight. `ready`/dispatch still require <4s data;
+                    // this grace never authorizes a stale write.
+                    || (self.busy && !self.poll_error && age < neonmix_desktop_service::IPC_TIMEOUT)
+        }) && !self.pending_stop
     }
     fn sender_allowed(&self) -> bool {
         if !self.writable() || self.credential.as_path() == std::path::Path::new("hub/admin.json") {
@@ -1473,6 +1536,21 @@ fn request_key(request: &Request) -> &'static str {
 #[derive(Debug, Clone)]
 struct UiError {
     fault: Option<neonmix_desktop_service::Fault>,
+}
+impl UiError {
+    fn transient_read(&self) -> bool {
+        use neonmix_desktop_service::FaultCode;
+        self.fault.as_ref().is_some_and(|fault| {
+            matches!(
+                fault.code,
+                FaultCode::ConnectionUnavailable
+                    | FaultCode::BackgroundTimeout
+                    | FaultCode::BackgroundBusy
+                    | FaultCode::RequestInterrupted
+                    | FaultCode::CredentialStoreBusy
+            )
+        })
+    }
 }
 impl From<&str> for UiError {
     fn from(error: &str) -> Self {
@@ -2217,6 +2295,96 @@ mod tests {
         assert!(!app.pending_stop);
     }
     #[test]
+    fn slow_start_keeps_one_followup_and_reports_queue_capacity() {
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.status = Some(lifecycle_fixture());
+        let (tx, rx) = mpsc::sync_channel(1);
+        app.worker = Some(tx);
+        let (done, result) = mpsc::sync_channel(1);
+        app.results = Some(result);
+        app.request(Request::HubStart);
+        let Work::Action(start) = rx.try_recv().unwrap() else {
+            panic!("start missing")
+        };
+        app.request(Request::Devices);
+        assert!(matches!(app.pending_action, Some(Request::Devices)));
+        // Repeated clicks cannot replace or duplicate the accepted operation.
+        app.request(Request::Devices);
+        assert!(matches!(app.pending_action, Some(Request::Devices)));
+        app.request(Request::HubSettings {
+            settings: HubSettings {
+                name: "Changed".into(),
+                output: "output".into(),
+            },
+        });
+        assert_eq!(app.message, Message::IntentQueueFull);
+        assert!(matches!(app.pending_action, Some(Request::Devices)));
+        done.send(Ok(Outcome::Action(Box::new(start), Value::Null)))
+            .unwrap();
+        app.process();
+        assert!(matches!(rx.try_recv(), Ok(Work::Action(Request::Devices))));
+        assert!(app.pending_action.is_none());
+    }
+
+    #[test]
+    fn stopping_share_cancels_a_start_waiting_behind_a_poll() {
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.status = Some(lifecycle_fixture());
+        app.busy = true;
+        app.polling = true;
+        app.request(Request::HubStart);
+        assert!(app.pending("hub-start"));
+        // Simulate an existing urgent stop so this test needs no real IPC.
+        app.pending_stop = true;
+        app.request(Request::HubStop);
+        assert!(app.pending_action.is_none());
+    }
+
+    #[test]
+    fn starting_share_switch_remains_clickable_for_stop() {
+        let ctx = themed();
+        ctx.enable_accesskit();
+        let mut app = fixture("full");
+        app.page = Page::Hub;
+        app.status.as_mut().unwrap().hub.running = false;
+        app.inflight = Some("hub-start");
+        app.busy = true;
+        let mut rect = None;
+        for _ in 0..3 {
+            let output = frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+            let tree = output.platform_output.accesskit_update.unwrap();
+            rect = tree.nodes.iter().find_map(|(_, node)| {
+                (node.label() == Some(app.tr(&Message::HubStopSharing).as_str()))
+                    .then(|| node.bounds())
+                    .flatten()
+            });
+        }
+        let rect = rect.expect("starting share must expose the stop action");
+        let pos = egui::pos2(
+            ((rect.x0 + rect.x1) / 2.0) as f32,
+            ((rect.y0 + rect.y1) / 2.0) as f32,
+        );
+        app.preview = false;
+        app.status.as_mut().unwrap().lifecycle = lifecycle_fixture().lifecycle;
+        // No real IPC: a stop should cancel the queued start even when a
+        // previous stop is already in flight.
+        app.pending_action = Some(Request::HubStart);
+        app.pending_stop = true;
+        app.urgent_target = LocalStop::Sender;
+        for pressed in [true, false] {
+            let mut input = pointer(pos, Some(pressed), if pressed { 1.0 } else { 1.1 });
+            input.screen_rect = Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1100.0, 760.0),
+            ));
+            let _ = ctx.run(input, |ctx| app.show(ctx));
+        }
+        assert!(
+            app.pending_action.is_none(),
+            "the switch must dispatch HubStop while starting"
+        );
+    }
+    #[test]
     fn stopping_an_inflight_start_uses_the_independent_path_and_keeps_unknown_results_visible() {
         let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
         app.status = Some(lifecycle_fixture());
@@ -2694,6 +2862,52 @@ mod tests {
     }
 
     #[test]
+    fn navigation_renders_body_text_at_full_opacity_without_sliding() {
+        fn body_label(shape: &egui::Shape) -> Option<(egui::Pos2, u8)> {
+            match shape {
+                egui::Shape::Text(text) if text.galley.job.text == "房间名称" => {
+                    let alpha = text
+                        .galley
+                        .rows
+                        .iter()
+                        .flat_map(|row| &row.visuals.mesh.vertices)
+                        .map(|vertex| vertex.color.a())
+                        .max()
+                        .unwrap();
+                    Some((text.pos, alpha))
+                }
+                egui::Shape::Vec(shapes) => shapes.iter().find_map(body_label),
+                _ => None,
+            }
+        }
+        let ctx = themed();
+        let mut app = fixture("full");
+        app.navigate(Page::Hub);
+        // Let egui determine the panel geometry, then revisit the same page
+        // exactly as a navigation click would. Its first frame must be final.
+        for _ in 0..3 {
+            frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        }
+        let settled = frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        let expected = settled
+            .shapes
+            .iter()
+            .find_map(|s| body_label(&s.shape))
+            .unwrap();
+        app.navigate(Page::Live);
+        frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        app.navigate(Page::Hub);
+        let first = frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        let actual = first
+            .shapes
+            .iter()
+            .find_map(|s| body_label(&s.shape))
+            .unwrap();
+        assert_eq!(actual.1, 255, "navigation dimmed the entire page body");
+        assert_eq!(actual.0, expected.0, "navigation displaced the page body");
+    }
+
+    #[test]
     fn english_header_and_long_room_badge_keep_about_content_inside_the_central_panel() {
         let ctx = themed();
         ctx.enable_accesskit();
@@ -2873,6 +3087,7 @@ mod tests {
             app.process();
             assert_eq!(lanes(&app), 4, "poll {poll}: AirPlay lanes must not vanish");
             assert!(app.diagnostics.is_some(), "poll {poll}: meters must stay");
+            assert!(app.ready(), "poll {poll}: diagnostics cannot gate control");
             assert_eq!(
                 app.error,
                 poll >= PARTIAL_REPORT,
@@ -2970,6 +3185,202 @@ mod tests {
         assert_eq!(app.diagnostics.as_ref(), Some(&value));
         assert_eq!(app.diagnostics_clock.last_received(), Some(old));
         assert!(app.diagnostics_current().is_none());
+    }
+
+    #[test]
+    fn slow_refresh_keeps_controls_interactive_without_sending_stale_writes() {
+        let mut app = fixture("full");
+        app.snapshot.as_mut().unwrap().runtime_epoch = uuid::Uuid::new_v4();
+        app.snapshot.as_mut().unwrap().control_version = neonmix_control::CONTROL_VERSION;
+        app.status.as_mut().unwrap().intent_version = neonmix_desktop_service::INTENT_VERSION;
+        app.preview = false;
+        app.online = false;
+        let (tx, rx) = mpsc::sync_channel(1);
+        app.worker = Some(tx);
+        app.fresh = Some(Instant::now() - Duration::from_secs(5));
+        app.synced = app.fresh;
+        app.busy = true;
+        app.polling = true;
+        app.last_poll = Instant::now();
+        for (page, _) in Page::ALL {
+            app.page = page;
+            let ctx = themed();
+            ctx.enable_accesskit();
+            let output = frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+            assert!(app.writable(), "{page:?}: refresh must not grey controls");
+            assert!(!app.ready());
+            if page != Page::Mixer {
+                let label = app.tr(&Message::ShellMasterMute);
+                let tree = output.platform_output.accesskit_update.unwrap();
+                let control = tree
+                    .nodes
+                    .iter()
+                    .find(|(_, node)| node.label() == Some(label.as_str()))
+                    .unwrap();
+                assert!(!control.1.is_disabled(), "{page:?}: master mute faded");
+            }
+        }
+        app.operation(Operation::OutputMix {
+            gain_db: None,
+            muted: Some(true),
+        });
+        assert!(!app.intents.queued.is_empty());
+        assert!(
+            rx.try_recv().is_err(),
+            "stale authority must never send a command"
+        );
+        app.synced = Some(Instant::now() - Duration::from_secs(46));
+        assert!(
+            !app.writable(),
+            "a hung request has a bounded interaction grace"
+        );
+        let (done, results) = mpsc::sync_channel(1);
+        app.results = Some(results);
+        done.send(Ok(Outcome::Poll(Box::new(PollData {
+            received: PollTimes {
+                snapshot: Some(Instant::now()),
+                ..Default::default()
+            },
+            credential: app.credential.clone(),
+            hub: app.hub(),
+            room_name: app.remote_room.clone(),
+            status: app.status.clone().unwrap(),
+            snapshot: app.snapshot.clone(),
+            diagnostics: None,
+            airplay: None,
+            partial: true,
+            error: None,
+        }))))
+        .unwrap();
+        app.process();
+        assert!(
+            matches!(rx.try_recv(), Ok(Work::Action(Request::Intent { .. }))),
+            "fresh authority must dispatch the intention retained during refresh"
+        );
+    }
+
+    #[test]
+    fn transient_snapshot_failure_preserves_recent_controls_and_cannot_toggle_on_each_retry() {
+        let mut app = fixture("full");
+        let (done, results) = mpsc::sync_channel(1);
+        app.results = Some(results);
+        let old_name = app.remote_room.clone();
+        let failed = PollData {
+            received: Default::default(),
+            partial: false,
+            credential: app.credential.clone(),
+            hub: app.hub(),
+            room_name: None,
+            status: app.status.clone().unwrap(),
+            snapshot: None,
+            diagnostics: None,
+            airplay: None,
+            error: Some("background_busy".into()),
+        };
+        done.send(Ok(Outcome::Poll(Box::new(failed)))).unwrap();
+        app.process();
+        assert!(
+            app.writable(),
+            "a transient read is not permission revocation"
+        );
+        assert!(!app.ready());
+        assert_eq!(app.remote_room, old_name);
+        assert_eq!(app.lanes(app.snapshot.as_ref().unwrap()).len(), 4);
+        assert!(app.diagnostics.is_some());
+        assert!(app.diagnostics_current().is_none());
+        app.synced = Some(Instant::now() - Duration::from_secs(5));
+        for busy in [false, true, false, true] {
+            app.busy = busy;
+            app.polling = busy;
+            assert!(
+                !app.writable(),
+                "retry alone cannot re-enable a failed connection"
+            );
+        }
+    }
+
+    #[test]
+    fn polling_publishes_control_after_optional_reads_and_rejects_previous_runtime_observations() {
+        for telemetry_fails in [false, true] {
+            let mut app = fixture("full");
+            let mut calls = Vec::new();
+            let data = read_poll(app.credential.clone(), app.hub(), |request| match request {
+                Request::Status => {
+                    calls.push("status");
+                    Ok(serde_json::to_value(app.status.as_ref().unwrap()).unwrap())
+                }
+                Request::AirplayV2 { .. } => {
+                    calls.push("airplay");
+                    Ok(serde_json::json!({"runtime_epoch": uuid::Uuid::new_v4()}))
+                }
+                Request::Diagnostics { .. } => {
+                    calls.push("diagnostics");
+                    if telemetry_fails {
+                        Err("background_timeout".into())
+                    } else {
+                        Ok(serde_json::json!({"remote":{"runtime_epoch":uuid::Uuid::new_v4()}}))
+                    }
+                }
+                Request::Snapshot { .. } => {
+                    calls.push("snapshot");
+                    Ok(serde_json::to_value(app.snapshot.as_ref().unwrap()).unwrap())
+                }
+                _ => panic!("unexpected read"),
+            })
+            .unwrap();
+            assert_eq!(calls, ["status", "airplay", "diagnostics", "snapshot"]);
+            assert!(data.airplay.is_none());
+            assert!(data.diagnostics.is_none());
+            assert!(data.received.snapshot >= data.received.airplay);
+            let (tx, rx) = mpsc::sync_channel(1);
+            app.results = Some(rx);
+            app.partial_polls = PARTIAL_REPORT;
+            tx.send(Ok(Outcome::Poll(Box::new(data)))).unwrap();
+            app.process();
+            assert!(
+                app.ready(),
+                "optional failure must not invalidate authoritative control"
+            );
+        }
+    }
+
+    #[test]
+    fn permission_loss_and_stopped_room_disable_controls_without_refresh_grace() {
+        for error in [
+            Some("permission_denied"),
+            Some("unauthenticated"),
+            Some("pairing_revoked"),
+            None,
+        ] {
+            let mut app = fixture("full");
+            let (tx, rx) = mpsc::sync_channel(1);
+            app.results = Some(rx);
+            let mut status = app.status.clone().unwrap();
+            if error.is_none() {
+                status.hub.running = false;
+            }
+            tx.send(Ok(Outcome::Poll(Box::new(PollData {
+                received: Default::default(),
+                credential: app.credential.clone(),
+                hub: app.hub(),
+                room_name: None,
+                status,
+                snapshot: None,
+                airplay: None,
+                diagnostics: None,
+                partial: false,
+                error: error.map(UiError::from),
+            }))))
+            .unwrap();
+            app.process();
+            app.busy = true;
+            app.polling = true;
+            assert!(
+                !app.writable(),
+                "{error:?}: disabled until new authority is obtained"
+            );
+            assert!(!app.ready());
+        }
     }
 
     #[test]
