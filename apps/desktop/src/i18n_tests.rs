@@ -415,6 +415,149 @@ fn assert_accessible_window_actions(output: &egui::FullOutput, app: &Desktop, si
 }
 
 #[test]
+fn shell_actions_fit_with_long_room_names_in_both_languages() {
+    for locale in [ResolvedLocale::ZhCn, ResolvedLocale::En] {
+        for (size, scale) in [
+            (egui::vec2(600.0, 440.0), 1.0),
+            (egui::vec2(600.0, 440.0), 2.0),
+            (egui::vec2(1100.0, 760.0), 1.0),
+            (egui::vec2(1100.0, 760.0), 2.0),
+        ] {
+            let ctx = context();
+            ctx.enable_accesskit();
+            let mut app = fixture();
+            select(&mut app, locale);
+            app.remote_room =
+                Some("Studio · 音频制作与混音监听房间 — a very long room name".repeat(3));
+            for page in [Page::Live, Page::Hub, Page::Mixer, Page::Diagnostics] {
+                app.page = page;
+                let output = frame_at_scale(&ctx, &mut app, size, Vec::new(), scale);
+                let tree = output.platform_output.accesskit_update.unwrap();
+                let sidebar = if size.x < 820.0 { 164.0 } else { 212.0 };
+                let quick = app.tr(&Message::ShellQuickActions {
+                    shortcut: widgets::command_hint("K"),
+                });
+                let mute = app.tr(&Message::ShellMasterMute);
+                let title = app.tr(&page.title());
+                let title_node = tree
+                    .nodes
+                    .iter()
+                    .find(|(_, node)| {
+                        (node.label() == Some(title.as_str())
+                            || node.value() == Some(title.as_str()))
+                            && node
+                                .bounds()
+                                .is_some_and(|b| b.x0 >= sidebar && b.y0 < 50.0)
+                    })
+                    .expect("page heading must remain visible above the content");
+                let title_bounds = title_node.1.bounds().unwrap();
+                assert!(title_bounds.x1 <= f64::from(size.x));
+                for label in [&quick, &mute] {
+                    let nodes: Vec<_> = tree
+                        .nodes
+                        .iter()
+                        .filter(|(_, node)| {
+                            node.label() == Some(label.as_str())
+                                && node.bounds().is_some_and(|b| b.y0 < 130.0)
+                        })
+                        .collect();
+                    if label == &quick || page != Page::Mixer {
+                        assert!(!nodes.is_empty(), "missing {label}: {locale:?} {page:?}");
+                    }
+                    for (_, node) in nodes {
+                        let b = node.bounds().unwrap();
+                        assert!(
+                            b.x0 >= sidebar && b.x1 <= f64::from(size.x),
+                            "{locale:?} {page:?} {size:?}: {label} outside content: {b:?}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn shell_identity_and_undo_stay_inside_their_panels() {
+    for locale in [ResolvedLocale::ZhCn, ResolvedLocale::En] {
+        for size in [egui::vec2(600.0, 440.0), egui::vec2(1100.0, 760.0)] {
+            let ctx = context();
+            ctx.enable_accesskit();
+            let mut app = fixture();
+            select(&mut app, locale);
+            app.undo = Some(Undo {
+                context: app.intents.current.clone().unwrap(),
+                target: intent::TargetKey::Master,
+                request_id: uuid::Uuid::new_v4(),
+                after: Write::Control(Operation::OutputMix {
+                    gain_db: Some(app.snapshot.as_ref().unwrap().output.gain_db),
+                    muted: None,
+                }),
+                label: Message::LaneGainChanged {
+                    name: "An extremely long studio audio source name 中文设备".repeat(4),
+                    before: "0.0".into(),
+                    after: "+3.5".into(),
+                },
+                inverse: Write::Control(Operation::OutputMix {
+                    gain_db: Some(0.0),
+                    muted: None,
+                }),
+                at: Instant::now() + Duration::from_secs(30),
+            });
+            let undo = app.undo.as_ref().unwrap();
+            app.intents.history.push_back(intent::Intent {
+                id: undo.request_id,
+                context: undo.context.clone(),
+                route: intent::Route {
+                    credential: app.credential.clone(),
+                    hub: app.hub(),
+                },
+                target: undo.target.clone(),
+                write: undo.after.clone(),
+                label: Some(undo.label.clone()),
+                guard: None,
+                frozen: None,
+                created_at: Instant::now(),
+                phase: intent::Phase::Acknowledged,
+            });
+            assert!(app.undo_available());
+            let output = frame_with_input(&ctx, &mut app, size, Vec::new());
+            let tree = output.platform_output.accesskit_update.unwrap();
+            let sidebar = if size.x < 820.0 { 164.0 } else { 212.0 };
+            let identity = app.tr(&Message::ShellIdentity);
+            let restore = app.tr(&Message::ShellRestoreButton {
+                shortcut: widgets::command_hint("Z"),
+            });
+            let undo_label = app.tr(&Message::ShellAdjusted {
+                change: app.tr(&app.undo.as_ref().unwrap().label),
+            });
+            for label in [&identity, &restore, &undo_label] {
+                let nodes: Vec<_> = tree
+                    .nodes
+                    .iter()
+                    .filter(|(_, node)| {
+                        node.label() == Some(label.as_str()) || node.value() == Some(label.as_str())
+                    })
+                    .collect();
+                assert!(!nodes.is_empty(), "missing {label}");
+                for node in nodes {
+                    let b = node.1.bounds().unwrap();
+                    let (left, right) = if b.y0 >= f64::from(size.y - 36.0) {
+                        (sidebar, f64::from(size.x))
+                    } else {
+                        (0.0, sidebar)
+                    };
+                    assert!(
+                        b.x0 >= left && b.x1 <= right && b.y1 <= f64::from(size.y),
+                        "{locale:?} {size:?}: {label} outside panel: {b:?}"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn dual_language_eight_surfaces_cover_empty_full_busy_and_stale_states() {
     for locale in [ResolvedLocale::ZhCn, ResolvedLocale::En] {
         let ctx = context();

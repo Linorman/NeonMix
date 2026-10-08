@@ -404,19 +404,28 @@ impl Desktop {
                 ui.add_space(pad);
                 match situation {
                     Empty::LocalStopped(..) => {
-                        if widgets::button_busy(
-                            ui,
-                            true,
-                            self.pending("hub-start"),
-                            text_live_start_sharing.as_str(),
-                            Kind::Primary,
-                        )
-                        .on_hover_text(
-                            text_live_let_devices_on_the_local_network_send_audio.as_str(),
-                        )
-                        .clicked()
+                        let starting = self.pending("hub-start");
+                        let stopping = self.pending("hub-stop")
+                            || (self.pending_stop
+                                && matches!(self.urgent_target, crate::LocalStop::Hub));
+                        let label = if starting || stopping {
+                            self.tr(&Message::HubStopSharing)
+                        } else {
+                            text_live_start_sharing.clone()
+                        };
+                        if widgets::button_busy(ui, true, stopping, &label, Kind::Primary)
+                            .on_hover_text(if starting || stopping {
+                                self.tr(&Message::HubStopSharingTheRoomStopsPlayingPairedDevices)
+                            } else {
+                                text_live_let_devices_on_the_local_network_send_audio.clone()
+                            })
+                            .clicked()
                         {
-                            self.request(Request::HubStart);
+                            self.request(if starting {
+                                Request::HubStop
+                            } else {
+                                Request::HubStart
+                            });
                         }
                         if widgets::button(ui, text_live_hub_settings.as_str(), Kind::Secondary)
                             .clicked()

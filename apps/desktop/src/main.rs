@@ -791,6 +791,19 @@ impl Desktop {
         (self.busy && !self.polling) || self.pending_action.is_some() || self.pending_stop
     }
     fn request(&mut self, request: Request) {
+        // A stop cancels a start which has not reached the worker yet. The
+        // frozen generation is still required for starts already in flight.
+        if let Some(queued) = &self.pending_action {
+            let cancel = match &request {
+                Request::HubStop => request_key(queued) == "hub-start",
+                Request::SenderStop => request_key(queued) == "sender-start",
+                Request::Shutdown => true,
+                _ => false,
+            };
+            if cancel {
+                self.pending_action = None;
+            }
+        }
         match &request {
             Request::Control { operation, .. } => {
                 self.write(Write::Control(operation.clone()));
@@ -826,9 +839,17 @@ impl Desktop {
             }
         };
         if self.busy {
-            if !self.polling || self.pending_action.is_some() {
+            if self.pending(request_key(&request)) {
                 return;
             }
+            if self.pending_action.is_some() {
+                self.message = Message::IntentQueueFull;
+                self.error = true;
+                return;
+            }
+            // Keep one frozen follow-up while any worker operation runs, not
+            // just a poll. Otherwise enabled buttons silently lose clicks
+            // during the slower platform startup/device enumeration calls.
             self.pending_action = Some(request);
         } else {
             self.queue(Work::Action(request));
@@ -2215,6 +2236,96 @@ mod tests {
         assert!(app.last_poll.elapsed() < Duration::from_secs(1));
         assert!(rx.try_recv().is_err());
         assert!(!app.pending_stop);
+    }
+    #[test]
+    fn slow_start_keeps_one_followup_and_reports_queue_capacity() {
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.status = Some(lifecycle_fixture());
+        let (tx, rx) = mpsc::sync_channel(1);
+        app.worker = Some(tx);
+        let (done, result) = mpsc::sync_channel(1);
+        app.results = Some(result);
+        app.request(Request::HubStart);
+        let Work::Action(start) = rx.try_recv().unwrap() else {
+            panic!("start missing")
+        };
+        app.request(Request::Devices);
+        assert!(matches!(app.pending_action, Some(Request::Devices)));
+        // Repeated clicks cannot replace or duplicate the accepted operation.
+        app.request(Request::Devices);
+        assert!(matches!(app.pending_action, Some(Request::Devices)));
+        app.request(Request::HubSettings {
+            settings: HubSettings {
+                name: "Changed".into(),
+                output: "output".into(),
+            },
+        });
+        assert_eq!(app.message, Message::IntentQueueFull);
+        assert!(matches!(app.pending_action, Some(Request::Devices)));
+        done.send(Ok(Outcome::Action(Box::new(start), Value::Null)))
+            .unwrap();
+        app.process();
+        assert!(matches!(rx.try_recv(), Ok(Work::Action(Request::Devices))));
+        assert!(app.pending_action.is_none());
+    }
+
+    #[test]
+    fn stopping_share_cancels_a_start_waiting_behind_a_poll() {
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.status = Some(lifecycle_fixture());
+        app.busy = true;
+        app.polling = true;
+        app.request(Request::HubStart);
+        assert!(app.pending("hub-start"));
+        // Simulate an existing urgent stop so this test needs no real IPC.
+        app.pending_stop = true;
+        app.request(Request::HubStop);
+        assert!(app.pending_action.is_none());
+    }
+
+    #[test]
+    fn starting_share_switch_remains_clickable_for_stop() {
+        let ctx = themed();
+        ctx.enable_accesskit();
+        let mut app = fixture("full");
+        app.page = Page::Hub;
+        app.status.as_mut().unwrap().hub.running = false;
+        app.inflight = Some("hub-start");
+        app.busy = true;
+        let mut rect = None;
+        for _ in 0..3 {
+            let output = frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+            let tree = output.platform_output.accesskit_update.unwrap();
+            rect = tree.nodes.iter().find_map(|(_, node)| {
+                (node.label() == Some(app.tr(&Message::HubStopSharing).as_str()))
+                    .then(|| node.bounds())
+                    .flatten()
+            });
+        }
+        let rect = rect.expect("starting share must expose the stop action");
+        let pos = egui::pos2(
+            ((rect.x0 + rect.x1) / 2.0) as f32,
+            ((rect.y0 + rect.y1) / 2.0) as f32,
+        );
+        app.preview = false;
+        app.status.as_mut().unwrap().lifecycle = lifecycle_fixture().lifecycle;
+        // No real IPC: a stop should cancel the queued start even when a
+        // previous stop is already in flight.
+        app.pending_action = Some(Request::HubStart);
+        app.pending_stop = true;
+        app.urgent_target = LocalStop::Sender;
+        for pressed in [true, false] {
+            let mut input = pointer(pos, Some(pressed), if pressed { 1.0 } else { 1.1 });
+            input.screen_rect = Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1100.0, 760.0),
+            ));
+            let _ = ctx.run(input, |ctx| app.show(ctx));
+        }
+        assert!(
+            app.pending_action.is_none(),
+            "the switch must dispatch HubStop while starting"
+        );
     }
     #[test]
     fn stopping_an_inflight_start_uses_the_independent_path_and_keeps_unknown_results_visible() {

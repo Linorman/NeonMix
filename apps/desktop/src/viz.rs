@@ -313,12 +313,19 @@ pub fn radar(ui: &mut Ui, scanning: bool, found: &[u64], size: f32) -> Response 
 /// Large on/off switch for room sharing. `busy` shows the round trip in the
 /// knob; the caller decides what a click does.
 pub fn switch(ui: &mut Ui, enabled: bool, on: bool, busy: bool, label: &str) -> Response {
-    let (rect, response) = ui.allocate_exact_size(vec2(56.0, 30.0), Sense::click());
-    let response = if enabled && !busy {
-        response
+    // Progress is independent from availability: a starting share may be
+    // stopped immediately. An unavailable switch must not consume clicks.
+    let sense = if enabled {
+        Sense::click()
     } else {
-        response.on_hover_cursor(egui::CursorIcon::Default)
+        Sense::hover()
     };
+    let (rect, response) = ui.allocate_exact_size(vec2(56.0, 30.0), sense);
+    let response = response.on_hover_cursor(if enabled {
+        egui::CursorIcon::PointingHand
+    } else {
+        egui::CursorIcon::Default
+    });
     response
         .widget_info(|| egui::WidgetInfo::selected(egui::WidgetType::Checkbox, enabled, on, label));
     let t = ui

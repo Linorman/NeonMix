@@ -37,14 +37,14 @@ reason = "Machine identifier prefix; value is copied from original data."
 
 [[exception]]
 file = "apps/desktop/src/pages/live.rs"
-line = 607
+line = 616
 value = "{} dB"
 category = "technical"
 reason = "Measured gain with invariant SI unit symbol."
 
 [[exception]]
 file = "apps/desktop/src/pages/live.rs"
-line = 724
+line = 733
 value = "{} dB"
 category = "technical"
 reason = "Measured gain with invariant SI unit symbol."
@@ -72,7 +72,7 @@ reason = "Stable product name used by the UI and window discovery."
 
 [[exception]]
 file = "apps/desktop/src/shell.rs"
-line = 664
+line = 708
 value = "{} dB"
 category = "technical"
 reason = "Measured gain with invariant SI unit symbol."
