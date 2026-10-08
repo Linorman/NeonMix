@@ -246,13 +246,16 @@ def main():
         parser.error('--output must remain inside the project directory')
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         sys.exit('macOS installer must be built on Apple Silicon macOS')
-    version = tomllib.loads((ROOT / 'Cargo.toml').read_text())['workspace']['package']['version']
+    workspace = tomllib.loads((ROOT / 'Cargo.toml').read_text())['workspace']
+    version = workspace['package']['version']
+    build_version = workspace['metadata']['neonmix']['macos-build-version']
     commit = output('git', 'rev-parse', '--short=9', 'HEAD').strip()
     if not args.skip_build:
         build_products()
     out.mkdir(parents=True, exist_ok=True)
     app = out / 'NeonMix.app'
-    bundled = assemble(app, version, commit)
+    # Bundle build metadata must be numeric; source provenance remains in the manifest.
+    bundled = assemble(app, version, build_version)
     verify_relocation(app)
     dmg = out / f'NeonMix-{version}-macos-arm64.dmg'
     make_dmg(app, dmg, f'NeonMix {version}')
@@ -260,6 +263,7 @@ def main():
         shutil.rmtree(app)
     report = {
         'version': version,
+        'build_version': build_version,
         'commit': commit,
         'dmg': dmg.name,
         'dmg_bytes': dmg.stat().st_size,

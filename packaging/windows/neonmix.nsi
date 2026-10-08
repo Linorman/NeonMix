@@ -1,5 +1,5 @@
 ; NeonMix per-user installer. Build with:
-;   makensis /DVERSION=0.1.0 /DSOURCE=<staged dir> /DOUTFILE=<installer.exe> neonmix.nsi
+;   makensis /DVERSION=0.2.0 /DSOURCE=<staged dir> /DOUTFILE=<installer.exe> neonmix.nsi
 Unicode true
 !include "MUI2.nsh"
 
