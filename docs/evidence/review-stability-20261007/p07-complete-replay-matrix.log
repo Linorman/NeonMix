@@ -1,0 +1,18 @@
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.70s
+     Running tests/version_domains.rs (target/debug/deps/version_domains-6d09962d1c1b3101)
+
+running 10 tests
+test restored_runtime_rejects_old_epoch_even_if_config_version_matches ... ok
+test staged_config_version_stays_fixed_while_commit_receipt_uses_latest_event_sequence ... ok
+test runtime_cas_remains_required_even_when_config_has_not_changed ... ok
+test health_and_runtime_do_not_advance_config_and_config_cas_ignores_unrelated_health ... ok
+test stream_preferences_use_both_conditions_and_solo_uses_only_runtime ... ok
+test revoked_principal_is_rejected_even_if_replayed_protocol_shape_is_invalid ... ok
+test protocols_cannot_mix_or_omit_cas_context ... ok
+test old_state_import_preserves_identity_and_config_counter_exhaustion_does_not_freeze_runtime ... ok
+test replica_rejects_mixed_sequence_protocol_or_impossible_config_jump_atomically ... ok
+test cache_eviction_ended_start_and_other_identity_cannot_reprepare_old_media ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -62,7 +62,7 @@ def main():
         binding=ipc(sender_dir,'output',directory='output',action={'action':'add','credential':'profiles/sender.json','hub':URL,'name':'NeonMix — E07 双路测试','provider':'blackhole','device':None})
         assert binding['enabled'] and binding['hub_id']==snapshot()['hub_id']
         restored=ipc(sender_dir,'status')['output_binding'];assert restored['output_id']==binding['output_id']
-        renamed=ipc(sender_dir,'output',directory='output',action={'action':'rename','expected_revision':binding['revision'],'name':'NeonMix — E07 采集'})
+        renamed=ipc(sender_dir,'output',directory='output',action={'action':'rename','expected_revision':binding['revision'],'expected_output_id':binding['output_id'],'name':'NeonMix — E07 采集'})
         assert renamed['output_id']==binding['output_id']
         report['scenarios']['pair_text_member_role_binding_and_identity_preserving_rename']=True
         invite_b=ipc(hub_dir,'invite',credential='hub/admin.json',hub=URL,out='invitations/b.json',seconds=120)
@@ -135,9 +135,9 @@ def main():
         assert ipc(hub_dir,'status')['hub']['running']
         report['scenarios']['explicit_sender_restart_and_stop_preserve_hub']=True
         current=ipc(sender_dir,'output',directory='output',action={'action':'show'})
-        disabled=ipc(sender_dir,'output',directory='output',action={'action':'disable','expected_revision':current['revision']})
-        enabled=ipc(sender_dir,'output',directory='output',action={'action':'enable','expected_revision':disabled['revision']})
-        ipc(sender_dir,'output',directory='output',action={'action':'remove','expected_revision':enabled['revision']})
+        disabled=ipc(sender_dir,'output',directory='output',action={'action':'disable','expected_revision':current['revision'],'expected_output_id':current['output_id']})
+        enabled=ipc(sender_dir,'output',directory='output',action={'action':'enable','expected_revision':disabled['revision'],'expected_output_id':disabled['output_id']})
+        ipc(sender_dir,'output',directory='output',action={'action':'remove','expected_revision':enabled['revision'],'expected_output_id':enabled['output_id']})
         assert ipc(sender_dir,'status')['output_binding'] is None
         report['scenarios']['binding_disable_enable_remove_and_reopen_status']=True
         control({'type':'revoke','device_id':paired_b['device_id']})

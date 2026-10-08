@@ -1,0 +1,36 @@
+[[message]]
+id = "intent-queued"
+
+[[message]]
+id = "intent-in-flight"
+
+[[message]]
+id = "intent-acknowledged"
+
+[[message]]
+id = "intent-conflict"
+
+[[message]]
+id = "intent-failed"
+
+[[message]]
+id = "intent-unknown"
+
+[[message]]
+id = "intent-cancelled"
+
+[[message]]
+id = "intent-queue-full"
+
+[[message]]
+id = "intent-target-ended"
+
+[[message]]
+id = "intent-context-changed"
+
+[[message]]
+id = "intent-undo-conflict"
+
+[[message]]
+id = "intent-reconcile"
+

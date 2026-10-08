@@ -1,10 +1,20 @@
 mod animation;
+mod commands;
+#[cfg(test)]
+mod commands_tests;
 mod emblem;
 mod events;
 mod flow;
 mod fx;
 mod history;
+#[cfg(test)]
+mod i18n_tests;
 mod icons;
+mod intent;
+mod localization;
+mod measurement;
+mod preferences;
+use neonmix_i18n::{LanguagePreference, Message};
 mod lanes;
 mod pages;
 mod palette;
@@ -41,6 +51,10 @@ const VERSION: &str = concat!(
 #[derive(Parser)]
 #[command(version = VERSION)]
 struct Args {
+    #[arg(long, requires="preview_page", value_parser=["auto","zh-CN","en"])]
+    preview_language: Option<String>,
+    #[arg(long, requires = "preview_page")]
+    preview_system_locale: Vec<String>,
     #[arg(long, default_value = ".local/desktop")]
     state_dir: PathBuf,
     #[arg(long, default_value_t = 1100.0)]
@@ -76,20 +90,30 @@ impl Page {
             Self::About => icons::Icon::Info,
         }
     }
-    const ALL: [(Self, &'static str); 7] = [
-        (Self::Live, "现场"),
-        (Self::Mixer, "Mixer"),
-        (Self::Hub, "Hub 设置"),
-        (Self::Sender, "Sender"),
-        (Self::Devices, "设备管理"),
-        (Self::Diagnostics, "诊断"),
-        (Self::About, "关于"),
+    const ALL: [(Self, Message); 7] = [
+        (Self::Live, Message::ShellPageLive),
+        (Self::Mixer, Message::ShellPageMixer),
+        (Self::Hub, Message::ShellPageHub),
+        (Self::Sender, Message::ShellPageSender),
+        (Self::Devices, Message::ShellPageDevices),
+        (Self::Diagnostics, Message::ShellPageDiagnostics),
+        (Self::About, Message::ShellPageAbout),
     ];
-    fn title(self) -> &'static str {
-        Self::ALL.iter().find(|p| p.0 == self).unwrap().1
+    fn title(self) -> Message {
+        Self::ALL.iter().find(|p| p.0 == self).unwrap().1.clone()
     }
 }
+/// Consecutive partial polls before the failure is shown.
+const PARTIAL_REPORT: u32 = 3;
+#[derive(Default, Clone, Copy)]
+struct PollTimes {
+    status: Option<Instant>,
+    snapshot: Option<Instant>,
+    diagnostics: Option<Instant>,
+    airplay: Option<Instant>,
+}
 struct PollData {
+    received: PollTimes,
     credential: PathBuf,
     hub: Option<String>,
     room_name: Option<String>,
@@ -97,8 +121,15 @@ struct PollData {
     snapshot: Option<Snapshot>,
     diagnostics: Option<Value>,
     airplay: Option<Value>,
-    error: Option<String>,
+    /// The AirPlay or diagnostics read failed this time (the snapshot did
+    /// not); the window keeps the previous readings instead of blanking.
+    partial: bool,
+    error: Option<UiError>,
 }
+#[allow(
+    clippy::large_enum_variant,
+    reason = "The one-slot UI queue keeps the complete frozen IPC envelope inline."
+)]
 enum Work {
     Boot,
     Poll {
@@ -107,47 +138,90 @@ enum Work {
     },
     Action(Request),
 }
+#[derive(Clone, Copy)]
+enum LocalStop {
+    Hub,
+    Sender,
+    Shutdown,
+}
 enum Outcome {
     Boot,
     Poll(Box<PollData>),
-    Action(Request, Value),
+    Action(Box<Request>, Value),
 }
-fn call(client: &Client, request: &Request) -> Result<Value, String> {
-    let reply = match client.request(request) {
-        // With no background there is nothing left to stop; quitting must
-        // still close the UI instead of leaving a hidden window behind.
-        Err(_)
-            if matches!(request, Request::Shutdown)
-                && client.request(&Request::Status).is_err() =>
-        {
-            return Ok(Value::Null);
-        }
-        reply => reply?,
-    };
+fn call(client: &Client, request: &Request) -> Result<Value, UiError> {
+    let reply = client.request(request).map_err(UiError::from)?;
     if reply.ok {
+        let stop = match request {
+            Request::LifecycleStop { request, .. } => request.as_ref(),
+            other => other,
+        };
+        if matches!(
+            stop,
+            Request::HubStop | Request::SenderStop | Request::Shutdown
+        ) {
+            let identity = reply.data["instance_generation"]
+                .as_str()
+                .and_then(|v| uuid::Uuid::parse_str(v).ok());
+            let operation = reply.data["operation_id"]
+                .as_str()
+                .and_then(|v| uuid::Uuid::parse_str(v).ok());
+            let targets: &[&str] = match stop {
+                Request::HubStop => &["hub"],
+                Request::SenderStop => &["sender"],
+                _ => &["hub", "sender"],
+            };
+            if identity.is_none()
+                || operation.is_none()
+                || targets
+                    .iter()
+                    .any(|key| reply.data[*key]["cleanup_complete"] != true)
+            {
+                return Err("invalid_backend_response".into());
+            }
+        }
         Ok(reply.data)
     } else {
-        Err(reply.error.unwrap_or_else(|| "后台操作失败".into()))
+        Err(UiError {
+            fault: reply.fault.or_else(|| {
+                reply
+                    .error
+                    .as_deref()
+                    .and_then(neonmix_desktop_service::Fault::from_machine_code)
+            }),
+        })
     }
 }
 fn worker(
     client: Client,
     ctx: egui::Context,
-) -> (SyncSender<Work>, Receiver<Result<Outcome, String>>) {
+) -> (SyncSender<Work>, Receiver<Result<Outcome, UiError>>) {
     let (tx, jobs) = mpsc::sync_channel(1);
     let (done, rx) = mpsc::sync_channel(1);
     std::thread::spawn(move || {
         while let Ok(job) = jobs.recv() {
             let result = match job {
-                Work::Boot => client.ensure_background().map(|()| Outcome::Boot),
+                Work::Boot => client
+                    .ensure_background()
+                    .map(|()| Outcome::Boot)
+                    .map_err(UiError::from),
                 Work::Action(request) => {
-                    call(&client, &request).map(|data| Outcome::Action(request, data))
+                    let result = call(&client, &request);
+                    let original = match request {
+                        Request::LifecycleStart { request, .. } => *request,
+                        other => other,
+                    };
+                    result.map(|data| Outcome::Action(Box::new(original), data))
                 }
                 Work::Poll { credential, hub } => (|| {
                     let status =
                         serde_json::from_value::<ServiceStatus>(call(&client, &Request::Status)?)
                             .map_err(|e| e.to_string())?;
                     let mut data = PollData {
+                        received: PollTimes {
+                            status: Some(Instant::now()),
+                            ..Default::default()
+                        },
                         credential: credential.clone(),
                         hub: hub.clone(),
                         room_name: None,
@@ -155,14 +229,10 @@ fn worker(
                         snapshot: None,
                         diagnostics: None,
                         airplay: None,
+                        partial: false,
                         error: None,
                     };
-                    if data
-                        .status
-                        .profiles
-                        .iter()
-                        .any(|p| p.credential == credential && !p.pending)
-                    {
+                    if fetches_room(&credential, &data.status) {
                         match call(
                             &client,
                             &Request::Snapshot {
@@ -176,22 +246,34 @@ fn worker(
                                     .and_then(Value::as_str)
                                     .map(str::to_owned);
                                 match serde_json::from_value(value) {
-                                    Ok(s) => data.snapshot = Some(s),
-                                    Err(e) => data.error = Some(e.to_string()),
+                                    Ok(s) => {
+                                        data.snapshot = Some(s);
+                                        data.received.snapshot = Some(Instant::now());
+                                    }
+                                    Err(_e) => {
+                                        data.error = Some(UiError::from(
+                                            "invalid_backend_response".to_owned(),
+                                        ))
+                                    }
                                 }
                             }
                             Err(e) => data.error = Some(e),
                         }
                         if data.snapshot.is_some() {
-                            data.airplay = call(
+                            match call(
                                 &client,
                                 &Request::AirplayV2 {
                                     credential: credential.clone(),
                                     hub: hub.clone(),
                                     command: None,
                                 },
-                            )
-                            .ok();
+                            ) {
+                                Ok(v) => {
+                                    data.airplay = Some(v);
+                                    data.received.airplay = Some(Instant::now());
+                                }
+                                Err(_) => data.partial = true,
+                            }
                             match call(
                                 &client,
                                 &Request::Diagnostics {
@@ -199,8 +281,14 @@ fn worker(
                                     hub: hub.clone(),
                                 },
                             ) {
-                                Ok(v) => data.diagnostics = Some(v),
-                                Err(e) => data.error = Some(e),
+                                Ok(v) => {
+                                    data.diagnostics = Some(v);
+                                    data.received.diagnostics = Some(Instant::now());
+                                }
+                                Err(e) => {
+                                    data.partial = true;
+                                    data.error = Some(e);
+                                }
                             }
                         }
                     }
@@ -218,78 +306,90 @@ fn worker(
 /// A write the user made while the previous one was still in flight. Only
 /// the latest intent is kept and it is sent against the next fresh revision,
 /// so rapid input neither conflicts nor greys out the controls.
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 enum Write {
     Control(Operation),
     Airplay(neonmix_airplay_adapter::control::AirplayActionV2),
 }
 /// The last mixer change, offered as 还原 (restore) for a few seconds. Named
 /// apart from 撤销 (revoke a pairing) so the two can never be confused.
-#[derive(Default, serde::Serialize, serde::Deserialize)]
-struct UiPreferences {
-    #[serde(default)]
-    reduce_motion: bool,
-}
 struct Undo {
-    label: String,
+    label: Message,
     inverse: Write,
+    after: Write,
+    context: intent::ContextKey,
+    target: intent::TargetKey,
+    request_id: uuid::Uuid,
     at: Instant,
 }
 struct Confirmation {
-    label: String,
-    consequence: String,
+    label: Message,
+    consequence: Message,
     request: Request,
+    intent: Option<intent::Intent>,
     focus: bool,
     _origin: egui::Id,
 }
 impl Confirmation {
-    fn action_label(&self) -> &str {
+    fn action_label(&self) -> Message {
         match &self.request {
-            Request::Shutdown => "退出后台",
+            Request::Shutdown => Message::ShellQuit,
             Request::Control {
                 operation: Operation::Revoke { .. },
                 ..
-            } => "撤销配对",
-            Request::ForgetCredential { .. } => "删除本机配对",
+            } => Message::ShellRevoke,
+            Request::ForgetCredential { .. } => Message::ShellForget,
             Request::Output {
                 action: OutputAction::Remove { .. },
                 ..
-            } => "删除输出绑定",
-            _ => &self.label,
+            } => Message::ShellRemoveOutput,
+            _ => self.label.clone(),
         }
     }
 }
 struct Desktop {
+    preferences: preferences::Preferences,
+    localization: localization::Localization,
     page: Page,
     page_since: Instant,
-    shown_message: String,
+    shown_message: Option<Message>,
+    /// Whether the message on screen is an error (repeated errors swap text
+    /// without re-running the fade-in).
+    shown_error: bool,
     message_since: Instant,
     client: Client,
     worker: Option<SyncSender<Work>>,
-    results: Option<Receiver<Result<Outcome, String>>>,
+    results: Option<Receiver<Result<Outcome, UiError>>>,
     busy: bool,
     inflight_start: bool,
     inflight_stop: bool,
-    stop_after_start: bool,
     polling: bool,
     pending_action: Option<Request>,
     pending_stop: bool,
-    urgent_action: Option<Receiver<Result<Value, String>>>,
-    urgent_is_shutdown: bool,
+    urgent_action: Option<Receiver<Result<Value, UiError>>>,
+    urgent_target: LocalStop,
     repaint: egui::Context,
     online: bool,
-    message: String,
+    message: Message,
     error: bool,
     cjk: bool,
     status: Option<ServiceStatus>,
     snapshot: Option<Snapshot>,
     diagnostics: Option<Value>,
     airplay: Option<Value>,
+    diagnostics_clock: measurement::ObservationClock,
+    airplay_clock: measurement::ObservationClock,
+    sender_clock: measurement::ObservationClock,
+    diagnostic_counters: measurement::CounterHistory,
+    sender_counters: measurement::CounterHistory,
     fresh: Option<Instant>,
     /// Last authoritative snapshot; unlike `fresh` our own writes do not clear
     /// it, so controls stay enabled (and do not flash) while a write settles.
     synced: Option<Instant>,
-    queued_write: Option<Write>,
+    intents: intent::IntentScheduler,
+    applications: std::collections::VecDeque<intent::ApplicationWatch>,
+    context_epoch: u64,
+    context_route: Option<(PathBuf, Option<String>)>,
     /// Which action is in flight, so only its button shows progress.
     inflight: Option<&'static str>,
     poll_error: bool,
@@ -320,6 +420,7 @@ struct Desktop {
     preview: bool,
     preview_airplay_only: bool,
     gain_drafts: std::collections::BTreeMap<u64, f32>,
+    gain_draft_owners: std::collections::BTreeMap<u64, (intent::ContextKey, intent::TargetKey)>,
     /// Mixer lane under keyboard control, keyed by the actual stream id.
     selected_lane: Option<u64>,
     lane_details: std::collections::BTreeSet<u64>,
@@ -333,10 +434,13 @@ struct Desktop {
     undo: Option<Undo>,
     tray: Option<tray::Tray>,
     tray_attempted: bool,
+    native_window: tray::NativeWindow,
     events: std::collections::VecDeque<events::RoomEvent>,
     marks: Option<events::Marks>,
     /// When a lane first joined while this window watched (connect animation).
     joined: std::collections::BTreeMap<u64, Instant>,
+    /// Consecutive polls whose AirPlay or diagnostics read failed.
+    partial_polls: u32,
     /// Last minute of per-lane RMS (dBFS) for the Mixer ribbon.
     level_history: history::Series<u64>,
     /// Last two minutes of room metrics for diagnostics sparklines.
@@ -347,16 +451,43 @@ struct Desktop {
 }
 impl Desktop {
     fn new(cc: &eframe::CreationContext<'_>, args: Args) -> Self {
+        let preview = args.preview_page.is_some();
+        let client = Client::new(args.state_dir);
+        let mut preferences = if preview {
+            preferences::Preferences::memory()
+        } else {
+            preferences::Preferences::load(Some(client.state_dir()))
+        };
+        if let Some(language) = args.preview_language.as_deref() {
+            preferences.value.language = if language == "auto" {
+                LanguagePreference::Auto
+            } else {
+                LanguagePreference::Explicit(language.into())
+            };
+        }
+        let candidates = if preview {
+            Some(args.preview_system_locale)
+        } else {
+            localization::SystemLocaleProvider::candidates(&localization::NativeLocaleProvider).ok()
+        };
+        let localization = localization::Localization::new(&preferences.value.language, candidates);
         let cjk = theme::install(&cc.egui_ctx);
-        let mut app = Self::empty(
-            Client::new(args.state_dir),
-            cjk,
-            args.preview_page.is_some(),
-        );
+        let mut app = Self::empty(client, cjk, preview);
+        app.preferences = preferences;
+        app.localization = localization;
+        localization::install(&cc.egui_ctx, app.localization.renderer.clone());
+        app.room = app.tr(&Message::ShellDefaultRoom);
+        app.sender_name = app.tr(&Message::ShellDefaultSender);
+        app.binding_name = format!("NeonMix — {}", app.room);
+        if app.preferences.read_failed {
+            app.message = Message::PreferencesReadFailed;
+            app.error = true;
+        }
         app.repaint = cc.egui_ctx.clone();
+        app.native_window = tray::NativeWindow::of(cc);
         animation::set_reduce_motion(
             std::env::var("NEONMIX_REDUCE_MOTION").is_ok_and(|v| v == "1")
-                || (!app.preview && app.load_ui_preferences().reduce_motion),
+                || app.preferences.value.reduce_motion,
         );
         if let Some(page) = args.preview_page {
             app.preview_airplay_only = page == "airplay";
@@ -391,27 +522,39 @@ impl Desktop {
                     .snapshot
                     .as_ref()
                     .and_then(|s| s.streams.keys().next().copied());
-                app.undo = Some(Undo {
-                    label: "「E07 合成 B」音量 0.0 → +3.5 dB".into(),
-                    inverse: Write::Control(Operation::OutputMix {
-                        gain_db: None,
-                        muted: None,
-                    }),
-                    at: Instant::now() + Duration::from_secs(30),
-                });
+                app.sync_command_context();
+                if let Some(context) = app.intents.current.clone() {
+                    app.undo = Some(Undo {
+                        context,
+                        target: intent::TargetKey::Master,
+                        request_id: uuid::Uuid::new_v4(),
+                        after: Write::Control(Operation::OutputMix {
+                            gain_db: Some(app.snapshot.as_ref().unwrap().output.gain_db),
+                            muted: None,
+                        }),
+                        label: Message::ShellMasterGain {
+                            previous: "0.0".into(),
+                            next: "+3.5".into(),
+                        },
+                        inverse: Write::Control(Operation::OutputMix {
+                            gain_db: None,
+                            muted: None,
+                        }),
+                        at: Instant::now() + Duration::from_secs(30),
+                    });
+                }
             }
             if std::env::var_os("NEONMIX_SCREENSHOT_CONFIRM").is_some() {
                 app.confirmation(
-                    "退出后台".into(),
-                    "停止本实例的共享、发送和全部音频连接。关闭窗口不会停止音频；退出后台会。"
-                        .into(),
+                    Message::ShellQuit,
+                    Message::ShellQuitConsequence,
                     Request::Shutdown,
                     egui::Id::new("preview-confirm"),
                 );
             }
         }
         if app.preview {
-            app.message = "视觉验证模式".into();
+            app.message = Message::ShellPreview;
             if let Some(path) = args.preview_data {
                 match std::fs::read(path)
                     .ok()
@@ -420,36 +563,18 @@ impl Desktop {
                     Some(data) => app.load_preview(&data),
                     None => {
                         app.error = true;
-                        app.message = "无法读取预览记录".into();
+                        app.message = Message::ShellPreviewReadFailed;
                     }
                 }
             }
         }
         app
     }
-    fn ui_preferences_path(&self) -> PathBuf {
-        self.client.state_dir().join("ui-preferences.json")
-    }
-
-    /// Window preferences that are not room state (no secrets, no names).
-    fn load_ui_preferences(&self) -> UiPreferences {
-        std::fs::read(self.ui_preferences_path())
-            .ok()
-            .and_then(|b| serde_json::from_slice(&b).ok())
-            .unwrap_or_default()
-    }
-
     pub(crate) fn set_reduce_motion(&mut self, on: bool) {
         animation::set_reduce_motion(on);
-        if self.preview {
-            return;
-        }
-        let prefs = UiPreferences { reduce_motion: on };
-        if let Err(e) = serde_json::to_vec_pretty(&prefs)
-            .map_err(|e| e.to_string())
-            .and_then(|b| std::fs::write(self.ui_preferences_path(), b).map_err(|e| e.to_string()))
-        {
-            self.message = format!("无法保存界面偏好：{e}");
+        self.preferences.motion(on);
+        if self.preferences.save().is_err() {
+            self.message = Message::PreferencesSaveFailed;
             self.error = true;
         }
     }
@@ -469,24 +594,83 @@ impl Desktop {
             .map(str::to_owned);
         self.diagnostics = data.get("diagnostics").cloned();
         self.airplay = data.get("airplay").cloned();
+        let epoch = self.snapshot.as_ref().map(|s| s.runtime_epoch);
+        let now = Instant::now();
+        if let Some(value) = &self.diagnostics {
+            self.diagnostics_clock.success(value, epoch, now);
+        }
+        if let Some(value) = &self.airplay {
+            self.airplay_clock.success(value, epoch, now);
+        }
+        if let Some(value) = self.status.as_ref().and_then(|s| s.sender.metrics.as_ref()) {
+            self.sender_clock.success(value, None, now);
+        }
         #[cfg(feature = "screenshot")]
         {
             self.airplay_name_drafts =
                 serde_json::from_value(data["preview_name_drafts"].clone()).unwrap_or_default();
             if let Some(error) = data["preview_error"].as_str() {
                 self.error = true;
-                self.message = error.into();
+                self.message = user_error(UiError::from(error.to_owned()));
             }
         }
         self.binding = self.status.as_ref().and_then(|s| s.output_binding.clone());
         self.fresh = Some(Instant::now());
         self.synced = self.fresh;
+        #[cfg(feature = "screenshot")]
+        if let Some(state) = data["preview_application"].as_str() {
+            self.sync_command_context();
+            if let (Some(context), Some(snapshot)) =
+                (self.intents.current.clone(), self.snapshot.as_ref())
+            {
+                let status = match state {
+                    "stalled" => intent::ApplicationState::Stalled,
+                    "unknown" => intent::ApplicationState::Unknown,
+                    _ => intent::ApplicationState::Pending,
+                };
+                let intent = intent::Intent {
+                    id: uuid::Uuid::new_v4(),
+                    context,
+                    route: intent::Route {
+                        credential: self.credential.clone(),
+                        hub: self.hub(),
+                    },
+                    target: intent::TargetKey::Master,
+                    write: Write::Control(Operation::OutputMix {
+                        gain_db: Some(snapshot.output.gain_db),
+                        muted: None,
+                    }),
+                    label: None,
+                    guard: None,
+                    frozen: None,
+                    created_at: Instant::now(),
+                    phase: intent::Phase::Acknowledged,
+                };
+                self.applications.push_back(intent::ApplicationWatch {
+                    intent,
+                    sequence: 2,
+                    state: status,
+                });
+                self.message = match status {
+                    intent::ApplicationState::Stalled => Message::ShellMediaStalled,
+                    intent::ApplicationState::Unknown => Message::ShellMediaUnknown,
+                    _ => Message::ShellMediaPending,
+                };
+                self.error = status != intent::ApplicationState::Pending;
+            }
+        }
     }
     fn empty(client: Client, cjk: bool, preview: bool) -> Self {
         Self {
+            preferences: preferences::Preferences::memory(),
+            localization: localization::Localization::new(
+                &LanguagePreference::Auto,
+                Some(vec!["zh-CN".into()]),
+            ),
             page: Page::Live,
             page_since: Instant::now() - Duration::from_secs(5),
-            shown_message: String::new(),
+            shown_message: None,
+            shown_error: false,
             message_since: Instant::now() - Duration::from_secs(5),
             client,
             worker: None,
@@ -494,33 +678,40 @@ impl Desktop {
             busy: false,
             inflight_start: false,
             inflight_stop: false,
-            stop_after_start: false,
             polling: false,
             pending_action: None,
             pending_stop: false,
             urgent_action: None,
-            urgent_is_shutdown: false,
+            urgent_target: LocalStop::Sender,
             repaint: egui::Context::default(),
             online: false,
-            message: "正在连接后台…".into(),
+            message: Message::ShellConnecting,
             error: false,
             cjk,
             status: None,
             snapshot: None,
             diagnostics: None,
             airplay: None,
+            diagnostics_clock: Default::default(),
+            airplay_clock: Default::default(),
+            sender_clock: Default::default(),
+            diagnostic_counters: Default::default(),
+            sender_counters: Default::default(),
             fresh: None,
             synced: None,
-            queued_write: None,
+            intents: Default::default(),
+            applications: Default::default(),
+            context_epoch: 0,
+            context_route: None,
             inflight: None,
             poll_error: false,
             copied_at: None,
             last_poll: Instant::now() - Duration::from_secs(5),
             devices: vec![],
-            room: "客厅".into(),
+            room: String::new(),
             remote_room: None,
             output: String::new(),
-            sender_name: "我的电脑".into(),
+            sender_name: String::new(),
             invitation: String::new(),
             show_invitation: false,
             show_airplay_pin: false,
@@ -532,7 +723,7 @@ impl Desktop {
             hub_address: String::new(),
             candidates: vec![],
             binding: None,
-            binding_name: "NeonMix — 客厅".into(),
+            binding_name: String::new(),
             provider: "neonmix".into(),
             search: String::new(),
             confirm: None,
@@ -541,6 +732,7 @@ impl Desktop {
             preview,
             preview_airplay_only: false,
             gain_drafts: std::collections::BTreeMap::new(),
+            gain_draft_owners: Default::default(),
             selected_lane: None,
             lane_details: Default::default(),
             panels: Default::default(),
@@ -551,10 +743,12 @@ impl Desktop {
             undo: None,
             tray: None,
             tray_attempted: false,
+            native_window: Default::default(),
             events: Default::default(),
             marks: None,
             marks_key: None,
             joined: Default::default(),
+            partial_polls: 0,
             level_history: history::Series::new(Duration::from_secs(60)),
             metric_history: history::Series::new(Duration::from_secs(120)),
             #[cfg(feature = "screenshot")]
@@ -566,7 +760,8 @@ impl Desktop {
             return;
         }
         let polling = matches!(&work, Work::Poll { .. });
-        let starting = matches!(&work, Work::Action(Request::SenderStart { .. }));
+        let starting = matches!(&work, Work::Action(Request::SenderStart { .. }))
+            || matches!(&work,Work::Action(Request::LifecycleStart {request,..}) if matches!(request.as_ref(),Request::SenderStart {..}));
         let stopping = matches!(&work, Work::Action(Request::SenderStop));
         let key = match &work {
             Work::Action(request) => Some(request_key(request)),
@@ -596,13 +791,40 @@ impl Desktop {
         (self.busy && !self.polling) || self.pending_action.is_some() || self.pending_stop
     }
     fn request(&mut self, request: Request) {
-        if self.busy && matches!(&request, Request::Shutdown) {
+        match &request {
+            Request::Control { operation, .. } => {
+                self.write(Write::Control(operation.clone()));
+                return;
+            }
+            Request::AirplayV2 {
+                command: Some(command),
+                ..
+            } => {
+                self.write(Write::Airplay(command.operation.clone()));
+                return;
+            }
+            _ => {}
+        }
+        if self.busy
+            && matches!(
+                &request,
+                Request::Shutdown | Request::HubStop | Request::SenderStop
+            )
+        {
             self.begin_urgent(request);
             return;
         }
         if self.preview {
             return;
         }
+        let request = match self.freeze_lifecycle(request) {
+            Ok(request) => request,
+            Err(error) => {
+                self.message = user_error(error);
+                self.error = true;
+                return;
+            }
+        };
         if self.busy {
             if !self.polling || self.pending_action.is_some() {
                 return;
@@ -611,20 +833,16 @@ impl Desktop {
         } else {
             self.queue(Work::Action(request));
         }
-        self.message = "正在处理…".into();
+        self.message = Message::ShellProcessing;
         self.error = false;
     }
     fn stop_sender(&mut self) {
         if self.preview || self.pending_stop {
             return;
         }
-        if self.inflight_start {
-            self.pending_stop = true;
-            self.stop_after_start = true;
-            self.message = "开始操作结束后立即停止发送…".into();
-            return;
-        }
-        if matches!(self.pending_action, Some(Request::SenderStart { .. })) {
+        if matches!(&self.pending_action, Some(Request::SenderStart { .. }))
+            || matches!(&self.pending_action,Some(Request::LifecycleStart {request,..}) if matches!(request.as_ref(),Request::SenderStart {..}))
+        {
             self.pending_action = None;
         }
         if self.busy {
@@ -638,13 +856,25 @@ impl Desktop {
             return;
         }
         self.pending_stop = true;
-        self.urgent_is_shutdown = matches!(&request, Request::Shutdown);
-        self.message = if self.urgent_is_shutdown {
-            "正在退出后台…"
+        self.urgent_target = match &request {
+            Request::Shutdown => LocalStop::Shutdown,
+            Request::HubStop => LocalStop::Hub,
+            _ => LocalStop::Sender,
+        };
+        let request = match self.freeze_lifecycle(request) {
+            Ok(request) => request,
+            Err(error) => {
+                self.pending_stop = false;
+                self.message = stop_error(error);
+                self.error = true;
+                return;
+            }
+        };
+        self.message = if matches!(self.urgent_target, LocalStop::Shutdown) {
+            Message::ShellQuitting
         } else {
-            "正在停止发送…"
-        }
-        .into();
+            Message::ShellStopping
+        };
         let client = self.client.clone();
         let repaint = self.repaint.clone();
         let (tx, rx) = mpsc::sync_channel(1);
@@ -654,6 +884,44 @@ impl Desktop {
             let _ = tx.send(result);
             repaint.request_repaint();
         });
+    }
+    fn freeze_lifecycle(&self, request: Request) -> Result<Request, UiError> {
+        if !matches!(
+            request,
+            Request::HubStart
+                | Request::SenderStart { .. }
+                | Request::HubStop
+                | Request::SenderStop
+                | Request::Shutdown
+        ) {
+            return Ok(request);
+        }
+        let status = self
+            .status
+            .as_ref()
+            .ok_or_else(|| UiError::from("background_timeout"))?;
+        let view = status
+            .lifecycle
+            .as_ref()
+            .filter(|view| view.version == 1)
+            .ok_or_else(|| UiError::from("ipc_incompatible_version"))?;
+        if matches!(request, Request::HubStart | Request::SenderStart { .. }) {
+            let expected_stop_generation = if matches!(request, Request::HubStart) {
+                view.hub_stop_generation
+            } else {
+                view.sender_stop_generation
+            };
+            Ok(Request::LifecycleStart {
+                instance_generation: view.instance_generation,
+                expected_stop_generation,
+                request: Box::new(request),
+            })
+        } else {
+            Ok(Request::LifecycleStop {
+                instance_generation: view.instance_generation,
+                request: Box::new(request),
+            })
+        }
     }
     fn manual_hub(&self) -> Option<String> {
         (!self.hub_address.trim().is_empty()).then(|| self.hub_address.trim().to_string())
@@ -676,6 +944,7 @@ impl Desktop {
         });
     }
     fn process(&mut self) {
+        self.sync_command_context();
         if let Some(result) = self
             .urgent_action
             .as_ref()
@@ -684,27 +953,38 @@ impl Desktop {
             self.urgent_action = None;
             self.pending_stop = false;
             match result {
-                Ok(_) => {
-                    if self.urgent_is_shutdown {
+                Ok(data) => {
+                    if matches!(self.urgent_target, LocalStop::Shutdown) {
                         self.exiting = true;
                     }
-                    self.urgent_is_shutdown = false;
-                    self.message = "发送已停止".into();
+                    self.message = if matches!(self.urgent_target, LocalStop::Hub) {
+                        Message::ShellSharingStopped
+                    } else {
+                        Message::ShellStopped
+                    };
                     self.error = false;
+                    self.last_poll = Instant::now() - Duration::from_secs(5);
                     if let Some(status) = &mut self.status {
-                        status.sender.running = false;
-                        status.sender.pid = None;
+                        let process = match self.urgent_target {
+                            LocalStop::Hub => &mut status.hub,
+                            _ => &mut status.sender,
+                        };
+                        process.running = false;
+                        process.ready = false;
+                        process.pid = None;
+                        if let Ok(view) = serde_json::from_value(data["lifecycle"].clone()) {
+                            status.lifecycle = Some(view);
+                        }
                     }
                 }
                 Err(error) => {
-                    self.message = user_error(error);
+                    self.message = stop_error(error);
                     self.error = true;
                 }
             }
         }
         let outcome = self.results.as_ref().and_then(|rx| rx.try_recv().ok());
         if let Some(outcome) = outcome {
-            let completed_start = self.inflight_start;
             let completed_stop = self.inflight_stop;
             let was_poll = self.polling;
             self.inflight = None;
@@ -716,193 +996,317 @@ impl Desktop {
             self.busy = false;
             self.polling = false;
             self.last_poll = Instant::now();
-            match outcome {
-                Err(e) => {
-                    self.message = user_error(e);
-                    self.error = true;
-                    self.fresh = None;
-                    // A failed poll keeps the last readings on screen (marked
-                    // stale by age) instead of blanking meters and cards.
-                    if was_poll {
-                        self.poll_error = true;
-                    } else {
-                        self.gain_drafts.clear();
-                        self.queued_write = None;
-                    }
-                }
-                Ok(Outcome::Boot) => {
-                    self.online = true;
-                    self.message = "后台已连接".into();
-                    self.request(Request::Devices);
-                }
-                Ok(Outcome::Poll(data)) => {
-                    self.online = true;
-                    if self.status.is_none()
-                        && let Some(settings) = &data.status.hub_settings
-                    {
-                        self.room = settings.name.clone();
-                        self.output = settings.output.clone();
-                    }
-                    if !data
-                        .status
-                        .profiles
-                        .iter()
-                        .any(|p| p.credential == self.credential)
-                        && let Some(profile) = data.status.profiles.iter().find(|p| !p.pending)
-                    {
-                        self.credential = profile.credential.clone();
-                    }
-                    if self.status.is_none()
-                        && let Some(name) = data
-                            .status
-                            .output_binding
-                            .as_ref()
-                            .and_then(|b| b["display_name"].as_str())
-                    {
-                        self.binding_name = name.into();
-                    }
-                    if data.credential == self.credential && data.hub == self.hub() {
-                        self.remote_room = data.room_name;
-                    }
-                    self.binding = data.status.output_binding.clone();
-                    self.status = Some(data.status);
-                    if let Some(snapshot) = data
-                        .snapshot
-                        .filter(|_| data.credential == self.credential && data.hub == self.hub())
-                    {
-                        self.snapshot = Some(snapshot);
-                        self.airplay = data.airplay;
-                        self.fresh = Some(Instant::now());
-                        self.synced = self.fresh;
-                        if self.poll_error && data.error.is_none() {
-                            self.poll_error = false;
-                            self.error = false;
-                            self.message = "已重新取得房间状态".into();
+            if !self.consume_intent_result(&outcome) {
+                match outcome {
+                    Err(e) => {
+                        if was_poll {
+                            self.diagnostics_clock.failed();
+                            self.airplay_clock.failed();
+                            self.sender_clock.failed();
                         }
-                        self.diagnostics = data
-                            .diagnostics
-                            .map(|v| v.get("remote").cloned().unwrap_or(v));
-                        self.record_history();
-                    } else {
-                        self.fresh = None;
-                        self.synced = None;
-                        self.airplay = None;
-                        self.diagnostics = None;
-                    }
-                    if let Some(e) = data.error {
                         self.message = user_error(e);
                         self.error = true;
                         self.fresh = None;
+                        // A failed poll keeps the last readings on screen (marked
+                        // stale by age) instead of blanking meters and cards.
+                        if was_poll {
+                            self.poll_error = true;
+                        } else {
+                            self.gain_drafts.clear();
+                            // Other objects/fields remain queued after a failed write.
+                        }
                     }
-                }
-                Ok(Outcome::Action(request, data)) => {
-                    // Mixer and AirPlay writes show their result in the control
-                    // itself; a status line per click is noise.
-                    if !matches!(request, Request::Control { .. } | Request::AirplayV2 { .. }) {
-                        self.message = "操作已完成".into();
+                    Ok(Outcome::Boot) => {
+                        self.online = true;
+                        self.message = Message::ShellConnected;
+                        self.request(Request::Devices);
                     }
-                    self.error = false;
-                    self.last_poll = Instant::now() - Duration::from_secs(5);
-                    match request {
-                        Request::AirplayV2 { command, .. } => {
-                            if let Some(command) = command {
-                                self.airplay_name_saved(&command.operation);
+                    Ok(Outcome::Poll(data)) => {
+                        let sender_replaced = self.status.as_ref().is_some_and(|old| {
+                            old.sender.pid != data.status.sender.pid
+                                || old.sender.owner_pid != data.status.sender.owner_pid
+                                || old.lifecycle.as_ref().map(|s| s.instance_generation)
+                                    != data
+                                        .status
+                                        .lifecycle
+                                        .as_ref()
+                                        .map(|s| s.instance_generation)
+                        });
+                        if sender_replaced {
+                            self.sender_counters.clear();
+                            self.sender_clock.clear();
+                        }
+                        if let Some(metrics) = data.status.sender.metrics.as_ref()
+                            && let Some(age) = data.status.sender.metrics_age_ms
+                        {
+                            let new_metrics = sender_replaced
+                                || self.status.as_ref().is_none_or(|old| {
+                                    old.sender.metrics_sequence
+                                        != data.status.sender.metrics_sequence
+                                });
+                            if new_metrics {
+                                self.sender_counters.update(metrics);
                             }
-                            match data["outcome"].as_str() {
-                                Some("configuration_partial") => {
-                                    self.message =
-                                        "部分入口身份已保存，但配置尚未完成；请检查入口后重试。"
-                                            .into();
-                                    self.error = true;
-                                }
-                                Some("saved_session_ended") => {
-                                    self.message =
-                                        "设备设置已保存；原会话已结束，未操作新的连接。".into()
-                                }
-                                _ => {}
+                            self.sender_clock.success_with_age(
+                                metrics,
+                                None,
+                                data.received.status.unwrap_or_else(Instant::now),
+                                Duration::from_millis(age),
+                            );
+                        } else {
+                            self.sender_clock.failed();
+                        }
+                        let application = data
+                            .diagnostics
+                            .as_ref()
+                            .and_then(|v| v.get("remote").unwrap_or(v).get("media_application"))
+                            .or_else(|| {
+                                data.airplay
+                                    .as_ref()
+                                    .and_then(|v| v.get("media_application"))
+                            })
+                            .cloned();
+                        self.online = true;
+                        if self.status.is_none()
+                            && let Some(settings) = &data.status.hub_settings
+                        {
+                            self.room = settings.name.clone();
+                            self.output = settings.output.clone();
+                        }
+                        if !data
+                            .status
+                            .profiles
+                            .iter()
+                            .any(|p| p.credential == self.credential)
+                            && let Some(profile) = data.status.profiles.iter().find(|p| !p.pending)
+                        {
+                            self.credential = profile.credential.clone();
+                        }
+                        if self.status.is_none()
+                            && let Some(name) = data
+                                .status
+                                .output_binding
+                                .as_ref()
+                                .and_then(|b| b["display_name"].as_str())
+                        {
+                            self.binding_name = name.into();
+                        }
+                        if data.credential == self.credential && data.hub == self.hub() {
+                            self.remote_room = data.room_name;
+                        }
+                        self.binding = data.status.output_binding.clone();
+                        let outdated = self
+                            .status
+                            .as_ref()
+                            .and_then(|current| current.lifecycle.as_ref())
+                            .zip(data.status.lifecycle.as_ref())
+                            .is_some_and(|(current, incoming)| {
+                                current.instance_generation == incoming.instance_generation
+                                    && (incoming.hub_stop_generation < current.hub_stop_generation
+                                        || incoming.sender_stop_generation
+                                            < current.sender_stop_generation)
+                            });
+                        if !outdated {
+                            self.status = Some(data.status);
+                        }
+                        if let Some(snapshot) = data.snapshot.filter(|_| {
+                            data.credential == self.credential && data.hub == self.hub()
+                        }) {
+                            // A single failed AirPlay/diagnostics read keeps the
+                            // last readings of the same room: blanking them made
+                            // AirPlay lanes, meters and the graph vanish for one
+                            // poll and come back on the next.
+                            let same_room = self.snapshot.as_ref().is_some_and(|s| {
+                                s.hub_id == snapshot.hub_id
+                                    && s.runtime_epoch == snapshot.runtime_epoch
+                            });
+
+                            self.partial_polls = if data.partial {
+                                self.partial_polls + 1
+                            } else {
+                                0
+                            };
+                            let now = Instant::now();
+                            let epoch = Some(snapshot.runtime_epoch);
+                            if !same_room {
+                                self.diagnostic_counters.clear();
+                                self.diagnostics_clock.clear();
+                                self.airplay_clock.clear();
                             }
-                            if let Some(warning) = data["warning"].as_str() {
-                                self.message = if warning == "profile_durability_unconfirmed" {
-                                    "配置已写入，但磁盘同步未确认；请检查存储状态。"
-                                } else {
-                                    "设置已保存，但入口未完成更新；请检查诊断和入口状态。"
-                                }
-                                .into();
-                                self.error = true;
-                            } else if data["media_pending"].as_bool() == Some(true) {
-                                self.message = "设置已保存，正在同步到音频引擎。".into();
+                            match data
+                                .diagnostics
+                                .as_ref()
+                                .map(|v| v.get("remote").unwrap_or(v))
+                            {
+                                Some(value) => self.diagnostics_clock.success(
+                                    value,
+                                    epoch,
+                                    data.received.diagnostics.unwrap_or(now),
+                                ),
+                                None => self.diagnostics_clock.failed(),
                             }
-                            self.airplay = Some(data);
-                        }
-                        Request::Devices => match serde_json::from_value(data) {
-                            Ok(devices) => self.devices = devices,
-                            Err(e) => {
-                                self.error = true;
-                                self.message = format!("设备列表格式错误：{e}");
+                            match data.airplay.as_ref() {
+                                Some(value) => self.airplay_clock.success(
+                                    value,
+                                    epoch,
+                                    data.received.airplay.unwrap_or(now),
+                                ),
+                                None => self.airplay_clock.failed(),
                             }
-                        },
-                        Request::Discover { .. } => {
-                            self.candidates = data
-                                .get("candidates")
-                                .and_then(Value::as_array)
-                                .cloned()
-                                .unwrap_or_default();
-                        }
-                        Request::Invite { .. } => {
-                            self.issued_invitation = data
-                                .get("invitation")
-                                .map(|v| {
-                                    if let Some(t) = v.as_str() {
-                                        t.to_owned()
-                                    } else {
-                                        v.to_string()
-                                    }
-                                })
-                                .unwrap_or_default();
-                            self.invite_id = data
-                                .get("invitation_id")
-                                .and_then(Value::as_str)
-                                .and_then(|s| s.parse().ok());
-                            self.invite_expiry =
-                                data.get("expires_unix_seconds").and_then(Value::as_u64);
-                        }
-                        Request::CancelInvite { .. } => {
-                            self.issued_invitation.clear();
-                            self.invite_id = None;
-                        }
-                        Request::Output {
-                            action: OutputAction::Remove { .. },
-                            ..
-                        } => self.binding = None,
-                        Request::Output { .. } => self.binding = Some(data),
-                        Request::Shutdown => self.exiting = true,
-                        Request::ExportDiagnostics { .. } => {
-                            self.message = "脱敏诊断已导出到 diagnostics-redacted.json".into()
-                        }
-                        Request::ForgetCredential { .. } => {
-                            self.snapshot = None;
+                            if let Some(value) = data
+                                .diagnostics
+                                .as_ref()
+                                .map(|v| v.get("remote").unwrap_or(v))
+                                && value["available"].as_bool() != Some(false)
+                            {
+                                self.diagnostic_counters.update(value);
+                            }
+                            self.snapshot = Some(snapshot);
+                            if data
+                                .airplay
+                                .as_ref()
+                                .is_some_and(|v| v["available"].as_bool() != Some(false))
+                            {
+                                self.airplay = data.airplay;
+                            } else if !same_room {
+                                self.airplay = None;
+                            }
+                            self.fresh = Some(data.received.snapshot.unwrap_or(now));
+                            self.synced = self.fresh;
+                            if self.poll_error && data.error.is_none() {
+                                self.poll_error = false;
+                                self.error = false;
+                                self.message = Message::ShellRecovered;
+                            }
+                            if data.diagnostics.as_ref().is_some_and(|v| {
+                                v.get("remote").unwrap_or(v)["available"].as_bool() != Some(false)
+                            }) {
+                                self.diagnostics = data
+                                    .diagnostics
+                                    .map(|v| v.get("remote").cloned().unwrap_or(v));
+                            } else if !same_room {
+                                self.diagnostics = None;
+                            }
+                            self.record_history();
+                            self.sync_command_context();
+                            self.refresh_applications(application.as_ref());
+                        } else {
                             self.fresh = None;
                             self.synced = None;
-                            self.invitation.clear();
-                            self.message =
-                                "本机配对已删除，输出已禁用；重新配对后手动启用或重新添加输出。"
-                                    .into();
+                            self.airplay = None;
+                            self.diagnostics = None;
+                            self.airplay_clock.failed();
+                            self.diagnostics_clock.failed();
                         }
-                        Request::PairText { .. } => {
-                            self.credential = PathBuf::from("profiles/sender.json");
-                            self.invitation.clear();
-                            self.snapshot = None;
-                            self.synced = None;
+                        // Partial reads are reported once they persist; a lone
+                        // miss would only flash the status strip red.
+                        if let Some(e) = data
+                            .error
+                            .filter(|_| !data.partial || self.partial_polls >= PARTIAL_REPORT)
+                        {
+                            self.message = user_error(e);
+                            self.error = true;
+                            self.fresh = None;
                         }
-                        _ => {}
+                    }
+                    Ok(Outcome::Action(request, data)) => {
+                        let request = *request;
+                        // Mixer and AirPlay writes show their result in the control
+                        // itself; a status line per click is noise.
+                        if !matches!(request, Request::Control { .. } | Request::AirplayV2 { .. }) {
+                            self.message = Message::ShellCompleted;
+                        }
+                        self.error = false;
+                        self.last_poll = Instant::now() - Duration::from_secs(5);
+                        match request {
+                            Request::AirplayV2 { command, .. } => {
+                                if let Some(command) = command {
+                                    self.airplay_name_saved(&command.operation);
+                                }
+                                match data["outcome"].as_str() {
+                                    Some("configuration_partial") => {
+                                        self.message = Message::ShellPartialConfiguration;
+                                        self.error = true;
+                                    }
+                                    Some("saved_session_ended") => {
+                                        self.message = Message::ShellSessionEnded
+                                    }
+                                    _ => {}
+                                }
+                                if let Some(warning) = data["warning"].as_str() {
+                                    self.message = if warning == "profile_durability_unconfirmed" {
+                                        Message::ShellDurability
+                                    } else {
+                                        Message::ShellEntryPending
+                                    };
+                                    self.error = true;
+                                } else if data["media_pending"].as_bool() == Some(true) {
+                                    self.message = Message::ShellMediaPending;
+                                }
+                                self.airplay = Some(data);
+                            }
+                            Request::Devices => match serde_json::from_value(data) {
+                                Ok(devices) => self.devices = devices,
+                                Err(_e) => {
+                                    self.error = true;
+                                    self.message = Message::FaultInvalidBackendResponse;
+                                }
+                            },
+                            Request::Discover { .. } => {
+                                self.candidates = data
+                                    .get("candidates")
+                                    .and_then(Value::as_array)
+                                    .cloned()
+                                    .unwrap_or_default();
+                            }
+                            Request::Invite { .. } => {
+                                self.issued_invitation = data
+                                    .get("invitation")
+                                    .map(|v| {
+                                        if let Some(t) = v.as_str() {
+                                            t.to_owned()
+                                        } else {
+                                            v.to_string()
+                                        }
+                                    })
+                                    .unwrap_or_default();
+                                self.invite_id = data
+                                    .get("invitation_id")
+                                    .and_then(Value::as_str)
+                                    .and_then(|s| s.parse().ok());
+                                self.invite_expiry =
+                                    data.get("expires_unix_seconds").and_then(Value::as_u64);
+                            }
+                            Request::CancelInvite { .. } => {
+                                self.issued_invitation.clear();
+                                self.invite_id = None;
+                            }
+                            Request::Output {
+                                action: OutputAction::Remove { .. },
+                                ..
+                            } => self.binding = None,
+                            Request::Output { .. } => self.binding = Some(data),
+                            Request::Shutdown => self.exiting = true,
+                            Request::ExportDiagnostics { .. } => {
+                                self.message = Message::ShellExported
+                            }
+                            Request::ForgetCredential { .. } => {
+                                self.snapshot = None;
+                                self.fresh = None;
+                                self.synced = None;
+                                self.invitation.clear();
+                                self.message = Message::ShellForgotPairing;
+                            }
+                            Request::PairText { .. } => {
+                                self.credential = PathBuf::from("profiles/sender.json");
+                                self.invitation.clear();
+                                self.snapshot = None;
+                                self.synced = None;
+                            }
+                            _ => {}
+                        }
                     }
                 }
-            }
-            if completed_start && self.stop_after_start {
-                self.stop_after_start = false;
-                self.pending_stop = false;
-                self.request(Request::SenderStop);
-                self.pending_stop = true;
             }
         }
         if !self.busy
@@ -911,11 +1315,8 @@ impl Desktop {
         {
             self.request(request);
         }
-        if self.ready()
-            && let Some(write) = self.queued_write.take()
-        {
-            self.dispatch(write);
-        }
+        self.sync_command_context();
+        self.dispatch_intents();
         if self.online
             && !self.busy
             && !self.pending_stop
@@ -986,27 +1387,7 @@ impl Desktop {
         self.write(Write::Control(operation));
     }
     fn write(&mut self, write: Write) {
-        if self.ready() {
-            self.dispatch(write);
-        } else if self.writable() {
-            self.queued_write = Some(write);
-        }
-    }
-    fn dispatch(&mut self, write: Write) {
-        let request = match write {
-            Write::Control(operation) => self.snapshot.as_ref().map(|state| Request::Control {
-                credential: self.credential.clone(),
-                hub: self.hub(),
-                expected_revision: state.revision,
-                operation,
-            }),
-            Write::Airplay(operation) => self.airplay_request(operation),
-        };
-        if let Some(request) = request {
-            self.request(request);
-            // Our own write makes the snapshot stale until the next poll.
-            self.fresh = None;
-        }
+        self.enqueue_write(write, None);
     }
     fn panel_open(&self, key: &'static str, default: bool) -> bool {
         self.panels.get(key).copied().unwrap_or(default)
@@ -1015,40 +1396,39 @@ impl Desktop {
         self.panels.insert(key, !open);
     }
     /// A mixer change the user can restore with one click or ⌘Z.
-    fn mix_change(&mut self, label: String, write: Write, inverse: Write) {
-        if !self.writable() {
-            return;
-        }
-        self.write(write);
-        self.undo = Some(Undo {
-            label,
-            inverse,
-            at: Instant::now(),
-        });
+    fn mix_change(&mut self, label: Message, write: Write, _inverse: Write) {
+        self.enqueue_write(write, Some(label));
     }
     fn undo_available(&self) -> bool {
-        self.undo
-            .as_ref()
-            .is_some_and(|u| u.at.elapsed() < Duration::from_secs(8))
+        self.undo_matches()
     }
     fn restore_last(&mut self) {
-        if !self.undo_available() {
-            return;
-        }
-        if let Some(undo) = self.undo.take() {
-            self.write(undo.inverse);
-            self.message = format!("已还原：{}", undo.label);
-            self.error = false;
-        }
+        self.restore_confirmed();
     }
     fn confirmation(
         &mut self,
-        label: String,
-        consequence: String,
+        label: Message,
+        consequence: Message,
         request: Request,
         origin: egui::Id,
     ) {
+        let intent = self.confirmation_intent(&request);
+        if intent.is_none()
+            && matches!(
+                &request,
+                Request::Control { .. }
+                    | Request::AirplayV2 {
+                        command: Some(_),
+                        ..
+                    }
+            )
+        {
+            self.message = Message::IntentTargetEnded;
+            self.error = true;
+            return;
+        }
         self.confirm = Some(Confirmation {
+            intent,
             label,
             consequence,
             request,
@@ -1057,8 +1437,25 @@ impl Desktop {
         });
     }
 }
+/// Whether a poll should ask for room state as `credential`. The local
+/// admin identity can only reach this machine's Hub; while it is not sharing
+/// there is nothing to ask, and asking showed a permanent red connection
+/// error that alternated between causes every second.
+fn fetches_room(credential: &std::path::Path, status: &ServiceStatus) -> bool {
+    let local_hub_stopped =
+        credential == std::path::Path::new("hub/admin.json") && !status.hub.running;
+    !local_hub_stopped
+        && status
+            .profiles
+            .iter()
+            .any(|p| p.credential == credential && !p.pending)
+}
+
 fn request_key(request: &Request) -> &'static str {
     match request {
+        Request::LifecycleStart { request, .. } | Request::LifecycleStop { request, .. } => {
+            request_key(request)
+        }
         Request::HubSetup { .. } | Request::HubSettings { .. } => "hub-settings",
         Request::HubStart => "hub-start",
         Request::HubStop => "hub-stop",
@@ -1073,25 +1470,157 @@ fn request_key(request: &Request) -> &'static str {
         _ => "other",
     }
 }
-fn user_error(error: String) -> String {
-    match error.as_str() {
-        "revision_conflict" | "stale_revision" => {
-            "房间状态已被其他操作更新；正在刷新，请核对后重试。".into()
+#[derive(Debug, Clone)]
+struct UiError {
+    fault: Option<neonmix_desktop_service::Fault>,
+}
+impl From<&str> for UiError {
+    fn from(error: &str) -> Self {
+        Self::from(error.to_owned())
+    }
+}
+impl From<String> for UiError {
+    fn from(error: String) -> Self {
+        Self {
+            fault: neonmix_desktop_service::Fault::from_machine_code(&error),
         }
-        "permission_denied" => "当前身份无权执行此操作；请刷新设备权限。".into(),
-        "unauthenticated" => "配对凭证不可用；检查是否已被撤销，必要时重新配对。".into(),
-        "invalid_argument" => "参数无效；请检查字段和所选设备。".into(),
-        "not_found" => "目标设备或通道已不存在；请刷新状态。".into(),
-        "quota_exceeded" | "room_capacity_full" => "房间已达到设备或通道上限。".into(),
-        "receiver_busy" => "这个入口已被占用；请选择空闲入口。".into(),
-        "source_already_active" => "此来源已在房间播放；先断开旧连接再更换入口。".into(),
-        "source_blocked" => "此来源已被禁止播放，请由管理员重新允许。".into(),
-        "pairing_revoked" => "此来源的配对已撤销，需要管理员重新开放配对。".into(),
-        "session_changed" => "此来源的会话已变化；正在刷新，请核对后重试。".into(),
-        "worker_unavailable" => "此入口的接收引擎不可用，请检查诊断后重新开启。".into(),
-        "output_unavailable" => "实体输出不可用，请检查声卡连接。".into(),
-        "upgrade_required" => "此房间使用多路 AirPlay，请更新桌面客户端。".into(),
-        _ => error,
+    }
+}
+fn stop_error(error: UiError) -> Message {
+    use neonmix_desktop_service::FaultCode;
+    if error.fault.as_ref().is_none_or(|fault| {
+        matches!(
+            fault.code,
+            FaultCode::ConnectionUnavailable
+                | FaultCode::BackgroundTimeout
+                | FaultCode::BackgroundBusy
+                | FaultCode::LifecycleOwnerLost
+                | FaultCode::InvalidBackendResponse
+                | FaultCode::RequestInterrupted
+        )
+    }) {
+        Message::ShellStopUnconfirmed
+    } else {
+        user_error(error)
+    }
+}
+
+fn user_error(error: UiError) -> Message {
+    use neonmix_desktop_service::FaultCode;
+    let Some(fault) = error.fault else {
+        return Message::ErrorGeneric;
+    };
+    match fault.code {
+        FaultCode::GenericFailure => Message::FaultGenericFailure,
+        FaultCode::RevisionConflict => Message::FaultRevisionConflict,
+        FaultCode::PermissionDenied => Message::FaultPermissionDenied,
+        FaultCode::Unauthenticated => Message::FaultUnauthenticated,
+        FaultCode::InvalidArgument => Message::FaultInvalidArgument,
+        FaultCode::NotFound => Message::FaultNotFound,
+        FaultCode::QuotaExceeded => Message::FaultQuotaExceeded,
+        FaultCode::ReceiverBusy => Message::FaultReceiverBusy,
+        FaultCode::RoomCapacityFull => Message::FaultRoomCapacityFull,
+        FaultCode::SourceAlreadyActive => Message::FaultSourceAlreadyActive,
+        FaultCode::SourceBlocked => Message::FaultSourceBlocked,
+        FaultCode::PairingRevoked => Message::FaultPairingRevoked,
+        FaultCode::StaleRevision => Message::FaultStaleRevision,
+        FaultCode::SessionChanged => Message::FaultSessionChanged,
+        FaultCode::OutputUnavailable => Message::FaultOutputUnavailable,
+        FaultCode::OutputObjectReplaced => Message::FaultOutputObjectReplaced,
+        FaultCode::WorkerUnavailable => Message::FaultWorkerUnavailable,
+        FaultCode::UpgradeRequired => Message::FaultUpgradeRequired,
+        FaultCode::HubPortInUse => Message::FaultHubPortInUse {
+            port: u64::from(fault.params.port.unwrap_or(7443)),
+        },
+        FaultCode::MigrationRequired => Message::FaultMigrationRequired,
+        FaultCode::CredentialMissing => Message::FaultCredentialMissing,
+        FaultCode::CredentialPermissionDenied => Message::FaultCredentialPermissionDenied,
+        FaultCode::CredentialStoreBusy => Message::FaultCredentialStoreBusy,
+        FaultCode::AdministratorCredentialProtected => {
+            Message::FaultAdministratorCredentialProtected
+        }
+        FaultCode::CredentialIoFailed => Message::FaultCredentialIoFailed,
+        FaultCode::ProfileDurabilityUnconfirmed => Message::FaultProfileDurabilityUnconfirmed,
+        FaultCode::ConfigurationRecoveryRequired => Message::FaultConfigurationRecoveryRequired,
+        FaultCode::CredentialCorrupt => Message::FaultCredentialCorrupt,
+        FaultCode::CredentialVersionUnsupported => Message::FaultCredentialVersionUnsupported,
+        FaultCode::CredentialKindMismatch => Message::FaultCredentialKindMismatch,
+        FaultCode::CredentialReferenceInvalid => Message::FaultCredentialReferenceInvalid,
+        FaultCode::CredentialAlreadyExists => Message::FaultCredentialAlreadyExists,
+        FaultCode::CredentialProfileMissing => Message::FaultCredentialProfileMissing,
+        FaultCode::SetupIncomplete => Message::FaultSetupIncomplete,
+        FaultCode::UnsupportedAudioFormat => Message::FaultUnsupportedAudioFormat,
+        FaultCode::CaptureUnavailable => Message::FaultCaptureUnavailable,
+        FaultCode::ConnectionUnavailable => Message::FaultConnectionUnavailable,
+        FaultCode::BackgroundTimeout => Message::FaultBackgroundTimeout,
+        FaultCode::BackgroundBusy => Message::FaultBackgroundBusy,
+        FaultCode::RequestInterrupted => Message::FaultRequestInterrupted,
+        FaultCode::BackgroundShuttingDown => Message::FaultBackgroundShuttingDown,
+        FaultCode::RuntimeUnavailable => Message::FaultRuntimeUnavailable,
+        FaultCode::ProcessAlreadyRunning => Message::FaultProcessAlreadyRunning,
+        FaultCode::ProcessExited => Message::FaultProcessExited,
+        FaultCode::StopFailed => Message::FaultStopFailed,
+        FaultCode::StopIncomplete => Message::FaultStopIncomplete,
+        FaultCode::RuntimeCleanupIncomplete => Message::FaultRuntimeCleanupIncomplete,
+        FaultCode::LifecycleOwnerLost => Message::FaultLifecycleOwnerLost,
+        FaultCode::HubSetupExists => Message::FaultHubSetupExists,
+        FaultCode::HubSettingsRequireStop => Message::FaultHubSettingsRequireStop,
+        FaultCode::SenderRequiresHubStop => Message::FaultSenderRequiresHubStop,
+        FaultCode::HubRequiresSenderStop => Message::FaultHubRequiresSenderStop,
+        FaultCode::SelfConnectionForbidden => Message::FaultSelfConnectionForbidden,
+        FaultCode::ResourceOwnedByOtherInstance => Message::FaultResourceOwnedByOtherInstance,
+        FaultCode::LocalFeedbackLoop => Message::FaultLocalFeedbackLoop,
+        FaultCode::LocalFeedbackCheckUnavailable => Message::FaultLocalFeedbackCheckUnavailable,
+        FaultCode::OutputBindingRequired => Message::FaultOutputBindingRequired,
+        FaultCode::InvalidOutputBinding => Message::FaultInvalidOutputBinding,
+        FaultCode::DiscoveryIncomplete => Message::FaultDiscoveryIncomplete,
+        FaultCode::InvalidBackendResponse => Message::FaultInvalidBackendResponse,
+        FaultCode::IpcInvalidRequest => Message::FaultIpcInvalidRequest,
+        FaultCode::IpcIncompatibleVersion => Message::FaultIpcIncompatibleVersion,
+        FaultCode::IpcMessageTooLarge => Message::FaultIpcMessageTooLarge,
+        FaultCode::InvalidPath => Message::FaultInvalidPath,
+        FaultCode::DiagnosticsSaveFailed => Message::FaultDiagnosticsSaveFailed,
+        FaultCode::NetworkApiFailed => Message::FaultNetworkApiFailed,
+        FaultCode::NetworkIdentityUnavailable => Message::FaultNetworkIdentityUnavailable,
+        FaultCode::NetworkIdentityInvalid => Message::FaultNetworkIdentityInvalid,
+        FaultCode::NetworkTokenUnavailable => Message::FaultNetworkTokenUnavailable,
+        FaultCode::NetworkModuleUnavailable => Message::FaultNetworkModuleUnavailable,
+        FaultCode::NetworkPackagePathInvalid => Message::FaultNetworkPackagePathInvalid,
+        FaultCode::NetworkHashUnavailable => Message::FaultNetworkHashUnavailable,
+        FaultCode::NetworkPackageReadFailed => Message::FaultNetworkPackageReadFailed,
+        FaultCode::NetworkRecordInvalid => Message::FaultNetworkRecordInvalid,
+        FaultCode::NetworkRecordWriteFailed => Message::FaultNetworkRecordWriteFailed,
+        FaultCode::NetworkInstanceInvalid => Message::FaultNetworkInstanceInvalid,
+        FaultCode::NetworkInstallationInvalid => Message::FaultNetworkInstallationInvalid,
+        FaultCode::NetworkPackageHashMismatch => Message::FaultNetworkPackageHashMismatch,
+        FaultCode::NetworkRequesterUnavailable => Message::FaultNetworkRequesterUnavailable,
+        FaultCode::NetworkRequesterInvalid => Message::FaultNetworkRequesterInvalid,
+        FaultCode::NetworkRecordMissing => Message::FaultNetworkRecordMissing,
+        FaultCode::NetworkRuleOwnerMismatch => Message::FaultNetworkRuleOwnerMismatch,
+        FaultCode::NetworkRuleReadbackFailed => Message::FaultNetworkRuleReadbackFailed,
+        FaultCode::NetworkRuleRemoveFailed => Message::FaultNetworkRuleRemoveFailed,
+        FaultCode::NetworkOperationRequired => Message::FaultNetworkOperationRequired,
+        FaultCode::NetworkOperationInvalid => Message::FaultNetworkOperationInvalid,
+        FaultCode::NetworkArgumentInvalid => Message::FaultNetworkArgumentInvalid,
+        FaultCode::NetworkUacCancelled => Message::FaultNetworkUacCancelled,
+        FaultCode::IncompatibleVersion => Message::FaultIncompatibleVersion,
+        FaultCode::PlaybackBlocked => Message::FaultPlaybackBlocked,
+        FaultCode::AlreadyActive => Message::FaultAlreadyActive,
+        FaultCode::IdempotencyConflict => Message::FaultIdempotencyConflict,
+        FaultCode::SnapshotRequired => Message::FaultSnapshotRequired,
+        FaultCode::Busy => Message::FaultBusy,
+        FaultCode::CommandIdReused => Message::FaultCommandIdReused,
+        FaultCode::InvalidCommand => Message::FaultInvalidCommand,
+        FaultCode::InvalidCommandId => Message::FaultInvalidCommandId,
+        FaultCode::InvalidGain => Message::FaultInvalidGain,
+        FaultCode::InvalidReceiverCount => Message::FaultInvalidReceiverCount,
+        FaultCode::InvalidReceiverName => Message::FaultInvalidReceiverName,
+        FaultCode::InvalidSourceAlias => Message::FaultInvalidSourceAlias,
+        FaultCode::ProfileUnavailable => Message::FaultProfileUnavailable,
+        FaultCode::ProfileWriteFailed => Message::FaultProfileWriteFailed,
+        FaultCode::ReceiverDisabled => Message::FaultReceiverDisabled,
+        FaultCode::ReceiverUnknown => Message::FaultReceiverUnknown,
+        FaultCode::SourceUnknown => Message::FaultSourceUnknown,
     }
 }
 fn virtual_device(device: &DeviceInfo) -> bool {
@@ -1100,27 +1629,44 @@ fn virtual_device(device: &DeviceInfo) -> bool {
         || device.id.contains("neonmix.sink")
         || device.id.contains("NEONMIX")
 }
-fn status_text(status: Option<SessionStatus>) -> &'static str {
+fn status_text(status: Option<SessionStatus>) -> Message {
     match status {
-        None => "无输入",
-        Some(SessionStatus::Buffering) => "缓冲中",
-        Some(SessionStatus::Playing) => "播放中",
-        Some(SessionStatus::NetworkDegraded) => "网络降级",
-        Some(SessionStatus::UserStopped) => "用户已停止",
-        Some(SessionStatus::AdminDisconnected) => "管理员已断开",
-        Some(SessionStatus::NetworkInterrupted) => "连接中断 · 需重新发送",
-        Some(SessionStatus::Revoked) => "配对已撤销",
-        Some(SessionStatus::OutputLost) => "输出丢失",
+        None => Message::SessionNoInput,
+        Some(SessionStatus::Buffering) => Message::SessionBuffering,
+        Some(SessionStatus::Playing) => Message::SessionPlaying,
+        Some(SessionStatus::NetworkDegraded) => Message::SessionNetworkDegraded,
+        Some(SessionStatus::UserStopped) => Message::SessionUserStopped,
+        Some(SessionStatus::AdminDisconnected) => Message::SessionAdminDisconnected,
+        Some(SessionStatus::NetworkInterrupted) => Message::SessionNetworkInterrupted,
+        Some(SessionStatus::Revoked) => Message::SessionRevoked,
+        Some(SessionStatus::OutputLost) => Message::SessionOutputLost,
     }
 }
 impl eframe::App for Desktop {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        if !self.tray_attempted && !self.preview {
+        if self
+            .localization
+            .frame(ctx, &self.preferences.value.language, self.preview)
+            && let Some(tray) = &mut self.tray
+        {
+            let _ = tray.update_locale(&self.localization.renderer);
+        }
+        let preview_tray = {
+            #[cfg(feature = "screenshot")]
+            {
+                self.preview && std::env::var_os("NEONMIX_SCREENSHOT_TRAY").is_some()
+            }
+            #[cfg(not(feature = "screenshot"))]
+            {
+                false
+            }
+        };
+        if !self.tray_attempted && (!self.preview || preview_tray) {
             self.tray_attempted = true;
-            match tray::Tray::new(ctx.clone()) {
+            match tray::Tray::new(ctx.clone(), self.native_window, &self.localization.renderer) {
                 Ok(tray) => self.tray = Some(tray),
-                Err(e) => {
-                    self.message = format!("托盘不可用：{e}；关闭窗口会最小化，后台继续运行。");
+                Err(_e) => {
+                    self.message = Message::ShellTrayUnavailable;
                     self.error = true;
                 }
             }
@@ -1129,6 +1675,12 @@ impl eframe::App for Desktop {
             for action in tray.actions() {
                 match action {
                     tray::Action::Show => {
+                        if !self.preview {
+                            self.localization.detect(
+                                &self.preferences.value.language,
+                                &localization::NativeLocaleProvider,
+                            );
+                        }
                         ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
                         ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
                         ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
@@ -1142,8 +1694,8 @@ impl eframe::App for Desktop {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
                         ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
                         self.confirmation(
-                            "退出后台".into(),
-                            "停止本实例的共享、发送和全部音频连接。".into(),
+                            Message::ShellQuit,
+                            Message::ShellQuitConsequence,
                             Request::Shutdown,
                             ctx.memory(|m| m.focused())
                                 .unwrap_or_else(|| egui::Id::new("tray-quit")),
@@ -1152,8 +1704,14 @@ impl eframe::App for Desktop {
                 }
             }
         }
+        if tray::maintenance_exit_requested() {
+            self.exiting = true;
+        }
         if self.exiting {
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            // eframe consumes the Close command, then closes the root on the
+            // next frame; keep that frame scheduled even for a hidden window.
+            ctx.request_repaint();
             return;
         }
         if ctx.input(|i| i.viewport().close_requested()) && !self.preview {
@@ -1173,6 +1731,15 @@ impl eframe::App for Desktop {
 }
 fn main() -> eframe::Result {
     let args = Args::parse();
+    #[cfg(windows)]
+    let _instance = if args.preview_page.is_some() {
+        None
+    } else {
+        match tray::single_instance(&args.state_dir) {
+            Some(instance) => Some(instance),
+            None => return Ok(()),
+        }
+    };
     let size = [args.width.max(600.0), args.height.max(440.0)];
     eframe::run_native(
         "NeonMix",
@@ -1197,6 +1764,120 @@ mod tests {
     }
 
     #[test]
+    fn mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts() {
+        for console in [false, true] {
+            let ctx = themed();
+            let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+            app.selected_lane = Some(99);
+            let next = if console {
+                egui::Key::ArrowRight
+            } else {
+                egui::Key::ArrowDown
+            };
+            let previous = if console {
+                egui::Key::ArrowLeft
+            } else {
+                egui::Key::ArrowUp
+            };
+            for key in [next, previous, egui::Key::M, egui::Key::S] {
+                let _ = ctx.run(
+                    egui::RawInput {
+                        events: vec![egui::Event::Key {
+                            key,
+                            physical_key: None,
+                            pressed: true,
+                            repeat: false,
+                            modifiers: egui::Modifiers::NONE,
+                        }],
+                        ..Default::default()
+                    },
+                    |ctx| {
+                        egui::CentralPanel::default().show(ctx, |ui| {
+                            assert_eq!(app.mixer_keys(ui, &[], console), None);
+                        });
+                    },
+                );
+                assert_eq!(app.selected_lane, None);
+                assert!(app.intents.queued.is_empty());
+                assert!(!app.busy);
+            }
+            let authority =
+                neonmix_control::Authority::new("speaker".into(), "admin".into(), &"a".repeat(64))
+                    .unwrap();
+            let mut snapshot = authority.snapshot();
+            snapshot.streams.insert(
+                7,
+                neonmix_control::Stream {
+                    id: 7,
+                    session_id: uuid::Uuid::new_v4(),
+                    device_id: *snapshot.devices.keys().next().unwrap(),
+                    mix: Default::default(),
+                },
+            );
+            app.snapshot = Some(snapshot.clone());
+            let lanes = app.lanes(&snapshot);
+            for (key, selected) in [(egui::Key::M, None), (egui::Key::S, None), (next, Some(7))] {
+                app.selected_lane = Some(99);
+                let _ = ctx.run(
+                    egui::RawInput {
+                        events: vec![egui::Event::Key {
+                            key,
+                            physical_key: None,
+                            pressed: true,
+                            repeat: false,
+                            modifiers: egui::Modifiers::NONE,
+                        }],
+                        ..Default::default()
+                    },
+                    |ctx| {
+                        egui::CentralPanel::default().show(ctx, |ui| {
+                            app.mixer_keys(ui, &lanes, console);
+                        });
+                    },
+                );
+                assert_eq!(app.selected_lane, selected);
+                assert!(app.intents.queued.is_empty());
+            }
+            // Removing the last lane invalidates selection even without a key.
+            app.snapshot = Some(authority.snapshot());
+            let _ = ctx.run(Default::default(), |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    app.mixer_page(ui);
+                });
+            });
+            assert_eq!(app.selected_lane, None);
+            // A focused text field owns the keyboard; no lane navigation.
+            let mut text = String::new();
+            for events in [
+                vec![],
+                vec![egui::Event::Key {
+                    key: next,
+                    physical_key: None,
+                    pressed: true,
+                    repeat: false,
+                    modifiers: egui::Modifiers::NONE,
+                }],
+            ] {
+                let _ = ctx.run(
+                    egui::RawInput {
+                        events,
+                        ..Default::default()
+                    },
+                    |ctx| {
+                        egui::CentralPanel::default().show(ctx, |ui| {
+                            let id = egui::Id::new("keyboard-owner");
+                            ui.add(egui::TextEdit::singleline(&mut text).id(id));
+                            ui.memory_mut(|m| m.request_focus(id));
+                            assert_eq!(app.mixer_keys(ui, &lanes, console), None);
+                        });
+                    },
+                );
+                assert_eq!(app.selected_lane, None);
+            }
+        }
+    }
+
+    #[test]
     fn named_fields_publish_accessible_labels_without_exposing_password_text() {
         let ctx = egui::Context::default();
         ctx.enable_accesskit();
@@ -1204,7 +1885,7 @@ mod tests {
             let mut value = "private-test-value".to_owned();
             let output = ctx.run(egui::RawInput::default(), |ctx| {
                 egui::CentralPanel::default().show(ctx, |ui| {
-                    widgets::field(ui, "受测字段", &mut value, secret);
+                    widgets::field(ui, "test-field", "受测字段", &mut value, secret);
                 });
             });
             let tree = output.platform_output.accesskit_update.unwrap();
@@ -1241,7 +1922,7 @@ mod tests {
             for (busy, error) in [(false, false), (true, false), (false, true)] {
                 app.busy = busy;
                 app.error = error;
-                app.message = "设备不可用，请刷新".into();
+                app.message = Message::FaultOutputUnavailable;
                 let _ = ctx.run(
                     egui::RawInput {
                         screen_rect: Some(egui::Rect::from_min_size(
@@ -1279,6 +1960,9 @@ mod tests {
             "capacity":{"limit":4,"active":1}}),
         );
         app.status = Some(ServiceStatus {
+            lifecycle: None,
+            intent_version: neonmix_desktop_service::INTENT_VERSION,
+            managed_control_version: 1,
             version: 1,
             pid: 1,
             hub: Default::default(),
@@ -1383,6 +2067,9 @@ mod tests {
         app.snapshot = Some(snapshot.clone());
         app.fresh = Some(Instant::now());
         app.status = Some(ServiceStatus {
+            lifecycle: None,
+            intent_version: neonmix_desktop_service::INTENT_VERSION,
+            managed_control_version: 1,
             version: 1,
             pid: 1,
             hub: Default::default(),
@@ -1413,12 +2100,18 @@ mod tests {
         assert!(app.busy);
         assert!(!app.ready());
         match rx.try_recv().unwrap() {
-            Work::Action(Request::Control {
-                expected_revision,
-                operation,
+            Work::Action(Request::Intent {
+                command:
+                    neonmix_desktop_service::IntentCommand::Native(neonmix_control::Command {
+                        expected_revision,
+                        expected_config_revision,
+                        operation,
+                        ..
+                    }),
                 ..
             }) => {
-                assert_eq!(expected_revision, snapshot.revision);
+                assert_eq!(expected_revision, None);
+                assert_eq!(expected_config_revision, Some(snapshot.config_revision));
                 assert_eq!(
                     operation,
                     Operation::OutputMix {
@@ -1459,18 +2152,39 @@ mod tests {
                 },
                 |ctx| {
                     egui::CentralPanel::default().show(ctx, |ui| {
-                        let id = ui.make_persistent_id("房间名称");
+                        let id = ui.make_persistent_id(("field", "room-name"));
                         ui.memory_mut(|m| m.request_focus(id));
-                        widgets::field(ui, "房间名称", &mut value, false);
+                        widgets::field(ui, "room-name", "房间名称", &mut value, false);
                     });
                 },
             );
         }
         assert_eq!(value, "客厅");
     }
+    fn lifecycle_fixture() -> ServiceStatus {
+        ServiceStatus {
+            lifecycle: Some(neonmix_desktop_service::LifecycleView {
+                version: 1,
+                instance_generation: uuid::Uuid::new_v4(),
+                hub_stop_generation: 0,
+                sender_stop_generation: 0,
+            }),
+            intent_version: 1,
+            managed_control_version: 1,
+            version: 1,
+            pid: 1,
+            hub: Default::default(),
+            sender: Default::default(),
+            hub_settings: None,
+            profiles: Vec::new(),
+            sender_options: None,
+            output_binding: None,
+        }
+    }
     #[test]
     fn polling_does_not_lock_forms_and_stop_has_priority_over_pending_start() {
         let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.status = Some(lifecycle_fixture());
         assert_eq!(app.manual_hub(), None);
         assert_eq!(app.hub(), None);
         app.busy = true;
@@ -1503,41 +2217,69 @@ mod tests {
         assert!(!app.pending_stop);
     }
     #[test]
-    fn stop_after_an_inflight_start_runs_last_and_keeps_the_stop_pending_until_ack() {
+    fn stopping_an_inflight_start_uses_the_independent_path_and_keeps_unknown_results_visible() {
         let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.status = Some(lifecycle_fixture());
         let (tx, rx) = mpsc::sync_channel(1);
         app.worker = Some(tx);
-        let start = Request::SenderStart {
+        app.request(Request::SenderStart {
             options: SenderOptions {
                 credential: "profiles/sender.json".into(),
                 hub: None,
                 output_binding: "output".into(),
             },
+        });
+        let Work::Action(Request::LifecycleStart {
+            request,
+            instance_generation,
+            expected_stop_generation,
+        }) = rx.try_recv().unwrap()
+        else {
+            panic!("start was not frozen")
         };
-        app.request(start.clone());
-        assert!(matches!(
-            rx.try_recv().unwrap(),
-            Work::Action(Request::SenderStart { .. })
-        ));
+        assert!(matches!(request.as_ref(), Request::SenderStart { .. }));
+        assert_eq!(
+            instance_generation,
+            app.status
+                .as_ref()
+                .unwrap()
+                .lifecycle
+                .as_ref()
+                .unwrap()
+                .instance_generation
+        );
+        assert_eq!(expected_stop_generation, 0);
         app.stop_sender();
-        assert!(app.stop_after_start);
         assert!(app.pending_stop);
-        assert!(app.urgent_action.is_none());
+        assert!(app.urgent_action.is_some());
+        assert!(
+            rx.try_recv().is_err(),
+            "stop waited behind the startup worker"
+        );
         let (done, result) = mpsc::sync_channel(1);
-        app.results = Some(result);
-        done.send(Ok(Outcome::Action(start, Value::Null))).unwrap();
-        app.process();
-        assert!(matches!(
-            rx.try_recv().unwrap(),
-            Work::Action(Request::SenderStop)
-        ));
-        assert!(app.pending_stop);
-        assert!(!app.stop_after_start);
-        done.send(Ok(Outcome::Action(Request::SenderStop, Value::Null)))
-            .unwrap();
+        app.urgent_action = Some(result);
+        done.send(Err("background_timeout".into())).unwrap();
         app.process();
         assert!(!app.pending_stop);
-        assert!(!app.busy);
+        assert!(app.error);
+        assert_eq!(app.message, Message::ShellStopUnconfirmed);
+        assert!(!app.exiting);
+    }
+    #[test]
+    fn two_failed_ipc_calls_do_not_prove_that_background_audio_stopped() {
+        let project = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap();
+        let client = Client::new(
+            project
+                .join(".local/tmp")
+                .join(format!("missing-stop-{}", uuid::Uuid::new_v4())),
+        );
+        for request in [Request::SenderStop, Request::HubStop, Request::Shutdown] {
+            assert!(call(&client, &request).is_err());
+        }
     }
     #[test]
     fn cancel_modal_keeps_accesskit_focus_in_the_published_tree() {
@@ -1545,8 +2287,8 @@ mod tests {
         ctx.enable_accesskit();
         let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, true);
         app.confirmation(
-            "退出后台".into(),
-            "停止本实例音频".into(),
+            Message::ShellQuit,
+            Message::ShellQuitConsequence,
             Request::Shutdown,
             egui::Id::new("nonexistent-origin"),
         );
@@ -1587,6 +2329,9 @@ mod tests {
         let mut snapshot = authority.snapshot();
         let admin = snapshot.devices.values().next().unwrap().id;
         let status = ServiceStatus {
+            lifecycle: None,
+            intent_version: neonmix_desktop_service::INTENT_VERSION,
+            managed_control_version: 1,
             version: 1,
             pid: 1,
             hub: Default::default(),
@@ -1620,10 +2365,10 @@ mod tests {
             gain_db: None,
             muted: Some(true),
         });
-        assert!(matches!(
-            rx.try_recv(),
-            Ok(Work::Action(Request::Control { .. }))
-        ));
+        let Work::Action(first_request) = rx.try_recv().unwrap() else {
+            panic!("expected intent");
+        };
+        assert!(matches!(first_request, Request::Intent { .. }));
         assert!(!app.ready() && app.writable());
 
         let ctx = themed();
@@ -1652,14 +2397,16 @@ mod tests {
             muted: None,
         });
         assert!(rx.try_recv().is_err(), "second write must wait, not race");
-        assert!(app.queued_write.is_some());
+        assert!(!app.intents.queued.is_empty());
 
-        done.send(Ok(Outcome::Action(Request::Status, Value::Null)))
+        done.send(Ok(Outcome::Action(Box::new(first_request), Value::Null)))
             .unwrap();
         app.process();
         assert!(matches!(rx.try_recv(), Ok(Work::Poll { .. })));
         snapshot.revision += 1;
         done.send(Ok(Outcome::Poll(Box::new(PollData {
+            received: Default::default(),
+            partial: false,
             credential: "hub/admin.json".into(),
             hub: None,
             room_name: None,
@@ -1672,12 +2419,18 @@ mod tests {
         .unwrap();
         app.process();
         match rx.try_recv() {
-            Ok(Work::Action(Request::Control {
-                expected_revision,
-                operation,
+            Ok(Work::Action(Request::Intent {
+                command:
+                    neonmix_desktop_service::IntentCommand::Native(neonmix_control::Command {
+                        expected_revision,
+                        expected_config_revision,
+                        operation,
+                        ..
+                    }),
                 ..
             })) => {
-                assert_eq!(expected_revision, snapshot.revision);
+                assert_eq!(expected_revision, None);
+                assert_eq!(expected_config_revision, Some(snapshot.config_revision));
                 assert_eq!(
                     operation,
                     Operation::OutputMix {
@@ -1798,6 +2551,9 @@ mod tests {
         let mut snapshot = authority.snapshot();
         let admin = snapshot.devices.values().next().unwrap().id;
         let status = ServiceStatus {
+            lifecycle: None,
+            intent_version: neonmix_desktop_service::INTENT_VERSION,
+            managed_control_version: 1,
             version: 1,
             pid: 1,
             hub: Default::default(),
@@ -1827,23 +2583,24 @@ mod tests {
         app.results = Some(results);
 
         app.master_mute(true);
-        assert!(matches!(
-            rx.try_recv(),
-            Ok(Work::Action(Request::Control { .. }))
-        ));
-        assert!(app.undo_available());
-        app.restore_last();
+        let Work::Action(first_request) = rx.try_recv().unwrap() else {
+            panic!("expected intent");
+        };
+        assert!(matches!(first_request, Request::Intent { .. }));
+        assert!(!app.undo_available(), "Undo requires acknowledgement");
         assert!(
             rx.try_recv().is_err(),
             "restore waits for the fresh revision"
         );
-        done.send(Ok(Outcome::Action(Request::Status, Value::Null)))
+        done.send(Ok(Outcome::Action(Box::new(first_request), Value::Null)))
             .unwrap();
         app.process();
         assert!(matches!(rx.try_recv(), Ok(Work::Poll { .. })));
         snapshot.revision += 1;
         snapshot.output.muted = true;
         done.send(Ok(Outcome::Poll(Box::new(PollData {
+            received: Default::default(),
+            partial: false,
             credential: "hub/admin.json".into(),
             hub: None,
             room_name: None,
@@ -1855,13 +2612,21 @@ mod tests {
         }))))
         .unwrap();
         app.process();
+        assert!(app.undo_available());
+        app.restore_last();
         match rx.try_recv() {
-            Ok(Work::Action(Request::Control {
-                expected_revision,
-                operation,
+            Ok(Work::Action(Request::Intent {
+                command:
+                    neonmix_desktop_service::IntentCommand::Native(neonmix_control::Command {
+                        expected_revision,
+                        expected_config_revision,
+                        operation,
+                        ..
+                    }),
                 ..
             })) => {
-                assert_eq!(expected_revision, snapshot.revision);
+                assert_eq!(expected_revision, None);
+                assert_eq!(expected_config_revision, Some(snapshot.config_revision));
                 assert_eq!(
                     operation,
                     Operation::OutputMix {
@@ -1878,8 +2643,10 @@ mod tests {
         let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, true);
         app.page = Page::Devices;
         app.error = true;
-        app.message =
-            "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。".repeat(3);
+        app.message = Message::ShellAdjusted {
+            change: "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。"
+                .repeat(3),
+        };
         let ctx = themed();
         ctx.enable_accesskit();
         let output = ctx.run(
@@ -1927,6 +2694,34 @@ mod tests {
     }
 
     #[test]
+    fn english_header_and_long_room_badge_keep_about_content_inside_the_central_panel() {
+        let ctx = themed();
+        ctx.enable_accesskit();
+        let mut app = fixture("full");
+        app.page = Page::About;
+        std::sync::Arc::make_mut(&mut app.localization.renderer)
+            .set_locale(neonmix_i18n::ResolvedLocale::En);
+        app.localization.locale = neonmix_i18n::ResolvedLocale::En;
+        for long in [false, true] {
+            if long {
+                app.remote_room = Some("中文房间 { $name } ".repeat(40));
+            }
+            let output = frame(&ctx, &mut app, egui::vec2(600.0, 440.0));
+            let tree = output.platform_output.accesskit_update.unwrap();
+            let brands: Vec<_> = tree
+                .nodes
+                .iter()
+                .filter_map(|(_, n)| (n.value() == Some("NeonMix")).then(|| n.bounds()).flatten())
+                .collect();
+            assert!(
+                brands.iter().any(|b| b.x0 >= 188.0 && b.x1 <= 600.0),
+                "central title escaped viewport: {brands:?}"
+            );
+            assert!(app.localization.renderer.diagnostics().is_empty());
+        }
+    }
+
+    #[test]
     fn live_graph_names_every_node_for_assistive_tech() {
         for size in [egui::vec2(1100.0, 760.0), egui::vec2(600.0, 440.0)] {
             let mut app = fixture("full");
@@ -1938,7 +2733,10 @@ mod tests {
             let labels: Vec<String> = tree
                 .nodes
                 .iter()
-                .filter_map(|(_, node)| node.label().map(str::to_owned))
+                .filter_map(|(_, node)| {
+                    node.label()
+                        .map(|s| s.replace(['\u{2068}', '\u{2069}'], ""))
+                })
                 .collect();
             for needle in [
                 "E07 真实采集 A，原生 Sender，成员 · 已静音",
@@ -2048,5 +2846,142 @@ mod tests {
             "navigation {last_page:?} overlaps identity {identity:?}"
         );
         assert!(quit.y1 <= 440.0, "quit button {quit:?} off screen");
+    }
+
+    #[test]
+    fn one_failed_airplay_or_diagnostics_read_keeps_the_room_on_screen() {
+        let mut app = fixture("full");
+        let (done, results) = mpsc::sync_channel(1);
+        app.results = Some(results);
+        let lanes = |app: &Desktop| app.lanes(app.snapshot.as_ref().unwrap()).len();
+        assert_eq!(lanes(&app), 4);
+        let partial = |app: &Desktop| PollData {
+            received: Default::default(),
+            partial: true,
+            credential: app.credential.clone(),
+            hub: app.hub(),
+            room_name: None,
+            status: app.status.clone().unwrap(),
+            snapshot: app.snapshot.clone(),
+            diagnostics: None,
+            airplay: None,
+            error: Some("connection reset".into()),
+        };
+        for poll in 1..=PARTIAL_REPORT {
+            done.send(Ok(Outcome::Poll(Box::new(partial(&app)))))
+                .unwrap();
+            app.process();
+            assert_eq!(lanes(&app), 4, "poll {poll}: AirPlay lanes must not vanish");
+            assert!(app.diagnostics.is_some(), "poll {poll}: meters must stay");
+            assert_eq!(
+                app.error,
+                poll >= PARTIAL_REPORT,
+                "poll {poll}: only a persistent failure turns the strip red"
+            );
+        }
+    }
+
+    #[test]
+    fn fresh_native_get_cannot_refresh_failed_diagnostic_clock_or_feed_old_meters_into_history() {
+        let authority = neonmix_control::Authority::new(
+            "test".into(),
+            "admin".into(),
+            "freshness-admin-token-with-at-least-32-bytes",
+        )
+        .unwrap();
+        let mut app = Desktop::empty(
+            Client::new(".local/test-independent-observations"),
+            true,
+            false,
+        );
+        app.snapshot = Some(authority.snapshot());
+        app.status = Some(ServiceStatus {
+            lifecycle: None,
+            intent_version: 2,
+            managed_control_version: 1,
+            version: 1,
+            pid: 1,
+            hub: Default::default(),
+            sender: Default::default(),
+            hub_settings: None,
+            profiles: vec![],
+            sender_options: None,
+            output_binding: None,
+        });
+        let value = serde_json::json!({"available":true,"output_stats":{"errors":0,"callback_over_budget":0},"underrun_frames":0,"output_frames":480,
+            "receivers":[],"lane_stream_ids":[],"queues":[],"meters":{"lanes":[]}});
+        let old = Instant::now() - Duration::from_secs(1);
+        app.diagnostics_clock
+            .success(&value, Some(authority.current().runtime_epoch), old);
+        app.diagnostics = Some(value.clone());
+        let (tx, rx) = mpsc::sync_channel(4);
+        app.results = Some(rx);
+        for _ in 0..2 {
+            app.busy = true;
+            app.polling = true;
+            tx.send(Ok(Outcome::Poll(Box::new(PollData {
+                received: PollTimes {
+                    snapshot: Some(Instant::now()),
+                    ..Default::default()
+                },
+                credential: app.credential.clone(),
+                hub: app.hub(),
+                room_name: None,
+                status: app.status.clone().unwrap(),
+                snapshot: Some(authority.snapshot()),
+                diagnostics: None,
+                airplay: None,
+                partial: true,
+                error: None,
+            }))))
+            .unwrap();
+            app.process();
+            assert_eq!(app.diagnostics_clock.last_received(), Some(old));
+            assert!(app.diagnostics_current().is_none());
+            assert_eq!(app.diagnostics.as_ref(), Some(&value));
+            assert!(
+                app.synced
+                    .is_some_and(|at| at.elapsed() < Duration::from_secs(1))
+            );
+        }
+        assert!(
+            app.metric_history
+                .get(&"output")
+                .unwrap()
+                .iter()
+                .all(|sample| sample.value.is_none())
+        );
+        app.busy = true;
+        app.polling = true;
+        tx.send(Ok(Outcome::Poll(Box::new(PollData {
+            received: Default::default(),
+            credential: app.credential.clone(),
+            hub: app.hub(),
+            room_name: None,
+            status: app.status.clone().unwrap(),
+            snapshot: Some(authority.snapshot()),
+            diagnostics: Some(serde_json::json!({"available":false})),
+            airplay: None,
+            partial: false,
+            error: None,
+        }))))
+        .unwrap();
+        app.process();
+        assert_eq!(app.diagnostics.as_ref(), Some(&value));
+        assert_eq!(app.diagnostics_clock.last_received(), Some(old));
+        assert!(app.diagnostics_current().is_none());
+    }
+
+    #[test]
+    fn stopped_local_hub_is_not_polled_for_room_state() {
+        let mut status = fixture("full").status.unwrap();
+        let admin = std::path::Path::new("hub/admin.json");
+        assert!(fetches_room(admin, &status));
+        status.hub.running = false;
+        assert!(!fetches_room(admin, &status));
+        assert!(fetches_room(
+            std::path::Path::new("profiles/b.json"),
+            &status
+        ));
     }
 }

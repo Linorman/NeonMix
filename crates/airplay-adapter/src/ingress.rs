@@ -39,6 +39,10 @@ pub struct IngressStats {
     pub overflow_packets: u64,
     pub clock_resets: u64,
     pub timeline_rejections: u64,
+    pub coordinate_rejections: u64,
+    pub pts_rejections: u64,
+    pub source_gap_frames: u64,
+    pub last_normalized_sample_position: u64,
     pub pending_frames: usize,
     pub pending_bytes: usize,
     /// Estimated submission-to-presentation device backlog, not analog latency.
@@ -85,8 +89,8 @@ pub struct Ingress {
     clock_valid: bool,
     pending: VecDeque<Pending>,
     stats: IngressStats,
-    last: Option<(u64, u64, u64, u32)>,
-    normalized_position: u64,
+    last: Option<(u64, u64, u64, u32, u64, u64)>,
+    coordinate_anchor: Option<(u64, u64)>,
     playback_mode: PlaybackMode,
     latency_advance_ns: Option<u64>,
 }
@@ -104,7 +108,7 @@ impl Ingress {
             pending: VecDeque::new(),
             stats: IngressStats::default(),
             last: None,
-            normalized_position: 0,
+            coordinate_anchor: None,
             playback_mode: PlaybackMode::Synchronized,
             latency_advance_ns: None,
         }
@@ -129,7 +133,8 @@ impl Ingress {
         self.stats.pending_frames = 0;
         self.stats.pending_bytes = 0;
         self.last = None;
-        self.normalized_position = 0;
+        self.coordinate_anchor = None;
+        self.stats.last_normalized_sample_position = 0;
         self.latency_advance_ns = None;
         self.stats.latency_advance_ns = 0;
         self.stats.protocol_lead_ns = 0;
@@ -234,14 +239,38 @@ impl Ingress {
             self.stats.late_packets += 1;
             return Err(IngressError::Late);
         }
-        if self.last.is_some_and(|(seq, pos, time, rate)| {
+        let q = h.normalized_sample_position;
+        if self.last.is_some_and(|(seq, pos, time, rate, end, _)| {
             h.sequence <= seq
                 || h.source_sample_position < pos
-                || target < time
+                || target <= time
                 || h.source_rate != rate
+                || q < end
         }) {
             self.stats.timeline_rejections += 1;
             return Err(IngressError::Timeline);
+        }
+        // Original integer source coordinates may truncate a fractional SRC
+        // sample. Cross-check the explicit normalized coordinate against the
+        // same fixed anchor, allowing two source/normalized quantization frames.
+        if let Some((p0, q0)) = self.coordinate_anchor {
+            let source_delta = i128::from(h.source_sample_position) - i128::from(p0);
+            let normalized_delta = i128::from(q) - i128::from(q0);
+            let error =
+                (source_delta * 48_000 - normalized_delta * i128::from(h.source_rate)).abs();
+            if error > 2 * (48_000 + i128::from(h.source_rate)) {
+                self.stats.coordinate_rejections += 1;
+                return Err(IngressError::Timeline);
+            }
+        }
+        if let Some((_, _, time, _, _, previous_q)) = self.last {
+            let delta = neonmix_core::clock::frames_to_ns(q - previous_q, 48_000);
+            // Permit the existing 1000 ppm source-clock slope and nanosecond
+            // timestamp quantization, without accepting a contradictory gap.
+            if target.saturating_sub(time).abs_diff(delta) > 1_000_000 + delta / 1000 {
+                self.stats.pts_rejections += 1;
+                return Err(IngressError::Timeline);
+            }
         }
         // Account for the full fixed callback block allocation, not only its active samples.
         let bytes = std::mem::size_of::<Pending>();
@@ -259,7 +288,7 @@ impl Ingress {
         let mut block = AudioBlock::empty(h.stream_id, AudioFormat::INTERNAL);
         block.header.stream_epoch = h.stream_epoch;
         block.header.frame_count = h.frame_count;
-        block.header.source_sample_position = self.normalized_position;
+        block.header.source_sample_position = q;
         block.header.presentation_time_ns = Some(target);
         block.header.arrival_ns = now_ns;
         block.header.discontinuity_flags = if h.flags != 0 {
@@ -274,12 +303,24 @@ impl Ingress {
         {
             *frame = [samples[0] * gain, samples[1] * gain];
         }
-        self.normalized_position = self.normalized_position.saturating_add(frames as u64);
+        self.coordinate_anchor
+            .get_or_insert((h.source_sample_position, q));
+        if let Some((_, _, _, _, end, _)) = self.last {
+            self.stats.source_gap_frames += q.saturating_sub(end);
+        }
+        self.stats.last_normalized_sample_position = q;
         self.latency_advance_ns = Some(advance);
         self.stats.latency_advance_ns = advance;
         self.stats.protocol_lead_ns = protocol_lead_ns;
         self.stats.playout_lead_ns = target.saturating_sub(now_ns);
-        self.last = Some((h.sequence, h.source_sample_position, target, h.source_rate));
+        self.last = Some((
+            h.sequence,
+            h.source_sample_position,
+            target,
+            h.source_rate,
+            q + frames as u64,
+            q,
+        ));
         self.stats.last_source_sample_position = h.source_sample_position;
         self.stats.last_source_rate = h.source_rate;
         self.stats.last_presentation_time_ns = target;

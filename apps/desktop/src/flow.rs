@@ -4,10 +4,13 @@
 //! the core ring is the room output level. With no signal above the meter
 //! floor (or reduced motion) nothing moves and no frames are requested.
 use crate::emblem::{self, Emblem};
+use crate::localization::text as tr;
 use crate::{animation, fx, icons, theme, widgets};
 use eframe::egui::{
-    self, Align2, Color32, CornerRadius, FontId, Pos2, Rect, Sense, Stroke, StrokeKind, pos2, vec2,
+    self, Align2, Color32, CornerRadius, FontId, Pos2, Rect, Sense, Stroke, StrokeKind, Vec2, pos2,
+    vec2,
 };
+use neonmix_i18n::{Localizer, Message};
 use std::sync::Arc;
 
 /// What a source's line says about its path into the room.
@@ -38,6 +41,8 @@ pub struct Source {
     pub key: u64,
     pub name: String,
     pub detail: String,
+    /// State alone, for the compact chips where the role does not fit.
+    pub status: String,
     pub detail_color: Color32,
     pub airplay: bool,
     pub mine: bool,
@@ -46,7 +51,7 @@ pub struct Source {
     pub gain_db: f32,
     pub rms: Option<f64>,
     /// Hover card rows (label, value).
-    pub facts: Vec<(&'static str, String)>,
+    pub facts: Vec<(String, String)>,
     /// 0→1 while a source that just joined connects to the core; 1 otherwise.
     pub appear: f32,
 }
@@ -60,18 +65,18 @@ impl Source {
         }
     }
 
-    fn accessible(&self) -> String {
-        format!(
-            "{}，{}，{}，{} dB",
-            self.name,
-            if self.airplay {
-                "AirPlay"
-            } else {
-                "原生 Sender"
-            },
-            self.detail,
-            widgets::gain_text(self.gain_db)
-        )
+    pub fn accessible_label(&self, localizer: &Localizer) -> String {
+        let kind = if self.airplay {
+            "AirPlay".into()
+        } else {
+            localizer.render(&Message::FlowNativeSender)
+        };
+        localizer.render(&Message::FlowSourceAccessible {
+            name: self.name.clone(),
+            kind,
+            detail: self.detail.clone(),
+            gain: widgets::gain_text(self.gain_db),
+        })
     }
 }
 
@@ -115,12 +120,19 @@ pub struct Geometry {
     pub hub: Pos2,
     pub hub_r: f32,
     pub output: Pos2,
+    /// Where each source line meets the core, and the outward direction it
+    /// arrives along (lines enter radially, spread around the ring).
+    pub entries: Vec<(Pos2, Vec2)>,
 }
 
 const CARD_H: f32 = 54.0;
 const GAP: f32 = 12.0;
 const OFFLINE_H: f32 = 26.0;
 const OUTPUT_HALF: f32 = 24.0;
+/// Right-hand column holding the output node and its full name.
+const OUTPUT_COLUMN: f32 = 176.0;
+/// Room under the core for its name and state.
+const HUB_LABELS: f32 = 50.0;
 /// Compact source node for the stacked (narrow) graph.
 const CHIP_H: f32 = 84.0;
 /// Below this width the graph stacks top to bottom.
@@ -131,7 +143,7 @@ pub fn height_for(n: usize, offline: bool, width: f32) -> f32 {
     let extra = if offline { GAP + OFFLINE_H } else { 0.0 };
     if width >= HORIZONTAL_MIN {
         let column = n as f32 * CARD_H + n.saturating_sub(1) as f32 * GAP + extra;
-        (column + 48.0).max(280.0)
+        (column + 32.0).max(2.0 * 60.0 + HUB_LABELS + 40.0)
     } else {
         let row = if n > 0 { CHIP_H } else { 0.0 };
         row + extra + 64.0 + 2.0 * 44.0 + 72.0 + 2.0 * OUTPUT_HALF + 56.0
@@ -143,7 +155,7 @@ pub fn layout(n: usize, offline: bool, rect: Rect) -> Geometry {
     let horizontal = rect.width() >= HORIZONTAL_MIN;
     let mut sources = Vec::with_capacity(n);
     if horizontal {
-        let w = (rect.width() * 0.3).clamp(160.0, 236.0);
+        let w = (rect.width() * 0.3).clamp(170.0, 240.0);
         let extra = if offline { GAP + OFFLINE_H } else { 0.0 };
         let total = n as f32 * CARD_H + n.saturating_sub(1) as f32 * GAP + extra;
         let mut y = rect.center().y - total / 2.0;
@@ -156,10 +168,16 @@ pub fn layout(n: usize, offline: bool, rect: Rect) -> Geometry {
         }
         let offline =
             offline.then(|| Rect::from_min_size(pos2(rect.left() + 4.0, y), vec2(w, OFFLINE_H)));
-        let hub_r = (rect.height() * 0.2).clamp(42.0, 60.0);
-        let output = pos2(rect.right() - 70.0, rect.center().y - 10.0);
+        // Sources | core | output column; the core sits in the middle of the
+        // free span and rides up a little so its labels stay centred too.
         let left = rect.left() + 4.0 + w;
-        let hub = pos2(left + (output.x - left) * 0.5, rect.center().y - 10.0);
+        let right = rect.right() - OUTPUT_COLUMN;
+        let span = right - left;
+        let hub_r = (rect.height() * 0.2).min(span * 0.17).clamp(42.0, 60.0);
+        let cy = rect.center().y - HUB_LABELS / 2.0 + 6.0;
+        let hub = pos2(left + span * 0.52, cy);
+        let output = pos2(rect.right() - OUTPUT_COLUMN / 2.0, cy);
+        let entries = entries(n, hub, hub_r, std::f32::consts::PI);
         Geometry {
             horizontal,
             sources,
@@ -167,6 +185,7 @@ pub fn layout(n: usize, offline: bool, rect: Rect) -> Geometry {
             hub,
             hub_r,
             output,
+            entries,
         }
     } else {
         // One row of compact chips so every line drops straight to the core
@@ -186,17 +205,20 @@ pub fn layout(n: usize, offline: bool, rect: Rect) -> Geometry {
         if n > 0 {
             y += CHIP_H + GAP;
         }
-        let offline = offline.then(|| {
-            let r = Rect::from_center_size(
-                pos2(rect.center().x, y + OFFLINE_H / 2.0),
-                vec2(rect.width().min(260.0), OFFLINE_H),
-            );
-            y += OFFLINE_H + GAP;
-            r
-        });
         let hub_r = 44.0;
         let hub = pos2(rect.center().x, y + 52.0 + hub_r);
         let output = pos2(rect.center().x, hub.y + hub_r + 72.0 + OUTPUT_HALF);
+        // Below the output, clear of every line into the core.
+        let offline = offline.then(|| {
+            Rect::from_center_size(
+                pos2(
+                    rect.center().x,
+                    output.y + OUTPUT_HALF + GAP + OFFLINE_H / 2.0,
+                ),
+                vec2(rect.width().min(260.0), OFFLINE_H),
+            )
+        });
+        let entries = entries(n, hub, hub_r, -std::f32::consts::FRAC_PI_2);
         Geometry {
             horizontal,
             sources,
@@ -204,8 +226,48 @@ pub fn layout(n: usize, offline: bool, rect: Rect) -> Geometry {
             hub,
             hub_r,
             output,
+            entries,
         }
     }
+}
+
+/// Entry points spread over an arc of the core centred on `facing` (π: from
+/// the left, −π/2: from above), first source at the upper/left end.
+fn entries(n: usize, hub: Pos2, hub_r: f32, facing: f32) -> Vec<(Pos2, Vec2)> {
+    let arc = (n.saturating_sub(1) as f32 * 0.42).min(1.4);
+    (0..n)
+        .map(|i| {
+            let t = if n > 1 {
+                i as f32 / (n - 1) as f32
+            } else {
+                0.5
+            };
+            // Left-facing: top source enters upper-left (angle above π).
+            let a = if facing > 0.0 {
+                facing + arc / 2.0 - arc * t
+            } else {
+                facing - arc / 2.0 + arc * t
+            };
+            let dir = Vec2::angled(a);
+            (hub + dir * (hub_r + 8.0), dir)
+        })
+        .collect()
+}
+
+/// Line from a source into the core: leaves the source along its axis and
+/// arrives along the radial `dir`.
+fn route(start: Pos2, horizontal: bool, (end, dir): (Pos2, Vec2)) -> [Pos2; 4] {
+    let reach = if horizontal {
+        (end.x - start.x).abs()
+    } else {
+        (end.y - start.y).abs()
+    };
+    let lead = if horizontal {
+        vec2(reach * 0.5, 0.0)
+    } else {
+        vec2(0.0, reach * 0.5)
+    };
+    [start, start + lead, end + dir * reach * 0.4, end]
 }
 
 /// Level 0…1 above the meter floor, through the shared meter ballistics.
@@ -245,12 +307,13 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
     let mut responses = Vec::with_capacity(model.sources.len());
     for (source, card) in model.sources.iter().zip(&geo.sources) {
         let response = ui.interact(*card, id.with(source.key), Sense::click());
+        let access_label = source.accessible_label(&crate::localization::renderer(ui.ctx()));
         response.widget_info(|| {
             egui::WidgetInfo::selected(
                 egui::WidgetType::Button,
                 true,
                 model.selected == Some(source.key),
-                source.accessible(),
+                access_label.clone(),
             )
         });
         if response.hovered() {
@@ -264,24 +327,29 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
     }
     let hub_rect = Rect::from_center_size(geo.hub, vec2(geo.hub_r * 2.0, geo.hub_r * 2.0));
     let hub_response = ui.interact(hub_rect, id.with("hub"), Sense::click());
+    let hub_access_label = tr(
+        ui,
+        &Message::FlowHubAccessible {
+            name: model.hub.name.clone(),
+            state: model.hub.state.clone(),
+        },
+    );
     hub_response.widget_info(|| {
-        egui::WidgetInfo::labeled(
-            egui::WidgetType::Button,
-            true,
-            format!(
-                "房间「{}」，{}，打开 Mixer",
-                model.hub.name, model.hub.state
-            ),
-        )
+        egui::WidgetInfo::labeled(egui::WidgetType::Button, true, hub_access_label.clone())
     });
     if hub_response.clicked() {
         action = Some(Action::OpenMixer);
     }
-    let hub_response = hub_response.on_hover_text("打开 Mixer");
+    let hub_response = hub_response.on_hover_text(tr(ui, &Message::FlowOpenMixer));
     let mut offline_label = None;
     if let Some(offline) = geo.offline {
         let response = ui.interact(offline, id.with("offline"), Sense::click());
-        let label = format!("另有 {} 台已配对设备未在发送", model.offline);
+        let label = tr(
+            ui,
+            &Message::FlowOfflineCount {
+                count: model.offline as u64,
+            },
+        );
         response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, &label));
         if response.clicked() {
             action = Some(Action::OpenDevices);
@@ -327,7 +395,6 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
     );
 
     // Lines into the core.
-    let n = model.sources.len();
     for (i, ((source, card), lvl)) in model
         .sources
         .iter()
@@ -335,23 +402,19 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
         .zip(&levels)
         .enumerate()
     {
-        let focus = hovered.is_none_or(|h| h == source.key);
-        let spread = if n > 1 {
-            (i as f32 - (n - 1) as f32 / 2.0) * (geo.hub_r * 0.9 / (n - 1) as f32).min(16.0)
+        // Hover focus eases: moving across the gaps between cards used to
+        // snap every other line between full and 30 % each frame.
+        let focus = ctx.animate_bool_with_time(
+            id.with(("focus", source.key)),
+            hovered.is_none_or(|h| h == source.key),
+            0.15,
+        );
+        let start = if geo.horizontal {
+            card.right_center()
         } else {
-            0.0
+            card.center_bottom()
         };
-        let curve = if geo.horizontal {
-            fx::s_curve(
-                card.right_center(),
-                geo.hub + vec2(-geo.hub_r - 8.0, spread),
-            )
-        } else {
-            fx::s_curve_vertical(
-                card.center_bottom(),
-                geo.hub + vec2(spread, -geo.hub_r - 8.0),
-            )
-        };
+        let curve = route(start, geo.horizontal, geo.entries[i]);
         if source.appear < 1.0 {
             // Joining: the line grows from the source into the core.
             let t = animation::ease_out_cubic(source.appear);
@@ -375,7 +438,7 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
             source.gain_db,
             *lvl,
             phase + i as f32 * 0.37,
-            if focus { 1.0 } else { 0.3 },
+            0.3 + 0.7 * focus,
         );
     }
     // Core → output.
@@ -408,7 +471,7 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
             output.gain_db,
             master,
             phase,
-            if hovered.is_none() { 1.0 } else { 0.55 },
+            0.55 + 0.45 * ctx.animate_bool_with_time(id.with("out-focus"), hovered.is_none(), 0.15),
         );
     }
 
@@ -418,14 +481,17 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
         .zip(&geo.sources)
         .zip(levels.iter().zip(&responses))
     {
-        let dim = source.appear.min(1.0)
-            * if hovered.is_some_and(|h| h != source.key) {
-                0.45
-            } else if source.edge == Edge::SoloedOut {
-                0.6
-            } else {
-                1.0
-            };
+        let focus = ctx.animate_bool_with_time(
+            id.with(("focus", source.key)),
+            hovered.is_none_or(|h| h == source.key),
+            0.15,
+        );
+        let base = if source.edge == Edge::SoloedOut {
+            0.6
+        } else {
+            1.0
+        };
+        let dim = source.appear.min(1.0) * base * (0.45 + 0.55 * focus);
         paint_source(
             ui,
             &painter,
@@ -450,7 +516,20 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
         paint_offline(&painter, rect, &label, hovered);
     }
     if let Some(output) = &model.output {
-        paint_output(&painter, &geo, output);
+        let localizer = crate::localization::renderer(ui.ctx());
+        let output_response = ui.interact(
+            Rect::from_center_size(geo.output, vec2(OUTPUT_HALF * 2.0, OUTPUT_HALF * 2.0)),
+            id.with("output"),
+            Sense::hover(),
+        );
+        let output_access_label = localizer.render(&Message::FlowOutputAccessible {
+            name: output.name.clone(),
+            state: output_status(output, &localizer),
+        });
+        output_response.widget_info(|| {
+            egui::WidgetInfo::labeled(egui::WidgetType::Label, true, output_access_label.clone())
+        });
+        paint_output(&painter, &geo, output, &localizer);
     }
     for (source, response) in model.sources.iter().zip(responses) {
         if !source.facts.is_empty() {
@@ -555,7 +634,8 @@ fn paint_edge(
         if t > end {
             continue;
         }
-        let envelope = (std::f32::consts::PI * (t / end)).sin();
+        // Floating-point sin(PI) can be slightly negative at the gate endpoint.
+        let envelope = (std::f32::consts::PI * (t / end)).sin().clamp(0.0, 1.0);
         let p = fx::cubic_at(curve, t);
         let a = alpha * envelope * (0.35 + 0.65 * level);
         let core = if edge == Edge::Degraded {
@@ -582,6 +662,17 @@ fn paint_source(
     dim: f32,
     wide: bool,
 ) {
+    let mine_label = tr(ui, &Message::FlowYou);
+    let badge_width = (painter
+        .layout_no_wrap(
+            mine_label.clone(),
+            FontId::proportional(10.0),
+            theme::ACCENT,
+        )
+        .size()
+        .x
+        + 6.0)
+        .max(18.0);
     let ctx = ui.ctx();
     let hover = ctx.animate_bool_with_time(response.id.with("h"), response.hovered(), 0.12);
     let sel = ctx.animate_bool_with_time(response.id.with("s"), selected, 0.16);
@@ -603,7 +694,8 @@ fn paint_source(
     painter.rect(
         card,
         CornerRadius::same(12),
-        fill.gamma_multiply(dim.max(0.7)),
+        // Dimmed cards darken but stay opaque, so lines never show through.
+        animation::lerp_color(theme::BG_DEEP, fill, dim.max(0.7)),
         Stroke::new(1.0 + sel * 0.5, stroke.gamma_multiply(dim)),
         StrokeKind::Inside,
     );
@@ -680,11 +772,11 @@ fn paint_source(
         &source.name,
         theme::heading(13.5),
         theme::TEXT.gamma_multiply(dim),
-        width - if source.mine { 22.0 } else { 0.0 },
+        width - if source.mine { badge_width + 5.0 } else { 0.0 },
     );
     let detail = text(
         painter,
-        &source.detail,
+        if wide { &source.detail } else { &source.status },
         FontId::proportional(theme::SMALL),
         source.detail_color.gamma_multiply(dim),
         width,
@@ -696,7 +788,7 @@ fn paint_source(
             pos2(text_left, card.center().y + 2.0),
         )
     } else {
-        let badge = if source.mine { 23.0 } else { 0.0 };
+        let badge = if source.mine { badge_width + 5.0 } else { 0.0 };
         (
             pos2(card.center().x - (name_w + badge) / 2.0, card.top() + 48.0),
             pos2(card.center().x - detail.size().x / 2.0, card.top() + 65.0),
@@ -707,7 +799,7 @@ fn paint_source(
     if source.mine {
         let badge = Rect::from_min_size(
             pos2(name_at.x + name_w + 5.0, name_at.y + 2.0),
-            vec2(18.0, 15.0),
+            vec2(badge_width, 15.0),
         );
         painter.rect_filled(
             badge,
@@ -717,7 +809,7 @@ fn paint_source(
         painter.text(
             badge.center(),
             Align2::CENTER_CENTER,
-            "你",
+            mine_label,
             FontId::proportional(10.0),
             theme::ACCENT,
         );
@@ -814,7 +906,7 @@ fn paint_hub(
     }
 }
 
-fn paint_output(painter: &egui::Painter, geo: &Geometry, output: &Output) {
+fn paint_output(painter: &egui::Painter, geo: &Geometry, output: &Output, localizer: &Localizer) {
     let c = geo.output;
     let rect = Rect::from_center_size(c, vec2(OUTPUT_HALF * 2.0, OUTPUT_HALF * 2.0));
     let tone = if !output.available {
@@ -838,13 +930,7 @@ fn paint_output(painter: &egui::Painter, geo: &Geometry, output: &Output) {
         StrokeKind::Inside,
     );
     icons::paint(painter, icons::square(c, 24.0), icons::Icon::Room, tone);
-    let status = if !output.available {
-        "输出丢失".to_owned()
-    } else if output.muted {
-        "总静音".to_owned()
-    } else {
-        format!("{} dB", widgets::gain_text(output.gain_db))
-    };
+    let status = output_status(output, localizer);
     let status_color = if !output.available || output.muted {
         theme::WARNING
     } else {
@@ -855,14 +941,14 @@ fn paint_output(painter: &egui::Painter, geo: &Geometry, output: &Output) {
         &output.name,
         theme::heading(13.0),
         theme::TEXT,
-        128.0,
+        OUTPUT_COLUMN - 12.0,
     );
     let status = text(
         painter,
         &status,
         FontId::monospace(theme::MONO),
         status_color,
-        128.0,
+        OUTPUT_COLUMN - 12.0,
     );
     if geo.horizontal {
         let y = rect.bottom() + 10.0;
@@ -942,5 +1028,74 @@ mod tests {
                 }
             }
         }
+    }
+}
+
+fn output_status(output: &Output, localizer: &Localizer) -> String {
+    if !output.available {
+        localizer.render(&Message::FlowOutputUnavailable)
+    } else if output.muted {
+        localizer.render(&Message::FlowMasterMuted)
+    } else {
+        format!("{} dB", widgets::gain_text(output.gain_db))
+    }
+}
+
+#[cfg(test)]
+mod localization_tests {
+    use super::*;
+    use neonmix_i18n::ResolvedLocale;
+    #[test]
+    fn particle_at_mute_gate_endpoint_keeps_opacity_nonnegative() {
+        let end = 0.8_f32 - 0.02;
+        let phase = (end - 6.0 / 8.0) / 0.3;
+        assert_eq!((phase * 0.3 + 6.0 / 8.0).fract(), end);
+        assert!(std::f32::consts::PI.sin() < 0.0);
+        let ctx = egui::Context::default();
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            egui::CentralPanel::default().show(ctx, |ui| {
+                paint_edge(
+                    ui.painter(),
+                    [
+                        pos2(0.0, 0.0),
+                        pos2(20.0, 0.0),
+                        pos2(40.0, 0.0),
+                        pos2(60.0, 0.0),
+                    ],
+                    Edge::Muted,
+                    theme::SRC_NATIVE,
+                    0.0,
+                    Some(1.0),
+                    phase,
+                    1.0,
+                );
+            });
+        });
+    }
+
+    #[test]
+    fn source_accessible_name_follows_locale_and_preserves_user_content() {
+        let source = Source {
+            key: 7,
+            name: "设备 { $name }".into(),
+            detail: "Ready".into(),
+            status: "Ready".into(),
+            detail_color: theme::TEXT,
+            airplay: false,
+            mine: false,
+            solo: false,
+            edge: Edge::Live,
+            gain_db: 0.0,
+            rms: None,
+            facts: Vec::new(),
+            appear: 1.0,
+        };
+        let zh = Localizer::new(ResolvedLocale::ZhCn);
+        let en = Localizer::new(ResolvedLocale::En);
+        assert!(source.accessible_label(&zh).contains("原生 Sender"));
+        assert!(source.accessible_label(&en).contains("Native Sender"));
+        assert!(source.accessible_label(&en).contains("设备 { $name }"));
+        assert!(zh.diagnostics().is_empty());
+        assert!(en.diagnostics().is_empty());
     }
 }

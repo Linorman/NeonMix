@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.47s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 2 tests
+test managed::tests::hung_process_is_forced_with_a_bounded_wait ... ok
+test managed::tests::cancelled_stop_completes_and_fifty_restarts_are_graceful ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 12.52s
+

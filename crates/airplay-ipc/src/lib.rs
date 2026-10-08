@@ -6,10 +6,10 @@ use std::io::{self, BufRead, Read, Write};
 
 pub mod local;
 
-pub const IPC_VERSION: u16 = 1;
-/// Control JSON evolves independently of the unchanged PCM v1 layout.
+pub const IPC_VERSION: u16 = 2;
+/// Control JSON evolves independently of the PCM layout.
 pub const CONTROL_VERSION: u16 = 2;
-pub const HEADER_BYTES: usize = 112;
+pub const HEADER_BYTES: usize = 120;
 pub const MAX_FRAMES: usize = 480;
 pub const CHANNELS: usize = 2;
 pub const PCM_RATE: u32 = 48_000;
@@ -53,6 +53,9 @@ pub struct PcmHeader {
     pub sequence: u64,
     /// Position in the original decoder's `source_rate` timeline.
     pub source_sample_position: u64,
+    /// First output sample on the normalized 48 kHz timeline, relative to a
+    /// fixed SRC mapping anchor. Gaps survive rejection and variable chunks.
+    pub normalized_sample_position: u64,
     /// First normalized frame's target presentation time in Unix ns.
     pub presentation_time_ns: u64,
     pub mapping_id: u64,
@@ -89,6 +92,13 @@ impl PcmHeader {
         if !self.protocol_gain.is_finite() || !(0.0..=1.0).contains(&self.protocol_gain) {
             return Err(IpcError::Header("protocol gain"));
         }
+        if self
+            .normalized_sample_position
+            .checked_add(u64::from(self.frame_count))
+            .is_none()
+        {
+            return Err(IpcError::Header("normalized position overflow"));
+        }
         if self.presentation_time_ns == 0 {
             return Err(IpcError::Header("missing presentation anchor"));
         }
@@ -123,6 +133,7 @@ impl PcmHeader {
             format_epoch: u64_at(bytes, 40),
             sequence: u64_at(bytes, 48),
             source_sample_position: u64_at(bytes, 56),
+            normalized_sample_position: u64_at(bytes, 112),
             presentation_time_ns: u64_at(bytes, 64),
             mapping_id: u64_at(bytes, 72),
             uncertainty_ns: u64_at(bytes, 80),
@@ -156,6 +167,7 @@ impl PcmHeader {
             (64, self.presentation_time_ns),
             (72, self.mapping_id),
             (80, self.uncertainty_ns),
+            (112, self.normalized_sample_position),
         ] {
             put(&mut bytes, offset, value.to_le_bytes());
         }
@@ -288,12 +300,14 @@ pub enum HubCommand {
     Disconnect {
         worker_generation: u64,
         connection_id: u64,
+        request_id: u64,
         session_id: u64,
         stream_epoch: u64,
     },
     Revoke {
         worker_generation: u64,
         connection_id: u64,
+        request_id: u64,
         session_id: u64,
         stream_epoch: u64,
     },
@@ -354,6 +368,10 @@ pub enum WorkerEvent {
     },
     Ready {
         control_version: u16,
+        #[serde(default)]
+        session_control_version: u16,
+        #[serde(default)]
+        pcm_version: u16,
         worker_generation: u64,
         port: u16,
         public_key: String,
@@ -763,6 +781,7 @@ mod tests {
                 format_epoch: 14,
                 sequence: 0,
                 source_sample_position: 441,
+                normalized_sample_position: 480,
                 presentation_time_ns: 1_795_000_000_123_456_789,
                 mapping_id: 15,
                 uncertainty_ns: 1_000_000,
@@ -790,7 +809,7 @@ mod tests {
         let original = packet();
         let bytes = original.encode().unwrap();
         assert_eq!(bytes.len(), MAX_PACKET_BYTES);
-        assert_eq!(&bytes[..8], b"NMAM\x01\x00\x70\x00");
+        assert_eq!(&bytes[..8], b"NMAM\x02\x00\x78\x00");
         assert_eq!(u32_at(&bytes, 8), 3_840);
         assert_eq!(u64_at(&bytes, 64), original.header.presentation_time_ns);
         assert_eq!(u32_at(&bytes, 88), 44_100);

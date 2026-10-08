@@ -386,6 +386,29 @@ fn live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_re
     }
     assert_eq!(stats.lane_meters[0].snapshot().peak, 0.0);
     assert_eq!(stats.output_meter.snapshot().peak, 0.0);
+    // Same stream id under a new binding/output clock cannot retain old levels.
+    let old = stats.lane_meters[0].snapshot();
+    config.lanes[0].epoch = 2;
+    config.lanes[0].binding_generation = inputs[0].bind_next().unwrap();
+    config.output_epoch = 7;
+    control.apply(config).unwrap();
+    assert_eq!(
+        stats.lane_meters[0].snapshot().binding_generation,
+        old.binding_generation
+    );
+    mixer.render_block(&mut [[0.; 2]; 480]);
+    let rebound = stats.lane_meters[0].snapshot();
+    assert!(rebound.observed);
+    assert_eq!(
+        rebound.binding_generation,
+        config.lanes[0].binding_generation
+    );
+    assert_eq!(rebound.stream_epoch, 2);
+    assert_eq!(rebound.output_epoch, 7);
+    assert_eq!(rebound.peak, 0.0);
+    let reopened = stats.output_meter.snapshot();
+    assert_eq!(reopened.output_epoch, 7);
+    assert_eq!(reopened.peak, 0.0);
 }
 
 #[test]
@@ -434,4 +457,38 @@ fn live_output_meter_and_limiter_gain_recover_after_overload() {
         f32::from_bits(stats.limiter_gain_bits.load(Relaxed) as u32),
         1.0
     );
+}
+
+#[test]
+fn meter_timestamp_only_advances_on_the_actual_mixer_publication_clock() {
+    let origin = Instant::now();
+    let (mut mixer, mut control, mut inputs, stats) = Mixer::new(origin).unwrap();
+    let mut config = MixerConfig::default();
+    config.lanes[0] = LaneMix {
+        stream_id: 42,
+        epoch: 1,
+        ..LaneMix::default()
+    };
+    control.apply(config).unwrap();
+    for position in (0..3840).step_by(480) {
+        assert!(inputs[0].push(block(42, 1, position, [0.1, 0.2])));
+    }
+    mixer.render_block_at(
+        origin + std::time::Duration::from_millis(100),
+        &mut [[0.; 2]; 2400],
+    );
+    let first = stats.output_meter.snapshot();
+    assert!(first.observed);
+    assert_eq!(first.sampled_at_ns, 100_000_000);
+    assert!(first.peak > 0.);
+    // Repeated readers cannot rejuvenate the stopped audio callback.
+    assert_eq!(
+        stats.output_meter.snapshot().sampled_at_ns,
+        first.sampled_at_ns
+    );
+    mixer.render_block_at(
+        origin + std::time::Duration::from_millis(500),
+        &mut [[0.; 2]; 2400],
+    );
+    assert_eq!(stats.output_meter.snapshot().sampled_at_ns, 500_000_000);
 }

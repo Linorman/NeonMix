@@ -1,0 +1,166 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Finished `release` profile [optimized + debuginfo] target(s) in 25.93s
+     Running unittests src/lib.rs (target/release/deps/neonmix_airplay_adapter-b2f5a26426b962d1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ingress.rs (target/release/deps/ingress-cab16c354a158e2d)
+
+running 8 tests
+test already_applied_protocol_gain_is_not_multiplied_twice_and_late_packet_drops ... ok
+test low_latency_removes_protocol_prefetch_without_modulating_packet_timing ... ok
+test full_short_queue_never_invalidates_already_released_pcm ... ok
+test old_epoch_duplicates_clock_jump_and_bad_payload_fail_closed ... ok
+test low_latency_keeps_bounds_rejects_late_packets_and_preserves_short_deadlines ... ok
+test unix_mapping_preserves_source_domain_and_release_obeys_device_budget ... ok
+test four_second_and_byte_limits_hold_for_large_and_tiny_packets ... ok
+test low_latency_preserves_pcm_through_deep_device_callbacks ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running unittests src/lib.rs (target/release/deps/neonmix_core-fbfe73882bf6178d)
+
+running 2 tests
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/audio_contract.rs (target/release/deps/audio_contract-80d0b7369cda0c01)
+
+running 18 tests
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test mute_advances_signal_position ... ok
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test malicious_pcm_is_sanitized ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test silence_is_data_but_idle_is_not ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/drift_stability.rs (target/release/deps/drift_stability-430423d6f86df5b9)
+
+running 3 tests
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ignored, Run with --release --ignored: four accelerated 600-second drift cases
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ignored, Release-only accelerated 300-second delivery-stall regression
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ignored, Release-only accelerated over-limit drift degradation
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lane_binding.rs (target/release/deps/lane_binding-6403e5312cf0e02b)
+
+running 4 tests
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mixer.rs (target/release/deps/mixer-2d07b83b42a1d39c)
+
+running 8 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mixer_measurements.rs (target/release/deps/mixer_measurements-950f6a8e9f0ead28)
+
+running 3 tests
+test valid_silent_muted_pcm_is_counted_as_running_instead_of_starved ... ok
+test active_timed_starvation_counts_one_second_and_stops_on_remove ... ok
+test active_native_starvation_counts_every_internal_frame_after_dsp_reset ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/mixer_realtime.rs (target/release/deps/mixer_realtime-7f4717961b9e6dc3)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/presentation_resample.rs (target/release/deps/presentation_resample-d3ad8c58f8df03b1)
+
+running 2 tests
+test callback_hooks_include_pending_frames_and_retained_sinc_lookahead ... ok
+test converter_impulse_tracks_source_time_without_adding_output_delay_twice ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/realtime.rs (target/release/deps/realtime-ce344d056604b419)
+
+running 1 test
+test steady_state_capture_and_sinc_output_do_not_allocate_or_free ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/timed_mixer.rs (target/release/deps/timed_mixer-c05fa9d00d714e0e)
+
+running 11 tests
+test negative_callback_start_jitter_does_not_delay_buffered_pcm ... ok
+test muted_and_solo_lanes_consume_elapsed_audio_without_replay ... ok
+test callback_mid_block_selects_source_offset_and_epoch_flush_rejects_stale ... ok
+test late_deadlines_are_attributed_to_stream_epochs_across_lane_reuse ... ok
+test new_epoch_flushes_a_future_head_already_held_by_output ... ok
+test solo_exclusion_consumes_timed_input_instead_of_replaying_it_later ... ok
+test single_block_waits_until_target_without_native_start_water ... ok
+test genuinely_late_first_pcm_and_large_clock_jumps_still_skip_elapsed_samples ... ok
+test timed_audio_recovers_after_a_track_gap_without_an_epoch_change ... ok
+test starvation_recovery_waits_for_future_pts_and_skips_elapsed_audio ... ok
+test an_early_first_packet_keeps_its_samples_across_callback_start_jitter ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/timed_multi_source.rs (target/release/deps/timed_multi_source-3adb26a8a43d7753)
+
+running 3 tests
+test reusing_a_solo_lane_rejects_old_stream_and_keeps_other_stream_at_current_time ... ok
+test four_distinct_streams_mix_with_independent_gain_mute_and_solo ... ok
+test flushing_a_held_future_head_and_stale_packets_does_not_restart_other_lane ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/timed_quality.rs (target/release/deps/timed_quality-8b11e353ccf74f0e)
+
+running 3 tests
+test timed_source_clock_error_keeps_long_term_presentation_phase_bounded ... ignored, Run release ignored: accelerated two-minute absolute phase tracking
+test fractional_src_preserves_upper_music_passband_after_clock_lock ... ok
+test callback_jitter_and_source_clock_error_do_not_create_pcm_spikes ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.47s
+
+   Doc-tests neonmix_airplay_adapter
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

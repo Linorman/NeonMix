@@ -1,0 +1,22 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2.94s
+     Running tests/lane_binding.rs (target/release/deps/lane_binding-6403e5312cf0e02b)
+
+running 1 test
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... FAILED
+
+failures:
+
+---- stale_timed_queue_head_cannot_choose_playback_for_new_native_binding stdout ----
+
+thread 'stale_timed_queue_head_cannot_choose_playback_for_new_native_binding' (47240003) panicked at crates/audio-core/tests/lane_binding.rs:37:5:
+new native binding remained silent
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    stale_timed_queue_head_cannot_choose_playback_for_new_native_binding
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p neonmix-core --test lane_binding`

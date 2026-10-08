@@ -1,0 +1,38 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 3.82s
+     Running tests/lane_binding.rs (target/release/deps/lane_binding-6403e5312cf0e02b)
+
+running 6 tests
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test revocation_cuts_off_buffered_pcm_even_when_config_queue_is_full_and_same_ids_are_reused ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+test old_queue_binding_is_rejected_without_erasing_new_binding_and_mode ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mixer_realtime.rs (target/release/deps/mixer_realtime-7f4717961b9e6dc3)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/timed_mixer.rs (target/release/deps/timed_mixer-c05fa9d00d714e0e)
+
+running 11 tests
+test callback_mid_block_selects_source_offset_and_epoch_flush_rejects_stale ... ok
+test late_deadlines_are_attributed_to_stream_epochs_across_lane_reuse ... ok
+test negative_callback_start_jitter_does_not_delay_buffered_pcm ... ok
+test single_block_waits_until_target_without_native_start_water ... ok
+test solo_exclusion_consumes_timed_input_instead_of_replaying_it_later ... ok
+test new_epoch_flushes_a_future_head_already_held_by_output ... ok
+test muted_and_solo_lanes_consume_elapsed_audio_without_replay ... ok
+test genuinely_late_first_pcm_and_large_clock_jumps_still_skip_elapsed_samples ... ok
+test timed_audio_recovers_after_a_track_gap_without_an_epoch_change ... ok
+test starvation_recovery_waits_for_future_pts_and_skips_elapsed_audio ... ok
+test an_early_first_packet_keeps_its_samples_across_callback_start_jitter ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+

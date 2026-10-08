@@ -1,0 +1,89 @@
+{
+  "format": {
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.558
+  },
+  "packaging": {
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/tests",
+      "-p",
+      "test_*.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.181
+  },
+  "clippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "neonmix-core",
+      "-p",
+      "neonmix-control",
+      "-p",
+      "neonmix-airplay-adapter",
+      "-p",
+      "neonmix-airplay-ipc",
+      "-p",
+      "neonmix-output-binding",
+      "-p",
+      "neonmix-i18n",
+      "-p",
+      "neonmix-desktop-service",
+      "-p",
+      "neonmix-lifecycle",
+      "-p",
+      "neonmix-hub",
+      "-p",
+      "neonmix-desktop",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 1.631
+  },
+  "tests": {
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "neonmix-core",
+      "-p",
+      "neonmix-control",
+      "-p",
+      "neonmix-airplay-adapter",
+      "-p",
+      "neonmix-airplay-ipc",
+      "-p",
+      "neonmix-output-binding",
+      "-p",
+      "neonmix-i18n",
+      "-p",
+      "neonmix-desktop-service",
+      "-p",
+      "neonmix-lifecycle",
+      "-p",
+      "neonmix-hub",
+      "-p",
+      "neonmix-desktop",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 61.108
+  }
+}

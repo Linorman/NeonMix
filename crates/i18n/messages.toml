@@ -1,0 +1,2 @@
+version=1
+fragments=["messages/about.toml","messages/common.toml","messages/devices.toml","messages/diagnostics.toml","messages/errors.toml","messages/events.toml","messages/faults.toml","messages/flow.toml","messages/hub.toml","messages/lanes.toml","messages/live.toml","messages/mixer.toml","messages/palette.toml","messages/preferences.toml","messages/sender.toml","messages/shell.toml","messages/tray.toml","messages/viz.toml","messages/widgets.toml","messages/intent.toml"]

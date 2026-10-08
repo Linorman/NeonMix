@@ -1,0 +1,7 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 51.05s

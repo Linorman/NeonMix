@@ -1,0 +1,34 @@
+    Blocking waiting for file lock on build directory
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+    Checking neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+    Checking neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Checking neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+    Checking neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error[E0369]: binary operation `==` cannot be applied to type `neonmix_identity::pairing::Completion`
+    --> apps/hub/src/server.rs:2188:9
+     |
+2188 |         assert_eq!(done, replayed);
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |         |
+     |         neonmix_identity::pairing::Completion
+     |         neonmix_identity::pairing::Completion
+     |
+note: `neonmix_identity::pairing::Completion` does not implement `std::cmp::PartialEq`
+    --> crates/identity/src/pairing.rs:45:1
+     |
+  45 | pub struct Completion {
+     | ^^^^^^^^^^^^^^^^^^^^^ `neonmix_identity::pairing::Completion` is defined in another crate
+
+error[E0277]: `neonmix_identity::pairing::Completion` doesn't implement `std::fmt::Debug`
+    --> apps/hub/src/server.rs:2188:9
+     |
+2188 |         assert_eq!(done, replayed);
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::fmt::Debug` is not implemented for `neonmix_identity::pairing::Completion`
+
+Some errors have detailed explanations: E0277, E0369.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...

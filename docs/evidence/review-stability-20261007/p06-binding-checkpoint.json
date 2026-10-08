@@ -1,0 +1,28 @@
+{
+  "stage": "P06 output binding UUID CAS",
+  "client_date": "2026-10-08",
+  "head": "aefb8690320cb114c974be2477b2ebb64dfadf1e",
+  "tracked_diff_sha256": "bac42e04c8e92cc3088968440c792d024dca13e4bf8d252639e9158d8df9f73d",
+  "source_sha256": {
+    "crates/output-binding/src/lib.rs": "814b0c95aac823222fd24910ba3a87d57134b8e012f00af533093aa2985b8811",
+    "crates/output-binding/tests/persistence.rs": "5f3d4a083abf8ca5c406fc402a144c43797a66911f964cd28e9fa7e3f01c3ba9",
+    "apps/hub/src/binding.rs": "ce809e55e9af882477c40950e73d74b8972c65e62fa4f3629e0c2205215a8122",
+    "apps/hub/src/main.rs": "3fc9f359bc148c800715b55169e64265ffd8c4aae5f14ce86fa78f25b7598d91",
+    "apps/hub/src/sender.rs": "3159eda0265e11705139013224fb5d7916a069abc59916ffa8a0b849e0e8cbb1",
+    "crates/desktop-service/src/lib.rs": "533a245734faa1b5be685f98a41a98d39aca770685bcc483edc760b18de31258",
+    "crates/desktop-service/src/daemon.rs": "e971e6df21e5c04b30dab44efb74fdd90d30c62ab7c2e734b1937a860e70a4a1",
+    "crates/desktop-service/src/fault.rs": "0c0f7a2807349c2b0585a48e627f451e5e2429facec0eb59d1a3b0a17b2befc2",
+    "crates/desktop-service/tests/lifecycle.rs": "972d6a5ae9340a9b972325c14d9a5b4fa78c20e0931ffd1cdc432996e555b575",
+    "apps/desktop/src/pages/sender.rs": "36f547dd751acac22c820b50604ecf255c76b3b49a4dd620f8e494442341100f",
+    "apps/desktop/src/main.rs": "ad55d78b153714cfff2bb6ebfa6ff655cb49a25c8fa3ce7ae8fff88a39efc984",
+    "tools/e06_binding_probe.py": "e35d527851b76969120e4887d413f994a7159b57e9d6e6bb454caac541651955",
+    "tools/e06_linux_binding_probe.py": "2ef1a25f16c51a0e6b60c2019cd464d5c224409a7e95fced32fd9c7f728b166d",
+    "tools/e07_mixer_probe.py": "46050bb3819c51afa06bbf5534cc54d65fff86eabe19a215df790f20458fa249"
+  },
+  "artifact_sha256": {
+    "target/release/neonmix-hub": "208b6b56ed0ea4268f0acc8814a2effd2361c93e95520b271a1bd34fa2326d81",
+    "target/release/neonmix-background": "76aca890ab699e6dca946de9bb221f36db2b9413f916fbff19b8d1feb85778b0",
+    "target/release/neonmix-desktop": "0c43d31284e75887d5045d5c4d4b6b220d25c5a39889656a0402e14eb94b654a"
+  },
+  "scope": "actual Store/CLI dispatch, required CLI fields, native callback locking and local IPC; no actual platform setter/hardware or installer claim"
+}

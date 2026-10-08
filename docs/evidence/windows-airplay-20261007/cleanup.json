@@ -1,0 +1,17 @@
+{
+    "original_install_matches_initial_copy":  true,
+    "changed_install_files":  [
+
+                              ],
+    "remaining_test_processes":  [
+
+                                 ],
+    "removed_owned_paths":  [
+                                "baseline.tar.gz",
+                                "alac.bin",
+                                "setup_probe.py",
+                                ".local\\airplay\\build"
+                            ],
+    "retained":  "source/build/evidence, isolated runtime copy and stable private test identity for pending iPhone diagnosis",
+    "deleted_outside_test_root":  false
+}

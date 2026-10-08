@@ -1,5 +1,15 @@
 # E02–E04 媒体与控制合约（v1）
 
+## 2026-10-07 幂等准备与完整回执
+
+P02 增加 `Snapshot.runtime_epoch`：每次 `Authority::new/restore` 生成新的 UUID，持久 state 不保存它。原生 `Command` 的可选 `runtime_epoch/credential_id` 在认证后、回执查找/CAS/准备之前校验；当前 Desktop 必须携带它们，运行代次不符返回 `snapshot_required`，身份不符返回 `unauthenticated`。旧 CLI 省略条件字段继续保留原接口语义，不获得跨重启对账保证。事件携带同一 runtime，`Snapshot::apply_event` 拒绝旧 runtime，即使 Hub UUID 和数字 revision 碰巧一致。P07 Native版本域见下文；AirPlay仍在其独立版本域中逐步迁移。
+
+`Authority::prepare_transaction` 明确返回 `Preparation::Replay(Receipt)` 或 `Preparation::Prepared(PreparedCommand)`。首先重新核验当前身份，再按身份和 `request_id` 查已完成请求；相同 ID 的 operation、目标、expected_revision 或 payload 变化返回 `idempotency_conflict`。已完成重放先于无关 pending 的 Busy 判断。
+
+Hub 原生 HTTP 命令在 Replay 分支立即返回首次 `StartResponse`，不执行资源预留、SDK/媒体准备、证书解析、保存或 Mixer 配置发布。完整响应和权威提交在同一 Engine 临界区记录，回复丢失后仍可重放原 session、port 和 certificate fingerprint；原会话结束不影响历史回执，也不会因重放复活。已撤销身份不能读取旧敏感响应。
+
+缓存最多 128 条、仅限当前进程；Authority 有回执但 HTTP 完整响应不可得时返回 `snapshot_required`，不重建历史结果。重启后的 runtime 识别、缓存过期的 Unknown 对账和耐久中间态由后续版本补充，本批不提供跨重启 exactly-once 保证。
+
 实现入口为 `neonmix-hub`；公共模型在 `crates/control`，媒体适配在 `crates/media`，实时混音在 `crates/audio-core/src/mixer.rs`。此合约冻结本轮实验接口；自动发现、首次配对界面、系统凭证保护和成品安装分别属于 E05/E07/E09。
 
 ## 身份、协商与生命周期
@@ -145,3 +155,41 @@ Sender 的 `media_scheduling` 与 Hub `media_workers[].scheduling` 记录初始�
 长跑探针固定每次测试的两个二进制，记录 Hub/两路 Sender 的 RSS、physical footprint、线程数和文件描述符。CPU 百分比按一个逻辑核满载为 100%，峰值是采样间隔均值的峰值，不冒充瞬时峰值。loopback 长测另外要求丢包、迟到、实际 PLC 样本均为零，避免掩蔽代替连续性。跨机/模拟端延迟与 8/24 小时验收另行记录。
 
 Opus 时长检查依据 [RFC 6716 §3.1–3.2](https://www.rfc-editor.org/rfc/rfc6716.html#section-3.1)，支持等价的 2.5/5 ms 聚合帧，不要求编码内部一定为单帧；所有接收包的合计源时长仍须为 10 ms。
+
+
+## P06 Native persistence 结果待确认
+
+Native state替换返回publication阶段；目录同步失败不因读回一致升级为保存成功。未发布失败释放本次reservation/预备SDK并abort；已发布耐久未知保留相同PreparedCommand/request/候选session和预备媒体，不activate新的媒体。HTTP503固定 `profile_durability_unconfirmed`，调用方保留Unknown并重放原请求，不换ID/body/version。不同持久命令暂不能越过待确认候选，已完成exact replay仍无副作用返回。
+
+已发布Revoke/Stop/Disconnect的终态lane先失效媒体授权、结束worker，再异步DSP配置收敛；queue满不推迟限制，durability重试失败也不重新授权。公开persistent state的确认及音频应用是分别的条件，未知结果不得显示正常提交。限制性认证名单只属于当前runtime，完成后由权威device.revoked继续执行。
+
+管理员可用 `/v1/persistence/recover`（POST `{request_id,runtime_epoch}`）确认现有候选；current Admin及同epoch都要重新验证，不能凭旧回执取得授权。它不准备第二份SDK或另一个device/session。Native回执与管理员恢复响应有界缓存，跨epoch不承诺exactly-once。配对原registration候选也保持直到完成，token在同步未确认时不可用；邀请变更不能擦掉它。AirPlay配置/worker信任的未知候选也由同一恢复接口按其pending_command_id确认，限制投影和停止中的owner不得重新授权。完整event/config版本分域及desired/applied仍以P07和各专项合同的后续范围为准。
+
+
+## P07 pending 期间的实时健康状态
+
+配置准备不再保存待提交的完整 Authority 克隆；Prepared 保存不可变的配置候选、原对象基线及命令，公开事件历史/回执仍由运行中的 Authority 持有。输出 available 变化和现有会话状态立即发布事件，包括落盘尚未确认的期间；GET 所见状态每次变化都拥有新的游标。
+
+commit 使用最新运行状态合并本次配置、凭证和偏好，只更新原对象的命令效果。已终止的 session 不复活，已移除的 stream 不重新插入；会话终止前已准备的 trim/mute 偏好仍保存用于未来新会话，旧 Solo 不转给新会话。新 Start 按提交时的输出可用性进入 Buffering 或 OutputLost，运行中的其他来源保留最新健康值。abort 只丢弃候选，不恢复准备前的 output/session，也不重复健康事件。回执使用实际提交的当前游标；有界事件环保留等待期间的全部可续传部分，淘汰后要求 SnapshotRequired。
+
+pending 健康修复保持旧 revision 的事件语义；新增Native config_revision/event_sequence及v2条件见下文。AirPlay域和 desired/applied 仍是未完成 P07 子项。
+
+
+## P07 Native 控制协议 v2：配置与事件版本
+
+媒体 offer 的 version 仍为1；配对/资料schema及本地IPC不随Native控制协议一起改号。Native Snapshot 和 Event 明确提供 control_version=2、config_revision、event_sequence；revision保留旧事件CAS数值并等于event_sequence，不把它重新解释为配置版本。配置域只在设备/凭证、trim/mute偏好或输出持久设置实际改变时前进；Start/Stop、Solo、输出可用性和会话健康只推进运行期游标。PersistentState保存独立config_revision，旧资料缺此字段时在读取中以原保存revision作为一次导入基线，保留身份/权限；HubSettings日志对已有config_revision的资料同步递增并严格校验。
+
+v2 Command 必须声明control_version=2，携原runtime_epoch和credential_id。它不允许expected_revision；纯配置操作携expected_config_revision，Start/Stop等运行期操作携expected_event_sequence，含持久偏好的StreamMix两者都携带。Disconnect/Revoke既有配置限制也有运行期效果，因此也检查两域。条件在已完成回执查询之后对新请求检查；原请求重放不因之后健康事件或配置前进而失去首次回执。同ID换条件/payload仍冲突。缺必要条件、把legacy expected_revision混入v2，或把新域条件混入v1，都明确拒绝；不忽略请求条件。
+
+未声明control_version的旧命令按v1解析，仍要求原expected_revision数值；旧请求语义保持，不获得v2跨重启保障。写入接口路径继续为/v1/commands或/v1/sessions，正文control_version明确选定契约；v1序列化省略版本标记和新域字段，读取轮询保留。公开identity同时标示control_version=2及Native版本域能力；这不承诺与AirPlay跨域原子读取。
+
+WSS `/v1/events?control_version=2&runtime_epoch=UUID&after=event_sequence` 在upgrade前验证当前runtime与历史，再在每个batch重查认证/epoch。旧的after-only订阅HTTP426 upgrade_required，旧epoch或超前/过旧游标snapshot_required。真实watch/control_client每次连接先GET，校验epoch/序号，明确绑定该快照的游标；拒绝或断开后重新GET再订阅，不把心跳当成业务前进。Snapshot::apply_event同时验证协议、Hub、epoch、严格下一event_sequence、旧revision投影及配置版本不倒退/不跳两步，任何错误均不部分更新。
+
+Desktop调度器在冻结意图时使用对应域条件；Source运行条件不会被替换为配置CAS。Sender从已验证快照/当前认证的me取得调用方身份，Start使用运行期CAS；已明确未提交的冲突重新取快照时不跨原runtime，未知结果不在该分支重发。AirPlay自身配置/事件域已在AIRPLAY-CONTRACT中接入v3；完整desired/applied及FIFO联合验收继续是未完成P07子项。
+
+
+## P07 保存回执与 callback 确认
+
+Native完整StartResponse（包括其他Native命令回执）增加media_pending和media_application；AirPlay视图/回执同样带当前Mixer进度。desired/applied属于当前runtime的DSP目标序号，区别于控制config/event版本。queue满不再在纯配置生成之前返回，因此可保留最新待应用目标，worker重试同一目标不会编号第二个配置。终态权限/gate先关闭，应用积压是另一完成条件。
+
+Desktop对已确认保存的字段保留有界、绑定原context/target的应用观察；通道旁和共享底栏显示待应用、超时或进度未知。只有新读数同runtime且applied达到目标、当前字段仍是该值时才显示已应用；缓存诊断、另一runtime或字段后来被覆盖不能作此确认。未取得新诊断转进度未知，不重发保存命令；目标结束或房间切换清除旧观察。Undo仍是已确认保存后的独立反向命令，不把其可用性当音频已经应用。

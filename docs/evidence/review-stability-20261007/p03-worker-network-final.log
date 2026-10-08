@@ -1,0 +1,49 @@
+{
+  "passed": true,
+  "worker_sha256": "30ecbb6582d9e0d7978049f08b4f4c6c94b38d1a7f941a915ab5f4a941b06a1d",
+  "results": [
+    {
+      "case": "admission_pending",
+      "passed": true,
+      "successor_pcm_blocks": 50
+    },
+    {
+      "case": "await_grant",
+      "passed": true,
+      "successor_pcm_blocks": 50
+    },
+    {
+      "case": "active",
+      "passed": true,
+      "successor_pcm_blocks": 50
+    },
+    {
+      "case": "volume",
+      "volume_db": -144.0,
+      "passed": true,
+      "first_pcm_blocks": 50,
+      "resumed_pcm_blocks": 50,
+      "successor_pcm_blocks": 50,
+      "repeated_stream_setup": true
+    },
+    {
+      "case": "volume",
+      "volume_db": -18.0,
+      "passed": true,
+      "first_pcm_blocks": 50,
+      "resumed_pcm_blocks": 50,
+      "successor_pcm_blocks": 50,
+      "repeated_stream_setup": true
+    },
+    {
+      "case": "volume",
+      "volume_db": 0.0,
+      "passed": true,
+      "first_pcm_blocks": 50,
+      "resumed_pcm_blocks": 50,
+      "successor_pcm_blocks": 50,
+      "repeated_stream_setup": true
+    }
+  ],
+  "scope": "signed synthetic sender, encrypted UDP, actual worker and PCM IPC; no Apple/hardware audio"
+}

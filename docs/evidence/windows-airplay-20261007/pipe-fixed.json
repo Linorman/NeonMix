@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "packets": 600,
+      "elapsed_us": 21381,
+      "mode": "throughput",
+      "received_bytes": 1905600,
+      "passed": true
+    },
+    {
+      "packets": 1,
+      "elapsed_us": 250319,
+      "mode": "stalled",
+      "received_bytes": 0,
+      "passed": true
+    },
+    {
+      "packets": 1,
+      "elapsed_us": 58440,
+      "mode": "stop",
+      "received_bytes": 0,
+      "passed": true
+    }
+  ],
+  "scope": "real protected NamedPipe and production writer; throughput, timeout and cancellation"
+}

@@ -75,26 +75,26 @@ try:
     source=start('source',[audio,'play','--device',DEVICE,'--rate',48000,'--seconds',50,'--frequency',437,'--gain-db=-36'])
     sending=send('sender');session=wait(active)
     before=wait(lambda:api('/v1/diagnostics'),lambda d:d and len(d['receivers'])==1 and d['receivers'][0]['pcm_frames']>48000)
-    renamed=output('rename','--expected-revision',first['revision'],'--name','NeonMix — 书房')
+    renamed=output('rename','--expected-revision',first['revision'],'--expected-output-id',first['output_id'],'--name','NeonMix — 书房')
     assert renamed['output_id']==first['output_id'] and renamed['hub_id']==first['hub_id'] and renamed['device_id']==first['device_id']
     if args.provider=='neonmix':
-        output('sync-name')
+        output('sync-name','--expected-output-id',renamed['output_id'],'--expected-revision',renamed['revision'])
         wait(controls.name,lambda value:value==renamed['display_name'])
         report['native_name_sync']={'requested':renamed['display_name'],'actual':controls.name()}
-    output('rename','--expected-revision',first['revision'],'--name','Conflict',expected=1)
+    output('rename','--expected-revision',first['revision'],'--expected-output-id',first['output_id'],'--name','Conflict',expected=1)
     time.sleep(1)
     after=api('/v1/diagnostics');assert sending.poll() is None
     assert after['receivers'][0]['pcm_frames']>before['receivers'][0]['pcm_frames'] and after['receivers'][0]['last_buffer_rms']>.008
     report['rename_preserves_stream']={'before':before,'after':after,'original':first,'renamed':renamed}
-    disabled=output('disable','--expected-revision',renamed['revision'])
-    enabled=output('enable','--expected-revision',disabled['revision'])
+    disabled=output('disable','--expected-revision',renamed['revision'],'--expected-output-id',renamed['output_id'])
+    enabled=output('enable','--expected-revision',disabled['revision'],'--expected-output-id',disabled['output_id'])
     assert sending.wait(timeout=8)!=0
     assert any(row['event']=='output_binding_revoked' for row in rows('sender'))
     time.sleep(.5);assert not active()
     report['disable_enable_stops_old_sender']={'disabled':disabled,'enabled':enabled,'closed_session':api('/v1/hub')['sessions'][session['id']]}
     restarted=send('sender-restarted');fresh=wait(active);assert fresh['id']!=session['id'] and fresh['media_context']!=session['media_context']
     wait(lambda:api('/v1/diagnostics'),lambda d:d and len(d['receivers'])==1 and d['receivers'][0]['pcm_frames']>48000)
-    output('remove','--expected-revision',enabled['revision'])
+    output('remove','--expected-revision',enabled['revision'],'--expected-output-id',enabled['output_id'])
     assert restarted.wait(timeout=8)!=0;assert not active()
     replacement=output('add','--credential',lab/'sender-a.json','--hub',f'https://localhost:{port}','--provider',args.provider,'--name','NeonMix — 新绑定')
     assert replacement['output_id']!=first['output_id']

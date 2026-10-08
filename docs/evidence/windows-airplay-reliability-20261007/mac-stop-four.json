@@ -1,0 +1,264 @@
+{
+  "scenario": "shutdown",
+  "platform": "macOS",
+  "os_version": "27.0",
+  "architecture": "arm64",
+  "build_profile": "release",
+  "sources": 4,
+  "native_sources": 0,
+  "scope": "managed stop and resource cleanup with synthetic PCM; audio timing quality is reported separately",
+  "limitations": [
+    "synthetic FairPlay; no Apple sender interoperability claim",
+    "meter/counter verification, no recorded or analog audio",
+    "short functional run, not sustained performance acceptance"
+  ],
+  "binary_sha256": {
+    "neonmix-hub": "3a0848ad61661a201d986f74e3365921258ca331f8bf394dcd2f0b47351208df",
+    "neonmix-airplay-worker": "b36f41d25faeb5460f818f7530b08128e6876bd7283af728f75b1c8961d74745"
+  },
+  "artifact_snapshot": true,
+  "fault_cycles": 1,
+  "patch_sha256": "f34f34f5a84a018c6dbb7dad6992c62070635acd8ea74684a8e4cfbd9452ff76",
+  "steady_seconds": null,
+  "airplay_frequencies_hz": [
+    317,
+    439,
+    563,
+    701
+  ],
+  "native_frequencies_hz": [],
+  "passed": true,
+  "scenarios": {
+    "explicit_idle_pairing_window_renews_without_worker_restart": true,
+    "managed_active_shutdown_releases_workers_and_runtime_keys": true
+  },
+  "isolation_checks": [],
+  "last_live_observation": {
+    "expected_sources": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "active": 4,
+    "sessions": [
+      {
+        "lane": 0,
+        "released_blocks": 220,
+        "ingress_late": 0,
+        "lane_rms": 0.05634823814034462
+      },
+      {
+        "lane": 1,
+        "released_blocks": 145,
+        "ingress_late": 0,
+        "lane_rms": 0.05654313787817955
+      },
+      {
+        "lane": 2,
+        "released_blocks": 83,
+        "ingress_late": 0,
+        "lane_rms": 0.05643779784440994
+      },
+      {
+        "lane": 3,
+        "released_blocks": 21,
+        "ingress_late": 0,
+        "lane_rms": 0.05651550367474556
+      }
+    ],
+    "output_rms": 0.02835879474878311,
+    "output_stats": {
+      "callback_max_ns": 80583,
+      "callback_over_budget": 0,
+      "callbacks": 571,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 146176,
+      "last_arrival_ns": 3083823042,
+      "last_device_ns": 845669438295499,
+      "last_error": 0,
+      "native_device_frame_position": 145920,
+      "native_internal_frames": 145920,
+      "native_stream_frames": 145920,
+      "no_data_intervals": 0,
+      "peak": 0.06646229326725006,
+      "period_max": 256,
+      "period_min": 256,
+      "presented_frames": 145665,
+      "silent_frames": 64710,
+      "stale_frames": 0,
+      "submitted_frames": 146176
+    }
+  },
+  "quality_evaluated": false,
+  "observed_quality_before_stop": {
+    "timed_late_frames": 0,
+    "output_stats": {
+      "callback_max_ns": 80583,
+      "callback_over_budget": 0,
+      "callbacks": 571,
+      "clock_epoch": 1,
+      "discontinuities": 0,
+      "dropped_frames": 0,
+      "errors": 0,
+      "frames": 146176,
+      "last_arrival_ns": 3083823042,
+      "last_device_ns": 845669438295499,
+      "last_error": 0,
+      "native_device_frame_position": 145920,
+      "native_internal_frames": 145920,
+      "native_stream_frames": 145920,
+      "no_data_intervals": 0,
+      "peak": 0.06646229326725006,
+      "period_max": 256,
+      "period_min": 256,
+      "presented_frames": 145665,
+      "silent_frames": 64710,
+      "stale_frames": 0,
+      "submitted_frames": 146176
+    },
+    "ingress": [
+      {
+        "accepted_packets": 228,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 3211867750,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4295044095,
+        "last_uncertainty_ns": 8705539,
+        "late_packets": 0,
+        "latency_advance_ns": 1803881380,
+        "malformed_packets": 0,
+        "output_latency_ns": 5333333,
+        "overflow_packets": 0,
+        "pending_bytes": 31488,
+        "pending_frames": 3065,
+        "playout_lead_ns": 131926207,
+        "protocol_lead_ns": 1935807587,
+        "released_packets": 220,
+        "timeline_rejections": 0
+      },
+      {
+        "accepted_packets": 153,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 3208499333,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4295017695,
+        "last_uncertainty_ns": 8710084,
+        "late_packets": 0,
+        "latency_advance_ns": 1809567215,
+        "malformed_packets": 0,
+        "output_latency_ns": 5333333,
+        "overflow_packets": 0,
+        "pending_bytes": 31488,
+        "pending_frames": 3065,
+        "playout_lead_ns": 128551208,
+        "protocol_lead_ns": 1938118423,
+        "released_packets": 145,
+        "timeline_rejections": 0
+      },
+      {
+        "accepted_packets": 91,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 3213292500,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4294995871,
+        "last_uncertainty_ns": 8688129,
+        "late_packets": 0,
+        "latency_advance_ns": 1809616921,
+        "malformed_packets": 0,
+        "output_latency_ns": 5333333,
+        "overflow_packets": 0,
+        "pending_bytes": 31488,
+        "pending_frames": 3065,
+        "playout_lead_ns": 127321542,
+        "protocol_lead_ns": 1936938463,
+        "released_packets": 83,
+        "timeline_rejections": 0
+      },
+      {
+        "accepted_packets": 28,
+        "clock_resets": 0,
+        "future_packets": 0,
+        "identity_rejections": 0,
+        "last_mapping_id": 1,
+        "last_presentation_time_ns": 3215345166,
+        "last_source_rate": 44100,
+        "last_source_sample_position": 4294974047,
+        "last_uncertainty_ns": 8688689,
+        "late_packets": 0,
+        "latency_advance_ns": 1812633974,
+        "malformed_packets": 0,
+        "output_latency_ns": 5333333,
+        "overflow_packets": 0,
+        "pending_bytes": 27552,
+        "pending_frames": 2682,
+        "playout_lead_ns": 122452291,
+        "protocol_lead_ns": 1935086265,
+        "released_packets": 21,
+        "timeline_rejections": 0
+      }
+    ]
+  },
+  "managed_shutdown": {
+    "elapsed_ms": 795,
+    "workers": 4,
+    "exit_code": 0,
+    "forced": false,
+    "runtime_keys_before": 4,
+    "runtime_keys_after": 0,
+    "processes_exited": true
+  },
+  "reopen_and_owner_eof": {
+    "same_profile_and_port": true,
+    "identity_unchanged": true,
+    "elapsed_ms": 962,
+    "workers": 4,
+    "runtime_keys_after": 0
+  },
+  "status_reads": {
+    "readers": 0,
+    "successful": 0,
+    "errors": 0
+  },
+  "source_pacing": [
+    {
+      "source_index": 1,
+      "sent_packets": 332,
+      "max_schedule_lag_ns": 7891621,
+      "max_send_gap_ns": 13103209
+    },
+    {
+      "source_index": 2,
+      "sent_packets": 270,
+      "max_schedule_lag_ns": 4441428,
+      "max_send_gap_ns": 11993917
+    },
+    {
+      "source_index": 3,
+      "sent_packets": 233,
+      "max_schedule_lag_ns": 5724785,
+      "max_send_gap_ns": 11874875
+    },
+    {
+      "source_index": 4,
+      "sent_packets": 182,
+      "max_schedule_lag_ns": 4023255,
+      "max_send_gap_ns": 11855708
+    }
+  ],
+  "fixture_process_stopped": true,
+  "native_processes_stopped": true,
+  "fixture_files_removed": true
+}

@@ -28,6 +28,7 @@ fn single_block_waits_until_target_without_native_start_water() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -53,6 +54,7 @@ fn callback_mid_block_selects_source_offset_and_epoch_flush_rejects_stale() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 2,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -91,11 +93,13 @@ fn late_deadlines_are_attributed_to_stream_epochs_across_lane_reuse() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 2,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     config.lanes[1] = LaneMix {
         stream_id: 2,
         epoch: 5,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -152,6 +156,7 @@ fn muted_and_solo_lanes_consume_elapsed_audio_without_replay() {
         stream_id: 1,
         epoch: 1,
         muted: true,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -178,6 +183,7 @@ fn new_epoch_flushes_a_future_head_already_held_by_output() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -205,12 +211,14 @@ fn solo_exclusion_consumes_timed_input_instead_of_replaying_it_later() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     config.lanes[1] = LaneMix {
         stream_id: 2,
         epoch: 1,
         solo: true,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -237,6 +245,7 @@ fn timed_audio_recovers_after_a_track_gap_without_an_epoch_change() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -281,6 +290,7 @@ fn starvation_recovery_waits_for_future_pts_and_skips_elapsed_audio() {
         config.lanes[0] = LaneMix {
             stream_id: 1,
             epoch: 1,
+            playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
             ..LaneMix::default()
         };
         control.apply(config).unwrap();
@@ -333,6 +343,7 @@ fn an_early_first_packet_keeps_its_samples_across_callback_start_jitter() {
                 config.lanes[1] = LaneMix {
                     stream_id: 14,
                     epoch: 4,
+                    playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
                     ..LaneMix::default()
                 };
                 if lifecycle != "new" {
@@ -399,6 +410,7 @@ fn negative_callback_start_jitter_does_not_delay_buffered_pcm() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -422,6 +434,7 @@ fn genuinely_late_first_pcm_and_large_clock_jumps_still_skip_elapsed_samples() {
         config.lanes[0] = LaneMix {
             stream_id: 1,
             epoch: 1,
+            playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
             ..LaneMix::default()
         };
         control.apply(config).unwrap();

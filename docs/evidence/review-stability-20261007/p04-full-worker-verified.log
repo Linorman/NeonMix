@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 336, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 320, in main
+    resumed = source.audio(100, 3, legal)
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 263, in audio
+    assert self.rig.condition.wait_for(lambda: len(frames()) >= 5, 5), 'missing normalized PCM'
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: missing normalized PCM

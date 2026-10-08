@@ -1,0 +1,20 @@
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error[E0277]: `?` couldn't convert the error: `dyn std::error::Error + Send + Sync: Sized` is not satisfied
+  --> crates/desktop-service/src/bin/neonmix-config-transaction-probe.rs:47:47
+   |
+21 | fn main() -> Result<(), Box<dyn std::error::Error>> {
+   |              -------------------------------------- required `dyn std::error::Error + Send + Sync: Sized` because of this
+...
+47 |         let metadata = profiles::hub(&profile)?;
+   |                        -----------------------^ doesn't have a size known at compile-time
+   |                        |
+   |                        this can't be annotated with `?` because it has type `Result<_, Box<(dyn std::error::Error + Send + Sync + 'static)>>`
+   |
+   = help: the trait `Sized` is not implemented for `dyn std::error::Error + Send + Sync`
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = note: required for `Box<dyn std::error::Error + Send + Sync>` to implement `std::error::Error`
+   = note: required for `Box<dyn std::error::Error>` to implement `From<Box<dyn std::error::Error + Send + Sync>>`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `neonmix-desktop-service` (bin "neonmix-config-transaction-probe") due to 1 previous error

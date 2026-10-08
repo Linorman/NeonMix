@@ -1,0 +1,21 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.74s
+     Running tests/lane_binding.rs (target/debug/deps/lane_binding-936c153e6ee6aae4)
+
+running 6 tests
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test old_queue_binding_is_rejected_without_erasing_new_binding_and_mode ... ok
+test revocation_cuts_off_buffered_pcm_even_when_config_queue_is_full_and_same_ids_are_reused ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/mixer_realtime.rs (target/debug/deps/mixer_realtime-c6c8e3e551dba2a0)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.67s
+

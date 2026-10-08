@@ -1,0 +1,30 @@
+[package]
+name = "neonmix-i18n"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+fluent-bundle = "=0.16.0"
+fluent-syntax = "=0.12.0"
+unic-langid = "=0.9.6"
+language-tags = "=0.3.2"
+toml = "=0.8.23"
+
+syn = { version = "2.0", features = ["full", "visit"] }
+proc-macro2 = { version = "1.0", features = ["span-locations"] }
+
+[build-dependencies]
+serde.workspace = true
+fluent-bundle = "=0.16.0"
+fluent-syntax = "=0.12.0"
+unic-langid = "=0.9.6"
+toml = "=0.8.23"
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

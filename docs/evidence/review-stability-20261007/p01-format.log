@@ -1,0 +1,144 @@
+Diff in /Volumes/projects-mac/NeonMix/apps/desktop/src/main.rs:1193:
+         FaultCode::OutputUnavailable => Message::FaultOutputUnavailable,
+         FaultCode::WorkerUnavailable => Message::FaultWorkerUnavailable,
+         FaultCode::UpgradeRequired => Message::FaultUpgradeRequired,
+-        FaultCode::HubPortInUse => Message::FaultHubPortInUse { port: u64::from(fault.params.port.unwrap_or(7443)) },
++        FaultCode::HubPortInUse => Message::FaultHubPortInUse {
++            port: u64::from(fault.params.port.unwrap_or(7443)),
++        },
+         FaultCode::MigrationRequired => Message::FaultMigrationRequired,
+         FaultCode::CredentialMissing => Message::FaultCredentialMissing,
+         FaultCode::CredentialPermissionDenied => Message::FaultCredentialPermissionDenied,
+Diff in /Volumes/projects-mac/NeonMix/apps/desktop/src/main.rs:1200:
+         FaultCode::CredentialStoreBusy => Message::FaultCredentialStoreBusy,
+-        FaultCode::AdministratorCredentialProtected => Message::FaultAdministratorCredentialProtected,
++        FaultCode::AdministratorCredentialProtected => {
++            Message::FaultAdministratorCredentialProtected
++        }
+         FaultCode::CredentialIoFailed => Message::FaultCredentialIoFailed,
+         FaultCode::CredentialCorrupt => Message::FaultCredentialCorrupt,
+         FaultCode::CredentialVersionUnsupported => Message::FaultCredentialVersionUnsupported,
+Diff in /Volumes/projects-mac/NeonMix/apps/desktop/src/main.rs:1276:
+         FaultCode::ReceiverDisabled => Message::FaultReceiverDisabled,
+         FaultCode::ReceiverUnknown => Message::FaultReceiverUnknown,
+         FaultCode::SourceUnknown => Message::FaultSourceUnknown,
+-
+     }
+ }
+ fn virtual_device(device: &DeviceInfo) -> bool {
+Diff in /Volumes/projects-mac/NeonMix/apps/desktop/src/main.rs:1438:
+                 assert!(app.queued_write.is_none());
+                 assert!(!app.busy);
+             }
+-            let authority = neonmix_control::Authority::new(
+-                "speaker".into(), "admin".into(), &"a".repeat(64),
+-            ).unwrap();
++            let authority =
++                neonmix_control::Authority::new("speaker".into(), "admin".into(), &"a".repeat(64))
++                    .unwrap();
+             let mut snapshot = authority.snapshot();
+-            snapshot.streams.insert(7, neonmix_control::Stream {
+-                id: 7,
+-                session_id: uuid::Uuid::new_v4(),
+-                device_id: *snapshot.devices.keys().next().unwrap(),
+-                mix: Default::default(),
+-            });
++            snapshot.streams.insert(
++                7,
++                neonmix_control::Stream {
++                    id: 7,
++                    session_id: uuid::Uuid::new_v4(),
++                    device_id: *snapshot.devices.keys().next().unwrap(),
++                    mix: Default::default(),
++                },
++            );
+             app.snapshot = Some(snapshot.clone());
+             let lanes = app.lanes(&snapshot);
+             for (key, selected) in [(egui::Key::M, None), (egui::Key::S, None), (next, Some(7))] {
+Diff in /Volumes/projects-mac/NeonMix/apps/desktop/src/main.rs:1454:
+                 app.selected_lane = Some(99);
+-                let _ = ctx.run(egui::RawInput {
+-                    events: vec![egui::Event::Key {
+-                        key, physical_key: None, pressed: true, repeat: false,
+-                        modifiers: egui::Modifiers::NONE,
+-                    }], ..Default::default()
+-                }, |ctx| {
+-                    egui::CentralPanel::default().show(ctx, |ui| {
+-                        app.mixer_keys(ui, &lanes, console);
+-                    });
+-                });
++                let _ = ctx.run(
++                    egui::RawInput {
++                        events: vec![egui::Event::Key {
++                            key,
++                            physical_key: None,
++                            pressed: true,
++                            repeat: false,
++                            modifiers: egui::Modifiers::NONE,
++                        }],
++                        ..Default::default()
++                    },
++                    |ctx| {
++                        egui::CentralPanel::default().show(ctx, |ui| {
++                            app.mixer_keys(ui, &lanes, console);
++                        });
++                    },
++                );
+                 assert_eq!(app.selected_lane, selected);
+                 assert!(app.queued_write.is_none());
+             }
+Diff in /Volumes/projects-mac/NeonMix/apps/desktop/src/main.rs:1474:
+             assert_eq!(app.selected_lane, None);
+             // A focused text field owns the keyboard; no lane navigation.
+             let mut text = String::new();
+-            for events in [vec![], vec![egui::Event::Key {
+-                key: next, physical_key: None, pressed: true, repeat: false,
+-                modifiers: egui::Modifiers::NONE,
+-            }]] {
+-                let _ = ctx.run(egui::RawInput { events, ..Default::default() }, |ctx| {
+-                    egui::CentralPanel::default().show(ctx, |ui| {
+-                        let id = egui::Id::new("keyboard-owner");
+-                        ui.add(egui::TextEdit::singleline(&mut text).id(id));
+-                        ui.memory_mut(|m| m.request_focus(id));
+-                        assert_eq!(app.mixer_keys(ui, &lanes, console), None);
+-                    });
+-                });
++            for events in [
++                vec![],
++                vec![egui::Event::Key {
++                    key: next,
++                    physical_key: None,
++                    pressed: true,
++                    repeat: false,
++                    modifiers: egui::Modifiers::NONE,
++                }],
++            ] {
++                let _ = ctx.run(
++                    egui::RawInput {
++                        events,
++                        ..Default::default()
++                    },
++                    |ctx| {
++                        egui::CentralPanel::default().show(ctx, |ui| {
++                            let id = egui::Id::new("keyboard-owner");
++                            ui.add(egui::TextEdit::singleline(&mut text).id(id));
++                            ui.memory_mut(|m| m.request_focus(id));
++                            assert_eq!(app.mixer_keys(ui, &lanes, console), None);
++                        });
++                    },
++                );
+                 assert_eq!(app.selected_lane, None);
+             }
+         }
+Diff in /Volumes/projects-mac/NeonMix/apps/desktop/src/pages/mixer.rs:151:
+             self.selected_lane = None;
+             return None;
+         }
+-        if self.selected_lane.is_some_and(|key| !lanes.iter().any(|lane| lane.key == key)) {
++        if self
++            .selected_lane
++            .is_some_and(|key| !lanes.iter().any(|lane| lane.key == key))
++        {
+             self.selected_lane = None;
+         }
+         let ctx = ui.ctx().clone();

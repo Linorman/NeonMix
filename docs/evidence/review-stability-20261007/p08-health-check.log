@@ -1,0 +1,32 @@
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error[E0277]: `std::option::Option<f64>` doesn't implement `std::fmt::Display`
+   --> apps/desktop/src/pages/diagnostics.rs:607:56
+    |
+607 | ...                   milliseconds: format!("{ms:.1}"),
+    |                                              ^^^^^^^ `std::option::Option<f64>` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `std::option::Option<f64>`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+
+warning: unused variable: `silent`
+   --> apps/desktop/src/pages/diagnostics.rs:188:60
+    |
+188 |             (Some(errors), Some(drops), Some(frames), Some(silent)) => {
+    |                                                            ^^^^^^ help: if this is intentional, prefix it with an underscore: `_silent`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `text_diagnostics_room_status_is_unavailable_check_sharing_discovery_or`
+   --> apps/desktop/src/pages/diagnostics.rs:233:13
+    |
+233 |         let text_diagnostics_room_status_is_unavailable_check_sharing_discovery_or =
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_text_diagnostics_room_status_is_unavailable_check_sharing_discovery_or`
+
+For more information about this error, try `rustc --explain E0277`.
+warning: `neonmix-desktop` (bin "neonmix-desktop") generated 2 warnings
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop") due to 1 previous error; 2 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 2 warnings (2 duplicates)
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 1 previous error; 2 warnings emitted

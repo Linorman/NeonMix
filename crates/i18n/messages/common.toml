@@ -1,0 +1,44 @@
+[[message]]
+id = "common-yes"
+
+[[message]]
+id = "common-no"
+
+[[message]]
+id = "common-cancel"
+
+[[message]]
+id = "common-confirm"
+
+[[message]]
+id = "common-close"
+
+[[message]]
+id = "common-save"
+
+[[message]]
+id = "common-retry"
+
+[[message]]
+id = "common-copy"
+
+[[message]]
+id = "common-copied"
+
+[[message]]
+id = "common-clear"
+
+[[message]]
+id = "common-search"
+
+[[message]]
+id = "common-on"
+
+[[message]]
+id = "common-off"
+
+[[message]]
+id = "common-unknown"
+
+[[message]]
+id = "common-unavailable"

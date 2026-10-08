@@ -1,6 +1,7 @@
 mod binding;
 mod connection;
 mod control_client;
+mod feedback;
 mod framer;
 mod identity;
 mod media_log;
@@ -98,14 +99,23 @@ enum Command {
         /// Product profiles share on 0.0.0.0:7443; laboratory profiles use loopback.
         #[arg(long)]
         listen: Option<SocketAddr>,
+        #[arg(long)]
+        managed_control_stdin: bool,
     },
     Send {
         #[arg(long)]
         credential: PathBuf,
         #[arg(long)]
         hub: Option<String>,
-        #[arg(long, default_value_t = 10)]
-        seconds: u32,
+        /// Explicit time limit; a manual CLI without a limit retains the 10s default.
+        #[arg(long, conflicts_with = "until_stopped", value_parser = clap::value_parser!(u32).range(1..=86400))]
+        seconds: Option<u32>,
+        /// Keep sending until an explicit stop or failure.
+        #[arg(long, conflicts_with = "seconds")]
+        until_stopped: bool,
+        /// Private binding owner generation supplied by the background (Linux).
+        #[arg(long, hide = true)]
+        instance_generation: Option<uuid::Uuid>,
         #[arg(long)]
         capture: Option<String>,
         /// Capture NeonMix's stable virtual output instead of a manually supplied device.
@@ -119,6 +129,8 @@ enum Command {
         output_binding: Option<PathBuf>,
         #[arg(long, default_value_t = 440.0)]
         frequency: f64,
+        #[arg(long)]
+        managed_control_stdin: bool,
     },
     Snapshot {
         #[arg(long)]
@@ -204,6 +216,10 @@ enum OutputCommand {
     SyncName {
         #[arg(long)]
         directory: PathBuf,
+        #[arg(long)]
+        expected_revision: u64,
+        #[arg(long)]
+        expected_output_id: uuid::Uuid,
     },
     Add {
         #[arg(long)]
@@ -229,6 +245,8 @@ enum OutputCommand {
         #[arg(long)]
         expected_revision: u64,
         #[arg(long)]
+        expected_output_id: uuid::Uuid,
+        #[arg(long)]
         name: String,
     },
     Enable {
@@ -236,18 +254,24 @@ enum OutputCommand {
         directory: PathBuf,
         #[arg(long)]
         expected_revision: u64,
+        #[arg(long)]
+        expected_output_id: uuid::Uuid,
     },
     Disable {
         #[arg(long)]
         directory: PathBuf,
         #[arg(long)]
         expected_revision: u64,
+        #[arg(long)]
+        expected_output_id: uuid::Uuid,
     },
     Remove {
         #[arg(long)]
         directory: PathBuf,
         #[arg(long)]
         expected_revision: u64,
+        #[arg(long)]
+        expected_output_id: uuid::Uuid,
     },
 }
 #[derive(Clone, Serialize, Deserialize)]
@@ -394,29 +418,35 @@ async fn main() {
                 output,
                 hosts,
             } => init(&directory, output, hosts),
-            Command::Serve { config, listen } => {
+            Command::Serve { config, listen, managed_control_stdin } => {
+                let stop=neonmix_lifecycle::StopSignal::new(managed_control_stdin)?;
                 let profile_directory=config.parent().unwrap_or_else(||Path::new(".")).to_path_buf();
                 let config=identity::config(&config)?;
                 let listen=listen.unwrap_or_else(||SocketAddr::from((if config.room_name.is_some() {[0,0,0,0]} else {[127,0,0,1]},7443)));
-                server::serve(config,listen,profile_directory).await
+                server::serve(config,listen,profile_directory, &stop).await
             },
             Command::Send {
                 credential,
                 hub,
                 seconds,
+                until_stopped,
+                instance_generation,
                 capture,
                 virtual_output,
                 virtual_output_provider,
                 output_binding,
                 frequency,
+                managed_control_stdin,
             } => {
+                let stop=neonmix_lifecycle::StopSignal::new(managed_control_stdin)?;
                 let mut c=identity::credential(&credential)?;
                 let hub=identity::endpoint(&mut c,hub).await?;
                 sender::run(
                     c,
                     &hub,
-                    seconds,
-                    sender::SendOptions {capture,virtual_output,provider:virtual_output_provider.unwrap_or(virtual_output::Provider::Neonmix),frequency,output_binding},
+                    if until_stopped { neonmix_lifecycle::RunLimit::UntilStopped } else { neonmix_lifecycle::RunLimit::seconds(seconds.unwrap_or(10)).ok_or("seconds must be 1..86400")? },
+                    sender::SendOptions {owner_instance:instance_generation,capture,virtual_output,provider:virtual_output_provider.unwrap_or(virtual_output::Provider::Neonmix),frequency,output_binding},
+                    &stop,
                 )
                 .await
             }
@@ -548,5 +578,54 @@ async fn main() {
     if let Err(error) = result {
         eprintln!("{error}");
         std::process::exit(1);
+    }
+}
+
+#[cfg(test)]
+mod output_cli_tests {
+    use super::*;
+    #[test]
+    fn sender_cli_continuous_and_duration_are_explicit_and_mutually_exclusive() {
+        for limit in [vec!["--until-stopped"], vec!["--seconds", "86400"]] {
+            let mut args = vec!["neonmix-hub", "send", "--credential", "sender.json"];
+            args.extend(limit);
+            assert!(Cli::try_parse_from(args).is_ok());
+        }
+        for limit in [
+            vec!["--seconds", "0"],
+            vec!["--seconds", "86401"],
+            vec!["--seconds", "1", "--until-stopped"],
+        ] {
+            let mut args = vec!["neonmix-hub", "send", "--credential", "sender.json"];
+            args.extend(limit);
+            assert!(Cli::try_parse_from(args).is_err());
+        }
+    }
+    #[test]
+    fn all_output_management_commands_require_captured_identity_and_revision() {
+        let id = uuid::Uuid::new_v4().to_string();
+        for action in ["rename", "enable", "disable", "remove", "sync-name"] {
+            let mut args = vec![
+                "neonmix-hub",
+                "output",
+                action,
+                "--directory",
+                "binding",
+                "--expected-revision",
+                "1",
+            ];
+            if action == "rename" {
+                args.extend(["--name", "new name"]);
+            }
+            assert!(
+                Cli::try_parse_from(&args).is_err(),
+                "{action} silently supplied a UUID"
+            );
+            args.extend(["--expected-output-id", id.as_str()]);
+            assert!(
+                Cli::try_parse_from(&args).is_ok(),
+                "{action} rejected complete CAS"
+            );
+        }
     }
 }

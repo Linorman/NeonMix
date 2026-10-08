@@ -1,0 +1,19 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.06s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 1 test
+
+thread 'managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit' (49244024) panicked at crates/desktop-service/src/managed.rs:486:17:
+assertion failed: start.elapsed() < Duration::from_millis(100)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit ... FAILED
+
+failures:
+
+failures:
+    managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.63s
+
+error: test failed, to rerun pass `-p neonmix-desktop-service --lib`

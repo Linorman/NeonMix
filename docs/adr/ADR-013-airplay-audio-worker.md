@@ -17,3 +17,6 @@ AirPlay 管理状态与原生设备/会话隔离，复用现有 TLS/Admin 验证
 2026-10-02 修订：按用户明确选择，默认采用低延迟音乐播放。Hub ingress 在每个 epoch 固定平移来源 PTS，首包保留最多 120ms 接收后余量，后续保持连续时间线；原有按声卡锚点消费与 sinc SRC 保持。可选 synchronized 保留完整来源 PTS，切换要求先断开。此选择有明确的声音提前于源视频的后果，不将源端预缓冲叫作 Hub 处理耗时。设备页可合并展示公开 AirPlay 来源摘要，但不把它写入原生身份/权限成员表。
 
 2026-10-03 平台复测修正：120ms 余量以提交设备为基准，首包 PTS 平移时额外计入设备 `playback−callback` 积压。此前 Ubuntu 的约106.6ms积压与1024帧回调已消耗接收余量，macOS确定性 Ingress→Mixer 回归重现跳采样；修正保留短队列容量与同epoch固定PTS平移，不因逐包到达或设备积压变化重定时。
+
+
+2026-10-07 可靠性修订：受管 Hub/Sender 以私有 stdin 协作式停止，生命周期任务独立于 IPC future；Windows 音频树使用挂起后入 Job、再恢复的创建顺序，kill-on-close 仅作异常兜底。Hub 正常停止对所有 worker 发出独立优先级 stop/EOF，在共享 2s 窗口内等待，随后才强制回收。运行 PEM 通过同一已验证句柄读取为小于 4096 字节的缓冲，解析完成和失败均清零；不再依赖 ANSI 路径，不改变持久身份与配对格式。新旧组件通过受管 CLI 与 ready 能力字段拒绝不兼容组合。实现、探针及剩余真机门槛见 [Windows AirPlay 可靠性记录](../WINDOWS-AIRPLAY-RELIABILITY-IMPLEMENTATION-20261007.md)。

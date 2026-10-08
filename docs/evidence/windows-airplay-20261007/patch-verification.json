@@ -1,0 +1,6 @@
+{
+  "patch_applies": true,
+  "modified_sources_match": true,
+  "patch_sha256": "dbd3f4cf0dab85458bd603dd1d2808f58e389c029dea329ea2108351ae466022",
+  "output": "patching file 'lib/crypto.c'\npatching file 'lib/crypto.h'\npatching file 'lib/dnssd.h'\npatching file 'lib/dnssdint.h'\npatching file 'lib/fairplay_playfair.c'\npatching file 'lib/http_handlers.h'\npatching file 'lib/http_request.c'\npatching file 'lib/http_response.c'\npatching file 'lib/http_response.h'\npatching file 'lib/httpd.c'\npatching file 'lib/httpd.h'\npatching file 'lib/pairing.c'\npatching file 'lib/raop.c'\npatching file 'lib/raop.h'\npatching file 'lib/raop_handlers.h'\npatching file 'lib/raop_ntp.c'\npatching file 'lib/raop_ntp.h'\npatching file 'lib/raop_rtp.c'\npatching file 'lib/stream.h'\n"
+}

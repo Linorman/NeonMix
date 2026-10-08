@@ -1,0 +1,18 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.26s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_identity-97fc1baeec37ad72)
+
+running 3 tests
+test hub_settings::tests::published_directory_failure_returns_unconfirmed_and_keeps_the_same_transaction_for_recovery ... ok
+test hub_settings::tests::corrupt_unknown_schema_changed_identity_and_newer_configuration_fail_closed ... ok
+test hub_settings::tests::all_publication_and_journal_boundaries_recover_the_whole_old_or_new_configuration ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.52s
+
+     Running unittests src/bin/neonmix-airplay-profile.rs (target/debug/deps/neonmix_airplay_profile-add753cba856e885)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

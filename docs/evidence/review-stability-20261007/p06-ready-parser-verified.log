@@ -1,0 +1,9 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.70s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 1 test
+test managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 1.32s
+

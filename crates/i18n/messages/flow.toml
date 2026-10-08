@@ -1,0 +1,31 @@
+[[message]]
+id = "flow-native-sender"
+
+[[message]]
+id = "flow-source-accessible"
+args = { name = "string", kind = "string", detail = "string", gain = "string" }
+
+[[message]]
+id = "flow-hub-accessible"
+args = { name = "string", state = "string" }
+
+[[message]]
+id = "flow-open-mixer"
+
+[[message]]
+id = "flow-offline-count"
+args = { count = "u64" }
+
+[[message]]
+id = "flow-you"
+
+[[message]]
+id = "flow-output-unavailable"
+
+[[message]]
+id = "flow-master-muted"
+
+[[message]]
+id = "flow-output-accessible"
+args = { name = "string", state = "string" }
+

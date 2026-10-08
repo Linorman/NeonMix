@@ -106,7 +106,7 @@ if sys.platform == 'win32' and native_media:
         if source.exists():
             shutil.copytree(source, OUT / 'gstreamer' / directory, dirs_exist_ok=True)
     (OUT / 'run.cmd').write_text('@echo off\r\nset "PATH=%~dp0gstreamer\\bin;%PATH%"\r\nset "GST_PLUGIN_SYSTEM_PATH_1_0=%~dp0gstreamer\\lib\\gstreamer-1.0"\r\n"%~dp0neonmix-desktop.exe" %*\r\n', encoding='utf-8')
-for name in ['neonmix-audio', 'neonmix-desktop', 'neonmix-background'] + (['neonmix-hub'] if native_media else []):
+for name in ['neonmix-audio', 'neonmix-desktop', 'neonmix-background'] + (['neonmix-guardian'] if sys.platform in ['darwin', 'linux'] else []) + (['neonmix-hub'] if native_media else []):
     binary = name + ('.exe' if sys.platform == 'win32' else '')
     source = ROOT / 'target/release' / binary
     shutil.copy2(source, OUT / binary)

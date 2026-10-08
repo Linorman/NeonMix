@@ -1,5 +1,15 @@
 # E01 音频接口与实时边界
 
+## 2026-10-07 Mixer 播放模式与计量
+
+`LaneMix.playback_kind` 由控制 owner 明确设置：原生为 `NativeAdaptive`，AirPlay 为 `Timed`。队列头不选择或锁存播放模式；匹配 stream/epoch/format 后仍必须匹配数据类型，native 拒绝携带 PTS 的块，timed 拒绝无 PTS 的块。模式变化与 stream/epoch/output_epoch 变化一样清理 DSP。输出重开在下一帧先应用 pending 配置，不等上一次输出剩余的 480 帧逻辑边界。
+
+`ever_started` 记录当前绑定是否实际消费过 PCM，独立于 DSP 的 `started`。SRC reset、欠载及恢复不清掉当前绑定的计量寿命；换绑定/输出 epoch 才重新 Priming。`underrun_frames` 按实际渲染的 48 kHz 内部帧累加：活动且已起播而没有有效 PCM 的每一帧最多计一次，一秒持续断流为 48000，初始 Priming 和停止后不计。恢复先保留新到的预缓冲 PCM，不因持续欠载反复清空预缓冲。
+
+`rendered_pcm_frames_by_lane` 累计实际消费的有效内部 PCM（包括有效零值、Mute/Solo 排除的 PCM）；`render_state_by_lane` 使用 `Inactive=0/Priming=1/Running=2/Starved=3/Stopped=4`，来源为 Mixer 消费侧。累计计数按物理 lane 生存期保留，不表示同一 session 的独立总数。现有容量、漂移参数、gain ramp 和 FIR 参数保持原值；Ingress 坐标与分段预取仍由 P03 后续步骤实施。
+
+确定性夹具使用 `Mixer::render_block_at(now, frames)` 显式提供 callback 提交钟，并用 `set_presentation_time` 独立提供扬声器呈现钟。队列 age 与 Ingress 使用同一单调钟，避免 debug 计算耗时被误当网络迟到；常规原生渲染保持已有 `Instant` 路径。两个入口使用同一 DSP 与有界扫描，显式时间入口也必须满足零分配/析构。
+
 ## 统一格式与源
 
 `AudioBlock` 预分配 480 个双 lane float32 帧，不含堆对象。`frame_count` 决定有效范围，尾部不是音频。Mono 原生采集复制到左右 lane，`channel_layout` 保留原生 Mono 含义；输出 Mono 使用 `(L+R)/2`。暂不猜测多声道顺序，>2 声道明确拒绝。
@@ -68,3 +78,29 @@ epoch使用进程内统一分配器；重开不能复用某个旧流在暂停/�
 macOS采集在打开设备前查询原生录音权限。虚拟输入也受Microphone权限控制；未授权返回PermissionDenied和明确修复提示，而不是将操作系统清零的音频当作有效静音采集。权限归属可能是启动CLI的宿主应用或终端。该查询只在控制线程执行，不在回调中检查或请求授权。
 
 频率诊断会在连续50ms低于幅度门限时结束当前信号分段，再从下一段重新计数；统计仍保留最长有效段。停源期间的真实静音帧仍计入总帧数与RMS，不再计入跨段频率跨度。
+
+
+## P03 绑定、授权和 timed 分段
+
+Mixer 的控制配置明确提供 `playback_kind`、`stream_id`、`epoch`、`binding_generation`、`output_epoch`。队列头不选择播放模式；新 lane owner 分配新的绑定代次，旧头按代次/身份/格式拒绝。授权原子独立于八槽配置队列；撤销后 callback 即使持有 FIFO 或 SRC 输出也返回静音，重新绑定不能接续旧 PCM。物理设备已提交缓冲的尾音仍受设备 backlog 限制；Hub 各限制性事务的完整接线由 P07 验收。
+
+Timed 保留原 4320-frame PCM FIFO 和八块 handoff 队列，另预分配 4320 个段描述符（最小合法包为一帧）。每段描述起点、终点及 PTS；连续包合并，正向缺口、discontinuity 或矛盾 PTS 建立新段。预取仅追加后段，不清掉前段。游标消费完当前段才清理 FIR 历史并取得下一段 PTS；空档输出静音，没有海量零样本存储。首版所有真实缺口均隔离 FIR 并重启 240-frame 增益包络，不启用“保持 DSP 小缺口”特例。FIR 两端采用当前段端点延拓，不能从后段读取未来样本。
+
+每个 callback（或无 callback 钩子的 480-frame 逻辑块）最多检查该 lane 的八个队列元素；跳过过期段每次采样最多八段，超额延至下次采样。段数和 PCM 数都有固定上限。分段、代次变更、满配置队列撤销、输出重开均通过 callback 零分配/重分配/析构回归。实际输出时钟与 callback 提交时间分别设置，测试不以执行耗时或 sleep 模拟呈现时间。
+
+`rendered_pcm_frames` 和 `underrun_frames` 按内部 48 kHz 累计，DSP reset 不清零。初始 Priming 不计欠载；已经运行后缺数据每秒精确增加 48000 帧，停止后不增加；有效静音 PCM 属于消费帧。字段和音质回归为组件证据，三端实体输出、真实 Apple、多源长测继续分别验收。
+
+
+## P07 撤销与配置应用进度
+
+Hub的Native终态和AirPlay Revoke/Disconnect/Disable先独立撤销lane授权，再尝试DSP发布，满队列不能推迟。callback按原binding的Acquire授权检查，不再读取/消费撤销FIFO；新owner用新generation，同stream/epoch也不能带旧PCM。正常停止的retirement fade同样保留原lease，在撤销后停止，inactive配置不能把授权丢掉后继续播tail。
+
+MixerControl为不同的最新目标配置分配desired_config_sequence（包括enqueue失败）；重试相同目标不增序号。队列命令携带该序号，callback在有界逻辑块开始应用后Release发布applied_config_sequence。控制线程discard_backlog即使更新内部DSP也不发布callback确认，重开输出须有真实回调。高频PCM/计量不生成配置目标；目标拒绝计数独立记录。
+
+Hub回执和diagnostics的media_application包含runtime_epoch、desired/applied、pending、pending_ms、stalled和queue_rejections。pending超过两秒显示stalled，保存结果继续有效；已完成历史回执保持原始进度，当前进度由新诊断读取确认。应用确认表示DSP已接受目标，增益仍有5ms ramp，且已提交硬件缓冲/正在执行的callback可能保留尾部；不是模拟端立即可闻或物理无声承诺。软件验收边界是撤销被观察后的渲染样本不消费旧lease。
+
+## 电平样本身份与年龄（稳定性P08/P10）
+
+Mixer电平的同一原子快照携带stream ID、binding_generation、stream_epoch、output_epoch与sampled_at_ns。时间使用已有Mixer origin和logical callback提交钟，按既有2400内部帧窗口发布，不因HTTP GET或状态读取刷新；增加的原子字段仍在有界零分配路径中。输出重开/绑定变化清窗口。Hub校验当前控制绑定与所选输出，未观察/旧代返回available=false和null；sample_age_ms来自实际音频发布时刻，非HTTP读取时刻。
+
+Desktop诊断读取新鲜与电平样本新鲜分别判断，音频callback停止而GET持续成功时，超过三次对应轮询周期的旧电平不继续绘制，输出健康不保持绿色。有效零值仍可表示当前静音；旧服务缺少新字段时按明确兼容读数范围显示。用于关联电平的运行期session UUID只在meters/lanes结构里保留，脱敏导出继续移除身份字段。

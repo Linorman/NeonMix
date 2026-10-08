@@ -9,8 +9,8 @@ pub(crate) struct Lane {
     pub(crate) key: u64,
     pub(crate) airplay_target: Option<(String, u64)>,
     pub(crate) name: String,
-    pub(crate) role: Option<&'static str>,
-    pub(crate) status: &'static str,
+    pub(crate) role: Option<Message>,
+    pub(crate) status: Message,
     pub(crate) tone: Tone,
     pub(crate) gain: f32,
     pub(crate) muted: bool,
@@ -23,7 +23,7 @@ pub(crate) struct Lane {
     pub(crate) device_id: Option<uuid::Uuid>,
     pub(crate) queue_ms: Option<f64>,
     pub(crate) drift_ppm: Option<f64>,
-    pub(crate) network: (&'static str, Option<Tone>),
+    pub(crate) network: (Message, Option<Tone>),
     /// Session state for native lanes; AirPlay sessions in the list are live.
     pub(crate) session: Option<SessionStatus>,
     /// This window's own device.
@@ -47,15 +47,22 @@ impl Lane {
 
 impl Desktop {
     pub(crate) fn lanes(&self, state: &Snapshot) -> Vec<Lane> {
-        let diag = self.diagnostics.as_ref();
+        let diag = self.diagnostics_current();
         let lane_index = |id: u64| {
             diag.and_then(|d| d.get("lane_stream_ids")?.as_array().cloned())
                 .and_then(|ids| ids.iter().position(|v| v.as_u64() == Some(id)))
         };
-        let meter = |id: u64| {
-            diag.and_then(|v| v.pointer("/meters/lanes"))
+        let meter = |id: u64, session_id: Value, epoch: Option<u64>| {
+            self.meters_current()
+                .and_then(|v| v.get("lanes"))
                 .and_then(Value::as_array)
                 .and_then(|lanes| lanes.iter().find(|v| v["stream_id"].as_u64() == Some(id)))
+                .filter(|v| v["available"].as_bool() != Some(false))
+                .filter(|v| {
+                    v.get("session_id")
+                        .is_none_or(|s| s.is_null() || *s == session_id)
+                })
+                .filter(|v| v.get("stream_epoch").is_none_or(|e| e.as_u64() == epoch))
                 .map(|v| (v["peak"].as_f64(), v["rms"].as_f64()))
                 .unwrap_or((None, None))
         };
@@ -78,13 +85,19 @@ impl Desktop {
             .map(|stream| {
                 let device = state.devices.get(&stream.device_id);
                 let session = state.sessions.get(&stream.session_id).map(|s| s.status);
+                let index = lane_index(stream.id);
+                let starved = index
+                    .and_then(|i| diag?.get("render_state_by_lane")?.get(i)?.as_u64())
+                    == Some(neonmix_core::mixer::LaneRenderState::Starved as u64);
                 let solo_elsewhere = any_solo && !stream.mix.solo;
                 let (status, tone) = if !state.output.available {
-                    ("输出丢失", Tone::Warning)
+                    (Message::LaneOutputLost, Tone::Warning)
                 } else if stream.mix.muted {
-                    ("已静音", Tone::Warning)
+                    (Message::LaneMuted, Tone::Warning)
                 } else if solo_elsewhere {
-                    ("因 Solo 静音", Tone::Warning)
+                    (Message::LaneSoloMuted, Tone::Warning)
+                } else if starved {
+                    (Message::LaneAudioSupplyInterrupted, Tone::Warning)
                 } else {
                     let tone = match session {
                         Some(SessionStatus::Playing) => Tone::Success,
@@ -101,19 +114,32 @@ impl Desktop {
                     (status_text(session), tone)
                 };
                 let network = match session {
-                    Some(SessionStatus::Playing) => ("良好", Some(Tone::Success)),
-                    Some(SessionStatus::Buffering) => ("缓冲", None),
-                    Some(SessionStatus::NetworkDegraded) => ("降级", Some(Tone::Warning)),
-                    Some(SessionStatus::NetworkInterrupted) => ("中断", Some(Tone::Danger)),
-                    None => ("未取得", None),
-                    _ => ("已停止", None),
+                    Some(SessionStatus::Playing) => {
+                        (Message::LaneNetworkHealthy, Some(Tone::Success))
+                    }
+                    Some(SessionStatus::Buffering) => (Message::LaneNetworkBuffering, None),
+                    Some(SessionStatus::NetworkDegraded) => {
+                        (Message::LaneNetworkDegraded, Some(Tone::Warning))
+                    }
+                    Some(SessionStatus::NetworkInterrupted) => {
+                        (Message::LaneNetworkInterrupted, Some(Tone::Danger))
+                    }
+                    None => (Message::LaneNetworkUnavailable, None),
+                    _ => (Message::LaneNetworkStopped, None),
                 };
-                let (peak, rms) = meter(stream.id);
-                let index = lane_index(stream.id);
+                let (peak, rms) = meter(
+                    stream.id,
+                    serde_json::json!(stream.session_id),
+                    state
+                        .sessions
+                        .get(&stream.session_id)
+                        .map(|s| s.offer.stream_epoch),
+                );
                 Lane {
                     key: stream.id,
                     airplay_target: None,
-                    name: device.map_or("未知设备".into(), |d| d.name.clone()),
+                    name: device
+                        .map_or_else(|| self.tr(&Message::LaneUnknownDevice), |d| d.name.clone()),
                     role: device.map(|d| role_name(d.role)),
                     status,
                     tone,
@@ -146,25 +172,42 @@ impl Desktop {
             let muted = mix("muted").and_then(Value::as_bool).unwrap_or(false);
             let solo = mix("solo").and_then(Value::as_bool).unwrap_or(false);
             let solo_elsewhere = any_solo && !solo;
-            let (peak, rms) = meter(stream_id);
+            let current = self.airplay_is_current();
+            let (peak, rms) = if current {
+                meter(
+                    stream_id,
+                    serde_json::json!(session_id),
+                    airplay["stream_epoch"].as_u64(),
+                )
+            } else {
+                (None, None)
+            };
             let index = lane_index(stream_id);
+            let starved = index.and_then(|i| diag?.get("render_state_by_lane")?.get(i)?.as_u64())
+                == Some(neonmix_core::mixer::LaneRenderState::Starved as u64);
             lanes.push(Lane {
                 key: stream_id,
                 airplay_target: Some((source_id.into(), session_id)),
                 name: airplay["source_name"]
                     .as_str()
                     .filter(|n| !n.trim().is_empty())
-                    .unwrap_or("AirPlay 来源")
-                    .to_owned(),
-                role: Some("AirPlay"),
-                status: if muted {
-                    "已静音"
+                    .map(str::to_owned)
+                    .unwrap_or_else(|| self.tr(&Message::LaneAirplaySource)),
+                role: Some(Message::LaneAirplay),
+                status: if !current {
+                    Message::LaneNetworkUnavailable
+                } else if muted {
+                    Message::LaneMuted
                 } else if solo_elsewhere {
-                    "因 Solo 静音"
+                    Message::LaneSoloMuted
+                } else if starved {
+                    Message::LaneAudioSupplyInterrupted
                 } else {
-                    "正在接收"
+                    Message::LaneReceiving
                 },
-                tone: if muted || solo_elsewhere {
+                tone: if !current {
+                    Tone::Neutral
+                } else if muted || solo_elsewhere || starved {
                     Tone::Warning
                 } else {
                     Tone::Success
@@ -172,15 +215,15 @@ impl Desktop {
                 gain: mix("gain_db").and_then(Value::as_f64).unwrap_or(0.0) as f32,
                 muted,
                 solo,
-                can_mix: self.admin(),
-                can_solo: self.admin(),
-                audible: state.output.available && !muted && !solo_elsewhere,
+                can_mix: self.admin() && current,
+                can_solo: self.admin() && current,
+                audible: current && state.output.available && !muted && !solo_elsewhere,
                 peak,
                 rms,
                 device_id: None,
                 queue_ms: at("queues", index).map(|f| f / 48.0),
                 drift_ppm: at("drift_ppm", index),
-                network: ("AirPlay", None),
+                network: (Message::LaneAirplay, None),
                 session: Some(SessionStatus::Playing),
                 mine: false,
             });
@@ -200,27 +243,27 @@ impl Desktop {
         if (mute.is_some() && !lane.can_mix) || (solo.is_some() && !lane.can_solo) {
             return;
         }
-        let what = match (mute, solo) {
-            (Some(true), _) => "静音",
-            (Some(false), _) => "取消静音",
-            (_, Some(true)) => "Solo",
-            _ => "取消 Solo",
+        let name = lane.name.clone();
+        let label = match (mute, solo) {
+            (Some(true), _) => Message::LaneMuteSource { name },
+            (Some(false), _) => Message::LaneUnmuteSource { name },
+            (_, Some(true)) => Message::LaneSoloSource { name },
+            _ => Message::LaneUnsoloSource { name },
         };
-        let label = format!("{what}「{}」", lane.name);
         let (write, inverse) = if let Some((source_id, session_id)) = &lane.airplay_target {
             let next = AirplayMix {
                 source_id: source_id.clone(),
                 session_id: *session_id,
-                gain_db: lane.gain,
-                muted: mute.unwrap_or(lane.muted),
-                solo: solo.unwrap_or(lane.solo),
+                gain_db: None,
+                muted: mute,
+                solo,
             };
             let prev = AirplayMix {
                 source_id: source_id.clone(),
                 session_id: *session_id,
-                gain_db: lane.gain,
-                muted: lane.muted,
-                solo: lane.solo,
+                gain_db: None,
+                muted: mute.map(|_| lane.muted),
+                solo: solo.map(|_| lane.solo),
             };
             (next.write(), prev.write())
         } else {
@@ -241,19 +284,18 @@ impl Desktop {
     }
 
     pub(crate) fn lane_gain(&mut self, lane: &Lane, gain: f32) {
-        let label = format!(
-            "「{}」音量 {} → {} dB",
-            lane.name,
-            widgets::gain_text(lane.gain),
-            widgets::gain_text(gain)
-        );
+        let label = Message::LaneGainChanged {
+            name: lane.name.clone(),
+            before: widgets::gain_text(lane.gain),
+            after: widgets::gain_text(gain),
+        };
         let (write, inverse) = if let Some((source_id, session_id)) = &lane.airplay_target {
             let mix = |g| AirplayMix {
                 source_id: source_id.clone(),
                 session_id: *session_id,
-                gain_db: g,
-                muted: lane.muted,
-                solo: lane.solo,
+                gain_db: Some(g),
+                muted: None,
+                solo: None,
             };
             (mix(gain).write(), mix(lane.gain).write())
         } else {
@@ -298,18 +340,22 @@ impl Desktop {
 
     /// Running totals (and the queue gauge) behind the diagnostics tiles.
     fn record_metrics(&mut self, now: Instant) {
-        let d = self.diagnostics.as_ref();
+        let d = self.diagnostics_current();
         let total = |p: &str| d.and_then(|d| d.pointer(p)).and_then(Value::as_u64);
         let network = d
             .and_then(|d| d.get("receivers"))
             .and_then(Value::as_array)
-            .map(|r| {
+            .and_then(|r| {
                 r.iter()
                     .map(|x| {
-                        x["lost_packets"].as_u64().unwrap_or(0)
-                            + x["late_packets"].as_u64().unwrap_or(0)
+                        Some(
+                            x["lost_packets"]
+                                .as_u64()?
+                                .saturating_add(x["late_packets"].as_u64()?),
+                        )
                     })
-                    .sum::<u64>()
+                    .collect::<Option<Vec<_>>>()
+                    .map(|values| values.into_iter().fold(0u64, u64::saturating_add))
             });
         let queue = d.and_then(|d| {
             let ids = d.get("lane_stream_ids")?.as_array()?;
@@ -322,9 +368,7 @@ impl Desktop {
                 .reduce(f64::max)
         });
         let capture = self
-            .status
-            .as_ref()
-            .and_then(|s| s.sender.metrics.as_ref())
+            .sender_metrics_current()
             .and_then(|m| m.pointer("/capture_stats/frames"))
             .and_then(Value::as_u64);
         for (key, value) in [
@@ -349,15 +393,15 @@ impl Desktop {
 pub(crate) struct AirplayMix {
     source_id: String,
     session_id: u64,
-    gain_db: f32,
-    muted: bool,
-    solo: bool,
+    gain_db: Option<f32>,
+    muted: Option<bool>,
+    solo: Option<bool>,
 }
 
 impl AirplayMix {
     pub(crate) fn write(&self) -> Write {
         Write::Airplay(
-            neonmix_airplay_adapter::control::AirplayActionV2::MixSource {
+            neonmix_airplay_adapter::control::AirplayActionV2::PatchMixSource {
                 source_id: self.source_id.clone(),
                 session_id: self.session_id,
                 gain_db: self.gain_db,
@@ -365,5 +409,70 @@ impl AirplayMix {
                 solo: self.solo,
             },
         )
+    }
+}
+
+#[cfg(test)]
+mod freshness_tests {
+    use super::*;
+    #[test]
+    fn current_mixer_starvation_and_failed_diagnostics_are_shared_by_all_lane_views() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../../../docs/evidence/ui-rebuild-20261004/fixtures/full.json"
+        ))
+        .unwrap();
+        let mut app = Desktop::empty(Client::new(".local/test-lane-freshness"), true, false);
+        app.load_preview(&fixture);
+        let mut state = app.snapshot.clone().unwrap();
+        state.output.available = true;
+        for stream in state.streams.values_mut() {
+            stream.mix.muted = false;
+            stream.mix.solo = false;
+        }
+        app.airplay = None;
+        let id = *state.streams.keys().next().unwrap();
+        let diag = serde_json::json!({"lane_stream_ids":[id],"render_state_by_lane":[3],"meters":{"lanes":[{"stream_id":id,"peak":0.1,"rms":0.05}]}});
+        app.diagnostics_clock
+            .success(&diag, Some(state.runtime_epoch), Instant::now());
+        app.diagnostics = Some(diag);
+        let lane = app
+            .lanes(&state)
+            .into_iter()
+            .find(|lane| lane.key == id)
+            .unwrap();
+        assert_eq!(lane.status, Message::LaneAudioSupplyInterrupted);
+        assert_eq!(lane.peak, Some(0.1));
+        app.diagnostics.as_mut().unwrap()["meters"]["lanes"][0]["session_id"] =
+            serde_json::json!(uuid::Uuid::new_v4());
+        assert!(
+            app.lanes(&state)
+                .into_iter()
+                .find(|lane| lane.key == id)
+                .unwrap()
+                .peak
+                .is_none(),
+            "a cached meter from another session cannot be reattached"
+        );
+        app.diagnostics.as_mut().unwrap()["meters"]["lanes"][0]["session_id"] =
+            serde_json::json!(state.streams[&id].session_id);
+        app.diagnostics.as_mut().unwrap()["meters"]["lanes"][0]["available"] =
+            serde_json::json!(false);
+        assert!(
+            app.lanes(&state)
+                .into_iter()
+                .find(|lane| lane.key == id)
+                .unwrap()
+                .peak
+                .is_none()
+        );
+        app.diagnostics_clock.failed();
+        let lane = app
+            .lanes(&state)
+            .into_iter()
+            .find(|lane| lane.key == id)
+            .unwrap();
+        assert!(lane.peak.is_none());
+        assert!(lane.rms.is_none());
+        assert_ne!(lane.status, Message::LaneAudioSupplyInterrupted);
     }
 }

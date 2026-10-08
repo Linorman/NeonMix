@@ -1,0 +1,108 @@
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+warning: method `airplay_is_current` is never used
+   --> apps/desktop/src/measurement.rs:242:19
+    |
+219 | impl crate::Desktop {
+    | ------------------- method in this implementation
+...
+242 |     pub(crate) fn airplay_is_current(&self) -> bool {
+    |                   ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.62s
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-5052d7cba9beba85)
+
+running 70 tests
+test commands_tests::airplay_v3_regular_mix_uses_config_and_runtime_conditions_while_solo_uses_runtime_only ... ok
+test commands_tests::saved_field_waits_for_scoped_callback_ack_and_exposes_stall_or_unknown_without_resending ... ok
+test commands_tests::application_ack_from_another_runtime_cannot_settle_saved_field_and_room_switch_clears_watch ... ok
+test commands_tests::acknowledgement_does_not_erase_a_newer_drag_draft_and_removed_session_clears_its_draft ... ok
+test commands_tests::airplay_v3_confirmation_retains_original_versions_and_command_id_after_refresh ... ok
+test commands_tests::airplay_mute_then_gain_and_solo_then_gain_emit_independent_patches ... ok
+test events::tests::diff_names_joins_changes_leaves_and_output_in_order ... ok
+test commands_tests::delayed_first_write_preserves_b_gain_c_mute_b_solo_and_fair_order ... ok
+test commands_tests::context_change_cancels_queued_fields_and_does_not_retarget_inflight_reply_or_undo ... ok
+test emblem::tests::same_room_same_emblem_and_rooms_differ ... ok
+test events::tests::list_keeps_the_newest_events ... ok
+test commands_tests::unknown_reconciles_the_same_envelope_and_only_acknowledgement_creates_undo ... ok
+test commands_tests::terminal_target_is_a_barrier_and_capacity_never_evicts_another_channel ... ok
+test commands_tests::undo_rechecks_field_after_a_wait_and_preserves_other_fields ... ok
+test events::tests::switching_locale_rerenders_existing_history_without_new_events ... ok
+test commands_tests::legacy_resolution_freezes_one_fresh_payload_and_is_cancelled_on_context_change ... ok
+test flow::localization_tests::source_accessible_name_follows_locale_and_preserves_user_content ... ok
+test history::tests::series_keeps_only_the_window_and_dropped_keys ... ok
+test flow::tests::nodes_never_overlap_or_leave_the_canvas ... ok
+test commands_tests::undo_is_invalidated_in_acknowledgement_and_restore_windows_and_on_session_reuse ... ok
+test animation::tests::one_shot_plays_on_change_not_on_first_sight ... ok
+test animation::tests::live_motion_repaints_only_while_active_and_not_reduced ... ok
+test measurement::tests::explicit_unavailable_keeps_age_and_cannot_turn_into_zero ... ok
+test measurement::tests::failures_and_snapshot_activity_never_refresh_last_good_measurement ... ok
+test flow::localization_tests::particle_at_mute_gate_endpoint_keeps_opacity_nonnegative ... ok
+test pages::airplay::name_tests::alias_display_never_changes_session_control_identity ... ok
+test pages::airplay::name_tests::names_use_utf8_byte_bounds_and_success_does_not_erase_newer_drafts ... ok
+test pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes ... FAILED
+test i18n_tests::field_focus_selection_disclosure_and_scroll_persist_across_rendered_language_frames ... ok
+test i18n_tests::current_frame_accessibility_names_change_while_source_node_ids_stay_stable ... ok
+test localization::tests::locale_commit_waits_for_ime_and_retains_generation_when_unchanged ... ok
+test i18n_tests::palette_preserves_query_and_selected_command_identity_across_language_switch ... ok
+test i18n_tests::language_popup_opens_with_keyboard_and_escape_returns_focus_to_same_selector ... ok
+test i18n_tests::actions_started_in_chinese_finish_in_the_current_english_locale ... ok
+test localization::tests::detection_empty_failure_manual_override_and_auto_return_are_distinct ... ok
+test tests::airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions ... ok
+test i18n_tests::fifty_language_switches_preserve_drafts_targets_timers_and_backend_sessions ... ok
+test tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked ... ok
+test tests::chinese_composition_preserves_draft_without_enter_submission ... ok
+test tests::cancel_modal_keeps_accesskit_focus_in_the_published_tree ... ok
+test tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later ... ok
+test tests::english_header_and_long_room_badge_keep_about_content_inside_the_central_panel ... ok
+test tests::fader_click_never_jumps_gain_and_double_click_resets_to_unity ... ok
+test tests::long_error_at_minimum_width_keeps_page_content_on_screen ... ok
+test tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts ... ok
+test tests::live_graph_names_every_node_for_assistive_tech ... ok
+test preferences::tests::newer_version_is_never_overwritten_and_memory_choice_survives_failure ... ok
+test tests::one_failed_airplay_or_diagnostics_read_keeps_the_room_on_screen ... ok
+test tests::named_fields_publish_accessible_labels_without_exposing_password_text ... ok
+test tests::restore_sends_the_inverse_change_against_a_fresh_revision ... ok
+test tests::polling_does_not_lock_forms_and_stop_has_priority_over_pending_start ... ok
+test tests::mixer_arrows_follow_the_fader_direction_of_the_layout ... ok
+test tests::two_failed_ipc_calls_do_not_prove_that_background_audio_stopped ... ok
+test tests::palette_enter_during_ime_composition_does_not_run_an_action ... ok
+test tests::stopping_an_inflight_start_uses_the_independent_path_and_keeps_unknown_results_visible ... ok
+test tests::stopped_local_hub_is_not_polled_for_room_state ... ok
+test tests::sidebar_fits_seven_pages_and_actions_in_the_minimum_window ... ok
+test theme::tests::fluent_direction_isolates_are_invisible_egui_glyphs ... ok
+test tests::pages_handle_missing_loading_failed_and_stale_states ... ok
+test i18n_tests::dual_language_eight_surfaces_cover_empty_full_busy_and_stale_states ... ok
+test widgets::localization_tests::identical_display_labels_do_not_alias_business_field_ids ... ok
+test widgets::localization_tests::keyboard_combo_selection_closes_popup_and_returns_focus ... ok
+test tests::live_graph_moves_only_while_signal_flows ... ok
+test theme::tests::cached_font_bytes_are_read_once_and_reused ... ok
+test preferences::tests::legacy_unknown_language_and_interleaved_updates_preserve_fields ... ok
+test widgets::localization_tests::translated_inline_title_keeps_identity_and_focus ... ok
+test widgets::localization_tests::translated_field_labels_keep_focus_draft_and_identity ... ok
+test preferences::tests::old_plain_writer_mode_is_migrated_without_relaxing_new_files_or_links ... ok
+test preferences::tests::malformed_and_oversized_files_do_not_get_overwritten_on_load ... ok
+test i18n_tests::long_user_names_and_double_scale_keep_actions_and_page_names_reachable ... ok
+
+failures:
+
+---- pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes stdout ----
+
+thread 'pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes' (51342492) panicked at apps/desktop/src/pages/mixer.rs:916:9:
+assertion `left == right` failed
+  left: None
+ right: Some(0.5)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes
+
+test result: FAILED. 69 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+
+error: test failed, to rerun pass `-p neonmix-desktop --bin neonmix-desktop`

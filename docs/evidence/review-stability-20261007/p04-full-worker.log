@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 330, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 299, in main
+    successor = rig.client(1); new_owner = successor.setup(); successor.stream(); rig.grant(new_owner, 200, 2)
+                                           ~~~~~~~~~~~~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 231, in setup
+    assert self.request('SETUP', 'rtsp://receiver/audio', body)[0] == 200
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

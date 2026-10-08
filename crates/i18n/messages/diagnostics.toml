@@ -1,0 +1,251 @@
+[[message]]
+id = "diagnostics-airplay-channel"
+args = { name = "string", id = "string" }
+
+[[message]]
+id = "diagnostics-buffering"
+
+[[message]]
+id = "diagnostics-calculated-from-the-latest-received-packet-this-is"
+
+[[message]]
+id = "diagnostics-callbacks-over-budget-total"
+
+[[message]]
+id = "diagnostics-capture-anomaly-count"
+args = { count = "u64" }
+
+[[message]]
+id = "diagnostics-capture-errors-total"
+
+[[message]]
+id = "diagnostics-capture-frame-value"
+args = { value = "string" }
+
+[[message]]
+id = "diagnostics-capture-frames-total"
+
+[[message]]
+id = "diagnostics-capture-peak-session-maximum"
+
+[[message]]
+id = "diagnostics-capture-statistics-appear-after-sending-starts"
+
+[[message]]
+id = "diagnostics-capture-statistics-are-unavailable-start-sending-then-refresh"
+
+[[message]]
+id = "diagnostics-channel-id"
+args = { id = "string" }
+
+
+[[message]]
+id = "diagnostics-connection-and-processes"
+
+[[message]]
+id = "diagnostics-error-count"
+args = { count = "u64" }
+
+[[message]]
+id = "diagnostics-export-destination-tooltip"
+args = { path = "string" }
+
+[[message]]
+id = "diagnostics-export-redacted-diagnostics"
+
+[[message]]
+id = "diagnostics-healthy"
+
+[[message]]
+id = "diagnostics-late-packets-total"
+
+[[message]]
+id = "diagnostics-limited-frames-total"
+
+[[message]]
+id = "diagnostics-local-background-pid"
+
+[[message]]
+id = "diagnostics-lost-packets-total"
+
+[[message]]
+id = "diagnostics-media-network"
+
+[[message]]
+id = "diagnostics-media-receiver-statistics-are-unavailable"
+
+[[message]]
+id = "diagnostics-mixer-queue-estimate-largest-channel"
+
+[[message]]
+id = "diagnostics-mixer-queue-estimate-queued-frames-48-khz-it"
+
+[[message]]
+id = "diagnostics-no-channels"
+
+[[message]]
+id = "diagnostics-no-data-intervals-total"
+
+[[message]]
+id = "diagnostics-no-packet-loss"
+
+[[message]]
+id = "diagnostics-no-receivers"
+
+[[message]]
+id = "diagnostics-not-sending"
+
+[[message]]
+id = "diagnostics-output-errors-total"
+
+[[message]]
+id = "diagnostics-output-fault-count"
+args = { count = "u64" }
+
+[[message]]
+id = "diagnostics-packet-loss-value"
+args = { count = "u64" }
+
+[[message]]
+id = "diagnostics-pcm-queue-drops-total"
+
+[[message]]
+id = "diagnostics-pcm-timing-gaps-total"
+
+[[message]]
+id = "diagnostics-playback-advance"
+
+[[message]]
+id = "diagnostics-playback-and-output"
+
+[[message]]
+id = "diagnostics-playback-frame-value"
+args = { value = "string" }
+
+[[message]]
+id = "diagnostics-playback-frames-total"
+
+[[message]]
+id = "diagnostics-plc-samples-total"
+
+[[message]]
+id = "diagnostics-receiver-index"
+args = { index = "u64" }
+
+[[message]]
+id = "diagnostics-receiver-late-count"
+args = { count = "u64", late = "u64" }
+
+[[message]]
+id = "diagnostics-room-diagnostics-must-be-available-first"
+
+[[message]]
+id = "diagnostics-room-status"
+
+[[message]]
+id = "diagnostics-room-status-is-unavailable-check-sharing-discovery-or"
+
+[[message]]
+id = "diagnostics-running"
+
+[[message]]
+id = "diagnostics-send-queue-drops-total"
+
+[[message]]
+id = "diagnostics-sender-capture"
+
+[[message]]
+id = "diagnostics-sent-packets-total"
+
+[[message]]
+id = "diagnostics-silent-frames-total"
+
+[[message]]
+id = "diagnostics-source"
+
+[[message]]
+id = "diagnostics-source-lead-time"
+
+[[message]]
+id = "diagnostics-state-revision"
+
+[[message]]
+id = "diagnostics-status-age"
+args = { seconds = "string" }
+
+[[message]]
+id = "diagnostics-status-age-note"
+args = { seconds = "string" }
+
+[[message]]
+id = "diagnostics-stopped"
+
+[[message]]
+id = "diagnostics-there-are-no-active-channels"
+
+[[message]]
+id = "diagnostics-there-are-no-active-channels-label"
+
+[[message]]
+id = "diagnostics-there-are-no-media-receivers"
+
+[[message]]
+id = "diagnostics-there-are-no-media-receivers-label"
+
+[[message]]
+id = "diagnostics-time-until-playback-after-reception"
+
+[[message]]
+id = "diagnostics-unavailable"
+
+[[message]]
+id = "diagnostics-underrun-callback-total"
+args = { count = "u64" }
+
+[[message]]
+id = "diagnostics-underrun-count"
+args = { count = "u64" }
+
+[[message]]
+id = "diagnostics-underrun-frames-total"
+
+[[message]]
+id = "diagnostics-queue-and-drift"
+args = { milliseconds = "string", drift = "string" }
+
+[[message]]
+id = "diagnostics-connection-override"
+
+[[message]]
+id = "diagnostics-https-address"
+
+[[message]]
+id = "diagnostics-address-trust-note"
+
+[[message]]
+id="diagnostics-observation-age"
+args = { seconds = "string" }
+
+[[message]]
+id="diagnostics-observation-stale"
+args = { seconds = "string" }
+
+[[message]]
+id="diagnostics-observation-unavailable-last-good"
+args = { seconds = "string" }
+
+[[message]]
+id="diagnostics-no-samples"
+
+[[message]]
+id="diagnostics-sampling-silence"
+
+[[message]]
+id="diagnostics-historical-errors"
+args = { count = "u64" }
+
+[[message]]
+id = "diagnostics-required-fields-missing"
+
+[[message]]
+id = "diagnostics-no-recent-samples"

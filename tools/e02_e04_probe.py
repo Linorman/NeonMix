@@ -179,10 +179,13 @@ def capture(name, frequency=None, silence=False, seconds=2):
     return measurement
 
 
-def websocket(after):
+def websocket(snapshot):
+    after = snapshot["event_sequence"]
+    epoch = snapshot["runtime_epoch"]
+    version = snapshot["control_version"]
     conn = context.wrap_socket(socket.create_connection((host, port), timeout=5), server_hostname=host)
     key = base64.b64encode(uuid.uuid4().bytes).decode()
-    request = f'GET /v1/events?after={after} HTTP/1.1\r\nHost: localhost:{port}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\nAuthorization: Bearer {credentials["admin"]["token"]}\r\n\r\n'
+    request = f'GET /v1/events?control_version={version}&runtime_epoch={epoch}&after={after} HTTP/1.1\r\nHost: localhost:{port}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\nAuthorization: Bearer {credentials["admin"]["token"]}\r\n\r\n'
     conn.sendall(request.encode())
     response = b''
     while b'\r\n\r\n' not in response:
@@ -265,7 +268,7 @@ sys.exit(child.returncode)
         raise TimeoutError('Hub startup timeout')
     assert api('/v1/hub', token='unknown')[0] == 401
     report['checks']['unauthenticated'] = 401
-    ws = websocket(initial['revision'])
+    ws = websocket(initial)
     sender_seconds = str(max(90, args.soak_seconds + 90))
     sender_a = start('sender-a', [str(binary), 'send', '--credential', str(lab / 'sender-a.json'), '--hub', f'https://{host}:{port}', '--seconds', sender_seconds, '--frequency', '437'])
     state = wait_streams(1)

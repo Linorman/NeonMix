@@ -1,0 +1,34 @@
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.78s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 9 tests
+test server::transaction_tests::native_ids_cannot_collide_with_reserved_airplay_context_before_prepare ... ok
+test server::transaction_tests::native_external_preparation_failure_returns_the_reserved_lane_without_writing ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test server::transaction_tests::native_failed_disk_write_aborts_candidate_and_returns_lane ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test server::transaction_tests::native_start_releases_engine_during_preparation_and_persistence ... FAILED
+test server::transaction_tests::in_flight_native_start_owns_the_last_multi_source_slot ... ok
+test server::transaction_tests::native_http_replay_keeps_original_media_parameters_after_session_ends_and_during_pending ... ok
+test server::transaction_tests::native_http_replay_returns_original_response_without_external_work ... ok
+
+failures:
+
+---- server::transaction_tests::native_start_releases_engine_during_preparation_and_persistence stdout ----
+
+thread 'server::transaction_tests::native_start_releases_engine_during_preparation_and_persistence' (50395979) panicked at apps/hub/src/server.rs:1450:9:
+assertion `left == right` failed
+  left: AdminDisconnected
+ right: OutputLost
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    server::transaction_tests::native_start_releases_engine_during_preparation_and_persistence
+
+test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 56 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `-p neonmix-hub --bin neonmix-hub`

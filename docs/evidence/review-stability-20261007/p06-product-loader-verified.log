@@ -1,0 +1,17 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+   Compiling neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.67s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 1 test
+test identity::tests::interrupted_output_settings_recover_before_product_config_agreement_checks ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 62 filtered out; finished in 0.25s
+

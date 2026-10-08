@@ -1,0 +1,43 @@
+{
+  "stage": "P05 Unix owner checkpoint",
+  "client_date": "2026-10-08",
+  "head": "aefb8690320cb114c974be2477b2ebb64dfadf1e",
+  "tracked_diff_sha256": "528fb8deabb3cffb9f9418b751f21306057c97b1e5363f6d761e18d6989d6309",
+  "source_sha256": {
+    "crates/lifecycle/src/lib.rs": "dc9810262edb5424079c2e1e0f6169425093b9e71ee36dfcda58ae65785c8f6c",
+    "crates/lifecycle/src/unix_group.rs": "a7bfd20032e12ac3b147c1a13555699d03cc0d19c56d53abba0e959b0cc5d5e8",
+    "crates/lifecycle/src/bin/neonmix-lifecycle-probe.rs": "81fe561ead7d33da99a5bafab578038990c0101e87f4086749052699a59254d2",
+    "crates/desktop-service/src/guardian.rs": "941448b863cf0a05c5c42540c155852b1e0e5c6806fb4690c1434737cf013f51",
+    "crates/desktop-service/src/bin/neonmix-guardian.rs": "bbe0a2d3f1c74c81c44a7976fb0da9b507683a2d8090eff117b4bc909eb5cfb4",
+    "crates/desktop-service/src/managed.rs": "b212dd87065f56445af61e1b6ba824d39b4c468316b88ce07f395b8f429bfb36",
+    "crates/desktop-service/src/manager.rs": "550bcc480ab095e645de0379185c421b5ba107c37675995cf7e02de3f2ddeee2",
+    "crates/desktop-service/src/daemon.rs": "2cd4e5198f847789831386150704961f674df97d07fdff454a67ea2c6fb6f9f5",
+    "crates/desktop-service/src/lib.rs": "817feef1a4f2a604e7f6e5d609b3d3350228fb556b2be9d9d8d0cdafd26fc005",
+    "crates/desktop-service/src/transport.rs": "50b326a43684e98f250a84660f8c06afd2c83f2e11f3ff6db7954d461a22f960",
+    "crates/desktop-service/src/transport_windows.rs": "a12bedef41d9d0fd0725b2b6932aea4c31ab5644b611a4a7d1fd9792cd238932",
+    "crates/desktop-service/tests/lifecycle.rs": "6c6c718b2ea2f2f73bfc0586f6e05b84acccfaada50d3ad0f6198b9e80d8d5ee",
+    "crates/identity/src/files.rs": "ad26126f9277d88af7cc5dc971c58069c1ced8e395da4b54b898aed96a035236",
+    "apps/desktop/src/main.rs": "d672f36ea63908c62e5dd659d8a136c8f0c6f0c5fc51219de4d7851a688867e7",
+    "tools/unix_owner_probe.py": "1933ff6d96a3b06fd1e9cca324493a82143033cbf8adc2d5cb6a55a70320c26b",
+    "tools/guardian_pipe_probe.py": "085d75b0b70ae1f856751df9f047a1992e09ae15ad3f3ba0e737c3b355b46fa7",
+    "tools/package_macos.py": "c24b303619f14d9904a69a8f96778aaff073923daf609c2a4d873df09ca05010",
+    "tools/collect_build.py": "2ab2bf48a02280a4c0a7b05c9f9062789149c46db08d2521ecfc84cffe43ea4d",
+    "tools/review_check.py": "2fc8cca7531656ac831e4f994bf40c4db102c6e893a6da4b8ab55db24ebd76fa"
+  },
+  "artifact_sha256": {
+    "target/debug/neonmix-background": "33e03fb5bb5a415537d2bde92bd9f2526e754b24e29be08cb9d97f993dddd67e",
+    "target/debug/neonmix-guardian": "acdbf3d9927b59756a7eda2b9b9395c823be5176964e9a9449629bc11b2b6979",
+    "target/release/neonmix-background": "1104cdced8c451b535a7f0fe2089fa54baafa0891a2945b720ee2fa83beeeedf",
+    "target/release/neonmix-guardian": "06dca97db25e8bdb485b4e6b0060d38b6c5b265310393669ba82280cea4578ca",
+    "target/release/neonmix-lifecycle-probe": "e8d1db9c3b9eec440cd49012c7f71b023147557b7e9f4b7f23254872b6f8a6ab"
+  },
+  "scope": "macOS background/synthetic owner tree/private file cleanup; Linux cross type check; no native Windows/Linux media or GUI or final package claim",
+  "reports": [
+    "p05-release-parent-kill.json",
+    "p05-release-blocked-pipe.json",
+    "p05-runtime-drop-isolated-verified.log",
+    "p05-final-source-clippy.log",
+    "p05-guardian-linux-cross-final.log",
+    "p05-final-gate.log"
+  ]
+}

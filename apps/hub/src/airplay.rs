@@ -131,6 +131,7 @@ pub(super) struct EndpointState {
     commands: Option<SyncSender<Action>>,
     gate: Arc<AtomicBool>,
     shutdown: Arc<AtomicBool>,
+    stop_deadline: Arc<Mutex<Option<Instant>>>,
     epoch: Arc<AtomicU64>,
     pub(super) join: Option<JoinHandle<()>>,
 }
@@ -153,6 +154,7 @@ impl EndpointState {
             commands: None,
             gate: Arc::new(AtomicBool::new(false)),
             shutdown: Arc::new(AtomicBool::new(false)),
+            stop_deadline: Arc::new(Mutex::new(None)),
             epoch: Arc::new(AtomicU64::new(1)),
             join: None,
         }
@@ -186,6 +188,9 @@ impl EndpointState {
         serde_json::to_value(status).unwrap_or_default()
     }
     pub(super) fn stop(&mut self) {
+        if let Ok(mut deadline) = self.stop_deadline.lock() {
+            deadline.get_or_insert_with(|| Instant::now() + Duration::from_secs(2));
+        }
         self.shutdown.store(true, Release);
         self.gate.store(false, Release);
         self.status.active = false;
@@ -238,32 +243,63 @@ struct PairingLease {
     deadline: Instant,
 }
 pub(super) struct State {
+    stopping: bool,
+    pub(super) worker_forced: Arc<AtomicBool>,
+    pub(super) cleanup_failures: Arc<AtomicU64>,
+    pub(super) shutdown_failures: Arc<AtomicU64>,
     receivers: Vec<EndpointState>,
     pairing_leases: std::collections::BTreeMap<Uuid, PairingLease>,
     multi_receiver: bool,
     pub(super) mixer_dirty: bool,
     configuration_pending: bool,
+    recovery: Option<api::Recovery>,
+    profile_recovery: Option<api::ProfileRecovery>,
     profile: Arc<Mutex<Option<ReceiverProfile>>>,
     revision: u64,
+    published_business: Option<(u64, serde_json::Value)>,
+    sequence_exhausted: bool,
     receipts: std::collections::VecDeque<(String, String, serde_json::Value)>,
     pub(super) output_latency_ns: Arc<AtomicU64>,
 }
 impl State {
     pub(super) fn new(directory: PathBuf, listen: SocketAddr) -> Self {
         Self {
+            stopping: false,
+            worker_forced: Arc::new(AtomicBool::new(false)),
+            cleanup_failures: Arc::new(AtomicU64::new(0)),
+            shutdown_failures: Arc::new(AtomicU64::new(0)),
             receivers: vec![EndpointState::new(directory, listen)],
             pairing_leases: Default::default(),
             multi_receiver: false,
             mixer_dirty: false,
             configuration_pending: false,
+            recovery: None,
+            profile_recovery: None,
             profile: Arc::new(Mutex::new(None)),
             revision: 1,
+            published_business: None,
+            sequence_exhausted: false,
             receipts: Default::default(),
             output_latency_ns: Arc::new(AtomicU64::new(0)),
         }
     }
+    fn advance_event(&mut self) {
+        if let Some(sequence) = self.revision.checked_add(1) {
+            self.revision = sequence;
+        } else {
+            self.sequence_exhausted = true;
+        }
+    }
     pub(super) fn stop(&mut self) {
+        if !self.stopping {
+            self.worker_forced.store(false, Release);
+            self.stopping = true;
+        }
+        let deadline = Instant::now() + Duration::from_secs(2);
         for receiver in &mut self.receivers {
+            if let Ok(mut stored) = receiver.stop_deadline.lock() {
+                stored.get_or_insert(deadline);
+            }
             receiver.stop();
         }
     }
@@ -362,7 +398,7 @@ pub(super) async fn command(
             }
             apply_action(&mut e, &shared, 0, AirplayAction::PlaybackMode { mode })?;
             e.airplay.receivers[0].status.revision += 1;
-            e.airplay.revision += 1;
+            e.airplay.advance_event();
             let mut status = e.airplay.receivers[0].display_status_at(Instant::now());
             status.revision = e.airplay.revision;
             return Ok(Json(
@@ -404,8 +440,13 @@ pub(super) async fn command(
             AirplayAction::PlaybackMode { .. } => unreachable!(),
         };
         AirplayCommandV2 {
+            command_version: 2,
+            expected_config_revision: None,
+            expected_event_sequence: None,
+            runtime_epoch: None,
+            credential_id: None,
             command_id: Uuid::new_v4().to_string(),
-            expected_revision: e.airplay.revision,
+            expected_revision: Some(e.airplay.revision),
             operation,
         }
     };
@@ -434,6 +475,13 @@ fn apply_action(
     receiver: usize,
     operation: AirplayAction,
 ) -> std::result::Result<(), ApiError> {
+    if matches!(
+        operation,
+        AirplayAction::Disable | AirplayAction::Disconnect | AirplayAction::Revoke
+    ) && let Some(lane) = engine.airplay.receivers[receiver].lane
+    {
+        engine.resources.control.revoke_lane(lane);
+    }
     match operation {
         AirplayAction::PlaybackMode { mode } => {
             if engine.airplay.receivers[receiver].status.active {
@@ -451,7 +499,7 @@ fn apply_action(
             engine.airplay.receivers[receiver].status.playback_mode = mode;
         }
         AirplayAction::Enable => {
-            if engine.airplay.configuration_pending {
+            if engine.stopping || engine.airplay.stopping || engine.airplay.configuration_pending {
                 return Err(ControlError::Busy.into());
             }
             if engine.airplay.receivers[receiver].commands.is_some() {
@@ -464,6 +512,9 @@ fn apply_action(
             engine.airplay.receivers[receiver]
                 .shutdown
                 .store(false, Release);
+            if let Ok(mut deadline) = engine.airplay.receivers[receiver].stop_deadline.lock() {
+                *deadline = None;
+            }
             let (tx, rx) = mpsc::sync_channel(8);
             let worker_shared = shared.clone();
             engine.airplay.receivers[receiver].status.enabled = true;
@@ -557,7 +608,7 @@ fn update(shared: &Shared, apply: impl FnOnce(&mut Engine)) {
             .map(|r| r.status.revision)
             .ne(before)
         {
-            engine.airplay.revision += 1;
+            engine.airplay.advance_event();
         }
     }
 }
@@ -570,8 +621,17 @@ fn save_receiver(
     profiles: &Arc<Mutex<Option<ReceiverProfile>>>,
     receiver_id: Uuid,
     saved: &Saved,
+    shared: &Shared,
 ) -> crate::Result<()> {
     let mut guard = profiles.lock().map_err(|_| "airplay_profile_busy")?;
+    if shared
+        .lock()
+        .map_err(|_| "airplay_state_busy")?
+        .airplay
+        .configuration_pending
+    {
+        return Err("profile_durability_unconfirmed".into());
+    }
     let mut next = guard.as_ref().ok_or("airplay_profile_missing")?.clone();
     let receiver = next
         .receivers
@@ -580,7 +640,13 @@ fn save_receiver(
         .ok_or("receiver_unknown")?;
     receiver.default_playback_mode =
         serde_json::from_value(serde_json::to_value(saved.playback_mode)?)?;
-    profile::save(path, &next)?;
+    api::persist_background(
+        shared,
+        path,
+        guard.as_ref().unwrap(),
+        &mut next,
+        profile::save,
+    )?;
     *guard = Some(next);
     Ok(())
 }
@@ -646,6 +712,9 @@ fn admission_denied(
 fn release_claim(engine: &mut Engine, receiver: usize, producer: &mut Option<BlockProducer>) {
     let endpoint = &mut engine.airplay.receivers[receiver];
     endpoint.gate.store(false, Release);
+    if let Some(lane) = endpoint.lane {
+        engine.resources.control.revoke_lane(lane);
+    }
     if let Some(p) = producer.take() {
         p.invalidate();
         if let Some(lane) = endpoint.lane.take() {
@@ -836,19 +905,40 @@ impl Drop for DiscoveryTask {
         }
     }
 }
-struct ChildGuard(Child);
+struct ChildGuard(Child, bool);
 impl Drop for ChildGuard {
     fn drop(&mut self) {
-        let _ = self.0.kill();
-        let _ = self.0.wait();
+        if self.1 {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
     }
 }
-struct FileGuard(PathBuf);
+struct FileGuard {
+    path: Option<PathBuf>,
+    failures: Arc<AtomicU64>,
+}
+impl FileGuard {
+    fn cleanup(&mut self) -> bool {
+        if let Some(path) = self.path.take() {
+            match std::fs::remove_file(path) {
+                Ok(()) => {}
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+                Err(_) => {
+                    self.failures.fetch_add(1, Relaxed);
+                    return false;
+                }
+            }
+        }
+        true
+    }
+}
 impl Drop for FileGuard {
     fn drop(&mut self) {
-        let _ = std::fs::remove_file(&self.0);
+        self.cleanup();
     }
 }
+
 fn run(shared: Shared, receiver: usize, actions: ChannelReceiver<Action>) {
     let mut producer = None;
     let result = run_worker(&shared, receiver, &mut producer, actions);
@@ -864,8 +954,12 @@ fn run(shared: Shared, receiver: usize, actions: ChannelReceiver<Action>) {
         engine.airplay.receivers[receiver].status.ready = false;
         engine.airplay.receivers[receiver].status.active = false;
         engine.airplay.receivers[receiver].status.pairing_pin = None;
-        if result.is_err() {
-            engine.airplay.receivers[receiver].status.error = Some("worker_failed".into());
+        if let Err(error) = &result {
+            if engine.stopping {
+                engine.airplay.shutdown_failures.fetch_add(1, Relaxed);
+            }
+            engine.airplay.receivers[receiver].status.error =
+                Some(public_worker_error(&error.to_string()).into());
             engine.airplay.receivers[receiver].status.failure_stage = result
                 .as_ref()
                 .err()
@@ -948,7 +1042,18 @@ fn run_worker(
         return Err("airplay_trust_capacity".into());
     }
     let keyfile = directory.join(format!("runtime-key-{}", Uuid::new_v4()));
-    let _key_guard = FileGuard(keyfile.clone());
+    let (cleanup_failures, worker_forced, stop_deadline) = {
+        let e = shared.lock().map_err(|_| "airplay_state_busy")?;
+        (
+            e.airplay.cleanup_failures.clone(),
+            e.airplay.worker_forced.clone(),
+            e.airplay.receivers[receiver].stop_deadline.clone(),
+        )
+    };
+    let mut key_guard = FileGuard {
+        path: Some(keyfile.clone()),
+        failures: cleanup_failures,
+    };
     let reference = saved.key_reference.as_ref().ok_or("credential_missing")?;
     let key = store
         .get(
@@ -1012,6 +1117,7 @@ fn run_worker(
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
             .spawn()?,
+        true,
     );
     let mut input = child.0.stdin.take().ok_or("worker_stdin")?;
     let output = child.0.stdout.take().ok_or("worker_stdout")?;
@@ -1030,7 +1136,7 @@ fn run_worker(
     let pairing_remaining_ms = pairing_deadline
         .saturating_duration_since(Instant::now())
         .as_millis() as u64;
-    let startup = serde_json::json!({"control_version":2,"worker_generation":generation,"trust_generation":trust_generation,"pairing_remaining_ms":pairing_remaining_ms,"pairing_attempts":pairing_attempts,"media_address":listener.endpoint()?,"ipc_token":token,
+    let startup = serde_json::json!({"control_version":2,"session_control_version":1,"pcm_version":2,"worker_generation":generation,"trust_generation":trust_generation,"pairing_remaining_ms":pairing_remaining_ms,"pairing_attempts":pairing_attempts,"media_address":listener.endpoint()?,"ipc_token":token,
         "device_id":neonmix_identity::speaker::receiver_id(hub),"receiver_uuid":hub,"keyfile":keyfile,"name":name,"pin":pin,"rtsp_port":0,
         "session_id":context.session_id,"stream_id":context.stream_id,"stream_epoch":context.stream_epoch,
         "format_epoch":context.format_epoch,"mapping_id":context.mapping_id,
@@ -1039,14 +1145,34 @@ fn run_worker(
     // Start the UI deadline before the worker receives configuration. It may
     // hide a code slightly early, but can never extend protocol authorization.
 
-    neonmix_airplay_ipc::write_control(&mut input, &startup)?;
+    neonmix_lifecycle::prepare_writer(&input)?;
+    let control_stop = Arc::new(AtomicBool::new(false));
+    write_worker_control(&mut input, &startup, &control_stop)?;
     let (command_tx, command_rx) = mpsc::sync_channel::<serde_json::Value>(8);
+    let writer_stop = control_stop.clone();
     let writer = std::thread::spawn(move || {
-        while let Ok(command) = command_rx.recv() {
-            if neonmix_airplay_ipc::write_control(&mut input, &command).is_err() {
+        loop {
+            if writer_stop.load(Acquire) {
+                let line = b"{\"type\":\"stop\"}\n";
+                let _ = neonmix_lifecycle::write_bounded(
+                    &mut input,
+                    line,
+                    &AtomicBool::new(false),
+                    Duration::from_millis(250),
+                );
                 break;
             }
+            match command_rx.recv_timeout(Duration::from_millis(20)) {
+                Ok(command) => {
+                    if write_worker_control(&mut input, &command, &writer_stop).is_err() {
+                        break;
+                    }
+                }
+                Err(mpsc::RecvTimeoutError::Timeout) => {}
+                Err(mpsc::RecvTimeoutError::Disconnected) => break,
+            }
         }
+        // Closing stdin requests stop if a partial write or full queue blocked it.
     });
     let (event_tx, event_rx) = mpsc::sync_channel::<(serde_json::Value, Instant)>(16);
     let reader_events = event_tx.clone();
@@ -1054,6 +1180,7 @@ fn run_worker(
     let reader_dropped = trace_dropped.clone();
     let terminal_failure = Arc::new(std::sync::atomic::AtomicU8::new(0));
     let reader_failure = terminal_failure.clone();
+    let reader_stop = control_stop.clone();
     let reader = std::thread::spawn(move || {
         let mut reader = std::io::BufReader::new(output);
         loop {
@@ -1068,6 +1195,9 @@ fn run_worker(
             if value["type"].as_str() == Some("fatal") {
                 reader_failure.store(fatal_code(value["message"].as_str().unwrap_or("")), Release);
             }
+            if reader_stop.load(Acquire) {
+                continue;
+            }
             if let Err(error) = reader_events.try_send((value, Instant::now())) {
                 if let mpsc::TrySendError::Full((value, _)) = error
                     && matches!(
@@ -1079,7 +1209,8 @@ fn run_worker(
                     continue;
                 }
                 reader_failure.store(6, Release);
-                break;
+                // Keep stdout drained until child exit even on event backpressure.
+                continue;
             }
         }
     });
@@ -1095,6 +1226,7 @@ fn run_worker(
 
     let mut admitted = false;
     let mut owner: Option<Owner> = None;
+    let mut closing_owner: Option<(Owner, Context, Instant)> = None;
     let mut awaiting_grant = false;
     let mut grant_deadline: Option<Instant> = None;
     let mut deferred_event: Option<(serde_json::Value, Instant)> = None;
@@ -1166,8 +1298,9 @@ fn run_worker(
                     let expected = token.clone();
                     let tx = pcm_tx.clone();
                     let failure = media_failure.clone();
+                    let draining = control_stop.clone();
                     media_thread = Some(std::thread::spawn(move || {
-                        if let Err(error) = read_media(stream, &expected, tx, &stop) {
+                        if let Err(error) = read_media(stream, &expected, tx, &stop, &draining) {
                             let message = error.to_string();
                             failure.store(
                                 if message == "media_consumer_slow" {
@@ -1212,6 +1345,12 @@ fn run_worker(
             if grant_deadline.is_some_and(|d| Instant::now() >= d) {
                 return Err("worker_grant_timeout".into());
             }
+            if closing_owner
+                .as_ref()
+                .is_some_and(|(_, _, deadline)| Instant::now() >= *deadline)
+            {
+                return Err("worker_close_timeout".into());
+            }
             let expired = shared.try_lock().is_ok_and(|e| {
                 e.resources
                     .admissions
@@ -1221,11 +1360,16 @@ fn run_worker(
             });
             if expired {
                 if let Some(o) = owner.as_ref() {
-                    let mut ungranted = active_context;
-                    ungranted.session_id = 0;
-                    ungranted.stream_epoch = 0;
-                    send(&command_tx, targeted("disconnect", o, ungranted))?;
                     send(&command_tx, targeted("disconnect", o, active_context))?;
+                    closing_owner = Some((
+                        o.clone(),
+                        active_context,
+                        Instant::now() + Duration::from_secs(5),
+                    ));
+                }
+                gate.store(false, Release);
+                if let Some(producer) = producer.as_ref() {
+                    producer.invalidate();
                 }
                 update(shared, |e| release_claim(e, receiver, producer));
                 owner = None;
@@ -1248,6 +1392,7 @@ fn run_worker(
                         + usize::from(e.resources.native_reservation.is_some());
                     let claim = e.resources.admissions.claims.get(&receiver_id);
                     e.airplay.receivers[receiver].status.enabled
+                        && closing_owner.is_none()
                         && e.authority.current().output.available
                         && claim.is_none_or(|c| !c.active)
                         && (claim.is_some()
@@ -1317,7 +1462,7 @@ fn run_worker(
                     }
                     Action::PlaybackMode(mode) => {
                         saved.playback_mode = mode;
-                        save_receiver(&state_path, &profiles, receiver_id, &saved)?;
+                        save_receiver(&state_path, &profiles, receiver_id, &saved, shared)?;
                         ingress.set_playback_mode(mode);
                     }
                     Action::Stop => {
@@ -1333,13 +1478,9 @@ fn run_worker(
                         {
                             continue;
                         }
-                        if let Some(p) = producer.as_mut() {
-                            p.invalidate();
-                        }
+                        cancel_owner_claim(shared, receiver, producer, &gate);
                         ingress.clear();
                         admitted = false;
-                        gate.store(false, Release);
-                        update(shared, |e| release_claim(e, receiver, producer));
                         awaiting_grant = false;
                         grant_deadline = None;
                         saved.playback_allowed = true;
@@ -1350,11 +1491,18 @@ fn run_worker(
                             &command_tx,
                             owner.as_ref().map(|o|targeted(if matches!(action,Action::Revoke(_)){"revoke"}else{"disconnect"},o,active_context)).unwrap_or_else(||serde_json::json!({"type":"allow","worker_generation":generation})),
                         )?;
+                        if let Some(o) = owner.as_ref() {
+                            closing_owner = Some((
+                                o.clone(),
+                                active_context,
+                                Instant::now() + Duration::from_secs(5),
+                            ));
+                        }
                         owner = None;
                     }
                     Action::Allow => {
                         saved.playback_allowed = true;
-                        save_receiver(&state_path, &profiles, receiver_id, &saved)?;
+                        save_receiver(&state_path, &profiles, receiver_id, &saved, shared)?;
                         send(
                             &command_tx,
                             serde_json::json!({"type":"allow","worker_generation":generation}),
@@ -1384,7 +1532,23 @@ fn run_worker(
                 {
                     continue;
                 }
-                if matches!(event_type, "flush" | "volume" | "session_ended" | "format")
+                if event_type == "session_ended" {
+                    if let Some((closing, context, _)) = closing_owner.as_ref()
+                        && terminal_session_event(&event, Some(closing), *context, false)
+                    {
+                        closing_owner = None;
+                        continue;
+                    }
+                    if !terminal_session_event(
+                        &event,
+                        owner.as_ref(),
+                        active_context,
+                        gate.load(Acquire),
+                    ) {
+                        continue;
+                    }
+                }
+                if matches!(event_type, "flush" | "volume" | "format")
                     && !owner
                         .as_ref()
                         .is_some_and(|o| event_matches(&event, o, Some(active_context)))
@@ -1431,10 +1595,17 @@ fn run_worker(
                 };
                 match event.get("type").and_then(|v| v.as_str()).unwrap_or("") {
                     "ready" => {
-                        if event["control_version"].as_u64() != Some(2)
+                        if event["pcm_version"].as_u64() != Some(2)
+                            || event["control_version"].as_u64() != Some(2)
                             || event["worker_generation"].as_u64() != Some(generation)
                         {
                             return Err("worker_control_version".into());
+                        }
+                        if event["session_control_version"].as_u64() != Some(1)
+                            || event["identity_loader_version"].as_u64() != Some(1)
+                            || event["stop_version"].as_u64() != Some(1)
+                        {
+                            return Err("upgrade_required".into());
                         }
                         receiver_ready = true;
                         let port = event
@@ -1559,7 +1730,8 @@ fn run_worker(
                             .get("client_public_key")
                             .and_then(|v| v.as_str())
                             .unwrap_or("");
-                        let valid = !public.is_empty()
+                        let valid = closing_owner.is_none()
+                            && !public.is_empty()
                             && public.len() <= 128
                             && !saved.blocked_keys.contains(public)
                             && saved.playback_allowed
@@ -1608,7 +1780,9 @@ fn run_worker(
                                     }
                                     Err(_) => return Err("airplay_state_busy".into()),
                                 };
-                            let policy_denial = if event["trust_generation"].as_u64()
+                            let policy_denial = if e.airplay.configuration_pending {
+                                Some("profile_durability_unconfirmed")
+                            } else if event["trust_generation"].as_u64()
                                 != Some(e.airplay.receivers[receiver].trust_generation)
                             {
                                 Some("trust_changed")
@@ -1661,6 +1835,11 @@ fn run_worker(
                                 ) {
                                     Ok(claim) => {
                                         *producer = e.resources.lanes[claim.lane].producer.take();
+                                        if let Some(producer) = producer.as_mut() {
+                                            producer
+                                                .bind_next()
+                                                .map_err(|_| "binding_generation_exhausted")?;
+                                        }
                                         e.airplay.receivers[receiver].lane = Some(claim.lane);
                                         active_context = claim.context;
                                         owner = Some(candidate.clone());
@@ -1705,6 +1884,14 @@ fn run_worker(
                         {
                             let mut profile_guard =
                                 profiles.lock().map_err(|_| "airplay_profile_busy")?;
+                            if shared
+                                .lock()
+                                .map_err(|_| "airplay_state_busy")?
+                                .airplay
+                                .configuration_pending
+                            {
+                                continue;
+                            }
                             let current_generation = shared
                                 .lock()
                                 .map_err(|_| "airplay_state_busy")?
@@ -1731,10 +1918,16 @@ fn run_worker(
                                 .filter(|n| !n.trim().is_empty())
                                 .map(|n| bounded_name(n, 128));
                             if next.register_source(receiver_id, public, name).is_ok() {
-                                profile::save(&state_path, &next)?;
+                                api::persist_background(
+                                    shared,
+                                    &state_path,
+                                    profile_guard.as_ref().unwrap(),
+                                    &mut next,
+                                    profile::save,
+                                )?;
                                 *profile_guard = Some(next);
                                 saved.known_keys.insert(public.into());
-                                update(shared, |e| e.airplay.revision += 1);
+                                update(shared, |e| e.airplay.advance_event());
                             }
                         }
                     }
@@ -1766,14 +1959,17 @@ fn run_worker(
                                 )
                         };
                         if !admitted || !still_allowed {
-                            let mut ungranted = active_context;
-                            ungranted.session_id = 0;
-                            ungranted.stream_epoch = 0;
                             send(
                                 &command_tx,
-                                targeted("disconnect", current_owner, ungranted),
+                                targeted("disconnect", current_owner, active_context),
                             )?;
                             update(shared, |e| release_claim(e, receiver, producer));
+                            closing_owner = Some((
+                                current_owner.clone(),
+                                active_context,
+                                Instant::now() + Duration::from_secs(5),
+                            ));
+                            gate.store(false, Release);
                             owner = None;
                             admitted = false;
                             awaiting_grant = false;
@@ -1877,6 +2073,10 @@ fn run_worker(
                                 LaneMix {
                                     stream_id: active_context.stream_id,
                                     epoch: active_context.stream_epoch,
+                                    binding_generation: producer
+                                        .as_ref()
+                                        .map_or(1, BlockProducer::binding_generation),
+                                    playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
                                     gain_db: mix.gain_db,
                                     muted: mix.muted,
                                     solo: mix.solo,
@@ -1888,13 +2088,19 @@ fn run_worker(
                                 gate.store(true, Release);
                                 awaiting_grant = false;
                                 grant_deadline = None;
-                                e.airplay.revision += 1;
+                                e.airplay.advance_event();
                             } else {
                                 release_claim(&mut e, receiver, producer);
                                 send(
                                     &command_tx,
                                     targeted("disconnect", current_owner, active_context),
                                 )?;
+                                closing_owner = Some((
+                                    current_owner.clone(),
+                                    active_context,
+                                    Instant::now() + Duration::from_secs(5),
+                                ));
+                                gate.store(false, Release);
                                 owner = None;
                                 admitted = false;
                                 awaiting_grant = false;
@@ -2125,6 +2331,11 @@ fn run_worker(
                             admitted = false;
                             if let Some(o) = owner.as_ref() {
                                 send(&command_tx, targeted("disconnect", o, active_context))?;
+                                closing_owner = Some((
+                                    o.clone(),
+                                    active_context,
+                                    Instant::now() + Duration::from_secs(5),
+                                ));
                             }
                             update(shared, |e| {
                                 e.airplay.receivers[receiver].status.error =
@@ -2202,22 +2413,80 @@ fn run_worker(
         p.invalidate();
     }
     drop(publisher);
-    media_stop.store(true, Release);
-    let _ = child.0.kill();
-    let _ = child.0.wait();
+    control_stop.store(true, Release);
     drop(command_tx);
+    let deadline = stop_deadline
+        .lock()
+        .ok()
+        .and_then(|d| *d)
+        .unwrap_or_else(|| Instant::now() + Duration::from_secs(2));
+    let mut forced = false;
+    let exit = loop {
+        match child.0.try_wait() {
+            Ok(Some(exit)) => {
+                child.1 = false;
+                break Ok(exit);
+            }
+            Ok(None) if Instant::now() < deadline => std::thread::sleep(Duration::from_millis(5)),
+            Ok(None) => {
+                forced = true;
+                let killed = child.0.kill();
+                if killed.is_err() {
+                    break Err("worker_kill_failed");
+                }
+                match child.0.wait() {
+                    Ok(exit) => {
+                        child.1 = false;
+                        break Ok(exit);
+                    }
+                    Err(_) => break Err("worker_wait_failed"),
+                }
+            }
+            Err(_) => break Err("worker_wait_failed"),
+        }
+    };
+    media_stop.store(true, Release);
     let _ = writer.join();
     let _ = reader.join();
     if let Some(thread) = media_thread {
         let _ = thread.join();
     }
+    let cleanup_complete = key_guard.cleanup();
+    if forced {
+        worker_forced.store(true, Release);
+    }
+    crate::emit(
+        serde_json::json!({"event":"airplay_worker_stopped","forced":forced,"exit_code":exit.as_ref().ok().and_then(|e|e.code()),"cleanup_complete":cleanup_complete}),
+    )?;
+    if !cleanup_complete {
+        return Err("worker_key_cleanup_failed".into());
+    }
+    let exit =
+        exit.map_err(|error| -> Box<dyn std::error::Error + Send + Sync> { error.into() })?;
+    if result.is_ok() && !forced && !exit.success() {
+        return Err("worker_shutdown_failed".into());
+    }
     result
+}
+fn write_worker_control(
+    input: &mut std::process::ChildStdin,
+    value: &serde_json::Value,
+    cancel: &AtomicBool,
+) -> crate::Result<()> {
+    let mut bytes = serde_json::to_vec(value)?;
+    if bytes.len() + 1 > neonmix_airplay_ipc::MAX_CONTROL_BYTES {
+        return Err("worker_control_length".into());
+    }
+    bytes.push(b'\n');
+    neonmix_lifecycle::write_bounded(input, &bytes, cancel, Duration::from_millis(250))?;
+    Ok(())
 }
 fn read_media(
     mut stream: MediaStream,
     token: &str,
     tx: SyncSender<PcmPacket>,
     stop: &AtomicBool,
+    draining: &AtomicBool,
 ) -> crate::Result<()> {
     stream.set_read_timeout(Some(Duration::from_millis(250)))?;
     let mut auth = vec![0u8; token.len() + 1];
@@ -2251,7 +2520,7 @@ fn read_media(
             stop,
         )?;
         let packet = PcmPacket::decode(&frame[..HEADER_BYTES + length])?;
-        queue_media_packet(&tx, packet, stop)?;
+        queue_media_packet(&tx, packet, draining)?;
     }
     Ok(())
 }
@@ -2345,12 +2614,52 @@ fn current_session_event(
     })
 }
 fn targeted(kind: &str, owner: &Owner, context: Context) -> serde_json::Value {
-    serde_json::json!({"type":kind,"worker_generation":owner.generation,"connection_id":owner.connection,"session_id":context.session_id,"stream_epoch":context.stream_epoch})
+    serde_json::json!({"type":kind,"worker_generation":owner.generation,"connection_id":owner.connection,"request_id":owner.request,"session_id":context.session_id,"stream_epoch":context.stream_epoch})
+}
+fn terminal_session_event(
+    event: &serde_json::Value,
+    owner: Option<&Owner>,
+    context: Context,
+    gate_open: bool,
+) -> bool {
+    owner.is_some_and(|owner| {
+        if !event_matches(event, owner, None) {
+            return false;
+        }
+        if gate_open {
+            return event_matches(event, owner, Some(context));
+        }
+        let session = event["session_id"].as_u64();
+        let epoch = event["stream_epoch"].as_u64();
+        (session == Some(0) && epoch == Some(0))
+            || (session == Some(context.session_id)
+                && epoch.is_some_and(|epoch| epoch > 0 && epoch <= context.stream_epoch))
+    })
+}
+fn cancel_owner_claim(
+    shared: &Shared,
+    receiver: usize,
+    producer: &mut Option<BlockProducer>,
+    gate: &AtomicBool,
+) {
+    gate.store(false, Release);
+    if let Some(producer) = producer.as_ref() {
+        producer.invalidate();
+    }
+    update(shared, |engine| release_claim(engine, receiver, producer));
 }
 fn grant(context: Context, owner: &Owner) -> serde_json::Value {
     serde_json::json!({"type":"grant","worker_generation":owner.generation,"connection_id":owner.connection,"request_id":owner.request,"session_id":context.session_id,"stream_id":context.stream_id,"stream_epoch":context.stream_epoch,"format_epoch":context.format_epoch,"mapping_id":context.mapping_id})
 }
 fn fatal_code(message: &str) -> u8 {
+    match message {
+        "identity_path_encoding" | "identity_path_invalid" => return 10,
+        "identity_not_found" => return 11,
+        "identity_read_failed" => return 12,
+        "identity_permission_denied" => return 13,
+        "identity_format_invalid" => return 14,
+        _ => {}
+    }
     if message == "decoder compressed queue limit exceeded" {
         7
     } else if message == "PCM queue limit exceeded" {
@@ -2378,6 +2687,11 @@ fn fatal_reason(code: u8) -> &'static str {
         7 => "worker_decoder_input_queue",
         8 => "worker_pcm_output_queue",
         9 => "worker_decoder_metadata_queue",
+        10 => "identity_path_invalid",
+        11 => "credential_missing",
+        12 => "credential_io_failed",
+        13 => "credential_permission_denied",
+        14 => "credential_corrupt",
         _ => "worker_protocol_failure",
     }
 }
@@ -2398,6 +2712,19 @@ fn terminal_failure_reason(terminal: u8, media: u8) -> &'static str {
     }
     fatal_reason(terminal)
 }
+fn public_worker_error(message: &str) -> &'static str {
+    match message {
+        "upgrade_required" => "upgrade_required",
+        "identity_path_invalid" => "invalid_path",
+        "credential_missing" => "credential_missing",
+        "credential_io_failed" => "credential_io_failed",
+        "credential_permission_denied" => "credential_permission_denied",
+        "credential_corrupt" => "credential_corrupt",
+        "worker_key_cleanup_failed" => "runtime_cleanup_incomplete",
+        "worker_shutdown_failed" | "worker_kill_failed" | "worker_wait_failed" => "stop_failed",
+        _ => "worker_unavailable",
+    }
+}
 fn failure_stage(message: &str) -> &'static str {
     match message {
         "worker_media_backpressure" => "media_backpressure",
@@ -2416,6 +2743,12 @@ fn failure_stage(message: &str) -> &'static str {
         "worker_decoder_failure" => "decoder",
         "worker_protocol_failure" => "protocol",
         "worker_exit" => "worker_exit",
+        "upgrade_required" => "worker_capabilities",
+        "identity_path_invalid" => "identity_path",
+        "credential_missing" => "identity_missing",
+        "credential_io_failed" => "identity_read",
+        "credential_permission_denied" => "identity_permission",
+        "credential_corrupt" => "identity_format",
         _ => "startup_or_native_runtime",
     }
 }
@@ -2596,6 +2929,135 @@ mod tests {
         ));
     }
     #[test]
+    fn pregrant_terminal_event_requires_exact_owner_and_active_zero_context_is_rejected() {
+        let owner = Owner {
+            receiver: Uuid::new_v4(),
+            generation: 7,
+            connection: 2,
+            request: 3,
+            source: "fixture".into(),
+        };
+        let context = Context {
+            session_id: 4,
+            stream_id: 5,
+            stream_epoch: 6,
+            format_epoch: 7,
+            mapping_id: 8,
+        };
+        let mut ended = targeted("session_ended", &owner, context);
+        assert_eq!(ended["request_id"], 3);
+        assert!(terminal_session_event(&ended, Some(&owner), context, true));
+        ended["session_id"] = serde_json::json!(0);
+        ended["stream_epoch"] = serde_json::json!(0);
+        assert!(terminal_session_event(&ended, Some(&owner), context, false));
+        assert!(!terminal_session_event(&ended, Some(&owner), context, true));
+        ended["request_id"] = serde_json::json!(2);
+        assert!(!terminal_session_event(
+            &ended,
+            Some(&owner),
+            context,
+            false
+        ));
+        ended["request_id"] = serde_json::json!(3);
+        ended["connection_id"] = serde_json::json!(1);
+        assert!(!terminal_session_event(
+            &ended,
+            Some(&owner),
+            context,
+            false
+        ));
+        assert!(!terminal_session_event(&ended, None, context, false));
+    }
+    #[test]
+    fn cancelling_a_real_claim_returns_lane_and_fences_late_start_grant_without_affecting_other_claim()
+     {
+        for active in [false, true] {
+            let (shared, _, _, _mixer) = super::super::transaction_tests::shared_fixture();
+            let (owner, context, gate, mut producer, other) = {
+                let mut engine = shared.lock().unwrap();
+                let receiver = engine.airplay.receivers[0].receiver_id;
+                let owner = Owner {
+                    receiver,
+                    generation: 7,
+                    connection: 2,
+                    request: 3,
+                    source: "cancelled".into(),
+                };
+                let claim = engine
+                    .resources
+                    .admissions
+                    .reserve(owner.clone(), 0, true, Some(0), &[], Instant::now())
+                    .unwrap();
+                if active {
+                    engine
+                        .resources
+                        .admissions
+                        .commit(&owner, Instant::now())
+                        .unwrap();
+                }
+                let other = Owner {
+                    receiver: Uuid::new_v4(),
+                    generation: 8,
+                    connection: 9,
+                    request: 10,
+                    source: "survivor".into(),
+                };
+                engine
+                    .resources
+                    .admissions
+                    .reserve(other.clone(), 0, true, Some(1), &[], Instant::now())
+                    .unwrap();
+                let endpoint = &mut engine.airplay.receivers[0];
+                endpoint.lane = Some(0);
+                endpoint.session_owner = Some((owner.clone(), claim.context));
+                endpoint.status.active = active;
+                let gate = endpoint.gate.clone();
+                gate.store(active, Release);
+                let producer = engine.resources.lanes[0].producer.take();
+                (owner, claim.context, gate, producer, other)
+            };
+            let barrier = std::sync::Barrier::new(2);
+            std::thread::scope(|scope| {
+                let delayed = scope.spawn(|| {
+                    barrier.wait();
+                    barrier.wait();
+                    let mut event = grant(context, &owner);
+                    event["type"] = serde_json::json!("grant_applied");
+                    assert!(!current_session_event(&event, None, context, false, false));
+                    event["type"] = serde_json::json!("session_started");
+                    event["session_id"] = serde_json::json!(0);
+                    event["stream_epoch"] = serde_json::json!(0);
+                    assert!(!current_session_event(&event, None, context, false, false));
+                });
+                barrier.wait();
+                cancel_owner_claim(&shared, 0, &mut producer, &gate);
+                barrier.wait();
+                delayed.join().unwrap();
+            });
+            assert!(!gate.load(Acquire));
+            assert!(producer.is_none());
+            let engine = shared.lock().unwrap();
+            assert!(
+                !engine
+                    .resources
+                    .admissions
+                    .claims
+                    .contains_key(&owner.receiver)
+            );
+            assert!(
+                engine
+                    .resources
+                    .admissions
+                    .claims
+                    .contains_key(&other.receiver)
+            );
+            assert!(engine.resources.lanes[0].producer.is_some());
+            assert!(engine.resources.airplay_mix[0].is_none());
+            assert!(engine.airplay.receivers[0].session_owner.is_none());
+            assert!(!engine.airplay.receivers[0].status.active);
+        }
+    }
+    #[test]
     fn existing_receiver_profiles_default_to_low_latency_and_keep_trust() {
         let saved: Saved = serde_json::from_value(serde_json::json!({
             "version": 1, "credential_store": "file", "key_reference": null, "known_keys": ["client"],
@@ -2671,6 +3133,7 @@ mod tests {
                 stream_epoch: 1,
                 format_epoch: 1,
                 sequence: 1,
+                normalized_sample_position: 0,
                 source_sample_position: 0,
                 presentation_time_ns: 1,
                 mapping_id: 1,
@@ -2761,7 +3224,16 @@ mod tests {
                 std::io::Write::write_all(&mut sender, &bytes).unwrap();
             });
             let (tx, _) = mpsc::sync_channel(1);
-            assert!(read_media(stream, &"a".repeat(64), tx, &AtomicBool::new(false)).is_err());
+            assert!(
+                read_media(
+                    stream,
+                    &"a".repeat(64),
+                    tx,
+                    &AtomicBool::new(false),
+                    &AtomicBool::new(false)
+                )
+                .is_err()
+            );
             worker.join().unwrap();
         }
     }

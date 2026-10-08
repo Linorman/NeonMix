@@ -1,0 +1,87 @@
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0774]: `derive` may only be applied to `struct`s, `enum`s and `union`s
+   --> crates/audio-core/src/mixer.rs:423:1
+    |
+423 |   #[derive(Clone, Copy, Default)]
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not applicable here
+424 | / impl MixerStats {
+425 | |     /// Release from control and callback; read applied first to retain a valid
+426 | |     /// ordered pair even while the producer publishes the next desired target.
+427 | |     pub fn config_progress(&self) -> ConfigProgress {
+...   |
+440 | | }
+    | |_- not a `struct`, `enum` or `union`
+
+error[E0599]: no function or associated item named `default` found for struct `TimedSegment` in the current scope
+   --> crates/audio-core/src/mixer.rs:477:38
+    |
+442 | struct TimedSegment {
+    | ------------------- function or associated item `default` not found for this struct
+...
+477 |             segments: [TimedSegment::default(); FIFO],
+    |                                      ^^^^^^^ function or associated item not found in `TimedSegment`
+    |
+    = help: items from traits can only be used if the trait is implemented and in scope
+    = note: the following trait defines an item `default`, perhaps you need to implement it:
+            candidate #1: `Default`
+
+error[E0277]: the trait bound `TimedSegment: Copy` is not satisfied
+   --> crates/audio-core/src/mixer.rs:477:24
+    |
+477 |             segments: [TimedSegment::default(); FIFO],
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^ the trait `Copy` is not implemented for `TimedSegment`
+    |
+    = note: the `Copy` trait is required because this value will be copied for each element of the array
+    = help: consider using `core::array::from_fn` to initialize the array
+    = help: see https://doc.rust-lang.org/stable/std/array/fn.from_fn.html for more information
+help: consider annotating `TimedSegment` with `#[derive(Copy)]`
+    |
+442 + #[derive(Copy)]
+443 | struct TimedSegment {
+    |
+
+error[E0507]: cannot move out of `self.segments[_]` which is behind a mutable reference
+   --> crates/audio-core/src/mixer.rs:518:23
+    |
+518 |         let segment = self.segments[self.segment_head];
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ move occurs because `self.segments[_]` has type `TimedSegment`, which does not implement the `Copy` trait
+    |
+note: if `TimedSegment` implemented `Clone`, you could clone the value
+   --> crates/audio-core/src/mixer.rs:442:1
+    |
+442 | struct TimedSegment {
+    | ^^^^^^^^^^^^^^^^^^^ consider implementing `Clone` for this type
+...
+518 |         let segment = self.segments[self.segment_head];
+    |                       -------------------------------- you could clone this value
+help: consider borrowing here
+    |
+518 |         let segment = &self.segments[self.segment_head];
+    |                       +
+
+error[E0507]: cannot move out of `self.segments[_]` which is behind a mutable reference
+   --> crates/audio-core/src/mixer.rs:545:20
+    |
+545 |         let last = self.segments[tail];
+    |                    ^^^^^^^^^^^^^^^^^^^ move occurs because `self.segments[_]` has type `TimedSegment`, which does not implement the `Copy` trait
+    |
+note: if `TimedSegment` implemented `Clone`, you could clone the value
+   --> crates/audio-core/src/mixer.rs:442:1
+    |
+442 | struct TimedSegment {
+    | ^^^^^^^^^^^^^^^^^^^ consider implementing `Clone` for this type
+...
+545 |         let last = self.segments[tail];
+    |                    ------------------- you could clone this value
+help: consider borrowing here
+    |
+545 |         let last = &self.segments[tail];
+    |                    +
+
+Some errors have detailed explanations: E0277, E0507, E0599, E0774.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `neonmix-core` (lib) due to 5 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-core` (lib test) due to 5 previous errors

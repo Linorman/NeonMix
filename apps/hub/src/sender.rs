@@ -16,6 +16,7 @@ use uuid::Uuid;
 const MAX_PENDING_MEDIA: usize = 8;
 
 pub struct SendOptions {
+    pub owner_instance: Option<Uuid>,
     pub capture: Option<String>,
     pub virtual_output: bool,
     pub provider: crate::virtual_output::Provider,
@@ -39,13 +40,68 @@ pub fn client(credential: &Credential) -> Result<reqwest::Client> {
     }
     Ok(builder.build()?)
 }
+async fn bound_command(
+    client: &reqwest::Client,
+    credential: &Credential,
+    hub: &str,
+    snapshot: &Snapshot,
+    operation: Operation,
+) -> Result<Command> {
+    Ok(
+        bound_command_with_room(client, credential, hub, snapshot, operation)
+            .await?
+            .0,
+    )
+}
+async fn bound_command_with_room(
+    client: &reqwest::Client,
+    credential: &Credential,
+    hub: &str,
+    snapshot: &Snapshot,
+    operation: Operation,
+) -> Result<(Command, Option<String>)> {
+    let mut room_name = None;
+    let principal = if snapshot.control_version == neonmix_control::CONTROL_VERSION {
+        let me: serde_json::Value = client
+            .get(format!("{hub}/v1/me"))
+            .bearer_auth(&credential.token)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        if me["hub_id"].as_str() != Some(snapshot.hub_id.to_string().as_str()) {
+            return Err("snapshot_required".into());
+        }
+        room_name = me["room_name"]
+            .as_str()
+            .filter(|name| !name.trim().is_empty())
+            .map(str::to_owned);
+        me["device_id"]
+            .as_str()
+            .ok_or("upgrade_required")?
+            .parse()?
+    } else {
+        Uuid::nil()
+    };
+    let mut command = Command::bound(snapshot, principal, operation);
+    if snapshot.control_version == 1 && principal.is_nil() {
+        command.credential_id = None;
+    }
+    if snapshot.control_version == 1 && snapshot.runtime_epoch.is_nil() {
+        command.runtime_epoch = None;
+    }
+    Ok((command, room_name))
+}
 pub async fn run(
     credential: Credential,
     hub: &str,
-    seconds: u32,
+    limit: neonmix_lifecycle::RunLimit,
     options: SendOptions,
+    stop: &neonmix_lifecycle::StopSignal,
 ) -> Result<()> {
     let SendOptions {
+        owner_instance,
         capture,
         virtual_output,
         provider,
@@ -61,8 +117,8 @@ pub async fn run(
         return Err("local output is disabled; explicitly enable it before starting Sender".into());
     }
     let provider = bound.as_ref().map_or(provider, |binding| binding.provider);
-    if !(1..=86400).contains(&seconds) || !hub.starts_with("https://") {
-        return Err("seconds must be 1..86400 and Hub must use HTTPS".into());
+    if !hub.starts_with("https://") {
+        return Err("Hub must use HTTPS".into());
     }
     let _activity = crate::qos::AudioActivity::begin();
     let client = client(&credential)?;
@@ -100,6 +156,18 @@ pub async fn run(
     socket.set_nonblocking(true)?;
     let (pem, cert, _) = crate::certificate()?;
     let ssrc = (Uuid::new_v4().as_u128() as u32).max(1);
+    #[cfg(not(target_os = "linux"))]
+    let _ = owner_instance;
+    #[cfg(target_os = "linux")]
+    if let Some(binding) = &bound
+        && binding.provider == crate::virtual_output::Provider::Neonmix
+    {
+        let owner = neonmix_output_binding::owner::inspect_owner()?.ok_or("output_unavailable")?;
+        let expected_instance = owner_instance.unwrap_or(owner.instance_generation);
+        if !owner.matches(expected_instance, binding.output_id)? {
+            return Err("output_unavailable".into());
+        }
+    }
     // Device ownership is independent of this network session. On Linux a local
     // `neonmix-audio virtual-output` owner keeps the sink present across Sender stops.
     let capture = if let Some(binding) = &bound {
@@ -110,7 +178,14 @@ pub async fn run(
         )?;
         #[cfg(any(target_os = "macos", target_os = "linux"))]
         if binding.provider == crate::virtual_output::Provider::Neonmix {
-            crate::binding::sync_native_name(binding)?;
+            store
+                .as_ref()
+                .ok_or("output_binding_required")?
+                .with_expected(
+                    binding.output_id,
+                    binding.revision,
+                    crate::binding::sync_native_name,
+                )?;
         }
         emit(
             serde_json::json!({"event":"virtual_output_selected","binding":selected,"output_binding":binding}),
@@ -135,7 +210,9 @@ pub async fn run(
     } else {
         capture
     };
-    let capture_id = capture.clone();
+    if let Some(id) = &capture {
+        crate::feedback::before_capture(remote, snapshot.hub_id, id, &snapshot.output.id)?;
+    }
     #[cfg(target_os = "macos")]
     let capture_kind = neonmix_io::CaptureKind::VirtualDevice;
     #[cfg(not(target_os = "macos"))]
@@ -160,17 +237,12 @@ pub async fn run(
     if let Some(capture) = &capture {
         capture.play()?;
     }
-    if remote.ip().is_loopback()
-        && capture_id
-            .as_ref()
-            .is_some_and(|id| *id == snapshot.output.id)
-    {
-        return Err("local capture and Hub output must use different devices".into());
-    }
-    let mut request = Command {
-        request_id: Uuid::new_v4(),
-        expected_revision: snapshot.revision,
-        operation: Operation::Start {
+    let (mut request, mut target_room_name) = bound_command_with_room(
+        &client,
+        &credential,
+        hub,
+        &snapshot,
+        Operation::Start {
             offer: MediaOffer {
                 version: 1,
                 codec: "opus".into(),
@@ -184,7 +256,8 @@ pub async fn run(
                 certificate_sha256: neonmix_media::certificate_fingerprint(&cert)?,
             },
         },
-    };
+    )
+    .await?;
     let mut attempts = 0;
     let response: StartResponse = loop {
         let response = client
@@ -213,7 +286,20 @@ pub async fn run(
             {
                 return Err("Hub identity changed during session negotiation".into());
             }
-            request.expected_revision = snapshot.revision;
+            if request
+                .runtime_epoch
+                .is_some_and(|epoch| epoch != snapshot.runtime_epoch)
+            {
+                return Err("snapshot_required".into());
+            }
+            (request, target_room_name) = bound_command_with_room(
+                &client,
+                &credential,
+                hub,
+                &snapshot,
+                request.operation.clone(),
+            )
+            .await?;
             attempts += 1;
             continue;
         }
@@ -252,7 +338,7 @@ pub async fn run(
         .map(|c| crate::framer::CaptureFramer::new(c.info.format))
         .transpose()?;
     emit(
-        serde_json::json!({"event":"sender_started","session_id":session.id,"stream_id":session.stream_id,"virtual_output_provider":(virtual_output||bound.is_some()).then_some(provider),"output_binding":bound,"capture":capture.as_ref().map(|c| &c.info),"capture_conversion_delay_frames":framer.as_ref().map(|f|f.delay_frames())}),
+        serde_json::json!({"event":"sender_started","sender_target":{"hub_id":snapshot.hub_id,"device_id":request.credential_id,"room_name":target_room_name},"session_id":session.id,"stream_id":session.stream_id,"virtual_output_provider":(virtual_output||bound.is_some()).then_some(provider),"output_binding":bound,"capture":capture.as_ref().map(|c| &c.info),"capture_conversion_delay_frames":framer.as_ref().map(|f|f.delay_frames())}),
     )?;
     let mut media_log = crate::media_log::MediaLog::new()?;
     let start = Instant::now();
@@ -280,13 +366,14 @@ pub async fn run(
     let mut last_loop = Instant::now();
     let media_scheduling = neonmix_media::ThreadPriority::enter();
     let mut timing = crate::pump_timing::Timing::new();
-    let shutdown = stop_signal();
+    let shutdown = stop.wait();
     tokio::pin!(shutdown);
     // TLS/WSS replication runs on Tokio workers. The paced media pump stays
     // on this QoS-classified thread, woken by sockets/native samples and the
     // next bounded source/pacing deadline, independently of Tokio timers.
+    let mut end_reason = neonmix_lifecycle::RunEndReason::DurationElapsed;
     let result: Result<()> = (|| {
-        while start.elapsed() < Duration::from_secs(u64::from(seconds)) {
+        while !limit.elapsed(start.elapsed()) {
             let now = Instant::now();
             last_loop_gap_ns = now
                 .duration_since(last_loop)
@@ -444,6 +531,7 @@ pub async fn run(
             if let Some(stop) = shutdown.as_mut().now_or_never() {
                 stop?;
                 media_log.publish(serde_json::json!({"event":"sender_stop_requested"}));
+                end_reason = neonmix_lifecycle::RunEndReason::UserStopped;
                 break;
             }
             timing.finish("report");
@@ -473,6 +561,7 @@ pub async fn run(
     })();
     sender.gate().revoke();
     if let Err(error) = &result {
+        end_reason = neonmix_lifecycle::RunEndReason::Failed;
         // The periodic log may be one second old (or its bounded queue full).
         // Record the actual failure counters after stopping media authorization.
         eprintln!(
@@ -510,14 +599,17 @@ pub async fn run(
         .send()
         .await
         && let Ok(snapshot) = response.json::<Snapshot>().await
-    {
-        let stop = Command {
-            request_id: Uuid::new_v4(),
-            expected_revision: snapshot.revision,
-            operation: Operation::Stop {
+        && let Ok(stop) = bound_command(
+            &client,
+            &credential,
+            hub,
+            &snapshot,
+            Operation::Stop {
                 session_id: session.id,
             },
-        };
+        )
+        .await
+    {
         let _ = client
             .post(format!("{hub}/v1/commands"))
             .bearer_auth(&credential.token)
@@ -525,22 +617,10 @@ pub async fn run(
             .send()
             .await;
     }
-    emit(serde_json::json!({"event":"sender_stopped","sent_packets":sent,"queue_drops":dropped}))?;
+    emit(
+        serde_json::json!({"event":"sender_stopped","reason":end_reason,"sent_packets":sent,"queue_drops":dropped}),
+    )?;
     result
-}
-
-async fn stop_signal() -> std::io::Result<()> {
-    #[cfg(unix)]
-    {
-        let mut terminate =
-            tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
-        tokio::select! {
-            result = tokio::signal::ctrl_c() => result,
-            _ = terminate.recv() => Ok(()),
-        }
-    }
-    #[cfg(not(unix))]
-    tokio::signal::ctrl_c().await
 }
 
 async fn stop_session(
@@ -556,10 +636,16 @@ async fn stop_session(
         .await
         && let Ok(snapshot) = response.json::<Snapshot>().await
     {
-        let command = Command {
-            request_id: Uuid::new_v4(),
-            expected_revision: snapshot.revision,
-            operation: Operation::Stop { session_id },
+        let Ok(command) = bound_command(
+            client,
+            credential,
+            hub,
+            &snapshot,
+            Operation::Stop { session_id },
+        )
+        .await
+        else {
+            return;
         };
         let _ = client
             .post(format!("{hub}/v1/commands"))

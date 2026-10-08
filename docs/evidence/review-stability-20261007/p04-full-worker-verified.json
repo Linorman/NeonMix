@@ -1,0 +1,21 @@
+{
+  "passed": false,
+  "results": [
+    {
+      "case": "admission_pending",
+      "passed": true,
+      "successor_pcm_blocks": 50
+    },
+    {
+      "case": "await_grant",
+      "passed": true,
+      "successor_pcm_blocks": 50
+    },
+    {
+      "case": "active",
+      "passed": true,
+      "successor_pcm_blocks": 50
+    }
+  ],
+  "scope": "in-progress full worker probe"
+}

@@ -1,0 +1,25 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2.25s
+     Running tests/mixer_measurements.rs (target/release/deps/mixer_measurements-950f6a8e9f0ead28)
+
+running 2 tests
+test active_native_starvation_counts_every_internal_frame_after_dsp_reset ... FAILED
+test active_timed_starvation_counts_one_second_and_stops_on_remove ... ok
+
+failures:
+
+---- active_native_starvation_counts_every_internal_frame_after_dsp_reset stdout ----
+
+thread 'active_native_starvation_counts_every_internal_frame_after_dsp_reset' (47260475) panicked at crates/audio-core/tests/mixer_measurements.rs:36:9:
+assertion `left == right` failed: period 1
+  left: 0
+ right: 48000
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    active_native_starvation_counts_every_internal_frame_after_dsp_reset
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p neonmix-core --test mixer_measurements`

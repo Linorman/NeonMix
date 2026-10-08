@@ -8,6 +8,13 @@ use uuid::Uuid;
 pub const MAX_STREAMS: usize = 16;
 pub const EVENT_CAPACITY: usize = 256;
 pub const PROTOCOL_VERSION: u16 = 1;
+pub const CONTROL_VERSION: u16 = 2;
+fn legacy_control_version() -> u16 {
+    1
+}
+fn is_legacy_control_version(version: &u16) -> bool {
+    *version == 1
+}
 pub const MEDIA_TTL_SECONDS: u32 = 86_400;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -138,7 +145,16 @@ pub struct Output {
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Snapshot {
+    #[serde(default = "legacy_control_version")]
+    pub control_version: u16,
+    #[serde(default)]
+    pub config_revision: u64,
+    #[serde(default)]
+    pub event_sequence: u64,
     pub hub_id: Uuid,
+    /// One Hub process lifetime; absent on legacy snapshots.
+    #[serde(default)]
+    pub runtime_epoch: Uuid,
     pub revision: u64,
     pub bus_id: String,
     pub devices: BTreeMap<Uuid, Device>,
@@ -150,7 +166,19 @@ impl Snapshot {
     /// Apply an authenticated event atomically. Never show a partial state when
     /// a connection loses an event or switches Hub identity.
     pub fn apply_event(&mut self, event: Event) -> Result<(), ControlError> {
-        if event.hub_id != self.hub_id || self.revision.checked_add(1) != Some(event.revision) {
+        if !matches!(self.control_version, 1 | CONTROL_VERSION)
+            || (self.control_version == CONTROL_VERSION && self.runtime_epoch.is_nil())
+            || self.control_version != event.control_version
+            || (self.control_version == CONTROL_VERSION
+                && (self.event_sequence != self.revision
+                    || event.event_sequence != event.revision
+                    || self.event_sequence.checked_add(1) != Some(event.event_sequence)
+                    || event.config_revision < self.config_revision
+                    || event.config_revision > self.config_revision.saturating_add(1)))
+            || event.runtime_epoch != self.runtime_epoch
+            || event.hub_id != self.hub_id
+            || self.revision.checked_add(1) != Some(event.revision)
+        {
             return Err(ControlError::SnapshotRequired);
         }
         let mut next = self.clone();
@@ -177,6 +205,8 @@ impl Snapshot {
             return Err(ControlError::QuotaExceeded);
         }
         next.revision = event.revision;
+        next.config_revision = event.config_revision;
+        next.event_sequence = event.event_sequence;
         *self = next;
         Ok(())
     }
@@ -218,12 +248,96 @@ pub enum Operation {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Command {
+    #[serde(
+        default = "legacy_control_version",
+        skip_serializing_if = "is_legacy_control_version"
+    )]
+    pub control_version: u16,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_config_revision: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_event_sequence: Option<u64>,
     pub request_id: Uuid,
-    pub expected_revision: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub runtime_epoch: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub credential_id: Option<Uuid>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_revision: Option<u64>,
     pub operation: Operation,
+}
+impl Operation {
+    fn config_condition(&self) -> bool {
+        match self {
+            Self::Start { .. } | Self::Stop { .. } => false,
+            Self::StreamMix { gain_db, muted, .. } => gain_db.is_some() || muted.is_some(),
+            _ => true,
+        }
+    }
+    fn runtime_condition(&self) -> bool {
+        matches!(
+            self,
+            Self::Start { .. }
+                | Self::Stop { .. }
+                | Self::StreamMix { .. }
+                | Self::Disconnect { .. }
+                | Self::Revoke { .. }
+        )
+    }
+}
+impl Command {
+    pub fn bound(state: &Snapshot, credential: Uuid, operation: Operation) -> Self {
+        let current = state.control_version == CONTROL_VERSION;
+        Self {
+            control_version: state.control_version,
+            expected_config_revision: if current && operation.config_condition() {
+                Some(state.config_revision)
+            } else {
+                None
+            },
+            expected_event_sequence: if current && operation.runtime_condition() {
+                Some(state.event_sequence)
+            } else {
+                None
+            },
+            request_id: Uuid::new_v4(),
+            runtime_epoch: Some(state.runtime_epoch),
+            credential_id: Some(credential),
+            expected_revision: if current { None } else { Some(state.revision) },
+            operation,
+        }
+    }
+    fn validate_version(&self) -> Result<(), ControlError> {
+        match self.control_version {
+            1 if self.expected_revision.is_some()
+                && self.expected_config_revision.is_none()
+                && self.expected_event_sequence.is_none() =>
+            {
+                Ok(())
+            }
+            CONTROL_VERSION
+                if self.expected_revision.is_none()
+                    && self.runtime_epoch.is_some_and(|e| !e.is_nil())
+                    && self.credential_id.is_some_and(|id| !id.is_nil())
+                    && (!self.operation.config_condition()
+                        || self.expected_config_revision.is_some())
+                    && (!self.operation.runtime_condition()
+                        || self.expected_event_sequence.is_some()) =>
+            {
+                Ok(())
+            }
+            CONTROL_VERSION => Err(ControlError::UpgradeRequired),
+            1 => Err(ControlError::UpgradeRequired),
+            _ => Err(ControlError::IncompatibleVersion),
+        }
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Receipt {
+    #[serde(default)]
+    pub config_revision: u64,
+    #[serde(default)]
+    pub event_sequence: u64,
     pub revision: u64,
     pub session_id: Option<Uuid>,
     pub stream_id: Option<u64>,
@@ -231,6 +345,14 @@ pub struct Receipt {
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
+    #[serde(default = "legacy_control_version")]
+    pub control_version: u16,
+    #[serde(default)]
+    pub config_revision: u64,
+    #[serde(default)]
+    pub event_sequence: u64,
+    #[serde(default)]
+    pub runtime_epoch: Uuid,
     pub revision: u64,
     pub hub_id: Uuid,
     pub devices: Vec<Device>,
@@ -268,6 +390,8 @@ pub enum ControlError {
     SnapshotRequired,
     #[error("busy")]
     Busy,
+    #[error("profile_durability_unconfirmed")]
+    DurabilityUnconfirmed,
 }
 
 pub fn token_digest(token: &str) -> [u8; 32] {
@@ -286,28 +410,52 @@ pub struct Authority {
 #[derive(Clone)]
 struct PendingTransaction {
     token: Uuid,
-    original_available: bool,
-    changes: Vec<DeferredChange>,
-}
-#[derive(Clone)]
-enum DeferredChange {
-    Session(Uuid, SessionStatus),
-    Output(bool),
 }
 pub struct PreparedCommand {
     token: Uuid,
-    next: Box<Authority>,
+    changes: Box<PreparedChanges>,
     receipt: Receipt,
+}
+struct PreparedChanges {
+    base: Snapshot,
+    candidate: Snapshot,
+    credentials: BTreeMap<[u8; 32], Uuid>,
+    preferences: BTreeMap<Uuid, Mix>,
+    principal: Uuid,
+    command: Command,
+}
+/// A completed request never becomes a new transaction. Owners must return
+/// the stored response before reserving resources or calling external code.
+pub enum Preparation {
+    Replay(Receipt),
+    Prepared(PreparedCommand),
 }
 impl PreparedCommand {
     pub fn token(&self) -> Uuid {
         self.token
     }
     pub fn snapshot(&self) -> &Snapshot {
-        self.next.current()
+        &self.changes.candidate
     }
     pub fn persistent(&self) -> PersistentState {
-        self.next.persistent()
+        PersistentState {
+            config_revision: self.changes.candidate.config_revision,
+            version: PROTOCOL_VERSION,
+            hub_id: self.changes.candidate.hub_id,
+            revision: self.changes.candidate.revision,
+            devices: self.changes.candidate.devices.clone(),
+            credentials: self
+                .changes
+                .credentials
+                .iter()
+                .map(|(hash, id)| (*hash, *id))
+                .collect(),
+            preferences: self.changes.preferences.clone(),
+            output: Output {
+                available: true,
+                ..self.changes.candidate.output.clone()
+            },
+        }
     }
     pub fn receipt(&self) -> &Receipt {
         &self.receipt
@@ -316,6 +464,8 @@ impl PreparedCommand {
 /// No media keys, RTP counters, buffers, PCM or live sessions are persisted.
 #[derive(Serialize, Deserialize)]
 pub struct PersistentState {
+    #[serde(default)]
+    pub config_revision: u64,
     pub version: u16,
     pub hub_id: Uuid,
     pub revision: u64,
@@ -336,7 +486,11 @@ impl Authority {
         let mut this = Self {
             last_published: None,
             state: Snapshot {
+                control_version: CONTROL_VERSION,
+                config_revision: 0,
+                event_sequence: 0,
                 hub_id: Uuid::new_v4(),
+                runtime_epoch: Uuid::new_v4(),
                 revision: 0,
                 bus_id: "main".into(),
                 devices: BTreeMap::new(),
@@ -378,7 +532,17 @@ impl Authority {
         if self.credentials.contains_key(&digest) {
             return Err(ControlError::InvalidArgument);
         }
+        let config_revision = self
+            .state
+            .config_revision
+            .checked_add(1)
+            .ok_or(ControlError::QuotaExceeded)?;
+        self.state
+            .revision
+            .checked_add(1)
+            .ok_or(ControlError::QuotaExceeded)?;
         let id = Uuid::new_v4();
+        self.state.config_revision = config_revision;
         self.state.devices.insert(
             id,
             Device {
@@ -419,6 +583,7 @@ impl Authority {
     }
     pub fn persistent(&self) -> PersistentState {
         PersistentState {
+            config_revision: self.state.config_revision,
             version: PROTOCOL_VERSION,
             hub_id: self.state.hub_id,
             revision: self.state.revision,
@@ -465,7 +630,15 @@ impl Authority {
         let mut this = Self {
             last_published: None,
             state: Snapshot {
+                control_version: CONTROL_VERSION,
+                config_revision: if saved.config_revision == 0 {
+                    saved.revision
+                } else {
+                    saved.config_revision
+                },
+                event_sequence: saved.revision,
                 hub_id: saved.hub_id,
+                runtime_epoch: Uuid::new_v4(),
                 revision: saved.revision,
                 bus_id: "main".into(),
                 devices: saved.devices,
@@ -481,6 +654,16 @@ impl Authority {
         };
         this.publish()?;
         Ok(this)
+    }
+    pub fn events_after_in_runtime(
+        &self,
+        epoch: Uuid,
+        sequence: u64,
+    ) -> Result<Vec<Event>, ControlError> {
+        if epoch.is_nil() || epoch != self.state.runtime_epoch {
+            return Err(ControlError::SnapshotRequired);
+        }
+        self.events_after(sequence)
     }
     pub fn events_after(&self, revision: u64) -> Result<Vec<Event>, ControlError> {
         if revision > self.state.revision
@@ -514,9 +697,19 @@ impl Authority {
         command: Command,
         prepare: impl FnOnce(&Snapshot, &PersistentState) -> Result<(), ControlError>,
     ) -> Result<Receipt, ControlError> {
+        if let Some(receipt) = self.replay(principal, &command)? {
+            return Ok(receipt);
+        }
         if self.pending.is_some() {
             return Err(ControlError::Busy);
         }
+        self.execute_new(principal, command, prepare)
+    }
+    fn replay(
+        &self,
+        principal: Principal,
+        command: &Command,
+    ) -> Result<Option<Receipt>, ControlError> {
         let live = self
             .state
             .devices
@@ -525,22 +718,64 @@ impl Authority {
         if live.revoked || live.role != principal.role {
             return Err(ControlError::Unauthenticated);
         }
+        command.validate_version()?;
+        if command
+            .credential_id
+            .is_some_and(|id| id != principal.device_id())
+        {
+            return Err(ControlError::Unauthenticated);
+        }
+        if command
+            .runtime_epoch
+            .is_some_and(|epoch| epoch != self.state.runtime_epoch)
+        {
+            return Err(ControlError::SnapshotRequired);
+        }
         if let Some((_, previous, receipt)) = self
             .receipts
             .iter()
             .find(|(id, c, _)| *id == principal.device && c.request_id == command.request_id)
         {
-            return if previous == &command {
-                Ok(receipt.clone())
+            return if previous == command {
+                Ok(Some(receipt.clone()))
             } else {
                 Err(ControlError::IdempotencyConflict)
             };
         }
-        if command.expected_revision != self.state.revision {
+        Ok(None)
+    }
+    fn execute_new(
+        &mut self,
+        principal: Principal,
+        command: Command,
+        prepare: impl FnOnce(&Snapshot, &PersistentState) -> Result<(), ControlError>,
+    ) -> Result<Receipt, ControlError> {
+        let live = self
+            .state
+            .devices
+            .get(&principal.device)
+            .ok_or(ControlError::Unauthenticated)?;
+        if command.control_version == CONTROL_VERSION {
+            if command
+                .expected_config_revision
+                .is_some_and(|r| r != self.state.config_revision)
+                || command
+                    .expected_event_sequence
+                    .is_some_and(|s| s != self.state.event_sequence)
+            {
+                return Err(ControlError::RevisionConflict);
+            }
+        } else if command.expected_revision != Some(self.state.revision) {
             return Err(ControlError::RevisionConflict);
         }
         let mut next = self.state.clone();
         let mut receipt = Receipt {
+            config_revision: self.state.config_revision,
+            event_sequence: self
+                .state
+                .revision
+                .checked_add(1)
+                .ok_or(ControlError::QuotaExceeded)?,
             revision: self
                 .state
                 .revision
@@ -757,7 +992,15 @@ impl Authority {
             );
         }
         let mut preferences = self.preferences.clone();
-        for stream in next.streams.values() {
+        if let Operation::StreamMix {
+            stream_id,
+            gain_db,
+            muted,
+            ..
+        } = &command.operation
+            && (gain_db.is_some() || muted.is_some())
+        {
+            let stream = &next.streams[stream_id];
             preferences.insert(
                 stream.device_id,
                 Mix {
@@ -766,7 +1009,24 @@ impl Authority {
                 },
             );
         }
+        let config_changed = next.devices != self.state.devices
+            || credentials != self.credentials
+            || preferences != self.preferences
+            || next.output.id != self.state.output.id
+            || next.output.gain_db != self.state.output.gain_db
+            || next.output.muted != self.state.output.muted;
+        next.config_revision = if config_changed {
+            self.state
+                .config_revision
+                .checked_add(1)
+                .ok_or(ControlError::QuotaExceeded)?
+        } else {
+            self.state.config_revision
+        };
+        next.event_sequence = next.revision;
+        receipt.config_revision = next.config_revision;
         let saved = PersistentState {
+            config_revision: next.config_revision,
             version: PROTOCOL_VERSION,
             hub_id: next.hub_id,
             revision: next.revision,
@@ -792,28 +1052,37 @@ impl Authority {
     }
     /// Stage a durable command while holding only the short control mutex.
     /// The owner must commit or abort the returned token after external work.
-    /// Other durable mutations return Busy; health updates are retained.
+    /// Other durable mutations return Busy; live health still publishes immediately.
+    pub fn transaction_pending(&self) -> bool {
+        self.pending.is_some()
+    }
     pub fn prepare_transaction(
         &mut self,
         principal: Principal,
         command: Command,
-    ) -> Result<PreparedCommand, ControlError> {
+    ) -> Result<Preparation, ControlError> {
+        if let Some(receipt) = self.replay(principal, &command)? {
+            return Ok(Preparation::Replay(receipt));
+        }
         if self.pending.is_some() {
             return Err(ControlError::Busy);
         }
         let mut next = self.clone();
-        let receipt = next.execute(principal, command, |_| Ok(()))?;
+        let receipt = next.execute(principal, command.clone(), |_| Ok(()))?;
         let token = Uuid::new_v4();
-        self.pending = Some(PendingTransaction {
+        self.pending = Some(PendingTransaction { token });
+        Ok(Preparation::Prepared(PreparedCommand {
             token,
-            original_available: self.state.output.available,
-            changes: Vec::new(),
-        });
-        Ok(PreparedCommand {
-            token,
-            next: Box::new(next),
+            changes: Box::new(PreparedChanges {
+                base: self.state.clone(),
+                candidate: next.state,
+                credentials: next.credentials,
+                preferences: next.preferences,
+                principal: principal.device_id(),
+                command,
+            }),
             receipt,
-        })
+        }))
     }
     pub fn commit_transaction(
         &mut self,
@@ -823,50 +1092,115 @@ impl Authority {
             .pending
             .as_ref()
             .is_none_or(|p| p.token != prepared.token)
+            || prepared.changes.base.hub_id != self.state.hub_id
+            || prepared.changes.base.runtime_epoch != self.state.runtime_epoch
         {
             return Err(ControlError::Busy);
         }
-        let pending = self.pending.take().unwrap();
-        *self = *prepared.next;
-        self.replay_health(pending);
-        Ok(prepared.receipt)
+        let revision = self
+            .state
+            .revision
+            .checked_add(1)
+            .ok_or(ControlError::QuotaExceeded)?;
+        let PreparedCommand {
+            changes,
+            mut receipt,
+            ..
+        } = prepared;
+        let PreparedChanges {
+            base,
+            candidate,
+            credentials,
+            preferences,
+            principal,
+            command,
+        } = *changes;
+        // Merge only this transaction's changes into the latest runtime. Health
+        // events and terminal sessions published during fsync are never restored
+        // from the preparation snapshot.
+        self.state.config_revision = candidate.config_revision;
+        self.state.devices = candidate.devices;
+        self.credentials = credentials;
+        self.preferences = preferences;
+        self.state.output.id = candidate.output.id;
+        self.state.output.gain_db = candidate.output.gain_db;
+        self.state.output.muted = candidate.output.muted;
+        for id in base.sessions.keys() {
+            if !candidate.sessions.contains_key(id) {
+                self.state.sessions.remove(id);
+            }
+        }
+        for (id, mut session) in candidate.sessions {
+            match base.sessions.get(&id) {
+                None => {
+                    session.created_revision = revision;
+                    if !self.state.output.available {
+                        session.status = SessionStatus::OutputLost;
+                    }
+                    self.state.sessions.insert(id, session);
+                }
+                Some(previous) if previous != &session => {
+                    if let Some(current) = self.state.sessions.get_mut(&id)
+                        && current.status.active()
+                    {
+                        current.status = session.status;
+                    }
+                }
+                _ => {}
+            }
+        }
+        for id in base.streams.keys() {
+            if !candidate.streams.contains_key(id) {
+                self.state.streams.remove(id);
+            }
+        }
+        for (id, stream) in candidate.streams {
+            if base.streams.get(&id) != Some(&stream)
+                && self
+                    .state
+                    .sessions
+                    .get(&stream.session_id)
+                    .is_some_and(|s| s.status.active())
+            {
+                self.state.streams.insert(id, stream);
+            }
+        }
+        self.pending = None;
+        self.state.revision = revision;
+        self.state.event_sequence = revision;
+        self.record_event();
+        receipt.revision = revision;
+        receipt.event_sequence = revision;
+        receipt.config_revision = self.state.config_revision;
+        if self.receipts.len() == 128 {
+            self.receipts.pop_front();
+        }
+        self.receipts
+            .push_back((principal, command, receipt.clone()));
+        Ok(receipt)
     }
     pub fn abort_transaction(&mut self, token: Uuid) -> Result<(), ControlError> {
         if self.pending.as_ref().is_none_or(|p| p.token != token) {
             return Err(ControlError::Busy);
         }
-        let pending = self.pending.take().unwrap();
-        self.state.output.available = pending.original_available;
-        self.replay_health(pending);
+        self.pending = None;
         Ok(())
     }
-    fn replay_health(&mut self, pending: PendingTransaction) {
-        for change in pending.changes {
-            match change {
-                DeferredChange::Session(id, status) => {
-                    let _ = self.set_session_status(id, status);
-                }
-                DeferredChange::Output(available) => {
-                    let _ = self.set_output_available(available);
-                }
-            }
-        }
+    fn check_health_sequence(&self) -> Result<(), ControlError> {
+        // Keep one event slot in the numeric sequence reserved for a prepared
+        // command. This bound is about u64 exhaustion, not the event ring size.
+        self.state
+            .revision
+            .checked_add(if self.pending.is_some() { 2 } else { 1 })
+            .ok_or(ControlError::QuotaExceeded)
+            .map(|_| ())
     }
     pub fn set_session_status(
         &mut self,
         id: Uuid,
         status: SessionStatus,
     ) -> Result<(), ControlError> {
-        if let Some(pending) = self.pending.as_mut() {
-            if !self.state.sessions.contains_key(&id) {
-                return Err(ControlError::NotFound);
-            }
-            pending
-                .changes
-                .retain(|c| !matches!(c, DeferredChange::Session(existing, _) if *existing == id));
-            pending.changes.push(DeferredChange::Session(id, status));
-            return Ok(());
-        }
+        let sequence_capacity = self.check_health_sequence();
         let s = self
             .state
             .sessions
@@ -878,6 +1212,7 @@ impl Authority {
         if s.status == status {
             return Ok(());
         }
+        sequence_capacity?;
         self.state
             .revision
             .checked_add(1)
@@ -889,19 +1224,10 @@ impl Authority {
         self.publish()
     }
     pub fn set_output_available(&mut self, available: bool) -> Result<(), ControlError> {
-        if let Some(pending) = self.pending.as_mut() {
-            // Availability is a live safety observation even while durable state
-            // is frozen; callers must reject new admission immediately.
-            self.state.output.available = available;
-            pending
-                .changes
-                .retain(|c| !matches!(c, DeferredChange::Output(_)));
-            pending.changes.push(DeferredChange::Output(available));
-            return Ok(());
-        }
         if self.state.output.available == available {
             return Ok(());
         }
+        self.check_health_sequence()?;
         self.state
             .revision
             .checked_add(1)
@@ -927,6 +1253,7 @@ impl Authority {
             .revision
             .checked_add(1)
             .ok_or(ControlError::QuotaExceeded)?;
+        self.state.event_sequence = self.state.revision;
         self.record_event();
         Ok(())
     }
@@ -936,6 +1263,10 @@ impl Authority {
         }
         let previous = self.last_published.as_ref();
         self.events.push_back(Event {
+            control_version: CONTROL_VERSION,
+            config_revision: self.state.config_revision,
+            event_sequence: self.state.event_sequence,
+            runtime_epoch: self.state.runtime_epoch,
             revision: self.state.revision,
             hub_id: self.state.hub_id,
             devices: self

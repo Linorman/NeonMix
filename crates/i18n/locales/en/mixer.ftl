@@ -1,0 +1,56 @@
+mixer-audio-video-sync = Audio-video sync
+mixer-channel = Channel
+mixer-channel-detail-title = Details for “{ $name }”
+mixer-channel-mute = Mute “{ $name }”
+mixer-channel-volume = Volume for “{ $name }”
+mixer-channels-appear-here-after-a-sender-pairs-and = Channels appear here after a Sender pairs and starts sending, or an AirPlay source connects.
+mixer-clock-drift = Clock drift
+mixer-collapse = Collapse
+mixer-create-and-start-sharing-a-room-in-hub = Create and start sharing a room in Hub settings, or pair with a room on the Sender page, then mix here.
+mixer-details = Details
+mixer-details-accessible = Details for “{ $name }”
+mixer-disconnect-airplay-source = Disconnect AirPlay source
+mixer-disconnect-device = Disconnect device
+mixer-end-this-device-s-audio-and-revoke-its = End this device's audio and revoke its pairing on every entry.
+mixer-end-this-device-s-session-allow-playback-again = End this device's session. Allow playback again in Devices before it can send again.
+mixer-go-to-hub-settings = Go to Hub settings
+mixer-go-to-sender = Go to Sender
+mixer-input-channels = Input channels
+mixer-input-count =
+    { $count ->
+        [one] { $count } channel
+       *[other] { $count } channels
+    }
+mixer-last-60-seconds = Last 60 seconds
+mixer-levels-and-faders = Levels and faders
+mixer-levels-use-the-latest-50-ms-stereo-window = Levels use the latest 50 ms stereo window. Channels are measured after Mute/Solo and gain, before the master; the master is measured after limiting. Solid fill is RMS, light fill is peak, and lines show peak hold. Drag a fader (Shift for fine adjustment), double-click for 0 dB, or scroll while focused or holding Alt/Option.
+mixer-limiter-gain-reduction-top-to-bottom-12-db = Limiter gain reduction (top to bottom, 12 dB full scale)
+mixer-limiter-value = Limiting { $value } dB
+mixer-low-latency = Low latency
+mixer-master-controls-require-a-controller-or-administrator = Master controls require a controller or administrator
+mixer-master-controls-require-a-room-controller-or-administrator = Master controls require a room controller or administrator. You currently have view-only access.
+mixer-master-muted = Master muted
+mixer-master-volume = Master volume
+mixer-media-network = Media network
+mixer-mixer-queue-estimate = Mixer queue estimate
+mixer-mute = Mute
+mixer-mute-master = Mute master
+mixer-no-inputs = No inputs
+mixer-no-room-connected-yet = No room connected yet
+mixer-output-active = Output active
+mixer-output-unavailable = Output unavailable
+mixer-output-unavailable-waiting-for-device-recovery = Output unavailable · Waiting for device recovery
+mixer-playback-mode-note = Playback mode: { $mode } (disconnect, then change in Devices)
+mixer-recording = Recording…
+mixer-revoke-airplay-pairing = Revoke AirPlay pairing
+mixer-rms-per-channel-hatching-marks-muted-or-solo = RMS per channel · Hatching marks muted or solo-excluded channels · Kept only in this window
+mixer-room-master = Room master
+mixer-select-channel = Select channel
+mixer-state-summary = { $count } active · { $muted } muted · { $solo } solo · Revision { $revision }
+mixer-the-limiter-is-reducing-output-peaks = The limiter is reducing output peaks
+mixer-unavailable = Unavailable
+mixer-unmute-master = Unmute master
+mixer-view-in-devices = View in Devices
+mixer-volume = Volume
+mixer-role-status = { $role } · { $status }
+mixer-solo = Solo

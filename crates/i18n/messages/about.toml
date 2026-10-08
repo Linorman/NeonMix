@@ -1,0 +1,48 @@
+[[message]]
+id = "about-audio-mixing-across-devices-on-your-local-network"
+
+[[message]]
+id = "about-build-information"
+
+[[message]]
+id = "about-commit"
+
+[[message]]
+id = "about-copied"
+
+[[message]]
+id = "about-copy-version-information"
+
+[[message]]
+id = "about-display"
+
+[[message]]
+id = "about-license"
+
+[[message]]
+id = "about-only-affects-this-window"
+
+[[message]]
+id = "about-open-in-browser"
+
+[[message]]
+id = "about-platform"
+
+[[message]]
+id = "about-reduce-motion"
+
+[[message]]
+id = "about-reduced-motion-is-on"
+
+[[message]]
+id = "about-signal-particles-and-radar-scans-become-static-and"
+
+[[message]]
+id = "about-source-repository"
+
+[[message]]
+id = "about-version"
+
+[[message]]
+id = "about-version-value"
+args = { version = "string" }

@@ -78,6 +78,9 @@ enum Command {
         /// Restore the display name from a persistent output binding.
         #[arg(long)]
         output_binding: Option<std::path::PathBuf>,
+        /// Owning background generation; manual owners receive a fresh identity.
+        #[arg(long)]
+        instance_generation: Option<String>,
     },
     /// Create a user-session PipeWire sink for E01 capture experiments (Linux).
     Sink {
@@ -410,7 +413,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         Command::VirtualOutput {
             state_directory,
             output_binding,
-        } => virtual_output::run(&state_directory, output_binding.as_deref())?,
+            instance_generation,
+        } => virtual_output::run(
+            &state_directory,
+            output_binding.as_deref(),
+            instance_generation.as_deref(),
+        )?,
         Command::Sink {
             room,
             seconds,

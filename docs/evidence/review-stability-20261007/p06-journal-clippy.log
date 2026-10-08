@@ -1,0 +1,6 @@
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.82s

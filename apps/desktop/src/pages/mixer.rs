@@ -8,7 +8,18 @@ use egui::{Align, CornerRadius, Layout, Margin, Stroke};
 
 impl Desktop {
     pub(crate) fn mixer_page(&mut self, ui: &mut egui::Ui) {
+        let text_mixer_input_channels = self.tr(&Message::MixerInputChannels);
+        let text_mixer_mute = self.tr(&Message::MixerMute);
+        let text_mixer_volume = self.tr(&Message::MixerVolume);
+        let text_mixer_select_channel = self.tr(&Message::MixerSelectChannel);
+        let text_mixer_no_inputs = self.tr(&Message::MixerNoInputs);
+        let text_mixer_channels_appear_here_after_a_sender_pairs_and =
+            self.tr(&Message::MixerChannelsAppearHereAfterASenderPairsAnd);
+        let text_mixer_levels_and_faders = self.tr(&Message::MixerLevelsAndFaders);
+        let text_mixer_levels_use_the_latest_50_ms_stereo_window =
+            self.tr(&Message::MixerLevelsUseTheLatest50MsStereoWindow);
         let Some(state) = self.snapshot.clone() else {
+            self.selected_lane = None;
             self.mixer_empty(ui);
             return;
         };
@@ -18,8 +29,14 @@ impl Desktop {
             self.master_hero(ui, &state);
         }
         let wide = ui.available_width() >= 620.0;
-        widgets::section(ui, "输入通道", |ui| {
-            widgets::pill(ui, &format!("{} 路", lanes.len()), Tone::Neutral);
+        widgets::section(ui, text_mixer_input_channels.as_str(), |ui| {
+            widgets::pill(
+                ui,
+                &self.tr(&Message::MixerInputCount {
+                    count: (lanes.len()) as u64,
+                }),
+                Tone::Neutral,
+            );
             if wide && !lanes.is_empty() {
                 // Keys follow the fader direction of the current layout.
                 let (pick, gain) = if console {
@@ -28,31 +45,30 @@ impl Desktop {
                     ("↑ ↓", "← →")
                 };
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    widgets::note(ui, "Solo");
+                    widgets::note(ui, self.tr(&Message::MixerSolo));
                     widgets::kbd(ui, "S");
-                    widgets::note(ui, "静音");
+                    widgets::note(ui, text_mixer_mute.as_str());
                     widgets::kbd(ui, "M");
-                    widgets::note(ui, "音量");
+                    widgets::note(ui, text_mixer_volume.as_str());
                     widgets::kbd(ui, gain);
-                    widgets::note(ui, "选择通道");
+                    widgets::note(ui, text_mixer_select_channel.as_str());
                     widgets::kbd(ui, pick);
                 });
             }
         });
+        let focus = self.mixer_keys(ui, &lanes, console);
         if lanes.is_empty() {
             widgets::surface(ui, None, Margin::same(16), |ui| {
                 ui.set_min_width(ui.available_width());
                 widgets::empty(
                     ui,
-                    "暂无输入",
-                    "Sender 配对并开始发送，或 AirPlay 来源连接后，通道会显示在这里。",
+                    text_mixer_no_inputs.as_str(),
+                    text_mixer_channels_appear_here_after_a_sender_pairs_and.as_str(),
                 );
             });
         } else if console {
-            let focus = self.mixer_keys(ui, &lanes, true);
             self.console(ui, &state, &lanes, focus);
         } else {
-            let focus = self.mixer_keys(ui, &lanes, false);
             ui.spacing_mut().item_spacing.y = 8.0;
             for lane in &lanes {
                 ui.push_id(lane.key, |ui| {
@@ -63,48 +79,55 @@ impl Desktop {
         }
         self.level_ribbon(ui, &lanes);
         ui.label(
-            RichText::new("电平与推子说明")
+            RichText::new(text_mixer_levels_and_faders.as_str())
                 .size(theme::SMALL)
                 .color(theme::TEXT_3)
                 .underline(),
         )
-        .on_hover_text(
-            "电平为最近 50 ms 双声道窗口：每路在 Mute/Solo 与增益之后、总控之前测量，总控在限幅之后。实心为 RMS，浅色为峰值，横线/竖线为峰值保持。推子按住拖动（Shift 微调），双击回到 0 dB；聚焦后或按住 Option 可用滚轮调节。",
-        );
+        .on_hover_text(text_mixer_levels_use_the_latest_50_ms_stereo_window.as_str());
     }
 
     fn mixer_empty(&mut self, ui: &mut egui::Ui) {
+        let text_mixer_no_room_connected_yet = self.tr(&Message::MixerNoRoomConnectedYet);
+        let text_mixer_create_and_start_sharing_a_room_in_hub =
+            self.tr(&Message::MixerCreateAndStartSharingARoomInHub);
+        let text_mixer_go_to_hub_settings = self.tr(&Message::MixerGoToHubSettings);
+        let text_mixer_go_to_sender = self.tr(&Message::MixerGoToSender);
         widgets::surface(ui, None, Margin::same(24), |ui| {
             ui.set_min_width(ui.available_width());
             ui.vertical_centered(|ui| {
-                    let (rect, _) = ui.allocate_exact_size(egui::vec2(40.0, 40.0), egui::Sense::hover());
-                    ui.painter()
-                        .circle_filled(rect.center(), 20.0, theme::ACCENT.gamma_multiply(0.12));
-                    icons::paint(
-                        ui.painter(),
-                        icons::square(rect.center(), 20.0),
-                        icons::Icon::Mixer,
-                        theme::ACCENT,
-                    );
-                    ui.add_space(6.0);
-                    ui.label(
-                        RichText::new("尚未连接房间")
-                            .font(theme::heading(17.0))
-                            .color(theme::TEXT),
-                    );
-                    widgets::note(
-                        ui,
-                        "在 Hub 设置中创建并开始共享房间，或在 Sender 页面配对一个房间，然后在这里调音。",
-                    );
-                    ui.add_space(6.0);
-                });
+                let (rect, _) =
+                    ui.allocate_exact_size(egui::vec2(40.0, 40.0), egui::Sense::hover());
+                ui.painter()
+                    .circle_filled(rect.center(), 20.0, theme::ACCENT.gamma_multiply(0.12));
+                icons::paint(
+                    ui.painter(),
+                    icons::square(rect.center(), 20.0),
+                    icons::Icon::Mixer,
+                    theme::ACCENT,
+                );
+                ui.add_space(6.0);
+                ui.label(
+                    RichText::new(text_mixer_no_room_connected_yet.as_str())
+                        .font(theme::heading(17.0))
+                        .color(theme::TEXT),
+                );
+                widgets::note(
+                    ui,
+                    text_mixer_create_and_start_sharing_a_room_in_hub.as_str(),
+                );
+                ui.add_space(6.0);
+            });
             ui.horizontal(|ui| {
                 let pad = ((ui.available_width() - 260.0) / 2.0).max(0.0);
                 ui.add_space(pad);
-                if widgets::button(ui, "前往 Hub 设置", Kind::Primary).clicked() {
+                if widgets::button(ui, text_mixer_go_to_hub_settings.as_str(), Kind::Primary)
+                    .clicked()
+                {
                     self.navigate(Page::Hub);
                 }
-                if widgets::button(ui, "前往 Sender", Kind::Secondary).clicked() {
+                if widgets::button(ui, text_mixer_go_to_sender.as_str(), Kind::Secondary).clicked()
+                {
                     self.navigate(Page::Sender);
                 }
             });
@@ -124,6 +147,16 @@ impl Desktop {
         lanes: &[Lane],
         console: bool,
     ) -> Option<u64> {
+        if lanes.is_empty() {
+            self.selected_lane = None;
+            return None;
+        }
+        if self
+            .selected_lane
+            .is_some_and(|key| !lanes.iter().any(|lane| lane.key == key))
+        {
+            self.selected_lane = None;
+        }
         let ctx = ui.ctx().clone();
         let mut focus_to = None;
         if ctx.wants_keyboard_input() || self.confirm.is_some() || self.palette.is_some() {
@@ -170,6 +203,19 @@ impl Desktop {
     }
 
     fn master_hero(&mut self, ui: &mut egui::Ui, state: &Snapshot) {
+        let renderer = self.localization.renderer.clone();
+        let text_mixer_output_unavailable_waiting_for_device_recovery =
+            renderer.render(&Message::MixerOutputUnavailableWaitingForDeviceRecovery);
+        let text_mixer_master_muted = renderer.render(&Message::MixerMasterMuted);
+        let text_mixer_output_active = renderer.render(&Message::MixerOutputActive);
+        let text_mixer_room_master = renderer.render(&Message::MixerRoomMaster);
+        let text_mixer_the_limiter_is_reducing_output_peaks =
+            renderer.render(&Message::MixerTheLimiterIsReducingOutputPeaks);
+        let text_mixer_master_volume = renderer.render(&Message::MixerMasterVolume);
+        let text_mixer_unmute_master = renderer.render(&Message::MixerUnmuteMaster);
+        let text_mixer_mute_master = renderer.render(&Message::MixerMuteMaster);
+        let text_mixer_master_controls_require_a_room_controller_or_administrator =
+            renderer.render(&Message::MixerMasterControlsRequireARoomControllerOrAdministrator);
         let output_name = self
             .devices
             .iter()
@@ -177,21 +223,20 @@ impl Desktop {
             .map(|d| d.name.clone())
             .unwrap_or_else(|| state.output.id.clone());
         let limiter = self
-            .diagnostics
-            .as_ref()
-            .and_then(|v| v.pointer("/meters/limiter_gain"))
+            .meters_current()
+            .and_then(|v| v.get("limiter_gain"))
             .and_then(Value::as_f64);
         let (pill, tone) = if !state.output.available {
-            ("输出丢失 · 等待设备恢复", Tone::Warning)
+            (
+                text_mixer_output_unavailable_waiting_for_device_recovery.as_str(),
+                Tone::Warning,
+            )
         } else if state.output.muted {
-            ("总静音中", Tone::Warning)
+            (text_mixer_master_muted.as_str(), Tone::Warning)
         } else {
-            ("正在输出", Tone::Success)
+            (text_mixer_output_active.as_str(), Tone::Success)
         };
-        let meter = self
-            .diagnostics
-            .as_ref()
-            .and_then(|v| v.pointer("/meters/output"));
+        let meter = self.meters_current().and_then(|v| v.get("output"));
         let (peak, rms) = (
             meter.and_then(|v| v["peak"].as_f64()),
             meter.and_then(|v| v["rms"].as_f64()),
@@ -199,7 +244,7 @@ impl Desktop {
         let can = self.controls_room();
         widgets::card_ex(
             ui,
-            "房间总控",
+            text_mixer_room_master.as_str(),
             Some(&output_name),
             Some(tone.color()),
             |ui| {
@@ -207,10 +252,12 @@ impl Desktop {
                 if let Some(g) = limiter.filter(|g| *g < 0.999) {
                     widgets::pill(
                         ui,
-                        &format!("限幅 {} dB", widgets::db_text(g)),
+                        &renderer.render(&Message::MixerLimiterValue {
+                            value: (widgets::db_text(g)).to_string(),
+                        }),
                         Tone::Warning,
                     )
-                    .on_hover_text("限幅器正在压低输出峰值");
+                    .on_hover_text(text_mixer_the_limiter_is_reducing_output_peaks.as_str());
                 }
             },
             |ui| {
@@ -221,7 +268,7 @@ impl Desktop {
                 let readout = |ui: &mut egui::Ui| {
                     ui.vertical(|ui| {
                         ui.spacing_mut().item_spacing.y = 0.0;
-                        let caption = widgets::caption(ui, "总音量");
+                        let caption = widgets::caption(ui, text_mixer_master_volume.as_str());
                         ui.label(
                             RichText::new(format!("{} dB", widgets::gain_text(shown)))
                                 .monospace()
@@ -256,7 +303,7 @@ impl Desktop {
                                         ui,
                                         0,
                                         current,
-                                        "总音量",
+                                        text_mixer_master_volume.as_str(),
                                         FaderSize::Hero,
                                     );
                                     response.labelled_by(caption.id);
@@ -266,8 +313,13 @@ impl Desktop {
                         });
                     } else {
                         let caption = readout(ui);
-                        let (commit, response) =
-                            self.gain_control(ui, 0, current, "总音量", FaderSize::Hero);
+                        let (commit, response) = self.gain_control(
+                            ui,
+                            0,
+                            current,
+                            text_mixer_master_volume.as_str(),
+                            FaderSize::Hero,
+                        );
                         response.labelled_by(caption.id);
                         committed = commit;
                     }
@@ -278,9 +330,9 @@ impl Desktop {
                             true,
                             muted,
                             if muted {
-                                "取消总静音"
+                                text_mixer_unmute_master.as_str()
                             } else {
-                                "总静音"
+                                text_mixer_mute_master.as_str()
                             },
                             Tone::Warning,
                         )
@@ -318,11 +370,12 @@ impl Desktop {
                                         .count();
                                 widgets::note(
                                     ui,
-                                    format!(
-                                        "活动 {} 路 · 静音 {muted} · Solo {solo} · 版本 {}",
-                                        state.streams.len() + sessions.len(),
-                                        state.revision
-                                    ),
+                                    renderer.render(&Message::MixerStateSummary {
+                                        count: (state.streams.len() + sessions.len()) as u64,
+                                        muted: (muted) as u64,
+                                        solo: (solo) as u64,
+                                        revision: state.revision,
+                                    }),
                                 );
                             });
                         }
@@ -331,14 +384,21 @@ impl Desktop {
                 if let Some(gain) = committed {
                     self.master_gain(current, gain);
                 }
+                self.command_note(ui, 0);
                 if !can {
-                    widgets::note(ui, "总控需要房间控制者或管理员身份；当前只能查看。");
+                    widgets::note(
+                        ui,
+                        text_mixer_master_controls_require_a_room_controller_or_administrator
+                            .as_str(),
+                    );
                 }
             },
         );
     }
 
     fn lane_row(&mut self, ui: &mut egui::Ui, lane: &Lane, focus_fader: bool, wide: bool) {
+        let renderer = self.localization.renderer.clone();
+        let text_mixer_mute = renderer.render(&Message::MixerMute);
         let selected = self.selected_lane == Some(lane.key);
         let open = self.lane_details.contains(&lane.key);
         let ctx = ui.ctx().clone();
@@ -371,10 +431,14 @@ impl Desktop {
                     .get(&lane.key)
                     .copied()
                     .unwrap_or(lane.gain);
+                let command_status = self
+                    .command_status(lane.key)
+                    .map(|message| renderer.render(&message))
+                    .unwrap_or_default();
                 let name_block = |ui: &mut egui::Ui, width: f32| {
                     let r = ui
                         .allocate_ui_with_layout(
-                            egui::vec2(width, 40.0),
+                            egui::vec2(width, 56.0),
                             Layout::left_to_right(Align::Center),
                             |ui| {
                                 let color = if lane.airplay_target.is_some() {
@@ -416,19 +480,31 @@ impl Desktop {
                                     );
                                     ui.horizontal(|ui| {
                                         ui.spacing_mut().item_spacing.x = 4.0;
-                                        if let Some(role) = lane.role {
+                                        if let Some(role) = lane.role.as_ref() {
                                             ui.label(
-                                                RichText::new(format!("{role} ·"))
-                                                    .size(theme::SMALL)
-                                                    .color(theme::TEXT_3),
+                                                RichText::new(format!(
+                                                    "{} ·",
+                                                    renderer.render(role)
+                                                ))
+                                                .size(theme::SMALL)
+                                                .color(theme::TEXT_3),
                                             );
                                         }
                                         ui.label(
-                                            RichText::new(lane.status)
+                                            RichText::new(renderer.render(&lane.status))
                                                 .size(theme::SMALL)
                                                 .color(lane.tone.color()),
                                         );
                                     });
+                                    ui.add(
+                                        egui::Label::new(
+                                            RichText::new(&command_status)
+                                                .size(11.)
+                                                .color(theme::TEXT_3),
+                                        )
+                                        .truncate(),
+                                    )
+                                    .on_hover_text(&command_status);
                                 });
                             },
                         )
@@ -454,26 +530,42 @@ impl Desktop {
                 let controls = |ui: &mut egui::Ui, details: bool| {
                     let mut out = (None, None, false);
                     ui.spacing_mut().item_spacing.x = 6.0;
-                    let mute = widgets::toggle(ui, lane.can_mix, lane.muted, "静音", Tone::Warning);
+                    let mute = widgets::toggle(
+                        ui,
+                        lane.can_mix,
+                        lane.muted,
+                        text_mixer_mute.as_str(),
+                        Tone::Warning,
+                    );
                     mute.widget_info(|| {
                         egui::WidgetInfo::selected(
                             egui::WidgetType::Button,
                             lane.can_mix,
                             lane.muted,
-                            format!("静音「{}」", lane.name),
+                            renderer.render(&Message::MixerChannelMute {
+                                name: (lane.name).to_string(),
+                            }),
                         )
                     });
                     if mute.clicked() {
                         out.0 = Some(!lane.muted);
                     }
                     if lane.can_solo {
-                        let solo = widgets::toggle(ui, true, lane.solo, "Solo", Tone::Solo);
+                        let solo = widgets::toggle(
+                            ui,
+                            true,
+                            lane.solo,
+                            &renderer.render(&Message::MixerSolo),
+                            Tone::Solo,
+                        );
                         solo.widget_info(|| {
                             egui::WidgetInfo::selected(
                                 egui::WidgetType::Button,
                                 true,
                                 lane.solo,
-                                format!("Solo「{}」", lane.name),
+                                renderer.render(&Message::LaneSoloSource {
+                                    name: lane.name.clone(),
+                                }),
                             )
                         });
                         if solo.clicked() {
@@ -511,7 +603,9 @@ impl Desktop {
                                             ui,
                                             lane.key,
                                             lane.gain,
-                                            &format!("「{}」音量", lane.name),
+                                            &renderer.render(&Message::MixerChannelVolume {
+                                                name: (lane.name).to_string(),
+                                            }),
                                             FaderSize::Row,
                                         );
                                         if focus_fader {
@@ -559,7 +653,9 @@ impl Desktop {
                                             ui,
                                             lane.key,
                                             lane.gain,
-                                            &format!("「{}」音量", lane.name),
+                                            &renderer.render(&Message::MixerChannelVolume {
+                                                name: (lane.name).to_string(),
+                                            }),
                                             FaderSize::Row,
                                         );
                                         if focus_fader {
@@ -611,29 +707,56 @@ impl Desktop {
     }
 
     pub(crate) fn lane_detail_panel(&mut self, ui: &mut egui::Ui, lane: &Lane) {
+        let text_mixer_mixer_queue_estimate = self.tr(&Message::MixerMixerQueueEstimate);
+        let text_mixer_unavailable = self.tr(&Message::MixerUnavailable);
+        let text_mixer_clock_drift = self.tr(&Message::MixerClockDrift);
+        let text_mixer_media_network = self.tr(&Message::MixerMediaNetwork);
+        let text_mixer_channel = self.tr(&Message::MixerChannel);
+        let text_mixer_low_latency = self.tr(&Message::MixerLowLatency);
+        let text_mixer_audio_video_sync = self.tr(&Message::MixerAudioVideoSync);
+        let text_mixer_disconnect_airplay_source = self.tr(&Message::MixerDisconnectAirplaySource);
+        let text_mixer_revoke_airplay_pairing = self.tr(&Message::MixerRevokeAirplayPairing);
+        let text_mixer_disconnect_device = self.tr(&Message::MixerDisconnectDevice);
+        let text_mixer_end_this_device_s_session_allow_playback_again =
+            self.tr(&Message::MixerEndThisDeviceSSessionAllowPlaybackAgain);
+        let text_mixer_view_in_devices = self.tr(&Message::MixerViewInDevices);
         use neonmix_airplay_adapter::control::AirplayActionV2 as AirplayAction;
         widgets::inset(ui, |ui| {
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing.x = 28.0;
                 widgets::metric(
                     ui,
-                    "Mixer 队列估计",
+                    text_mixer_mixer_queue_estimate.as_str(),
                     &lane
                         .queue_ms
-                        .map_or("未取得".into(), |ms| format!("{ms:.1} ms")),
+                        .map_or(text_mixer_unavailable.as_str().into(), |ms| {
+                            format!("{ms:.1} ms")
+                        }),
                     None,
                 );
                 widgets::metric(
                     ui,
-                    "时钟漂移",
+                    text_mixer_clock_drift.as_str(),
                     &lane
                         .drift_ppm
-                        .map_or("未取得".into(), |p| format!("{p:+.1} ppm")),
+                        .map_or(text_mixer_unavailable.as_str().into(), |p| {
+                            format!("{p:+.1} ppm")
+                        }),
                     None,
                 );
-                widgets::metric(ui, "媒体网络", lane.network.0, lane.network.1);
+                widgets::metric(
+                    ui,
+                    text_mixer_media_network.as_str(),
+                    &self.tr(&lane.network.0),
+                    lane.network.1,
+                );
                 if lane.airplay_target.is_none() {
-                    widgets::metric(ui, "通道", &format!("…{}", short_id(lane.key)), None);
+                    widgets::metric(
+                        ui,
+                        text_mixer_channel.as_str(),
+                        &format!("…{}", short_id(lane.key)),
+                        None,
+                    );
                 }
             });
             if let Some((source_id, session_id)) = &lane.airplay_target {
@@ -641,23 +764,38 @@ impl Desktop {
                     .airplay_sessions()
                     .into_iter()
                     .find(|s| s["session_id"].as_u64() == Some(*session_id))
-                    .map_or("低延迟", |s| {
+                    .map_or(text_mixer_low_latency.as_str(), |s| {
                         if s["playback_mode"].as_str() == Some("synchronized") {
-                            "音画同步"
+                            text_mixer_audio_video_sync.as_str()
                         } else {
-                            "低延迟"
+                            text_mixer_low_latency.as_str()
                         }
                     });
-                widgets::note(ui, format!("播放方式：{mode}（断开后在设备管理中切换）"));
+                widgets::note(
+                    ui,
+                    self.tr(&Message::MixerPlaybackModeNote {
+                        mode: (mode).to_string(),
+                    }),
+                );
                 if self.admin() {
                     ui.horizontal_wrapped(|ui| {
-                        if widgets::button(ui, "断开 AirPlay 来源", Kind::Secondary).clicked() {
+                        if widgets::button(
+                            ui,
+                            text_mixer_disconnect_airplay_source.as_str(),
+                            Kind::Secondary,
+                        )
+                        .clicked()
+                        {
                             self.airplay_operation(AirplayAction::DisconnectSource {
                                 source_id: source_id.clone(),
                                 session_id: *session_id,
                             });
                         }
-                        let revoke = widgets::button(ui, "撤销 AirPlay 配对", Kind::Quiet);
+                        let revoke = widgets::button(
+                            ui,
+                            text_mixer_revoke_airplay_pairing.as_str(),
+                            Kind::Quiet,
+                        );
                         if revoke.clicked()
                             && let Some(request) =
                                 self.airplay_request(AirplayAction::RevokeSource {
@@ -666,8 +804,10 @@ impl Desktop {
                                 })
                         {
                             self.confirmation(
-                                format!("撤销 {} 的配对", lane.name),
-                                "结束该设备音频，并撤销它在所有入口的配对。".into(),
+                                Message::DevicesRevokeTitle {
+                                    name: (lane.name).to_string(),
+                                },
+                                Message::MixerEndThisDeviceSAudioAndRevokeIts,
                                 request,
                                 revoke.id,
                             );
@@ -678,15 +818,17 @@ impl Desktop {
                 && let Some(device_id) = lane.device_id
             {
                 ui.horizontal_wrapped(|ui| {
-                    if widgets::button(ui, "断开设备", Kind::Quiet)
+                    if widgets::button(ui, text_mixer_disconnect_device.as_str(), Kind::Quiet)
                         .on_hover_text(
-                            "结束该设备的会话；需要在设备管理中重新允许后，它才能再次发送",
+                            text_mixer_end_this_device_s_session_allow_playback_again.as_str(),
                         )
                         .clicked()
                     {
                         self.operation(Operation::Disconnect { device_id });
                     }
-                    if widgets::button(ui, "在设备管理中查看", Kind::Secondary).clicked() {
+                    if widgets::button(ui, text_mixer_view_in_devices.as_str(), Kind::Secondary)
+                        .clicked()
+                    {
                         self.search = lane.name.clone();
                         self.navigate(Page::Devices);
                     }
@@ -698,14 +840,16 @@ impl Desktop {
 
 /// Chevron button that folds a row's details in and out.
 pub(super) fn disclosure(ui: &mut egui::Ui, open: bool, name: &str) -> egui::Response {
+    let text_mixer_details = crate::localization::text(ui, &Message::MixerDetails);
+    let accessible_name = crate::localization::text(
+        ui,
+        &Message::MixerDetailsAccessible {
+            name: name.to_string(),
+        },
+    );
     let (rect, response) = ui.allocate_exact_size(egui::vec2(30.0, 30.0), egui::Sense::click());
     response.widget_info(|| {
-        egui::WidgetInfo::selected(
-            egui::WidgetType::Button,
-            true,
-            open,
-            format!("「{name}」详情"),
-        )
+        egui::WidgetInfo::selected(egui::WidgetType::Button, true, open, &accessible_name)
     });
     let t = ui
         .ctx()
@@ -731,7 +875,7 @@ pub(super) fn disclosure(ui: &mut egui::Ui, open: bool, name: &str) -> egui::Res
             egui::StrokeKind::Inside,
         );
     }
-    response.on_hover_text("详情")
+    response.on_hover_text(text_mixer_details.as_str())
 }
 
 /// Strip width, master strip width and gap of the console layout.
@@ -762,12 +906,22 @@ mod multi_airplay_tests {
         app.diagnostics = Some(
             serde_json::json!({"lane_stream_ids":[101,202],"queues":[480,960],"meters":{"lanes":[{"stream_id":101,"peak":0.25,"rms":0.1},{"stream_id":202,"peak":0.5,"rms":0.2}]}}),
         );
+        app.diagnostics_clock.success(
+            app.diagnostics.as_ref().unwrap(),
+            app.snapshot.as_ref().map(|s| s.runtime_epoch),
+            Instant::now(),
+        );
+        app.airplay_clock.success(
+            app.airplay.as_ref().unwrap(),
+            Some(state.runtime_epoch),
+            Instant::now(),
+        );
         let lanes = app.lanes(&state);
         assert_eq!(lanes.len(), 2);
         assert_eq!(lanes[0].key, 202);
         assert_eq!(lanes[0].peak, Some(0.5));
         assert_eq!(lanes[0].queue_ms, Some(20.0));
-        assert_eq!(lanes[0].status, "因 Solo 静音");
+        assert_eq!(lanes[0].status, Message::LaneSoloMuted);
         assert_eq!(lanes[1].airplay_target, Some(("source-a".into(), 11)));
         assert_eq!(lanes[1].gain, -3.0);
         assert_eq!(lanes[1].peak, Some(0.25));

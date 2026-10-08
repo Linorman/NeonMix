@@ -1,0 +1,15 @@
+common-yes = 是
+common-no = 否
+common-cancel = 取消
+common-confirm = 确认
+common-close = 关闭
+common-save = 保存
+common-retry = 重试
+common-copy = 复制
+common-copied = 已复制
+common-clear = 清除
+common-search = 搜索
+common-on = 开启
+common-off = 关闭
+common-unknown = 未知
+common-unavailable = 不可用

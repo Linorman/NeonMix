@@ -1,0 +1,39 @@
+format: 0
+packaging: 0
+clippy: 101
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Checking neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+    Checking neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error: this `if` statement can be collapsed
+   --> apps/hub/src/server.rs:118:9
+    |
+118 | /         if let Some((index, _, _, _)) = &added {
+119 | |             if let Some(producer) = self.lanes[*index].producer.as_mut() {
+120 | |                 self.lanes[*index].binding_generation =
+121 | |                     producer.bind_next().map_err(|_| ControlError::Busy)?;
+122 | |             }
+123 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+    = note: `-D clippy::collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+118 ~         if let Some((index, _, _, _)) = &added
+119 ~             && let Some(producer) = self.lanes[*index].producer.as_mut() {
+120 |                 self.lanes[*index].binding_generation =
+121 |                     producer.bind_next().map_err(|_| ControlError::Busy)?;
+122 ~             }
+    |
+
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 1 previous error
+

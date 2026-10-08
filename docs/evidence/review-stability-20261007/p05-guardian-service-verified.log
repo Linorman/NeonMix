@@ -1,0 +1,87 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.90s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 12 tests
+test managed::tests::cancelled_stop_completes_and_fifty_restarts_are_graceful ... ignored, requires the project-local neonmix-lifecycle-probe fixture
+test managed::tests::hung_process_is_forced_with_a_bounded_wait ... ignored, requires the project-local neonmix-lifecycle-probe fixture
+test intent::tests::legacy_patch_uses_one_fresh_revision_and_preserves_unmodified_fields ... ok
+test daemon::discovery_tests::discovery_empty_completion_clears_removed_candidates_and_supports_single_line_output ... ok
+test daemon::discovery_tests::discovery_returns_the_final_candidate_snapshot_instead_of_transient_events ... ok
+test intent::tests::legacy_patch_requires_runtime_session_and_unchanged_undo_field ... ok
+test daemon::discovery_tests::discovery_incomplete_or_malformed_output_is_an_error ... ok
+test daemon::discovery_tests::receiver_pins_only_survive_authenticated_control_replies ... ok
+test daemon::discovery_tests::unsupported_device_format_has_a_specific_redacted_error ... ok
+test daemon::discovery_tests::persistent_fault_keeps_semantics_through_eof_and_unexpected_exit_noise ... ok
+test manager::tests::accepted_stop_fences_queued_start_and_duplicate_stop_reuses_the_operation ... ok
+test managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit ... ok
+
+test result: ok. 10 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 2.07s
+
+     Running unittests src/bin/neonmix-background.rs (target/debug/deps/neonmix_background-90d0887090cf714a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/neonmix-guardian.rs (target/debug/deps/neonmix_guardian-8a554d1ead7e192d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/fault_contract.rs (target/debug/deps/fault_contract-20690ad01d5c46ca)
+
+running 6 tests
+test fault_does_not_bypass_diagnostic_export_whitelist ... ok
+test real_persistent_status_serialization_is_compatible_in_both_directions ... ok
+test real_reply_serialization_covers_all_four_client_backend_combinations ... ok
+test disconnected_client_receives_public_connection_code_without_paths ... ok
+test closed_fault_parameters_reject_unknown_types_secrets_and_invalid_ports ... ok
+test all_codes_round_trip_and_legacy_mapping_never_uses_translated_sentences ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lifecycle.rs (target/debug/deps/lifecycle-5048a2c2b0a6caf5)
+
+running 14 tests
+test private_transport_rejects_unknown_commands_versions_oversize_paths_and_double_daemon ... ok
+test metadata_versions_and_admin_aliases_fail_closed_without_loading_secrets ... ok
+test status_stays_available_during_a_hung_ordinary_query_and_stop_interrupts_it ... ok
+test structured_faults_take_priority_and_unknown_stderr_is_never_a_ui_message ... ok
+test ready_followed_by_stats_is_immediately_ready_through_real_ipc ... ok
+test invitations_are_ephemeral_repeatable_and_export_contains_no_untrusted_strings ... ok
+test bound_intent_rejects_identity_swap_and_preserves_id_and_frozen_credential_metadata ... ok
+test disconnected_stop_client_still_reaps_and_late_ready_cannot_restart_media ... ok
+test forgetting_a_sender_stops_media_disables_persisted_binding_and_removes_profile ... ok
+test urgent_stop_interrupts_a_hung_read_only_query_and_reaps_its_process ... ok
+test frozen_lifecycle_identity_and_stop_generation_reject_late_start_and_wrong_instance_stop ... ok
+test ui_disconnect_reopen_stop_shutdown_and_failed_media_are_authoritative ... ok
+test stalled_partial_request_times_out_without_blocking_authoritative_status ... ok
+test slow_remote_mutation_and_full_ordinary_quota_do_not_block_status_or_stop ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 21.31s
+
+     Running tests/redaction.rs (target/debug/deps/redaction-eeb76d6d8395abf8)
+
+running 5 tests
+test healthy_optional_error_stays_empty_and_secret_errors_are_removed ... ok
+test diagnostic_pin_and_nested_error_payloads_are_always_redacted ... ok
+test airplay_timing_export_preserves_numbers_and_excludes_device_identity ... ok
+test numeric_phase_diagnostics_survive_but_malformed_error_arrays_are_removed ... ok
+test multi_receiver_aliases_and_profile_key_fields_never_enter_diagnostics ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/windows_native_ipc.rs (target/debug/deps/windows_native_ipc-0ceeda466f633a5f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests neonmix_desktop_service
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
