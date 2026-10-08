@@ -1,0 +1,19 @@
+[[message]]
+id = "widgets-peak"
+
+[[message]]
+id = "widgets-level-unavailable"
+
+[[message]]
+id = "widgets-step-done"
+
+[[message]]
+id = "widgets-step-current"
+
+[[message]]
+id = "widgets-step-todo"
+
+[[message]]
+id = "widgets-step-accessible"
+args = { number = "u64", label = "string", state = "string" }
+

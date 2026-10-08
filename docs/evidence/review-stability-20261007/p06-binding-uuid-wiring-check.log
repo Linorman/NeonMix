@@ -1,0 +1,27 @@
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Checking neonmix-output-binding v0.1.0 (/Volumes/projects-mac/NeonMix/crates/output-binding)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error[E0425]: cannot find function `notice` in module `widgets`
+   --> apps/desktop/src/pages/sender.rs:821:30
+    |
+821 |                     widgets::notice(ui, self.tr(&Message::FaultUpgradeRequired), theme::WARNING);
+    |                              ^^^^^^
+    |
+   ::: apps/desktop/src/widgets.rs:521:1
+    |
+521 | pub fn note(ui: &mut Ui, text: impl Into<String>) {
+    | ------------------------------------------------- similarly named function `note` defined here
+    |
+help: a function with a similar name exists
+    |
+821 -                     widgets::notice(ui, self.tr(&Message::FaultUpgradeRequired), theme::WARNING);
+821 +                     widgets::note(ui, self.tr(&Message::FaultUpgradeRequired), theme::WARNING);
+    |
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 1 previous error

@@ -29,6 +29,7 @@ impl Desktop {
             .collect()
     }
     pub(crate) fn airplay_sources(&self) -> Vec<Value> {
+        let text_hub_airplay_source = self.tr(&Message::HubAirplaySource);
         let sessions = self.airplay_sessions();
         self.airplay
             .as_ref()
@@ -49,7 +50,7 @@ impl Desktop {
                     .or_else(|| source.get("last_name").filter(|v| v.is_string()))
                     .cloned()
                     .or_else(|| session.map(|s| s["source_name"].clone()))
-                    .unwrap_or(Value::String("AirPlay 来源".into()));
+                    .unwrap_or(Value::String(text_hub_airplay_source.as_str().into()));
                 if let Some(session) = session {
                     source["session_id"] = session["session_id"].clone();
                     source["receiver_id"] = session["receiver_id"].clone();
@@ -59,11 +60,16 @@ impl Desktop {
             .collect()
     }
     pub(crate) fn airplay_request(&self, operation: AirplayAction) -> Option<Request> {
-        if !self.ready() || !self.admin() {
+        if !(self.ready() || self.writable()) || !self.admin() {
             return None;
         }
         let target = match &operation {
             AirplayAction::MixSource {
+                source_id,
+                session_id,
+                ..
+            }
+            | AirplayAction::PatchMixSource {
                 source_id,
                 session_id,
                 ..
@@ -89,24 +95,54 @@ impl Desktop {
         Some(Request::AirplayV2 {
             credential: self.credential.clone(),
             hub: self.hub(),
-            command: Some(neonmix_airplay_adapter::control::AirplayCommandV2 {
-                command_id: uuid::Uuid::new_v4().to_string(),
-                expected_revision: self.airplay.as_ref()?["revision"].as_u64()?,
+            command: Some(self.bind_airplay(
+                uuid::Uuid::new_v4(),
+                self.intents.current.as_ref()?,
                 operation,
-            }),
+            )?),
         })
     }
     pub(crate) fn airplay_operation(&mut self, operation: AirplayAction) {
         self.write(Write::Airplay(operation));
     }
     pub(crate) fn airplay_panel(&mut self, ui: &mut egui::Ui) {
+        let text_hub_airplay_receiver_entries = self.tr(&Message::HubAirplayReceiverEntries);
+        let text_hub_each_device_uses_a_free_entry_occupied_entries =
+            self.tr(&Message::HubEachDeviceUsesAFreeEntryOccupiedEntries);
+        let text_hub_on = self.tr(&Message::HubOn);
+        let text_hub_off = self.tr(&Message::HubOff);
+        let text_hub_connect_to_a_room_to_view_and_enable =
+            self.tr(&Message::HubConnectToARoomToViewAndEnable);
+        let text_hub_room_input_capacity = self.tr(&Message::HubRoomInputCapacity);
+        let text_hub_turn_off_airplay_reception = self.tr(&Message::HubTurnOffAirplayReception);
+        let text_hub_turn_on_airplay_reception = self.tr(&Message::HubTurnOnAirplayReception);
+        let text_hub_receiver_entry_count = self.tr(&Message::HubReceiverEntryCount);
+        let text_hub_adding_entries_keeps_existing_sources_connected_disconnect_sources =
+            self.tr(&Message::HubAddingEntriesKeepsExistingSourcesConnectedDisconnectSources);
+        let text_hub_airplay_entry = self.tr(&Message::HubAirplayEntry);
+        let text_hub_entry_fault = self.tr(&Message::HubEntryFault);
+        let text_hub_connected = self.tr(&Message::HubConnected);
+        let text_hub_waiting_for_connection = self.tr(&Message::HubWaitingForConnection);
+        let text_hub_preparing = self.tr(&Message::HubPreparing);
+        let text_hub_publicly_discoverable = self.tr(&Message::HubPubliclyDiscoverable);
+        let text_hub_hidden_from_discovery = self.tr(&Message::HubHiddenFromDiscovery);
+        let text_hub_discovery_fault = self.tr(&Message::HubDiscoveryFault);
+        let text_hub_updating_discovery = self.tr(&Message::HubUpdatingDiscovery);
+        let text_hub_turn_off_this_entry = self.tr(&Message::HubTurnOffThisEntry);
+        let text_hub_turn_on_this_entry = self.tr(&Message::HubTurnOnThisEntry);
+        let text_hub_open_pairing_window = self.tr(&Message::HubOpenPairingWindow);
+        let text_hub_pairing_code_for_this_entry = self.tr(&Message::HubPairingCodeForThisEntry);
+        let text_hub_hide_pairing_code = self.tr(&Message::HubHidePairingCode);
+        let text_hub_show_pairing_code = self.tr(&Message::HubShowPairingCode);
+        let text_hub_room_administrators_manage_reception_and_pairing =
+            self.tr(&Message::HubRoomAdministratorsManageReceptionAndPairing);
         let state = self.airplay.clone();
         let open = self.panel_open("airplay", true);
         let panel = widgets::panel(
             ui,
             "airplay",
-            "AirPlay 接收入口",
-            Some("每台设备选择一个空闲入口；占用入口会从公开发现列表隐藏"),
+            text_hub_airplay_receiver_entries.as_str(),
+            Some(text_hub_each_device_uses_a_free_entry_occupied_entries.as_str()),
             open,
             |ui| {
                 let enabled = state
@@ -114,7 +150,11 @@ impl Desktop {
                     .is_some_and(|s| s["enabled"].as_bool() == Some(true));
                 widgets::pill(
                     ui,
-                    if enabled { "已开启" } else { "已关闭" },
+                    if enabled {
+                        text_hub_on.as_str()
+                    } else {
+                        text_hub_off.as_str()
+                    },
                     if enabled {
                         Tone::Success
                     } else {
@@ -124,7 +164,7 @@ impl Desktop {
             },
             |ui| {
                 let Some(state) = state.as_ref() else {
-                    widgets::note(ui, "连接房间后可查看和开启 AirPlay 接收。");
+                    widgets::note(ui, text_hub_connect_to_a_room_to_view_and_enable.as_str());
                     return;
                 };
                 let enabled = state["enabled"].as_bool() == Some(true);
@@ -150,16 +190,16 @@ impl Desktop {
                             name: l.name,
                         })
                         .collect();
-                    widgets::caption(ui, "房间输入容量");
+                    widgets::caption(ui, text_hub_room_input_capacity.as_str());
                     crate::viz::capacity_slots(ui, limit, &used);
                     if self.admin()
                         && widgets::button_enabled(
                             ui,
                             self.writable() && (enabled || count > 0),
                             if enabled {
-                                "关闭 AirPlay 接收"
+                                text_hub_turn_off_airplay_reception.as_str()
                             } else {
-                                "开启 AirPlay 接收"
+                                text_hub_turn_on_airplay_reception.as_str()
                             },
                             Kind::Primary,
                         )
@@ -174,7 +214,7 @@ impl Desktop {
                 });
                 if self.admin() {
                     ui.horizontal_wrapped(|ui| {
-                        widgets::caption(ui, "接收入口数量");
+                        widgets::caption(ui, text_hub_receiver_entry_count.as_str());
                         for n in 1..=4 {
                             if widgets::toggle(
                                 ui,
@@ -196,7 +236,7 @@ impl Desktop {
                     if enabled {
                         widgets::note(
                             ui,
-                            "增加入口不中断现有来源；减少前请先断开被移除入口的来源。",
+                            text_hub_adding_entries_keeps_existing_sources_connected_disconnect_sources.as_str(),
                         );
                     }
                 }
@@ -213,20 +253,22 @@ impl Desktop {
                             ui.horizontal_wrapped(|ui| {
                                 ui.label(
                                     RichText::new(
-                                        receiver["name"].as_str().unwrap_or("AirPlay 入口"),
+                                        receiver["name"]
+                                            .as_str()
+                                            .unwrap_or(text_hub_airplay_entry.as_str()),
                                     )
                                     .color(theme::TEXT),
                                 );
                                 let (label, tone) = if receiver["error"].is_string() {
-                                    ("入口故障", Tone::Danger)
+                                    (text_hub_entry_fault.as_str(), Tone::Danger)
                                 } else if active {
-                                    ("已连接", Tone::Success)
+                                    (text_hub_connected.as_str(), Tone::Success)
                                 } else if ready {
-                                    ("等待连接", Tone::Accent)
+                                    (text_hub_waiting_for_connection.as_str(), Tone::Accent)
                                 } else if on {
-                                    ("正在准备", Tone::Neutral)
+                                    (text_hub_preparing.as_str(), Tone::Neutral)
                                 } else {
-                                    ("已关闭", Tone::Neutral)
+                                    (text_hub_off.as_str(), Tone::Neutral)
                                 };
                                 widgets::pill(ui, label, tone);
                                 let discovery =
@@ -234,10 +276,10 @@ impl Desktop {
                                 widgets::pill(
                                     ui,
                                     match discovery {
-                                        "published" => "公开可见",
-                                        "hidden" => "已从发现列表隐藏",
-                                        "error" => "发现状态异常",
-                                        _ => "正在更新发现列表",
+                                        "published" => text_hub_publicly_discoverable.as_str(),
+                                        "hidden" => text_hub_hidden_from_discovery.as_str(),
+                                        "error" => text_hub_discovery_fault.as_str(),
+                                        _ => text_hub_updating_discovery.as_str(),
                                     },
                                     Tone::Neutral,
                                 );
@@ -248,9 +290,9 @@ impl Desktop {
                                         ui,
                                         self.writable() && (on || can_enable),
                                         if on {
-                                            "关闭此入口"
+                                            text_hub_turn_off_this_entry.as_str()
                                         } else {
-                                            "开启此入口"
+                                            text_hub_turn_on_this_entry.as_str()
                                         },
                                     )
                                     .clicked()
@@ -268,7 +310,7 @@ impl Desktop {
                                     if widgets::small_button(
                                         ui,
                                         self.writable() && ready && !active,
-                                        "开启配对窗口",
+                                        text_hub_open_pairing_window.as_str(),
                                     )
                                     .clicked()
                                     {
@@ -286,7 +328,10 @@ impl Desktop {
                                 );
                                 if let Some(pin) = receiver["pairing_pin"].as_str() {
                                     ui.horizontal_wrapped(|ui| {
-                                        let label = widgets::caption(ui, "此入口配对码");
+                                        let label = widgets::caption(
+                                            ui,
+                                            text_hub_pairing_code_for_this_entry.as_str(),
+                                        );
                                         let mut pin = pin.to_owned();
                                         ui.add(
                                             egui::TextEdit::singleline(&mut pin)
@@ -299,9 +344,9 @@ impl Desktop {
                                             ui,
                                             true,
                                             if self.show_airplay_pin {
-                                                "隐藏配对码"
+                                                text_hub_hide_pairing_code.as_str()
                                             } else {
-                                                "显示配对码"
+                                                text_hub_show_pairing_code.as_str()
                                             },
                                         )
                                         .clicked()
@@ -315,7 +360,10 @@ impl Desktop {
                     });
                 }
                 if !self.admin() {
-                    widgets::note(ui, "接收开关与配对由房间管理员管理。");
+                    widgets::note(
+                        ui,
+                        text_hub_room_administrators_manage_reception_and_pairing.as_str(),
+                    );
                 }
             },
         );
@@ -324,13 +372,31 @@ impl Desktop {
         }
     }
     pub(crate) fn airplay_device_row(&mut self, ui: &mut egui::Ui, source: &Value) {
+        let text_hub_airplay_source = self.tr(&Message::HubAirplaySource);
+        let text_hub_pairing_revoked = self.tr(&Message::HubPairingRevoked);
+        let text_hub_playback_blocked = self.tr(&Message::HubPlaybackBlocked);
+        let text_hub_connected = self.tr(&Message::HubConnected);
+        let text_hub_disconnected = self.tr(&Message::HubDisconnected);
+        let text_hub_disconnect_airplay_source = self.tr(&Message::HubDisconnectAirplaySource);
+        let text_hub_allow_playback_again = self.tr(&Message::HubAllowPlaybackAgain);
+        let text_hub_enable_a_free_entry_in_hub_settings_then =
+            self.tr(&Message::HubEnableAFreeEntryInHubSettingsThen);
+        let text_hub_entry = self.tr(&Message::HubEntry);
+        let text_hub_revoke_airplay_pairing = self.tr(&Message::HubRevokeAirplayPairing);
+        let text_hub_playback_mode = self.tr(&Message::HubPlaybackMode);
+        let text_hub_low_latency = self.tr(&Message::HubLowLatency);
+        let text_hub_audio_video_sync = self.tr(&Message::HubAudioVideoSync);
+        let text_hub_disconnect_this_source_to_change_its_playback_mode =
+            self.tr(&Message::HubDisconnectThisSourceToChangeItsPlaybackMode);
         let Some(id) = source["source_id"].as_str() else {
             return;
         };
         let active = source["active"].as_bool() == Some(true);
         let revoked = source["revoked"].as_bool() == Some(true);
         let blocked = source["blocked"].as_bool() == Some(true);
-        let name = source["source_name"].as_str().unwrap_or("AirPlay 来源");
+        let name = source["source_name"]
+            .as_str()
+            .unwrap_or(text_hub_airplay_source.as_str());
         ui.horizontal_wrapped(|ui| {
             ui.label(
                 RichText::new(name)
@@ -339,13 +405,13 @@ impl Desktop {
             );
             widgets::pill(ui, "AirPlay", Tone::Neutral);
             let (label, tone) = if revoked {
-                ("配对已撤销", Tone::Danger)
+                (text_hub_pairing_revoked.as_str(), Tone::Danger)
             } else if blocked {
-                ("播放已禁止", Tone::Warning)
+                (text_hub_playback_blocked.as_str(), Tone::Warning)
             } else if active {
-                ("已连接", Tone::Success)
+                (text_hub_connected.as_str(), Tone::Success)
             } else {
-                ("未连接", Tone::Neutral)
+                (text_hub_disconnected.as_str(), Tone::Neutral)
             };
             widgets::pill(ui, label, tone);
             if let Some(receiver) = self
@@ -368,7 +434,12 @@ impl Desktop {
             ui.horizontal_wrapped(|ui| {
                 if active
                     && let Some(session_id) = source["session_id"].as_u64()
-                    && widgets::button(ui, "断开 AirPlay 来源", Kind::Secondary).clicked()
+                    && widgets::button(
+                        ui,
+                        text_hub_disconnect_airplay_source.as_str(),
+                        Kind::Secondary,
+                    )
+                    .clicked()
                 {
                     self.airplay_operation(AirplayAction::DisconnectSource {
                         source_id: id.into(),
@@ -377,28 +448,68 @@ impl Desktop {
                 }
                 if blocked
                     && !revoked
-                    && widgets::button(ui, "重新允许播放", Kind::Secondary).clicked()
+                    && widgets::button(ui, text_hub_allow_playback_again.as_str(), Kind::Secondary)
+                        .clicked()
                 {
                     self.airplay_operation(AirplayAction::AllowSource {
                         source_id: id.into(),
                     });
                 }
                 if revoked {
-                    let receivers=self.airplay.as_ref().and_then(|s|s["receivers"].as_array()).cloned().unwrap_or_default();
-                    if !receivers.iter().any(|r|r["active"].as_bool()!=Some(true) && r["configured_enabled"].as_bool().unwrap_or(true)) {
-                        widgets::note(ui,"请先在 Hub 设置启用一个空闲入口，再为此来源重新配对。");
+                    let receivers = self
+                        .airplay
+                        .as_ref()
+                        .and_then(|s| s["receivers"].as_array())
+                        .cloned()
+                        .unwrap_or_default();
+                    if !receivers.iter().any(|r| {
+                        r["active"].as_bool() != Some(true)
+                            && r["configured_enabled"].as_bool().unwrap_or(true)
+                    }) {
+                        widgets::note(
+                            ui,
+                            text_hub_enable_a_free_entry_in_hub_settings_then.as_str(),
+                        );
                     }
-                    for receiver in receivers.iter().filter(|r|r["active"].as_bool()!=Some(true) && r["configured_enabled"].as_bool().unwrap_or(true)) {
-                        let Some(receiver_id)=receiver["receiver_id"].as_str() else {continue;};
-                        let receiver_name=receiver["name"].as_str().unwrap_or("入口");
-                        let repair=widgets::button(ui,&format!("在 {receiver_name} 重新配对"),Kind::Secondary);
-                        if repair.clicked() && let Some(request)=self.airplay_request(AirplayAction::RepairSource{source_id:id.into(),receiver_id:receiver_id.into()}) {
-                            self.confirmation(format!("允许 {name} 重新配对"),format!("为 {receiver_name} 重新开放此来源的配对；其他入口的已撤销绑定保持失效。"),request,repair.id);
+                    for receiver in receivers.iter().filter(|r| {
+                        r["active"].as_bool() != Some(true)
+                            && r["configured_enabled"].as_bool().unwrap_or(true)
+                    }) {
+                        let Some(receiver_id) = receiver["receiver_id"].as_str() else {
+                            continue;
+                        };
+                        let receiver_name =
+                            receiver["name"].as_str().unwrap_or(text_hub_entry.as_str());
+                        let repair = widgets::button(
+                            ui,
+                            &self.tr(&Message::HubAirplayRepairEntry {
+                                name: (receiver_name).to_string(),
+                            }),
+                            Kind::Secondary,
+                        );
+                        if repair.clicked()
+                            && let Some(request) =
+                                self.airplay_request(AirplayAction::RepairSource {
+                                    source_id: id.into(),
+                                    receiver_id: receiver_id.into(),
+                                })
+                        {
+                            self.confirmation(
+                                Message::HubAirplayRepairTitle {
+                                    name: (name).to_string(),
+                                },
+                                Message::HubAirplayRepairConsequence {
+                                    name: (receiver_name).to_string(),
+                                },
+                                request,
+                                repair.id,
+                            );
                         }
                     }
                 }
                 if !revoked {
-                    let revoke = widgets::button(ui, "撤销 AirPlay 配对", Kind::Quiet);
+                    let revoke =
+                        widgets::button(ui, text_hub_revoke_airplay_pairing.as_str(), Kind::Quiet);
                     if revoke.clicked()
                         && let Some(request) = self.airplay_request(AirplayAction::RevokeSource {
                             source_id: id.into(),
@@ -406,8 +517,10 @@ impl Desktop {
                         })
                     {
                         self.confirmation(
-                            format!("撤销 {name} 的配对"),
-                            "结束该设备音频，并撤销它在所有入口的配对。".into(),
+                            Message::HubAirplayRevokeTitle {
+                                name: (name).to_string(),
+                            },
+                            Message::HubEndThisDeviceSAudioAndRevokeIts,
                             request,
                             revoke.id,
                         );
@@ -420,10 +533,13 @@ impl Desktop {
                 PlaybackMode::LowLatency
             };
             ui.horizontal_wrapped(|ui| {
-                widgets::caption(ui, "播放方式");
+                widgets::caption(ui, text_hub_playback_mode.as_str());
                 for (value, label) in [
-                    (PlaybackMode::LowLatency, "低延迟"),
-                    (PlaybackMode::Synchronized, "音画同步"),
+                    (PlaybackMode::LowLatency, text_hub_low_latency.as_str()),
+                    (
+                        PlaybackMode::Synchronized,
+                        text_hub_audio_video_sync.as_str(),
+                    ),
                 ] {
                     if widgets::toggle(ui, !active && !revoked, mode == value, label, Tone::Accent)
                         .clicked()
@@ -437,7 +553,10 @@ impl Desktop {
                 }
             });
             if active {
-                widgets::note(ui, "断开此来源后可修改播放方式。");
+                widgets::note(
+                    ui,
+                    text_hub_disconnect_this_source_to_change_its_playback_mode.as_str(),
+                );
             }
         });
     }
@@ -471,23 +590,43 @@ impl Desktop {
         receiver: bool,
         available: bool,
     ) {
+        let text_hub_edit_entry_name = self.tr(&Message::HubEditEntryName);
+        let text_hub_set_alias = self.tr(&Message::HubSetAlias);
+        let text_hub_edit_alias = self.tr(&Message::HubEditAlias);
+        let text_hub_turn_off_this_entry_to_edit_its_name =
+            self.tr(&Message::HubTurnOffThisEntryToEditItsName);
+        let text_hub_waiting_for_a_room_connection =
+            self.tr(&Message::HubWaitingForARoomConnection);
+        let text_hub_entry_name = self.tr(&Message::HubEntryName);
+        let text_hub_source_alias = self.tr(&Message::HubSourceAlias);
+        let text_hub_enter_a_name_without_control_characters_up_to =
+            self.tr(&Message::HubEnterANameWithoutControlCharactersUpTo);
+        let text_hub_enter_an_alias_without_control_characters_up_to =
+            self.tr(&Message::HubEnterAnAliasWithoutControlCharactersUpTo);
+        let text_hub_save = self.tr(&Message::HubSave);
+        let text_hub_clear_alias = self.tr(&Message::HubClearAlias);
+        let text_hub_cancel = self.tr(&Message::HubCancel);
+        let text_hub_applies_on_this_entry_s_next_start_receiver =
+            self.tr(&Message::HubAppliesOnThisEntrySNextStartReceiver);
+        let text_hub_aliases_are_only_used_for_room_display_they =
+            self.tr(&Message::HubAliasesAreOnlyUsedForRoomDisplayThey);
         let key = format!("{}:{id}", if receiver { "receiver" } else { "source" });
         if !self.airplay_name_drafts.contains_key(&key) {
             if widgets::small_button(
                 ui,
                 self.writable() && available,
                 if receiver {
-                    "修改入口名称"
+                    text_hub_edit_entry_name.as_str()
                 } else if current.is_empty() {
-                    "设置别名"
+                    text_hub_set_alias.as_str()
                 } else {
-                    "修改别名"
+                    text_hub_edit_alias.as_str()
                 },
             )
             .on_disabled_hover_text(if receiver {
-                "关闭此入口后可修改，下次启动生效"
+                text_hub_turn_off_this_entry_to_edit_its_name.as_str()
             } else {
-                "等待连接房间"
+                text_hub_waiting_for_a_room_connection.as_str()
             })
             .clicked()
             {
@@ -499,10 +638,11 @@ impl Desktop {
         ui.push_id(&key, |ui| {
             widgets::field_sized(
                 ui,
+                "airplay-name",
                 if receiver {
-                    "入口名称"
+                    text_hub_entry_name.as_str()
                 } else {
-                    "来源别名"
+                    text_hub_source_alias.as_str()
                 },
                 &mut draft,
                 false,
@@ -513,9 +653,9 @@ impl Desktop {
                 widgets::error_text(
                     ui,
                     if receiver {
-                        "名称不能为空、不能含控制字符，最多 50 个 UTF-8 字节。"
+                        text_hub_enter_a_name_without_control_characters_up_to.as_str()
                     } else {
-                        "别名不能为空、不能含控制字符，最多 128 个 UTF-8 字节；移除请用清除别名。"
+                        text_hub_enter_an_alias_without_control_characters_up_to.as_str()
                     },
                 );
             }
@@ -523,7 +663,7 @@ impl Desktop {
                 if widgets::small_button(
                     ui,
                     self.writable() && available && valid && draft != current,
-                    "保存",
+                    text_hub_save.as_str(),
                 )
                 .clicked()
                 {
@@ -541,7 +681,8 @@ impl Desktop {
                 }
                 if !receiver
                     && !current.is_empty()
-                    && widgets::small_button(ui, self.writable(), "清除别名").clicked()
+                    && widgets::small_button(ui, self.writable(), text_hub_clear_alias.as_str())
+                        .clicked()
                 {
                     draft.clear();
                     self.airplay_operation(AirplayAction::AliasSource {
@@ -549,14 +690,20 @@ impl Desktop {
                         alias: None,
                     });
                 }
-                if widgets::small_button(ui, true, "取消").clicked() {
+                if widgets::small_button(ui, true, text_hub_cancel.as_str()).clicked() {
                     self.airplay_name_drafts.remove(&key);
                 }
             });
             if receiver {
-                widgets::note(ui, "下次启动此入口时生效；接收身份和配对保持不变。");
+                widgets::note(
+                    ui,
+                    text_hub_applies_on_this_entry_s_next_start_receiver.as_str(),
+                );
             } else {
-                widgets::note(ui, "别名仅用于房间显示，不合并设备或改变配对权限。");
+                widgets::note(
+                    ui,
+                    text_hub_aliases_are_only_used_for_room_display_they.as_str(),
+                );
             }
         });
         if self.airplay_name_drafts.contains_key(&key) {

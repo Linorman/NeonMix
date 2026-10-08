@@ -1,0 +1,139 @@
+   Compiling serde v1.0.229
+   Compiling futures-macro v0.3.34
+   Compiling tokio v1.53.1
+   Compiling icu_normalizer v2.3.0
+   Compiling glib-macros v0.20.12
+   Compiling ppv-lite86 v0.2.21
+   Compiling epaint v0.31.1
+   Compiling winit v0.30.13
+   Compiling arboard v3.6.1
+   Compiling muda v0.21.0
+   Compiling fluent-bundle v0.16.0
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling toml_datetime v0.6.11
+   Compiling futures-util v0.3.34
+   Compiling idna_adapter v1.2.2
+   Compiling serde_spanned v0.6.9
+   Compiling rand_chacha v0.9.0
+   Compiling egui v0.31.1
+   Compiling toml_edit v0.22.27
+   Compiling idna v1.1.0
+   Compiling rand v0.9.5
+   Compiling neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+   Compiling accesskit_winit v0.23.1
+   Compiling url v2.5.8
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling serde_urlencoded v0.7.1
+   Compiling tokio-util v0.7.19
+   Compiling tokio-rustls v0.26.6
+   Compiling neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+   Compiling toml v0.8.23
+   Compiling webbrowser v1.2.4
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling tungstenite v0.29.0
+   Compiling h2 v0.4.19
+   Compiling egui_glow v0.31.1
+   Compiling egui-winit v0.31.1
+   Compiling fs-err v3.3.1
+   Compiling glutin-winit v0.5.0
+   Compiling futures-executor v0.3.34
+   Compiling tower v0.5.3
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling tokio-tungstenite v0.29.0
+   Compiling neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+   Compiling glib v0.20.12
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling tower-http v0.6.11
+   Compiling eframe v0.31.1
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling tray-icon v0.26.0
+   Compiling neonmix-output-binding v0.1.0 (/Volumes/projects-mac/NeonMix/crates/output-binding)
+   Compiling neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+   Compiling hyper v1.11.1
+   Compiling hyper-util v0.1.21
+   Compiling hyper-rustls v0.27.10
+   Compiling axum-server v0.7.3
+   Compiling axum v0.8.9
+   Compiling reqwest v0.12.28
+   Compiling gstreamer v0.23.7
+   Compiling gstreamer-base v0.23.6
+   Compiling gstreamer-rtp v0.23.5
+   Compiling gstreamer-app v0.23.5
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 28.49s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_control-b8162c1f487215dd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/authority.rs (target/debug/deps/authority-53a639ef7ee880c0)
+
+running 11 tests
+test member_cannot_solo_or_change_others_and_master ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/transactions.rs (target/debug/deps/transactions-18f6431ce493824e)
+
+running 4 tests
+test staged_command_excludes_durable_writers_and_preserves_live_output_loss ... ok
+test failed_preparation_aborts_only_the_candidate_and_keeps_health_updates ... ok
+test cached_receipt_does_not_bypass_current_principal_validation ... ok
+test completed_replay_precedes_unrelated_pending_transaction_and_checks_fingerprint ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-2be7ef3586db05a8)
+
+running 38 tests
+test emblem::tests::same_room_same_emblem_and_rooms_differ ... ok
+test events::tests::list_keeps_the_newest_events ... ok
+test events::tests::diff_names_joins_changes_leaves_and_output_in_order ... ok
+test history::tests::series_keeps_only_the_window_and_dropped_keys ... ok
+test flow::tests::nodes_never_overlap_or_leave_the_canvas ... ok
+test events::tests::switching_locale_rerenders_existing_history_without_new_events ... ok
+test flow::localization_tests::source_accessible_name_follows_locale_and_preserves_user_content ... ok
+test pages::airplay::name_tests::names_use_utf8_byte_bounds_and_success_does_not_erase_newer_drafts ... ok
+test pages::airplay::name_tests::alias_display_never_changes_session_control_identity ... ok
+test pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes ... ok
+test animation::tests::one_shot_plays_on_change_not_on_first_sight ... ok
+test animation::tests::live_motion_repaints_only_while_active_and_not_reduced ... ok
+test tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked ... ok
+test tests::chinese_composition_preserves_draft_without_enter_submission ... ok
+test tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later ... ok
+test tests::long_error_at_minimum_width_keeps_page_content_on_screen ... ok
+test tests::fader_click_never_jumps_gain_and_double_click_resets_to_unity ... ok
+test tests::one_failed_airplay_or_diagnostics_read_keeps_the_room_on_screen ... ok
+test preferences::tests::newer_version_is_never_overwritten_and_memory_choice_survives_failure ... ok
+test tests::polling_does_not_lock_forms_and_stop_has_priority_over_pending_start ... ok
+test tests::named_fields_publish_accessible_labels_without_exposing_password_text ... ok
+test tests::restore_sends_the_inverse_change_against_a_fresh_revision ... ok
+test tests::stop_after_an_inflight_start_runs_last_and_keeps_the_stop_pending_until_ack ... ok
+test tests::stopped_local_hub_is_not_polled_for_room_state ... ok
+test preferences::tests::malformed_and_oversized_files_do_not_get_overwritten_on_load ... ok
+test tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts ... ok
+test preferences::tests::legacy_unknown_language_and_interleaved_updates_preserve_fields ... ok
+test tests::palette_enter_during_ime_composition_does_not_run_an_action ... ok
+test tests::mixer_arrows_follow_the_fader_direction_of_the_layout ... ok
+test tests::airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions ... ok
+test widgets::localization_tests::identical_display_labels_do_not_alias_business_field_ids ... ok
+test tests::pages_handle_missing_loading_failed_and_stale_states ... ok
+test widgets::localization_tests::translated_field_labels_keep_focus_draft_and_identity ... ok
+test widgets::localization_tests::translated_inline_title_keeps_identity_and_focus ... ok
+test tests::live_graph_moves_only_while_signal_flows ... ok
+test tests::cancel_modal_keeps_accesskit_focus_in_the_published_tree has been running for over 60 seconds
+test tests::live_graph_names_every_node_for_assistive_tech has been running for over 60 seconds
+test tests::sidebar_fits_seven_pages_and_actions_in_the_minimum_window has been running for over 60 seconds

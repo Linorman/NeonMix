@@ -1,0 +1,12 @@
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.12s
+     Running tests/timed_quality.rs (target/release/deps/timed_quality-8b11e353ccf74f0e)
+
+running 1 test
+ppm=-500, recurrence_peak=0.0000018064333257017395, recurrence_rms=0.00000012994360246308437, settled_phase_ns=-10.586955871651691..-8.112889370151475, crossings=52755
+ppm=-100, recurrence_peak=0.0000008193044771509506, recurrence_rms=0.00000011296330102802953, settled_phase_ns=-1.9774807844102962..0.9595147944557485, crossings=52756
+ppm=100, recurrence_peak=0.0000008728974902894038, recurrence_rms=0.00000011318722905240273, settled_phase_ns=-9.913627821708301..-8.254024850367466, crossings=52756
+ppm=500, recurrence_peak=0.0000020932464739331635, recurrence_rms=0.0000001303748721444969, settled_phase_ns=-4.839546027711544..-3.333355553891545, crossings=52756
+test timed_source_clock_error_keeps_long_term_presentation_phase_bounded ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 3.04s
+

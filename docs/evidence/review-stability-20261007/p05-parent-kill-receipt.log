@@ -1,0 +1,54 @@
+{
+  "passed": false,
+  "scope": "real background, synthetic Hub/probe tree; no audio or Apple devices",
+  "binary_sha256": {
+    "neonmix-background": "3f7c5ea519aacc5f1c48101975afb64dbe0210363b6b9ff39b89420b54ae7c33",
+    "neonmix-lifecycle-probe": "e3ded55816073e27576d9bf8380eda8b98fae4c8c582cd3e66a6d39b5a15a09e",
+    "neonmix-guardian": "533a117595c79a2b6681306627537e9c2d6a975f3694a9bebd87ec1d5d9e6e01"
+  },
+  "owned_tree_pids": [
+    97110,
+    97112
+  ],
+  "owned_tree_remaining": [],
+  "elapsed_ms": 5060,
+  "other_instance_pid": 97114,
+  "other_instance_tree_alive": true,
+  "owned_runtime_keys_removed": false,
+  "other_runtime_key_preserved": true,
+  "profiles_preserved": true,
+  "failure_type": "AssertionError",
+  "failure": "",
+  "guardians_exited": true,
+  "supervisor_receipts": [
+    {
+      "event": "guardian_stopped",
+      "result": {
+        "child_exit_code": null,
+        "cleanup_complete": false,
+        "cleanup_failures": [
+          "process_tree_incomplete"
+        ],
+        "error_code": 1,
+        "failure_stage": "force_descendants",
+        "forced": true,
+        "runtime_keys_observed": 1,
+        "version": 1
+      }
+    },
+    {
+      "event": "guardian_stopped",
+      "result": {
+        "child_exit_code": null,
+        "cleanup_complete": true,
+        "cleanup_failures": [],
+        "error_code": null,
+        "failure_stage": null,
+        "forced": false,
+        "runtime_keys_observed": 1,
+        "version": 1
+      }
+    }
+  ],
+  "fixtures_removed": true
+}

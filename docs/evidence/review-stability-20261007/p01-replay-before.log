@@ -1,0 +1,27 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 32.86s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 1 test
+test server::transaction_tests::native_http_replay_returns_original_response_without_external_work ... FAILED
+
+failures:
+
+---- server::transaction_tests::native_http_replay_returns_original_response_without_external_work stdout ----
+
+thread 'server::transaction_tests::native_http_replay_returns_original_response_without_external_work' (47162651) panicked at apps/hub/src/server.rs:1138:20:
+Replay must not persist
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    server::transaction_tests::native_http_replay_returns_original_response_without_external_work
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 55 filtered out; finished in 0.18s
+
+error: test failed, to rerun pass `-p neonmix-hub --bin neonmix-hub`

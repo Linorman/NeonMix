@@ -8,6 +8,23 @@ const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 
 impl Desktop {
     pub(crate) fn about_page(&mut self, ui: &mut egui::Ui) {
+        let text_about_audio_mixing_across_devices_on_your_local_network =
+            self.tr(&Message::AboutAudioMixingAcrossDevicesOnYourLocalNetwork);
+        let text_about_display = self.tr(&Message::AboutDisplay);
+        let text_about_only_affects_this_window = self.tr(&Message::AboutOnlyAffectsThisWindow);
+        let text_about_reduced_motion_is_on = self.tr(&Message::AboutReducedMotionIsOn);
+        let text_about_reduce_motion = self.tr(&Message::AboutReduceMotion);
+        let text_about_signal_particles_and_radar_scans_become_static_and =
+            self.tr(&Message::AboutSignalParticlesAndRadarScansBecomeStaticAnd);
+        let text_about_build_information = self.tr(&Message::AboutBuildInformation);
+        let text_about_version = self.tr(&Message::AboutVersion);
+        let text_about_commit = self.tr(&Message::AboutCommit);
+        let text_about_platform = self.tr(&Message::AboutPlatform);
+        let text_about_license = self.tr(&Message::AboutLicense);
+        let text_about_copied = self.tr(&Message::AboutCopied);
+        let text_about_copy_version_information = self.tr(&Message::AboutCopyVersionInformation);
+        let text_about_source_repository = self.tr(&Message::AboutSourceRepository);
+        let text_about_open_in_browser = self.tr(&Message::AboutOpenInBrowser);
         let version = env!("CARGO_PKG_VERSION");
         let commit = env!("NEONMIX_GIT_HASH");
         widgets::surface(ui, None, Margin::symmetric(20, 18), |ui| {
@@ -19,23 +36,32 @@ impl Desktop {
                     .color(theme::TEXT),
             );
             ui.label(
-                RichText::new("局域网多设备音频混音")
-                    .size(theme::BODY)
-                    .color(theme::TEXT_2),
+                RichText::new(
+                    text_about_audio_mixing_across_devices_on_your_local_network.as_str(),
+                )
+                .size(theme::BODY)
+                .color(theme::TEXT_2),
             );
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
-                widgets::pill(ui, &format!("版本 {version}"), widgets::Tone::Accent);
+                widgets::pill(
+                    ui,
+                    &self.tr(&Message::AboutVersionValue {
+                        version: (version).to_string(),
+                    }),
+                    widgets::Tone::Accent,
+                );
                 widgets::pill(ui, commit, widgets::Tone::Neutral);
             });
         });
         widgets::card_ex(
             ui,
-            "显示",
-            Some("仅影响本机窗口"),
+            text_about_display.as_str(),
+            Some(text_about_only_affects_this_window.as_str()),
             None,
             |_| {},
             |ui| {
+                self.language_settings(ui);
                 let reduce = animation::reduce_motion();
                 ui.horizontal(|ui| {
                     if widgets::toggle(
@@ -43,9 +69,9 @@ impl Desktop {
                         true,
                         reduce,
                         if reduce {
-                            "已减少动态效果"
+                            text_about_reduced_motion_is_on.as_str()
                         } else {
-                            "减少动态效果"
+                            text_about_reduce_motion.as_str()
                         },
                         widgets::Tone::Accent,
                     )
@@ -56,13 +82,13 @@ impl Desktop {
                 });
                 widgets::note(
                     ui,
-                    "开启后，信号流动光点与雷达扫描改为静态显示，一次性动画直接显示结果；电平与状态照常更新。也可用环境变量 NEONMIX_REDUCE_MOTION=1 开启。",
+                    text_about_signal_particles_and_radar_scans_become_static_and.as_str(),
                 );
             },
         );
         widgets::card_ex(
             ui,
-            "构建信息",
+            text_about_build_information.as_str(),
             None,
             None,
             |_| {},
@@ -71,13 +97,16 @@ impl Desktop {
                     ui,
                     "about-build",
                     &[
-                        ("版本", version.to_owned()),
-                        ("提交", commit.to_owned()),
+                        (text_about_version.as_str(), version.to_owned()),
+                        (text_about_commit.as_str(), commit.to_owned()),
                         (
-                            "平台",
+                            text_about_platform.as_str(),
                             format!("{} / {}", std::env::consts::OS, std::env::consts::ARCH),
                         ),
-                        ("许可", env!("CARGO_PKG_LICENSE").to_owned()),
+                        (
+                            text_about_license.as_str(),
+                            env!("CARGO_PKG_LICENSE").to_owned(),
+                        ),
                     ],
                 );
                 ui.horizontal_wrapped(|ui| {
@@ -88,9 +117,9 @@ impl Desktop {
                         ui.ctx().request_repaint_after(Duration::from_millis(200));
                     }
                     let label = if copied {
-                        "已复制 ✓"
+                        text_about_copied.as_str()
                     } else {
-                        "复制版本信息"
+                        text_about_copy_version_information.as_str()
                     };
                     if widgets::small_button(ui, true, label).clicked() {
                         ui.ctx()
@@ -102,14 +131,16 @@ impl Desktop {
         );
         widgets::card_ex(
             ui,
-            "源码仓库",
+            text_about_source_repository.as_str(),
             None,
             None,
             |_| {},
             |ui| {
                 widgets::mono(ui, REPOSITORY);
                 ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
-                    if widgets::button(ui, "在浏览器中打开", Kind::Secondary).clicked() {
+                    if widgets::button(ui, text_about_open_in_browser.as_str(), Kind::Secondary)
+                        .clicked()
+                    {
                         ui.ctx().open_url(egui::OpenUrl::new_tab(REPOSITORY));
                     }
                 });

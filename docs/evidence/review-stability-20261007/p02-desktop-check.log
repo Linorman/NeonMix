@@ -1,0 +1,15 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+warning: method `status` is never used
+   --> apps/desktop/src/intent.rs:258:12
+    |
+ 92 | impl IntentScheduler {
+    | -------------------- method in this implementation
+...
+258 |     pub fn status(&self, target: &TargetKey, selected_field: Option<Field>) -> Option<Phase> {
+    |            ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `neonmix-desktop` (bin "neonmix-desktop") generated 1 warning
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 1 warning (1 duplicate)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.69s

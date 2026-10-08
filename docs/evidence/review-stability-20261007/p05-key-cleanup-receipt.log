@@ -1,0 +1,59 @@
+{
+  "passed": false,
+  "scope": "real background, synthetic Hub/probe tree; no audio or Apple devices",
+  "binary_sha256": {
+    "neonmix-background": "adbe286889ad12a61b7e0a1428eb5922deacbbbe06896cb9fe11c7032ba86e74",
+    "neonmix-lifecycle-probe": "5b38a904e77fcbfc3facfb61d5c44f3910bda3dcab4480c878e5451db82fba81",
+    "neonmix-guardian": "63d1d9b1ab444154c8aab4bed010e280e635011fde4abfcdd5c77f165b7a2bfd"
+  },
+  "owned_tree_pids": [
+    68694,
+    68697
+  ],
+  "owned_tree_remaining": [],
+  "elapsed_ms": 5010,
+  "other_instance_pid": 68699,
+  "other_instance_tree_alive": true,
+  "supervisor_status": {
+    "error": "\u97f3\u9891\u5df2\u505c\u6b62\uff0c\u4f46\u8fd0\u884c\u5bc6\u94a5\u6e05\u7406\u672a\u5b8c\u6210\u3002\u8bf7\u68c0\u67e5\u76ee\u5f55\u6743\u9650\u540e\u91cd\u8bd5\u505c\u6b62\u3002",
+    "fault": {
+      "code": "runtime_cleanup_incomplete",
+      "params": {}
+    },
+    "guardian_result": {
+      "child_exit_code": null,
+      "cleanup_complete": false,
+      "cleanup_failures": [
+        "process_tree_incomplete"
+      ],
+      "forced": true,
+      "runtime_keys_observed": 1,
+      "version": 1
+    },
+    "guardian_version": 1,
+    "last_event": {
+      "event": "hub_started",
+      "managed_control_version": 1
+    },
+    "metrics": null,
+    "owner_pid": null,
+    "pid": null,
+    "ready": false,
+    "running": false,
+    "stop_result": {
+      "cleanup_complete": false,
+      "elapsed_ms": 5006,
+      "exit_code": null,
+      "forced": true,
+      "graceful": false
+    },
+    "stopping": false
+  },
+  "owned_runtime_keys_removed": false,
+  "other_runtime_key_preserved": true,
+  "profiles_preserved": true,
+  "failure_type": "AssertionError",
+  "failure": "",
+  "guardians_exited": true,
+  "fixtures_removed": true
+}

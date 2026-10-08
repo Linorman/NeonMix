@@ -1,0 +1,26 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 19.02s
+     Running tests/lane_binding.rs (target/release/deps/lane_binding-6403e5312cf0e02b)
+
+running 4 tests
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... FAILED
+
+failures:
+
+---- output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline stdout ----
+
+thread 'output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline' (47266169) panicked at crates/audio-core/tests/lane_binding.rs:150:5:
+assertion failed: before[479][0] > 0.19
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p neonmix-core --test lane_binding`

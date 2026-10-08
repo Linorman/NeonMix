@@ -44,7 +44,7 @@ fn reopen_rename_and_repeated_add_preserve_identity() {
     let reopened = f.store().load().unwrap();
     assert_eq!(reopened, first);
     let renamed = store
-        .rename(first.revision, "NeonMix — 书房".into())
+        .rename(first.output_id, first.revision, "NeonMix — 书房".into())
         .unwrap();
     assert_eq!(renamed.output_id, first.output_id);
     assert_eq!(renamed.hub_id, hub);
@@ -84,16 +84,20 @@ fn disable_enable_and_recreation_cannot_reauthorize_an_old_sender() {
             "Room".into(),
         )
         .unwrap();
-    let disabled = store.set_enabled(original.revision, false).unwrap();
+    let disabled = store
+        .set_enabled(original.output_id, original.revision, false)
+        .unwrap();
     assert!(!disabled.permits(&original));
-    let enabled = store.set_enabled(disabled.revision, true).unwrap();
+    let enabled = store
+        .set_enabled(disabled.output_id, disabled.revision, true)
+        .unwrap();
     assert!(!enabled.permits(&original));
     assert!(enabled.permits(&enabled));
     assert!(matches!(
-        store.rename(original.revision, "stale write".into()),
+        store.rename(original.output_id, original.revision, "stale write".into()),
         Err(Error::Conflict(_))
     ));
-    store.remove(enabled.revision).unwrap();
+    store.remove(enabled.output_id, enabled.revision).unwrap();
     let replacement = store
         .add(
             original.hub_id,
@@ -125,7 +129,7 @@ fn concurrent_writers_use_revision_conflicts_and_never_publish_partial_json() {
             let barrier = barrier.clone();
             thread::spawn(move || {
                 barrier.wait();
-                store.rename(1, format!("Room {index}"))
+                store.rename(initial.output_id, 1, format!("Room {index}"))
             })
         })
         .collect();
@@ -207,4 +211,94 @@ fn losing_private_permissions_or_replacing_the_record_with_a_symlink_fails_close
     fs::rename(&path, fixture.directory.join("original.json")).unwrap();
     symlink("original.json", &path).unwrap();
     assert!(store.load().is_err());
+}
+
+#[test]
+fn management_requests_for_removed_a_cannot_change_recreated_b_with_the_same_revision() {
+    let fixture = Fixture::new();
+    let store = fixture.store();
+    let a = store
+        .add(
+            Uuid::new_v4(),
+            Provider::Blackhole,
+            "coreaudio:BlackHole2ch_UID".into(),
+            "A".into(),
+        )
+        .unwrap();
+    store.remove(a.output_id, a.revision).unwrap();
+    let b = store
+        .add(a.hub_id, a.provider, a.device_id.clone(), "B".into())
+        .unwrap();
+    assert_eq!(a.revision, b.revision);
+    assert_ne!(a.output_id, b.output_id);
+    assert!(matches!(
+        store.rename(a.output_id, a.revision, "stale".into()),
+        Err(Error::ObjectReplaced)
+    ));
+    assert!(matches!(
+        store.set_enabled(a.output_id, a.revision, false),
+        Err(Error::ObjectReplaced)
+    ));
+    assert!(matches!(
+        store.set_enabled(a.output_id, a.revision, true),
+        Err(Error::ObjectReplaced)
+    ));
+    assert!(matches!(
+        store.remove(a.output_id, a.revision),
+        Err(Error::ObjectReplaced)
+    ));
+    let mut native_effects = 0;
+    let result: Result<(), Error> = store.with_expected(a.output_id, a.revision, |_| {
+        native_effects += 1;
+        Ok(())
+    });
+    assert!(matches!(result, Err(Error::ObjectReplaced)));
+    assert_eq!(native_effects, 0);
+    assert_eq!(store.load().unwrap(), b);
+    assert!(
+        store
+            .rename(Uuid::nil(), b.revision, "no identity".into())
+            .is_err()
+    );
+    assert_eq!(
+        store
+            .rename(b.output_id, b.revision, "current".into())
+            .unwrap()
+            .output_id,
+        b.output_id
+    );
+}
+
+#[test]
+fn native_effect_keeps_management_lock_through_its_entire_callback() {
+    let fixture = Fixture::new();
+    let store = fixture.store();
+    let binding = store
+        .add(
+            Uuid::new_v4(),
+            Provider::Blackhole,
+            "coreaudio:BlackHole2ch_UID".into(),
+            "Room".into(),
+        )
+        .unwrap();
+    let result: Result<(), Error> =
+        store.with_expected(binding.output_id, binding.revision, |current| {
+            assert_eq!(current, &binding);
+            let competing = std::fs::OpenOptions::new()
+                .read(true)
+                .write(true)
+                .open(fixture.directory.join("binding.lock"))
+                .unwrap();
+            assert!(
+                competing.try_lock().is_err(),
+                "native setter ran after its management lock was released"
+            );
+            Ok(())
+        });
+    assert!(result.is_ok());
+    assert!(
+        store
+            .rename(binding.output_id, binding.revision, "after sync".into())
+            .is_ok()
+    );
 }

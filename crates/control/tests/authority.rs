@@ -25,8 +25,13 @@ fn offer() -> MediaOffer {
 }
 fn command(a: &Authority, operation: Operation) -> Command {
     Command {
+        control_version: 1,
+        expected_config_revision: None,
+        expected_event_sequence: None,
+        runtime_epoch: None,
+        credential_id: None,
         request_id: Uuid::new_v4(),
-        expected_revision: a.snapshot().revision,
+        expected_revision: Some(a.snapshot().revision),
         operation,
     }
 }
@@ -379,26 +384,7 @@ fn durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot() {
     .unwrap();
     let mut rebuilt = before;
     for event in a.events_after(rebuilt.revision).unwrap() {
-        assert_eq!(event.revision, rebuilt.revision + 1);
-        for d in event.devices {
-            rebuilt.devices.insert(d.id, d);
-        }
-        for s in event.sessions {
-            rebuilt.sessions.insert(s.id, s);
-        }
-        for s in event.streams {
-            rebuilt.streams.insert(s.id, s);
-        }
-        for id in event.removed_streams {
-            rebuilt.streams.remove(&id);
-        }
-        for id in event.removed_sessions {
-            rebuilt.sessions.remove(&id);
-        }
-        if let Some(output) = event.output {
-            rebuilt.output = output;
-        }
-        rebuilt.revision = event.revision;
+        rebuilt.apply_event(event).unwrap();
     }
     assert_eq!(
         serde_json::to_value(rebuilt).unwrap(),

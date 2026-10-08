@@ -1,0 +1,267 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling neonmix-output-binding v0.1.0 (/Volumes/projects-mac/NeonMix/crates/output-binding)
+   Compiling neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.22s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_airplay_adapter-4c33d6df220a51c1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ingress.rs (target/debug/deps/ingress-70cd7f42207e2f98)
+
+running 8 tests
+test already_applied_protocol_gain_is_not_multiplied_twice_and_late_packet_drops ... ok
+test full_short_queue_never_invalidates_already_released_pcm ... ok
+test low_latency_keeps_bounds_rejects_late_packets_and_preserves_short_deadlines ... ok
+test low_latency_removes_protocol_prefetch_without_modulating_packet_timing ... ok
+test old_epoch_duplicates_clock_jump_and_bad_payload_fail_closed ... ok
+test unix_mapping_preserves_source_domain_and_release_obeys_device_budget ... ok
+test four_second_and_byte_limits_hold_for_large_and_tiny_packets ... ok
+test low_latency_preserves_pcm_through_deep_device_callbacks ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.09s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_airplay_ipc-3733ba8207714c70)
+
+running 13 tests
+test tests::rejects_unbounded_and_inconsistent_lengths_before_payload_read ... ok
+test tests::explicit_layout_preserves_original_rate_and_unix_time ... ok
+test tests::sample_rate_change_requires_hub_granted_context ... ok
+test tests::rejects_unknown_wire_formats_and_reserved_bits ... ok
+test tests::revoke_and_hub_granted_epochs_reject_in_flight_pcm ... ok
+test tests::rejects_non_finite_samples_and_untrusted_gain ... ok
+test tests::control_rejects_overlong_unterminated_and_extra_json ... ok
+test tests::sequence_gaps_allowed_but_duplicate_reverse_or_flag_reset_rejected ... ok
+test tests::control_writer_never_writes_partial_oversized_message ... ok
+test tests::control_v2_requires_event_provenance ... ok
+test tests::transport_observations_reject_secrets_impossible_lengths_and_unknown_outcomes ... ok
+test tests::typed_admission_requires_request_correlation_and_known_fields ... ok
+test tests::stream_reads_partial_frames_and_distinguishes_truncation_from_eof ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_control-b8162c1f487215dd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/authority.rs (target/debug/deps/authority-53a639ef7ee880c0)
+
+running 11 tests
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test member_cannot_solo_or_change_others_and_master ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/transactions.rs (target/debug/deps/transactions-18f6431ce493824e)
+
+running 4 tests
+test failed_preparation_aborts_only_the_candidate_and_keeps_health_updates ... ok
+test staged_command_excludes_durable_writers_and_preserves_live_output_loss ... ok
+test completed_replay_precedes_unrelated_pending_transaction_and_checks_fingerprint ... ok
+test cached_receipt_does_not_bypass_current_principal_validation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/neonmix_core-5fcde07064e4dbda)
+
+running 2 tests
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/audio_contract.rs (target/debug/deps/audio_contract-aa92855fd67d5468)
+
+running 18 tests
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test mute_advances_signal_position ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test malicious_pcm_is_sanitized ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test silence_is_data_but_idle_is_not ... ok
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.32s
+
+     Running tests/drift_stability.rs (target/debug/deps/drift_stability-74c8e35133fff642)
+
+running 3 tests
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ignored, Run with --release --ignored: four accelerated 600-second drift cases
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ignored, Release-only accelerated 300-second delivery-stall regression
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ignored, Release-only accelerated over-limit drift degradation
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lane_binding.rs (target/debug/deps/lane_binding-8d55454771dbaace)
+
+running 4 tests
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/mixer.rs (target/debug/deps/mixer-2a8d94e392e80543)
+
+running 8 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+
+     Running tests/mixer_measurements.rs (target/debug/deps/mixer_measurements-9171fb76d7f7850c)
+
+running 3 tests
+test valid_silent_muted_pcm_is_counted_as_running_instead_of_starved ... ok
+test active_timed_starvation_counts_one_second_and_stops_on_remove ... ok
+test active_native_starvation_counts_every_internal_frame_after_dsp_reset ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/mixer_realtime.rs (target/debug/deps/mixer_realtime-23769a702b3ab107)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.77s
+
+     Running tests/presentation_resample.rs (target/debug/deps/presentation_resample-4c967db0e65ab8ce)
+
+running 2 tests
+test callback_hooks_include_pending_frames_and_retained_sinc_lookahead ... ok
+test converter_impulse_tracks_source_time_without_adding_output_delay_twice ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/realtime.rs (target/debug/deps/realtime-404c537285d4efac)
+
+running 1 test
+test steady_state_capture_and_sinc_output_do_not_allocate_or_free ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+
+     Running tests/timed_mixer.rs (target/debug/deps/timed_mixer-d63e87c3ca556690)
+
+running 11 tests
+test muted_and_solo_lanes_consume_elapsed_audio_without_replay ... ok
+test callback_mid_block_selects_source_offset_and_epoch_flush_rejects_stale ... ok
+test negative_callback_start_jitter_does_not_delay_buffered_pcm ... ok
+test new_epoch_flushes_a_future_head_already_held_by_output ... ok
+test single_block_waits_until_target_without_native_start_water ... ok
+test solo_exclusion_consumes_timed_input_instead_of_replaying_it_later ... ok
+test late_deadlines_are_attributed_to_stream_epochs_across_lane_reuse ... ok
+test genuinely_late_first_pcm_and_large_clock_jumps_still_skip_elapsed_samples ... ok
+test timed_audio_recovers_after_a_track_gap_without_an_epoch_change ... ok
+test starvation_recovery_waits_for_future_pts_and_skips_elapsed_audio ... ok
+test an_early_first_packet_keeps_its_samples_across_callback_start_jitter ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.00s
+
+     Running tests/timed_multi_source.rs (target/debug/deps/timed_multi_source-2be04bbd5e531d1a)
+
+running 3 tests
+test reusing_a_solo_lane_rejects_old_stream_and_keeps_other_stream_at_current_time ... ok
+test flushing_a_held_future_head_and_stale_packets_does_not_restart_other_lane ... ok
+test four_distinct_streams_mix_with_independent_gain_mute_and_solo ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/timed_quality.rs (target/debug/deps/timed_quality-eb96f5249f597ffa)
+
+running 3 tests
+test timed_source_clock_error_keeps_long_term_presentation_phase_bounded ... ignored, Run release ignored: accelerated two-minute absolute phase tracking
+test fractional_src_preserves_upper_music_passband_after_clock_lock ... ok
+test callback_jitter_and_source_clock_error_do_not_create_pcm_spikes ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 9.12s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-2be7ef3586db05a8)
+
+running 49 tests
+test emblem::tests::same_room_same_emblem_and_rooms_differ ... ok
+test events::tests::list_keeps_the_newest_events ... ok
+test events::tests::diff_names_joins_changes_leaves_and_output_in_order ... ok
+test flow::tests::nodes_never_overlap_or_leave_the_canvas ... ok
+test history::tests::series_keeps_only_the_window_and_dropped_keys ... ok
+test flow::localization_tests::source_accessible_name_follows_locale_and_preserves_user_content ... ok
+test events::tests::switching_locale_rerenders_existing_history_without_new_events ... ok
+test animation::tests::live_motion_repaints_only_while_active_and_not_reduced ... ok
+test animation::tests::one_shot_plays_on_change_not_on_first_sight ... ok
+test i18n_tests::field_focus_selection_disclosure_and_scroll_persist_across_rendered_language_frames ... ok
+test pages::airplay::name_tests::alias_display_never_changes_session_control_identity ... ok
+test pages::airplay::name_tests::names_use_utf8_byte_bounds_and_success_does_not_erase_newer_drafts ... ok
+test pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes ... ok
+test i18n_tests::current_frame_accessibility_names_change_while_source_node_ids_stay_stable ... ok
+test localization::tests::locale_commit_waits_for_ime_and_retains_generation_when_unchanged ... ok
+test i18n_tests::language_popup_opens_with_keyboard_and_escape_returns_focus_to_same_selector ... FAILED
+test i18n_tests::long_user_names_and_double_scale_keep_actions_and_page_names_reachable ... FAILED
+test i18n_tests::palette_preserves_query_and_selected_command_identity_across_language_switch ... FAILED
+test tests::chinese_composition_preserves_draft_without_enter_submission ... ok
+test tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked ... ok
+test tests::cancel_modal_keeps_accesskit_focus_in_the_published_tree ... ok
+test i18n_tests::actions_started_in_chinese_finish_in_the_current_english_locale ... ok
+test localization::tests::detection_empty_failure_manual_override_and_auto_return_are_distinct ... ok
+test tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later ... ok
+test preferences::tests::newer_version_is_never_overwritten_and_memory_choice_survives_failure ... ok
+test tests::fader_click_never_jumps_gain_and_double_click_resets_to_unity ... ok
+test tests::long_error_at_minimum_width_keeps_page_content_on_screen ... ok
+test tests::one_failed_airplay_or_diagnostics_read_keeps_the_room_on_screen ... ok
+test tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts ... ok
+test tests::named_fields_publish_accessible_labels_without_exposing_password_text ... ok
+test tests::restore_sends_the_inverse_change_against_a_fresh_revision ... ok
+test tests::polling_does_not_lock_forms_and_stop_has_priority_over_pending_start ... ok
+test tests::stop_after_an_inflight_start_runs_last_and_keeps_the_stop_pending_until_ack ... ok
+test preferences::tests::malformed_and_oversized_files_do_not_get_overwritten_on_load ... ok
+test tests::stopped_local_hub_is_not_polled_for_room_state ... ok
+test preferences::tests::legacy_unknown_language_and_interleaved_updates_preserve_fields ... ok
+test tests::live_graph_names_every_node_for_assistive_tech ... ok
+test tests::sidebar_fits_seven_pages_and_actions_in_the_minimum_window ... ok
+test tests::palette_enter_during_ime_composition_does_not_run_an_action ... ok
+test widgets::localization_tests::identical_display_labels_do_not_alias_business_field_ids ... ok
+test widgets::localization_tests::translated_inline_title_keeps_identity_and_focus ... ok
+test widgets::localization_tests::translated_field_labels_keep_focus_draft_and_identity ... ok
+test theme::tests::cached_font_bytes_are_read_once_and_reused ... ok
+test tests::mixer_arrows_follow_the_fader_direction_of_the_layout ... ok
+test tests::pages_handle_missing_loading_failed_and_stale_states ... ok
+test tests::live_graph_moves_only_while_signal_flows ... ok
+test tests::airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions ... ok
+test i18n_tests::fifty_language_switches_preserve_drafts_targets_timers_and_backend_sessions ... ok
+test i18n_tests::dual_language_eight_surfaces_cover_empty_full_busy_and_stale_states has been running for over 60 seconds

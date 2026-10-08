@@ -1,0 +1,27 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+warning: unused import: `ResolvedLocale`
+  --> apps/desktop/src/main.rs:10:49
+   |
+10 | use neonmix_i18n::{LanguagePreference, Message, ResolvedLocale};
+   |                                                 ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0502]: cannot borrow `palette.query` as immutable because it is also borrowed as mutable
+   --> apps/desktop/src/palette.rs:194:69
+    |
+189 |                         egui::TextEdit::singleline(&mut palette.query)
+    |                                                    ------------------ mutable borrow occurs here
+...
+194 |                             .desired_width((ui.available_width()-if palette.query.is_empty(){0.0}else{32.0}).max(20.0)),
+    |                              -------------                          ^^^^^^^^^^^^^ immutable borrow occurs here
+    |                              |
+    |                              mutable borrow later used by call
+
+For more information about this error, try `rustc --explain E0502`.
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 1 warning
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 1 previous error; 1 warning emitted

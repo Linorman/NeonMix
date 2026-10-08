@@ -1,0 +1,14 @@
+[[message]]
+id = "tray-show"
+
+[[message]]
+id = "tray-stop"
+
+[[message]]
+id = "tray-quit"
+
+[[message]]
+id = "tray-hide"
+
+[[message]]
+id = "tray-tooltip"

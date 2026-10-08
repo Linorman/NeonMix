@@ -1,0 +1,12 @@
+viz-stage-done = 已就绪
+viz-stage-next = 下一步
+viz-stage-todo = 未开始
+viz-stage-fault = 需处理
+viz-step-accessible = { $title }：{ $detail }（{ $state }）
+viz-invitation-remaining = 邀请剩余 { $seconds } 秒
+viz-capacity-idle = 空闲
+viz-native-source = 原生
+viz-capacity-occupant = { $name }（{ $kind }）
+viz-capacity-empty = 房间输入容量 0 / { $limit }
+viz-capacity-summary = 房间输入容量 { $count } / { $limit }：{ $sources }
+viz-list-separator = 、

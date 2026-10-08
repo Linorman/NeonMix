@@ -1,0 +1,109 @@
+[[message]]
+id = "lane-output-lost"
+
+[[message]]
+id = "lane-muted"
+
+[[message]]
+id = "lane-solo-muted"
+
+[[message]]
+id = "lane-network-healthy"
+
+[[message]]
+id = "lane-network-buffering"
+
+[[message]]
+id = "lane-network-degraded"
+
+[[message]]
+id = "lane-network-interrupted"
+
+[[message]]
+id = "lane-network-unavailable"
+
+[[message]]
+id = "lane-network-stopped"
+
+[[message]]
+id = "lane-receiving"
+
+[[message]]
+id = "lane-unknown-device"
+
+[[message]]
+id = "lane-airplay-source"
+
+[[message]]
+id = "lane-airplay"
+
+[[message]]
+id = "lane-mute-source"
+args = { name = "string" }
+
+[[message]]
+id = "lane-unmute-source"
+args = { name = "string" }
+
+[[message]]
+id = "lane-solo-source"
+args = { name = "string" }
+
+[[message]]
+id = "lane-unsolo-source"
+args = { name = "string" }
+
+[[message]]
+id = "lane-gain-changed"
+args = { name = "string", before = "string", after = "string" }
+
+[[message]]
+id = "session-no-input"
+
+[[message]]
+id = "session-buffering"
+
+[[message]]
+id = "session-playing"
+
+[[message]]
+id = "session-network-degraded"
+
+[[message]]
+id = "session-user-stopped"
+
+[[message]]
+id = "session-admin-disconnected"
+
+[[message]]
+id = "session-network-interrupted"
+
+[[message]]
+id = "session-revoked"
+
+[[message]]
+id = "session-output-lost"
+
+[[message]]
+id = "role-admin"
+
+[[message]]
+id = "role-controller"
+
+[[message]]
+id = "role-member"
+
+[[message]]
+id = "device-revoked"
+
+[[message]]
+id = "device-disconnected"
+
+[[message]]
+id = "device-sending"
+
+[[message]]
+id = "device-idle"
+
+[[message]]
+id = "lane-audio-supply-interrupted"

@@ -106,6 +106,16 @@ impl PrivateDirectory {
         let file = platform::open_private(&self.directory.path.join(name), false)?;
         read_bounded(file, limit)
     }
+    /// Validate and inspect the same pinned private object without reading any
+    /// credential bytes. Cleanup owners use inode identity before unlinking.
+    pub fn metadata(&self, name: &str) -> io::Result<std::fs::Metadata> {
+        validate_name(name)?;
+        #[cfg(unix)]
+        let file = self.open_file(name, false)?;
+        #[cfg(windows)]
+        let file = platform::open_private(&self.directory.path.join(name), false)?;
+        file.metadata()
+    }
     /// Exclusive create, durable write and readback all use the same directory
     /// and file handles, including cleanup after our own failed write.
     pub fn write_new(&self, name: &str, bytes: &[u8]) -> io::Result<()> {
@@ -254,20 +264,116 @@ pub fn write_new(path: &Path, bytes: &[u8]) -> io::Result<()> {
     }
     result
 }
-/// A random private sibling is fully synced before replacement. Failed rename
-/// leaves the destination intact and cleans only this invocation's temporary.
+/// Visibility and durability are separate. A failed directory sync cannot be
+/// upgraded to Durable by comparing the destination bytes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Publication {
+    NotPublished,
+    PublishedDurabilityUnknown,
+    Durable,
+}
+#[derive(Debug)]
+pub struct PublicationError {
+    pub publication: Publication,
+    pub source: io::Error,
+}
+impl std::fmt::Display for PublicationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}: {}", self.publication, self.source)
+    }
+}
+impl std::error::Error for PublicationError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.source)
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ReplaceStage {
+    CreateTemporary,
+    WriteTemporary,
+    SyncTemporary,
+    SyncPreparedDirectory,
+    Publish,
+    Published,
+    SyncPublishedDirectory,
+}
+/// Compatibility callers still receive the original error. New coordinators
+/// must use replace_reported to retain its publication phase.
 pub fn replace(path: &Path, bytes: &[u8]) -> io::Result<()> {
-    let temporary = path.with_file_name(format!(".neonmix-{}.tmp", uuid::Uuid::new_v4()));
-    write_new(&temporary, bytes)?;
-    #[cfg(unix)]
-    let result = std::fs::rename(&temporary, path);
-    #[cfg(windows)]
-    let result = platform::replace(&temporary, path);
-    if result.is_err() {
+    replace_reported(path, bytes)
+        .map(|_| ())
+        .map_err(|error| error.source)
+}
+pub fn replace_reported(path: &Path, bytes: &[u8]) -> Result<Publication, PublicationError> {
+    replace_with(path, bytes, &mut |_| Ok(()))
+}
+/// Real I/O with deterministic fault/barrier seams at each publication boundary.
+/// The seam is local control code, never a remotely selectable action.
+#[doc(hidden)]
+pub fn replace_with(
+    path: &Path,
+    bytes: &[u8],
+    hook: &mut impl FnMut(ReplaceStage) -> io::Result<()>,
+) -> Result<Publication, PublicationError> {
+    let name = format!(".neonmix-{}.tmp", uuid::Uuid::new_v4());
+    replace_scoped_with(path, bytes, &name, hook)
+}
+/// A coordinator-owned namespace enables cleanup after a process died before
+/// its first durable journal. Caller still receives exact publication stages.
+#[doc(hidden)]
+pub fn replace_scoped_with(
+    path: &Path,
+    bytes: &[u8],
+    temporary_name: &str,
+    hook: &mut impl FnMut(ReplaceStage) -> io::Result<()>,
+) -> Result<Publication, PublicationError> {
+    validate_name(temporary_name).map_err(|source| PublicationError {
+        publication: Publication::NotPublished,
+        source,
+    })?;
+    let temporary = path.with_file_name(temporary_name);
+    let mut publication = Publication::NotPublished;
+    let mut created = false;
+    let result = (|| -> io::Result<()> {
+        hook(ReplaceStage::CreateTemporary)?;
+        let mut file = create(&temporary)?;
+        created = true;
+        hook(ReplaceStage::WriteTemporary)?;
+        file.write_all(bytes)?;
+        hook(ReplaceStage::SyncTemporary)?;
+        file.sync_all()?;
+        drop(file);
+        hook(ReplaceStage::SyncPreparedDirectory)?;
+        sync_parent(&temporary)?;
+        hook(ReplaceStage::Publish)?;
+        #[cfg(unix)]
+        std::fs::rename(&temporary, path)?;
+        #[cfg(windows)]
+        if let Err(error) = platform::replace(&temporary, path) {
+            // The Win32 primitive includes write-through. If the source is
+            // gone (or its visibility cannot be checked), publication cannot
+            // be safely excluded; never report it as a clean prepublish abort.
+            if !temporary.try_exists().unwrap_or(false) {
+                publication = Publication::PublishedDurabilityUnknown;
+            }
+            return Err(error);
+        }
+        publication = Publication::PublishedDurabilityUnknown;
+        hook(ReplaceStage::Published)?;
+        hook(ReplaceStage::SyncPublishedDirectory)?;
+        sync_parent(path)?;
+        publication = Publication::Durable;
+        Ok(())
+    })();
+    if created && publication == Publication::NotPublished {
         let _ = std::fs::remove_file(&temporary);
     }
-    result?;
-    sync_parent(path)
+    result
+        .map(|_| publication)
+        .map_err(|source| PublicationError {
+            publication,
+            source,
+        })
 }
 /// Syncs the containing directory after entry creation/removal/rename on Unix.
 pub fn sync_parent(path: &Path) -> io::Result<()> {
@@ -519,5 +625,81 @@ mod tests {
         assert!(ready, "lock child did not become ready");
         assert_eq!(conflict.err().unwrap().kind(), io::ErrorKind::WouldBlock);
         let _guard = lock(&directory.0.join("owner.lock")).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod publication_tests {
+    use super::*;
+    #[test]
+    fn every_real_replace_boundary_preserves_original_error_and_publication_phase() {
+        let project = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap();
+        let directory = project
+            .join(".local/tmp")
+            .join(format!("publication-{}", uuid::Uuid::new_v4()));
+        private_dir(&directory).unwrap();
+        let destination = directory.join("state.json");
+        write_new(&destination, b"old").unwrap();
+        for stage in [
+            ReplaceStage::CreateTemporary,
+            ReplaceStage::WriteTemporary,
+            ReplaceStage::SyncTemporary,
+            ReplaceStage::SyncPreparedDirectory,
+            ReplaceStage::Publish,
+            ReplaceStage::Published,
+            ReplaceStage::SyncPublishedDirectory,
+        ] {
+            replace_reported(&destination, b"old").unwrap();
+            let error = replace_with(&destination, b"new", &mut |point| {
+                if point == stage {
+                    Err(io::Error::from_raw_os_error(28))
+                } else {
+                    Ok(())
+                }
+            })
+            .unwrap_err();
+            assert_eq!(error.source.raw_os_error(), Some(28));
+            let published = matches!(
+                stage,
+                ReplaceStage::Published | ReplaceStage::SyncPublishedDirectory
+            );
+            assert_eq!(
+                error.publication,
+                if published {
+                    Publication::PublishedDurabilityUnknown
+                } else {
+                    Publication::NotPublished
+                }
+            );
+            assert_eq!(
+                read_private(&destination, 16).unwrap(),
+                if published { b"new" } else { b"old" }
+            );
+            assert_eq!(
+                std::fs::read_dir(&directory).unwrap().count(),
+                1,
+                "temporary leaked at {stage:?}"
+            );
+        }
+        // Equal bytes provide no evidence of fsync completion.
+        let error = replace_with(&destination, b"new", &mut |point| {
+            if point == ReplaceStage::SyncPublishedDirectory {
+                Err(io::ErrorKind::Other.into())
+            } else {
+                Ok(())
+            }
+        })
+        .unwrap_err();
+        assert_eq!(read_private(&destination, 16).unwrap(), b"new");
+        assert_eq!(error.publication, Publication::PublishedDurabilityUnknown);
+        assert_eq!(
+            replace_reported(&destination, b"durable").unwrap(),
+            Publication::Durable
+        );
+        std::fs::remove_dir_all(directory).unwrap();
     }
 }

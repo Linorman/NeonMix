@@ -1,0 +1,30 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.61s
+     Running tests/config_progress.rs (target/debug/deps/config_progress-ea6e51c753fedada)
+
+running 3 tests
+test invalid_config_never_changes_desired_or_callback_sequence ... ok
+test full_queue_keeps_newest_desired_and_retry_does_not_allocate_a_second_sequence ... ok
+test control_thread_discard_does_not_impersonate_output_callback_application ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/lane_binding.rs (target/debug/deps/lane_binding-936c153e6ee6aae4)
+
+running 6 tests
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test old_queue_binding_is_rejected_without_erasing_new_binding_and_mode ... ok
+test revocation_cuts_off_buffered_pcm_even_when_config_queue_is_full_and_same_ids_are_reused ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/mixer_realtime.rs (target/debug/deps/mixer_realtime-c6c8e3e551dba2a0)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.68s
+

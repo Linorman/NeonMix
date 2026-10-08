@@ -6,7 +6,7 @@ use axum::{
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
 };
-use neonmix_control::{Command, ControlError, Operation, Principal, Role};
+use neonmix_control::{Command, ControlError, Operation, Preparation, Principal, Role};
 use neonmix_identity::pairing::{Checked, Completion, Error as PairError, Invitation, Request};
 use serde::Deserialize;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
@@ -15,8 +15,12 @@ use uuid::Uuid;
 // Book.open may evict expired grants and cancel removes them. Serialize these
 // operations with redemption until its durable commit and Book.finish, while
 // leaving Engine available to all audio/control workers during filesystem I/O.
-static PAIRING_TRANSACTION: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+pub(super) static PAIRING_TRANSACTION: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 
+pub(super) struct PairingRecovery {
+    pub(super) request: Request,
+    pub(super) prepared: neonmix_control::PreparedCommand,
+}
 pub(super) enum Error {
     Control(ControlError),
     Pairing(PairError),
@@ -77,7 +81,7 @@ pub(super) async fn identity(
 ) -> std::result::Result<Json<serde_json::Value>, ApiError> {
     let engine = shared.lock().map_err(|_| ControlError::Busy)?;
     Ok(Json(
-        serde_json::json!({"version":1,"hub_id":engine.authority.current().hub_id,"room_name":engine.room_name}),
+        serde_json::json!({"version":1,"control_version":neonmix_control::CONTROL_VERSION,"capabilities":["native_config_revision","native_event_sequence","runtime_epoch"],"hub_id":engine.authority.current().hub_id,"room_name":engine.room_name}),
     ))
 }
 pub(super) async fn open(
@@ -88,6 +92,9 @@ pub(super) async fn open(
     let _transaction = PAIRING_TRANSACTION.lock().await;
     let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
     let issuer = admin(&engine, &headers)?;
+    if engine.pairing_recovery.is_some() {
+        return Err(ControlError::DurabilityUnconfirmed.into());
+    }
     let (id, secret) = engine
         .pairings
         .open(issuer, open.ttl_seconds, Instant::now())?;
@@ -119,6 +126,9 @@ pub(super) async fn cancel(
     let _transaction = PAIRING_TRANSACTION.lock().await;
     let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
     admin(&engine, &headers)?;
+    if engine.pairing_recovery.is_some() {
+        return Err(ControlError::DurabilityUnconfirmed.into());
+    }
     engine.pairings.cancel(cancel.invitation_id);
     Ok(Json(serde_json::json!({"cancelled":cancel.invitation_id})))
 }
@@ -151,6 +161,36 @@ pub(super) async fn complete_with(
     })
     .await
     .map_err(|_| Error::Control(ControlError::Busy))?
+}
+pub(super) fn recover_registration(
+    shared: &Shared,
+    request_id: Uuid,
+) -> std::result::Result<Completion, Error> {
+    let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
+    let Some(recovery) = engine.pairing_recovery.as_ref() else {
+        return Err(ControlError::NotFound.into());
+    };
+    if recovery.request.request_id != request_id {
+        return Err(ControlError::NotFound.into());
+    }
+    let recovery = engine.pairing_recovery.take().expect("checked recovery");
+    let path = engine.state_path.clone();
+    let saved = recovery.prepared.persistent();
+    drop(engine);
+    let result = persist_saved(path.as_ref(), &saved);
+    let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
+    if result.is_err() {
+        engine.pairing_recovery = Some(recovery);
+        return Err(ControlError::DurabilityUnconfirmed.into());
+    }
+    let receipt = engine.authority.commit_transaction(recovery.prepared)?;
+    let done = Completion {
+        hub_id: engine.authority.current().hub_id,
+        device_id: receipt.device_id.ok_or(ControlError::Busy)?,
+        revision: receipt.revision,
+    };
+    engine.pairings.finish(recovery.request, done.clone());
+    Ok(done)
 }
 fn complete_locked(
     shared: Shared,
@@ -192,14 +232,51 @@ fn complete_locked(
         }
         Checked::New(issuer) => issuer,
     };
+    if let Some(recovery) = engine.pairing_recovery.as_ref() {
+        if recovery.request != request {
+            return Err(ControlError::DurabilityUnconfirmed.into());
+        }
+        let recovery = engine
+            .pairing_recovery
+            .take()
+            .expect("checked pending pairing");
+        let path = engine.state_path.clone();
+        let saved = recovery.prepared.persistent();
+        drop(engine);
+        let persisted =
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| save(path.as_ref(), &saved)))
+                .unwrap_or(Err(ControlError::DurabilityUnconfirmed));
+        let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
+        if persisted.is_err() {
+            engine.pairing_recovery = Some(recovery);
+            return Err(ControlError::DurabilityUnconfirmed.into());
+        }
+        let receipt = engine.authority.commit_transaction(recovery.prepared)?;
+        let done = Completion {
+            hub_id: engine.authority.current().hub_id,
+            device_id: receipt.device_id.ok_or(ControlError::Busy)?,
+            revision: receipt.revision,
+        };
+        engine.cache_recovery(
+            request.request_id,
+            serde_json::to_value(&done).map_err(|_| ControlError::Busy)?,
+        );
+        engine.pairings.finish(request, done.clone());
+        return Ok(Json(done));
+    }
     // Revalidate issuer and commit disk before publishing the registered identity.
     let path = engine.state_path.clone();
     let revision = engine.authority.current().revision;
-    let prepared = engine.authority.prepare_transaction(
+    let preparation = engine.authority.prepare_transaction(
         issuer,
         Command {
+            control_version: 1,
+            expected_config_revision: None,
+            expected_event_sequence: None,
+            runtime_epoch: None,
+            credential_id: None,
             request_id: request.request_id,
-            expected_revision: revision,
+            expected_revision: Some(revision),
             operation: Operation::RegisterDevice {
                 name: request.name.clone(),
                 role: Role::Member,
@@ -207,14 +284,24 @@ fn complete_locked(
             },
         },
     )?;
+    let prepared = match preparation {
+        Preparation::Prepared(prepared) => prepared,
+        // Pairing's own Book handles completed requests before this point.
+        // A control receipt without that completion cannot be redeemed again.
+        Preparation::Replay(_) => return Err(ControlError::IdempotencyConflict.into()),
+    };
     let token = prepared.token();
     let saved = prepared.persistent();
     drop(engine);
     let persisted =
         std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| save(path.as_ref(), &saved)))
-            .unwrap_or(Err(ControlError::Busy));
+            .unwrap_or(Err(ControlError::DurabilityUnconfirmed));
     let mut engine = shared.lock().map_err(|_| ControlError::Busy)?;
     if let Err(error) = persisted {
+        if error == ControlError::DurabilityUnconfirmed {
+            engine.pairing_recovery = Some(PairingRecovery { request, prepared });
+            return Err(error.into());
+        }
         engine.authority.abort_transaction(token)?;
         return Err(error.into());
     }

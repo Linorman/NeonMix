@@ -1,0 +1,25 @@
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+    Checking neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+    Checking neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+    Checking neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+    Checking neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+    Checking neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0063]: missing field `binding_generation` in initializer of `neonmix_core::mixer::LaneMix`
+    --> apps/hub/src/airplay.rs:2008:33
+     |
+2008 | ...                   LaneMix {
+     |                       ^^^^^^^ missing `binding_generation`
+
+error[E0063]: missing field `binding_generation` in initializer of `neonmix_core::mixer::LaneMix`
+   --> apps/hub/src/server.rs:138:35
+    |
+138 |                 config.lanes[i] = LaneMix {
+    |                                   ^^^^^^^ missing `binding_generation`
+
+For more information about this error, try `rustc --explain E0063`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 2 previous errors

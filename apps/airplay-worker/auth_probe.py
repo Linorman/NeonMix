@@ -7,8 +7,8 @@ def bn(n):return n.to_bytes((n.bit_length()+7)//8,'big')
 def h(s):return hashlib.sha1(s).digest()
 def sha(s):return hashlib.sha512(s).digest()
 class Crypto:
-    def __init__(self):
-        self.lib=ctypes.CDLL(str(ROOT/'.local/airplay/build/libneonmix-airplay-probe-crypto.dylib'))
+    def __init__(self, library=None):
+        self.lib=ctypes.CDLL(str(library or ROOT/'.local/airplay/build/libneonmix-airplay-probe-crypto.dylib'))
         for n in ['probe_ed_public','probe_x_public','probe_sign','probe_x_secret']:
             f=getattr(self.lib,n);f.argtypes=[ctypes.c_void_p]*(3 if n in ['probe_sign','probe_x_secret'] else 2);f.restype=ctypes.c_int
         self.lib.probe_gcm.argtypes=[ctypes.c_void_p,ctypes.c_int,ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p];self.lib.probe_gcm.restype=ctypes.c_int

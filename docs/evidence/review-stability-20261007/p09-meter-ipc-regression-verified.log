@@ -1,0 +1,26 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.67s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-cd57f3d42ee3b1c9)
+
+running 18 tests
+test daemon::discovery_tests::discovery_empty_completion_clears_removed_candidates_and_supports_single_line_output ... ok
+test intent::tests::legacy_patch_requires_runtime_session_and_unchanged_undo_field ... ok
+test daemon::discovery_tests::discovery_incomplete_or_malformed_output_is_an_error ... ok
+test daemon::discovery_tests::discovery_returns_the_final_candidate_snapshot_instead_of_transient_events ... ok
+test daemon::discovery_tests::receiver_pins_only_survive_authenticated_control_replies ... ok
+test daemon::discovery_tests::diagnostic_meter_session_scope_survives_ipc_but_never_the_export_whitelist ... ok
+test daemon::discovery_tests::unsupported_device_format_has_a_specific_redacted_error ... ok
+test daemon::discovery_tests::sender_target_is_latched_before_redaction_and_stats_cannot_change_it ... ok
+test daemon::discovery_tests::persistent_fault_keeps_semantics_through_eof_and_unexpected_exit_noise ... ok
+test intent::tests::legacy_patch_uses_one_fresh_revision_and_preserves_unmodified_fields ... ok
+test managed::tests::cancelled_stop_completes_and_fifty_restarts_are_graceful ... ignored, requires the project-local neonmix-lifecycle-probe fixture
+test managed::tests::failed_runtime_drop_keeps_guardian_alive_until_its_hung_media_exits ... ignored, requires the project-local neonmix-lifecycle-probe fixture
+test managed::tests::hung_process_is_forced_with_a_bounded_wait ... ignored, requires the project-local neonmix-lifecycle-probe fixture
+test manager::tests::accepted_stop_fences_queued_start_and_duplicate_stop_reuses_the_operation ... ok
+test guardian::cleanup_tests::cleanup_keeps_persistent_identity_and_removes_only_captured_temporary_keys ... ok
+test guardian::cleanup_tests::another_owner_lock_prevents_cleanup_and_file_replacement_does_not_get_deleted ... ok
+test guardian::cleanup_tests::receiver_directory_symlink_fails_closed_without_deleting_other_directory_keys ... ok
+test managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit ... ok
+
+test result: ok. 15 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.97s
+

@@ -30,6 +30,7 @@ fn render(frequency: f64, ppm: f64, jitter_ns: i64, seconds: usize) -> Quality {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();

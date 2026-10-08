@@ -1,0 +1,110 @@
+{
+  "created_at": "2026-10-07T23:14:50.970899+00:00",
+  "scope": "P07 live health merge using existing revision; macOS local component/handler regression. Config/event domains, WSS restart, desired/applied and native platform matrix remain pending.",
+  "gate": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.559
+    },
+    "packaging": {
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.216
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 6.425
+    },
+    "tests": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 93.71
+    }
+  },
+  "rust_test_passed": 314,
+  "rust_test_ignored": 7,
+  "sha256": {
+    "crates/control/src/lib.rs": "a5c7fcf67ae5cb7b9f4aa2db303f3c606ec8fbf58ccadba9a21d880e5ce44efa",
+    "crates/control/tests/transactions.rs": "86e225d54a322767cde9ae0f96902e0f55c015c3c83ef73a8d0c70895b7968bb",
+    "apps/hub/src/server.rs": "098a80ff3c1f2dc10cbad2b8b1275a503200a9d8ced4e15f7d62ff2f6b7ee0a7",
+    "apps/hub/src/airplay_api.rs": "c331329db255599ebf44f800e1a8659021e16b11037444d5fc90b121c8b46468",
+    "apps/hub/src/airplay.rs": "eda8c35fafad20246d5884bc2a89a7551d507f4656fed2eff5591e3897e6ed8d",
+    "apps/hub/src/pairing_api.rs": "150d9658655d38d178a6bc014557e016019792cafd8d73ed06fccfd98d3a12b5",
+    "crates/identity/src/airplay_profile.rs": "a885aeba569c12dc88fcc9f8cda225db0cdac9d8e78765dcf2275cd8db8cde0a",
+    "docs/REVIEW-IMPROVEMENT-DESIGN-PLAN-20261007.md": "811f872679f5564411fcf9b63daf9d58d3c932e1f92294bbeff0cf86e00d5204",
+    "docs/MEDIA-CONTROL-CONTRACT.md": "930d8c6670c9eb1ed041098703c030fe77cbfabf83f571776ede1b169cf4a34a",
+    "target/release/neonmix-hub": "295e87c4e9f9f48900bf374ffd5a186bdd41ec4ef17501c9232912f9776ecfd1",
+    "target/release/neonmix-desktop": "29a08b6cef9a0d6a794238ed9e2163d421320062f4231a2618c663c23b71c455",
+    "target/release/neonmix-background": "fd4bcc63d6b7af1251d87ce706ebf27d004a9cb3b328267f1ac97fbf24fb8421",
+    "target/release/neonmix-guardian": "57321e48ece11d27daf668bdd970e2d7c471dae2b952083dec0550c13e250f48"
+  }
+}

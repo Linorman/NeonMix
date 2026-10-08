@@ -1,0 +1,43 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.51s
+     Running tests/lane_binding.rs (target/debug/deps/lane_binding-fad7b077a5e60d50)
+
+running 7 tests
+test revocation_cuts_off_buffered_pcm_even_when_config_queue_is_full_and_same_ids_are_reused ... ok
+test old_queue_binding_is_rejected_without_erasing_new_binding_and_mode ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+test revocation_after_inactive_config_cannot_continue_a_planned_retirement_tail ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.29s
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-5052d7cba9beba85)
+
+running 13 tests
+test commands_tests::saved_field_waits_for_scoped_callback_ack_and_exposes_stall_or_unknown_without_resending ... ok
+test commands_tests::acknowledgement_does_not_erase_a_newer_drag_draft_and_removed_session_clears_its_draft ... ok
+test commands_tests::application_ack_from_another_runtime_cannot_settle_saved_field_and_room_switch_clears_watch ... ok
+test commands_tests::airplay_v3_regular_mix_uses_config_and_runtime_conditions_while_solo_uses_runtime_only ... ok
+test commands_tests::airplay_v3_confirmation_retains_original_versions_and_command_id_after_refresh ... ok
+test commands_tests::delayed_first_write_preserves_b_gain_c_mute_b_solo_and_fair_order ... ok
+test commands_tests::airplay_mute_then_gain_and_solo_then_gain_emit_independent_patches ... ok
+test commands_tests::undo_rechecks_field_after_a_wait_and_preserves_other_fields ... ok
+test commands_tests::context_change_cancels_queued_fields_and_does_not_retarget_inflight_reply_or_undo ... ok
+test commands_tests::legacy_resolution_freezes_one_fresh_payload_and_is_cancelled_on_context_change ... ok
+test commands_tests::unknown_reconciles_the_same_envelope_and_only_acknowledgement_creates_undo ... ok
+test commands_tests::terminal_target_is_a_barrier_and_capacity_never_evicts_another_channel ... ok
+test commands_tests::undo_is_invalidated_in_acknowledgement_and_restore_windows_and_on_session_reuse ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 55 filtered out; finished in 0.01s
+

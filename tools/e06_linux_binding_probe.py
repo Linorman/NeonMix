@@ -115,7 +115,7 @@ try:
     first=output('add','--credential',lab/'sender-a.json','--hub',f'https://localhost:{port}','--name','NeonMix — Ubuntu room')
     wait(node,lambda n:n and n['info']['props'].get('node.description')==first['display_name'])
     assert node()['id']==node_id
-    output('sync-name')
+    output('sync-name','--expected-output-id',first['output_id'],'--expected-revision',first['revision'])
     tone=lab/'tone.wav'; second_tone=lab/'second-tone.wav'
     for path,frequency in ((tone,437),(second_tone,659)):
         with wave.open(str(path),'wb') as wav:
@@ -137,16 +137,16 @@ try:
     stop(second_source)
     sender=start('sender',[binary,'send','--credential',lab/'sender-a.json','--hub',f'https://localhost:{port}','--output-binding',directory,'--seconds',90])
     session=wait(active);wait(lambda:api('/v1/diagnostics'),lambda d:d and len(d['receivers'])==1 and d['receivers'][0]['last_buffer_rms']>.008)
-    renamed=output('rename','--expected-revision',first['revision'],'--name','NeonMix — Ubuntu renamed')
-    output('sync-name');wait(node,lambda n:n and n['info']['props'].get('node.description')==renamed['display_name'])
+    renamed=output('rename','--expected-revision',first['revision'],'--expected-output-id',first['output_id'],'--name','NeonMix — Ubuntu renamed')
+    output('sync-name','--expected-output-id',renamed['output_id'],'--expected-revision',renamed['revision']);wait(node,lambda n:n and n['info']['props'].get('node.description')==renamed['display_name'])
     assert node()['id']==node_id and sender.poll() is None
     report['rename_keeps_node_and_media']={'node':node(),'binding':renamed,'diagnostics':api('/v1/diagnostics')}
-    disabled=output('disable','--expected-revision',renamed['revision']);enabled=output('enable','--expected-revision',disabled['revision'])
+    disabled=output('disable','--expected-revision',renamed['revision'],'--expected-output-id',renamed['output_id']);enabled=output('enable','--expected-revision',disabled['revision'],'--expected-output-id',disabled['output_id'])
     assert sender.wait(timeout=8)!=0 and not active();assert node()['id']==node_id
     report['disable_enable_stops_old_sender']={'old_session':api('/v1/hub')['sessions'][session['id']],'enabled':enabled}
     fresh_sender=start('sender-new',[binary,'send','--credential',lab/'sender-a.json','--hub',f'https://localhost:{port}','--output-binding',directory,'--seconds',60])
     fresh=wait(active);assert fresh['id']!=session['id'] and fresh['media_context']!=session['media_context']
-    output('remove','--expected-revision',enabled['revision']);assert fresh_sender.wait(timeout=8)!=0 and not active()
+    output('remove','--expected-revision',enabled['revision'],'--expected-output-id',enabled['output_id']);assert fresh_sender.wait(timeout=8)!=0 and not active()
     wait(node,lambda n:n and n['info']['props'].get('node.description')==original['info']['props']['node.description'])
     assert node()['id']==node_id;report['remove_preserves_local_output']=True
     stop(source)
@@ -161,7 +161,7 @@ finally:
         current=node();props=original['info']['params']['Props'][0]
         checked(['pw-cli','set-param',current['id'],'Props',json.dumps({k:props[k] for k in ('volume','mute','channelVolumes','softMute','softVolumes','monitorMute','monitorVolumes')})])
         if (directory/'binding.json').exists():
-            binding=output('show');output('remove','--expected-revision',binding['revision'])
+            binding=output('show');output('remove','--expected-revision',binding['revision'],'--expected-output-id',binding['output_id'])
     except Exception as error:report['restore_failure']=repr(error);report['passed']=False
     shutil.rmtree(lab)
     (OUT/'result.json').write_text(json.dumps(report,indent=2)+'\n')

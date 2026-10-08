@@ -1,0 +1,46 @@
+[
+  {
+    "name": "service-tests",
+    "command": [
+      "tools/dev",
+      "cargo",
+      "test",
+      "-p",
+      "neonmix-desktop-service",
+      "--no-fail-fast"
+    ],
+    "exit_code": 0,
+    "log": "docs/evidence/ui-i18n-20261007/service-tests.log"
+  },
+  {
+    "name": "service-clippy",
+    "command": [
+      "tools/dev",
+      "cargo",
+      "clippy",
+      "-p",
+      "neonmix-desktop-service",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "log": "docs/evidence/ui-i18n-20261007/service-clippy.log"
+  },
+  {
+    "name": "service-windows-check",
+    "command": [
+      "tools/dev",
+      "cargo",
+      "check",
+      "-p",
+      "neonmix-desktop-service",
+      "--all-targets",
+      "--target",
+      "x86_64-pc-windows-gnu"
+    ],
+    "exit_code": 0,
+    "log": "docs/evidence/ui-i18n-20261007/service-windows-check.log"
+  }
+]

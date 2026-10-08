@@ -1,0 +1,36 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2.27s
+     Running tests/lane_binding.rs (target/release/deps/lane_binding-6403e5312cf0e02b)
+
+running 7 tests
+test old_queue_binding_is_rejected_without_erasing_new_binding_and_mode ... ok
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test revocation_after_inactive_config_cannot_continue_a_planned_retirement_tail ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+test revocation_cuts_off_buffered_pcm_even_when_config_queue_is_full_and_same_ids_are_reused ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mixer.rs (target/release/deps/mixer-2d07b83b42a1d39c)
+
+running 8 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/mixer_realtime.rs (target/release/deps/mixer_realtime-7f4717961b9e6dc3)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+

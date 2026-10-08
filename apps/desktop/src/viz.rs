@@ -1,11 +1,13 @@
 //! State drawn as pictures: the Sender pipeline, the discovery radar, the
 //! share switch, the invitation countdown and the shared input capacity.
 //! Each one maps to real state; motion only while that state is changing.
+use crate::localization::text;
 use crate::{animation, fx, icons, theme};
 use eframe::egui::{
     self, Align2, Color32, CornerRadius, FontId, Rect, Response, Sense, Stroke, StrokeKind, Ui,
     pos2, vec2,
 };
+use neonmix_i18n::Message;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Stage {
@@ -33,12 +35,12 @@ impl Stage {
         }
     }
 
-    fn word(self) -> &'static str {
+    fn word(self, ui: &Ui) -> String {
         match self {
-            Self::Done => "已就绪",
-            Self::Next => "下一步",
-            Self::Todo => "未开始",
-            Self::Fault => "需处理",
+            Self::Done => text(ui, &Message::VizStageDone),
+            Self::Next => text(ui, &Message::VizStageNext),
+            Self::Todo => text(ui, &Message::VizStageTodo),
+            Self::Fault => text(ui, &Message::VizStageFault),
         }
     }
 }
@@ -54,7 +56,7 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
     let gap = if horizontal { 26.0 } else { 18.0 };
     let (node, total) = if horizontal {
         let w = (width - gap * (n - 1.0)) / n;
-        (vec2(w, 84.0), vec2(width, 84.0))
+        (vec2(w, 98.0), vec2(width, 98.0))
     } else {
         (vec2(width, 52.0), vec2(width, n * 52.0 + (n - 1.0) * gap))
     };
@@ -127,12 +129,16 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
         }
         let step = &steps[i];
         let response = ui.interact(r, id.with(i), Sense::click());
+        let access_label = text(
+            ui,
+            &Message::VizStepAccessible {
+                title: step.title.into(),
+                detail: step.detail.clone(),
+                state: step.state.word(ui),
+            },
+        );
         response.widget_info(|| {
-            egui::WidgetInfo::labeled(
-                egui::WidgetType::Button,
-                true,
-                format!("{}：{}（{}）", step.title, step.detail, step.state.word()),
-            )
+            egui::WidgetInfo::labeled(egui::WidgetType::Button, true, access_label.clone())
         });
         if response.clicked() {
             picked = Some(i);
@@ -201,7 +207,7 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
         );
         let state = label(
             painter,
-            step.state.word(),
+            &step.state.word(ui),
             FontId::proportional(11.0),
             color,
             80.0,
@@ -418,12 +424,14 @@ pub fn countdown_ring(ui: &mut Ui, remaining: f32, total: f32, size: f32) -> Res
             theme::TEXT_3
         },
     );
+    let access_label = text(
+        ui,
+        &Message::VizInvitationRemaining {
+            seconds: remaining.ceil().max(0.0) as u64,
+        },
+    );
     response.widget_info(|| {
-        egui::WidgetInfo::labeled(
-            egui::WidgetType::Label,
-            true,
-            format!("邀请剩余 {} 秒", remaining.ceil().max(0.0) as u32),
-        )
+        egui::WidgetInfo::labeled(egui::WidgetType::Label, true, access_label.clone())
     });
     response
 }
@@ -496,29 +504,40 @@ pub fn capacity_slots(ui: &mut Ui, limit: usize, used: &[Slot]) -> Response {
                 painter.text(
                     r.center(),
                     Align2::CENTER_CENTER,
-                    "空闲",
+                    text(ui, &Message::VizCapacityIdle),
                     FontId::proportional(theme::SMALL),
                     theme::TEXT_3,
                 );
             }
         }
     }
+    let localizer = crate::localization::renderer(ui.ctx());
     let summary = used
         .iter()
         .map(|s| {
-            format!(
-                "{}（{}）",
-                s.name,
-                if s.airplay { "AirPlay" } else { "原生" }
-            )
+            let kind = if s.airplay {
+                "AirPlay".into()
+            } else {
+                localizer.render(&Message::VizNativeSource)
+            };
+            localizer.render(&Message::VizCapacityOccupant {
+                name: s.name.clone(),
+                kind,
+            })
         })
         .collect::<Vec<_>>()
-        .join("、");
-    let text = format!(
-        "房间输入容量 {} / {limit}{}{summary}",
-        used.len(),
-        if used.is_empty() { "" } else { "：" }
-    );
+        .join(&localizer.render(&Message::VizListSeparator));
+    let text = if used.is_empty() {
+        localizer.render(&Message::VizCapacityEmpty {
+            limit: limit as u64,
+        })
+    } else {
+        localizer.render(&Message::VizCapacitySummary {
+            count: used.len() as u64,
+            limit: limit as u64,
+            sources: summary,
+        })
+    };
     response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Label, true, &text));
     response.on_hover_text(text)
 }

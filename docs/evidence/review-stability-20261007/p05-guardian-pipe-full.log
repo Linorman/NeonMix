@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "scope": "real supervisor/private pipe and synthetic log flood; no media or hardware",
+  "binary_sha256": {
+    "neonmix-guardian": "08fdb871f902be9dcc9b8a274274168adb07d1b2eb4679e0636748686031cf34",
+    "neonmix-lifecycle-probe": "e3ded55816073e27576d9bf8380eda8b98fae4c8c582cd3e66a6d39b5a15a09e"
+  },
+  "exit_code": 1,
+  "elapsed_ms": 5519,
+  "owned_tree_pids": [
+    89399,
+    89432
+  ],
+  "owned_tree_remaining": []
+}

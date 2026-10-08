@@ -1,0 +1,46 @@
+[[message]]
+id = "events-source-joined"
+args = { name = "string" }
+
+[[message]]
+id = "events-source-status"
+args = { name = "string", status = "string" }
+
+[[message]]
+id = "events-source-solo"
+args = { name = "string" }
+
+[[message]]
+id = "events-source-unsolo"
+args = { name = "string" }
+
+[[message]]
+id = "events-source-left"
+args = { name = "string" }
+
+[[message]]
+id = "events-output-restored"
+
+[[message]]
+id = "events-output-lost"
+
+[[message]]
+id = "events-master-muted"
+
+[[message]]
+id = "events-master-unmuted"
+
+[[message]]
+id = "events-just-now"
+
+[[message]]
+id = "events-seconds-ago"
+args = { count = "u64" }
+
+[[message]]
+id = "events-minutes-ago"
+args = { count = "u64" }
+
+[[message]]
+id = "events-hours-ago"
+args = { count = "u64" }

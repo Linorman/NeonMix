@@ -12,11 +12,14 @@ pub struct Palette {
     /// IME preedit is active: Enter belongs to the input method, not to us.
     composing: bool,
     focused: bool,
+    selected_cmd: Option<Cmd>,
+    generation: u64,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Hash)]
 enum Cmd {
     Go(Page),
+    LanguageSettings,
     HubStart,
     HubStop,
     SenderStart,
@@ -33,9 +36,9 @@ enum Cmd {
 }
 
 struct Entry {
-    group: &'static str,
+    group: String,
     title: String,
-    keywords: &'static str,
+    keywords: String,
     hint: Option<String>,
     tone: Tone,
     cmd: Cmd,
@@ -51,34 +54,53 @@ impl Desktop {
 
     fn palette_entries(&self) -> Vec<Entry> {
         let mut list = Vec::new();
-        let mut push = |group, title: String, keywords, hint, tone, cmd| {
+        let mut push = |group: Message, title: Message, keywords: Message, hint, tone, cmd| {
             list.push(Entry {
-                group,
-                title,
-                keywords,
+                group: self.tr(&group),
+                title: self.tr(&title),
+                keywords: self.tr(&keywords),
                 hint,
                 tone,
                 cmd,
-            })
+            });
         };
         for (i, (page, title)) in Page::ALL.into_iter().enumerate() {
-            let hint = widgets::command_hint(&(i + 1).to_string());
             push(
-                "前往",
-                format!("前往 {title}"),
-                "go page",
-                Some(hint),
+                Message::PaletteGoGroup,
+                Message::PaletteGo {
+                    page: Box::new(title),
+                },
+                match page {
+                    Page::Live => Message::PaletteAliasLive,
+                    Page::Mixer => Message::PaletteAliasMixer,
+                    Page::Hub => Message::PaletteAliasHub,
+                    Page::Sender => Message::PaletteAliasSender,
+                    Page::Devices => Message::PaletteAliasDevices,
+                    Page::Diagnostics => Message::PaletteAliasDiagnostics,
+                    Page::About => Message::PaletteAliasAbout,
+                },
+                (i < 6).then(|| widgets::command_hint(&(i + 1).to_string())),
                 Tone::Neutral,
                 Cmd::Go(page),
             );
         }
+        push(
+            Message::PaletteDisplayGroup,
+            Message::PaletteLanguage,
+            Message::PaletteAliasLanguage,
+            None,
+            Tone::Neutral,
+            Cmd::LanguageSettings,
+        );
         if self.undo_available()
             && let Some(undo) = &self.undo
         {
             push(
-                "混音",
-                format!("还原：{}", undo.label),
-                "undo restore",
+                Message::PaletteMixGroup,
+                Message::PaletteRestore {
+                    change: Box::new(undo.label.clone()),
+                },
+                Message::PaletteAliasRestore,
                 Some(widgets::command_hint("Z")),
                 Tone::Accent,
                 Cmd::Restore,
@@ -89,9 +111,9 @@ impl Desktop {
         let sharing = status.is_some_and(|s| s.hub.running);
         if configured && !sharing {
             push(
-                "房间",
-                "开始共享".into(),
-                "hub share start",
+                Message::PaletteRoomGroup,
+                Message::PaletteStartSharing,
+                Message::PaletteAliasShareStart,
                 None,
                 Tone::Success,
                 Cmd::HubStart,
@@ -99,9 +121,9 @@ impl Desktop {
         }
         if sharing {
             push(
-                "房间",
-                "停止共享".into(),
-                "hub share stop",
+                Message::PaletteRoomGroup,
+                Message::PaletteStopSharing,
+                Message::PaletteAliasShareStop,
                 None,
                 Tone::Danger,
                 Cmd::HubStop,
@@ -115,9 +137,9 @@ impl Desktop {
             .unwrap_or(false);
         if !sending && binding_on && self.sender_allowed() {
             push(
-                "发送",
-                "开始发送".into(),
-                "send start",
+                Message::PaletteSendGroup,
+                Message::PaletteStartSending,
+                Message::PaletteAliasSendStart,
                 None,
                 Tone::Success,
                 Cmd::SenderStart,
@@ -125,9 +147,9 @@ impl Desktop {
         }
         if sending {
             push(
-                "发送",
-                "停止发送".into(),
-                "send stop",
+                Message::PaletteSendGroup,
+                Message::PaletteStopSending,
+                Message::PaletteAliasSendStop,
                 None,
                 Tone::Danger,
                 Cmd::SenderStop,
@@ -139,94 +161,96 @@ impl Desktop {
             if self.controls_room() {
                 let muted = state.output.muted;
                 push(
-                    "混音",
+                    Message::PaletteMixGroup,
                     if muted {
-                        "取消总静音"
+                        Message::ShellMasterUnmute
                     } else {
-                        "总静音"
-                    }
-                    .into(),
-                    "master mute",
+                        Message::ShellMasterMute
+                    },
+                    Message::PaletteAliasMasterMute,
                     None,
                     Tone::Warning,
                     Cmd::MasterMute(!muted),
                 );
             }
-            let mine = self
-                .status
-                .as_ref()
-                .and_then(|s| s.profiles.iter().find(|p| p.credential == self.credential))
-                .and_then(|p| p.device_id);
-            for stream in state.streams.values() {
-                let name = state
-                    .devices
-                    .get(&stream.device_id)
-                    .map_or("未知设备", |d| d.name.as_str());
-                if self.controls_room() || mine == Some(stream.device_id) {
-                    let m = stream.mix.muted;
+            for lane in self.lanes(state) {
+                if lane.can_mix {
                     push(
-                        "混音",
-                        format!("{}「{name}」", if m { "取消静音" } else { "静音" }),
-                        "mute channel",
+                        Message::PaletteMixGroup,
+                        if lane.muted {
+                            Message::PaletteUnmuteLane {
+                                name: lane.name.clone(),
+                            }
+                        } else {
+                            Message::PaletteMuteLane {
+                                name: lane.name.clone(),
+                            }
+                        },
+                        Message::PaletteAliasLaneMute,
                         None,
                         Tone::Warning,
-                        Cmd::LaneMute(stream.id, !m),
+                        Cmd::LaneMute(lane.key, !lane.muted),
                     );
                 }
-                if self.controls_room() {
-                    let s = stream.mix.solo;
+                if lane.can_solo {
                     push(
-                        "混音",
-                        format!("{}「{name}」", if s { "取消 Solo" } else { "Solo" }),
-                        "solo channel",
+                        Message::PaletteMixGroup,
+                        if lane.solo {
+                            Message::PaletteUnsoloLane {
+                                name: lane.name.clone(),
+                            }
+                        } else {
+                            Message::PaletteSoloLane {
+                                name: lane.name.clone(),
+                            }
+                        },
+                        Message::PaletteAliasLaneSolo,
                         None,
-                        Tone::Accent,
-                        Cmd::LaneSolo(stream.id, !s),
+                        Tone::Solo,
+                        Cmd::LaneSolo(lane.key, !lane.solo),
                     );
                 }
             }
             if self.admin() {
                 push(
-                    "房间",
-                    "创建一次性邀请".into(),
-                    "invite pair",
+                    Message::PaletteRoomGroup,
+                    Message::PaletteInvite,
+                    Message::PaletteAliasInvite,
                     None,
                     Tone::Accent,
                     Cmd::Invite,
                 );
             }
-        }
-        push(
-            "发送",
-            "发现局域网房间".into(),
-            "discover scan room",
-            None,
-            Tone::Neutral,
-            Cmd::Discover,
-        );
-        if self.diagnostics.is_some() {
             push(
-                "诊断",
-                "导出脱敏诊断".into(),
-                "export diagnostics",
+                Message::PaletteDiagnosticsGroup,
+                Message::PaletteExport,
+                Message::PaletteAliasExport,
                 None,
                 Tone::Neutral,
                 Cmd::Export,
             );
         }
         push(
-            "窗口",
-            "隐藏窗口".into(),
-            "hide window close",
-            cfg!(target_os = "macos").then(|| widgets::command_hint("W")),
+            Message::PaletteSendGroup,
+            Message::PaletteDiscover,
+            Message::PaletteAliasDiscover,
+            None,
+            Tone::Neutral,
+            Cmd::Discover,
+        );
+        push(
+            Message::PaletteWindowGroup,
+            Message::ShellHide,
+            Message::PaletteAliasHide,
+            None,
             Tone::Neutral,
             Cmd::Hide,
         );
         push(
-            "窗口",
-            "退出后台…".into(),
-            "quit exit shutdown",
-            cfg!(target_os = "macos").then(|| widgets::command_hint("Q")),
+            Message::PaletteWindowGroup,
+            Message::ShellQuit,
+            Message::PaletteAliasQuit,
+            None,
             Tone::Danger,
             Cmd::Quit,
         );
@@ -266,6 +290,14 @@ impl Desktop {
                     || e.group.contains(&needle)
             })
             .collect();
+        if palette.generation != self.localization.renderer.generation() {
+            palette.selected = palette
+                .selected_cmd
+                .as_ref()
+                .and_then(|cmd| entries.iter().position(|e| &e.cmd == cmd))
+                .unwrap_or(0);
+            palette.generation = self.localization.renderer.generation();
+        }
         if !palette.composing {
             ctx.input_mut(|i| {
                 if i.consume_key(egui::Modifiers::NONE, egui::Key::ArrowDown) {
@@ -319,13 +351,27 @@ impl Desktop {
                         icons::Icon::Search,
                         theme::TEXT_3,
                     );
+                    let search_width = (ui.available_width()
+                        - if palette.query.is_empty() { 0.0 } else { 32.0 })
+                    .max(20.0);
                     let edit = ui.add(
                         egui::TextEdit::singleline(&mut palette.query)
-                            .hint_text("搜索操作、页面或通道…")
+                            .id(egui::Id::new("palette-query"))
+                            .hint_text(crate::localization::text(ui, &Message::PaletteSearch))
                             .frame(false)
                             .font(egui::FontId::proportional(16.0))
-                            .desired_width(ui.available_width()),
+                            .desired_width(search_width),
                     );
+                    if !palette.query.is_empty()
+                        && widgets::small_button(ui, true, "×")
+                            .on_hover_text(crate::localization::text(ui, &Message::CommonClear))
+                            .clicked()
+                    {
+                        palette.query.clear();
+                        palette.selected = 0;
+                        edit.request_focus();
+                        ui.ctx().request_repaint();
+                    }
                     if !palette.focused {
                         edit.request_focus();
                         palette.focused = true;
@@ -337,7 +383,7 @@ impl Desktop {
                 ui.separator();
                 if entries.is_empty() {
                     ui.add_space(10.0);
-                    widgets::note(ui, "没有匹配的操作。");
+                    widgets::note(ui, crate::localization::text(ui, &Message::PaletteEmpty));
                     ui.add_space(6.0);
                     return;
                 }
@@ -348,15 +394,20 @@ impl Desktop {
                         let mut last_group = "";
                         for (i, entry) in entries.iter().enumerate() {
                             if entry.group != last_group {
-                                last_group = entry.group;
+                                last_group = entry.group.as_str();
                                 ui.add_space(4.0);
                                 ui.label(
-                                    RichText::new(entry.group).size(11.0).color(theme::TEXT_3),
+                                    RichText::new(&entry.group).size(11.0).color(theme::TEXT_3),
                                 );
                             }
                             let selected = i == palette.selected;
-                            let (rect, row) = ui.allocate_exact_size(
+                            let (rect, _allocation) = ui.allocate_exact_size(
                                 egui::vec2(ui.available_width(), 32.0),
+                                egui::Sense::hover(),
+                            );
+                            let row = ui.interact(
+                                rect,
+                                ui.make_persistent_id(("palette-command", &entry.cmd)),
                                 egui::Sense::click(),
                             );
                             row.widget_info(|| {
@@ -408,11 +459,11 @@ impl Desktop {
                 ui.add_space(4.0);
                 ui.horizontal(|ui| {
                     widgets::kbd(ui, "↑↓");
-                    widgets::note(ui, "选择");
+                    widgets::note(ui, crate::localization::text(ui, &Message::PaletteSelect));
                     widgets::kbd(ui, "↩");
-                    widgets::note(ui, "执行");
+                    widgets::note(ui, crate::localization::text(ui, &Message::PaletteExecute));
                     widgets::kbd(ui, "esc");
-                    widgets::note(ui, "关闭");
+                    widgets::note(ui, crate::localization::text(ui, &Message::PaletteClose));
                 });
             });
         if let Some(cmd) = run {
@@ -420,6 +471,7 @@ impl Desktop {
             return;
         }
         if !response.should_close() {
+            palette.selected_cmd = entries.get(palette.selected).map(|e| e.cmd.clone());
             self.palette = Some(palette);
         }
     }
@@ -427,6 +479,10 @@ impl Desktop {
     fn run_command(&mut self, ctx: &egui::Context, cmd: Cmd) {
         match cmd {
             Cmd::Go(page) => self.navigate(page),
+            Cmd::LanguageSettings => {
+                self.navigate(Page::About);
+                self.localization.focus_language = true;
+            }
             Cmd::HubStart => self.request(Request::HubStart),
             Cmd::HubStop => self.request(Request::HubStop),
             Cmd::SenderStart => self.request(Request::SenderStart {
@@ -438,7 +494,11 @@ impl Desktop {
             }),
             Cmd::SenderStop => self.stop_sender(),
             Cmd::MasterMute(on) => self.mix_change(
-                if on { "总静音" } else { "取消总静音" }.into(),
+                if on {
+                    Message::ShellMasterMute
+                } else {
+                    Message::ShellMasterUnmute
+                },
                 Write::Control(Operation::OutputMix {
                     gain_db: None,
                     muted: Some(on),
@@ -473,8 +533,8 @@ impl Desktop {
                 }
             }
             Cmd::Quit => self.confirmation(
-                "退出后台".into(),
-                "停止本实例的共享、发送和全部音频连接。关闭窗口不会停止音频；退出后台会。".into(),
+                Message::ShellQuit,
+                Message::ShellQuitConsequence,
                 Request::Shutdown,
                 egui::Id::new("palette-quit"),
             ),

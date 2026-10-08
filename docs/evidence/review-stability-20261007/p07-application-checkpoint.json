@@ -1,0 +1,122 @@
+{
+  "created_at": "2026-10-08T01:38:55.142873+00:00",
+  "scope": "P07 local software/control/DSP callback/egui/native preview acceptance; real Apple/three-platform media/acoustics/soak remain P11.",
+  "gate": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.646
+    },
+    "packaging": {
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.214
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 10.4
+    },
+    "tests": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 122.075
+    }
+  },
+  "rust_passed": 342,
+  "rust_ignored": 7,
+  "wire_result": "p07-application-wire-result.json",
+  "sha256": {
+    "crates/audio-core/src/mixer.rs": "a5a3f4c62c08d68b244b5938c3694e28e47c26e1e652cbdbc61e2574676ee24a",
+    "crates/audio-core/tests/config_progress.rs": "c288a62133e8666a35bc267c7cf0b744f521434d6d309e22cf8d1736179455e9",
+    "crates/audio-core/tests/lane_binding.rs": "81318a42b440e69b26c4ef5559b869a8bf3266eceee08e4de5f0cd798f7aa0e8",
+    "crates/control/src/lib.rs": "3f713b884e0ed6df6c65cd7ceecd167b293871cef8af61e32966addeef654004",
+    "crates/control/tests/version_domains.rs": "688d881901b573d7ae8a0cef3b5886bfcc622a7458d6850d91fad8c7e1130cb9",
+    "apps/hub/src/server.rs": "3c5f76987889ea04bee308609516a3b3dda56f242651b4b27fe35b655e73999b",
+    "apps/hub/src/airplay.rs": "8c65956667e771439c5949d570527b8808d1fed9e13bf61e4427709042045210",
+    "apps/hub/src/airplay_api.rs": "0bebc9ef3fffa1b309b4ef295c87f92fc79c9ec5e2c5a788127b7ccb8b3ce101",
+    "apps/desktop/src/main.rs": "e7c1990e054bd3c61f7f3ca77bbf3c94b907776bfd83ae9b8fd76d04947f970e",
+    "apps/desktop/src/commands.rs": "7bcd1b51d00c71543cf6e9a10f03feea1d46cbaee79b845a02849879b6ff9548",
+    "apps/desktop/src/commands_tests.rs": "623bef56d00010d6cf99016f7f95baf7612e18462b48b7a6851ee6faadb9f556",
+    "apps/desktop/src/intent.rs": "278a313dead9e8a376d8df75ad21f7dd62f9b8fd3dbd6b711204643daaba90dc",
+    "crates/desktop-service/src/daemon.rs": "94890709ccd4f0fb7932a75fbc1442d1fb1263ec64e5a5561007ac8c59fa9b95",
+    "crates/i18n/messages/shell.toml": "633e63c5d1376a8cda1c7f7709093ea317abc1fd399b26540c0738bcf5ec718c",
+    "crates/i18n/locales/zh-CN/shell.ftl": "7b3bafe5dcaddae4ed4e6be8ec32048da960fd3aa64b15e6d4e0914181bc7ba5",
+    "crates/i18n/locales/en/shell.ftl": "a74c73d67e82c04b05a78d2af44ab9cbe23e63e6a43380a44ab5392b526bf26b",
+    "tools/control_epoch_probe.py": "a0a62ccc509bb846ae9bdb954354ccf2f760ccb32aaa76deab0d46d1fbf3a8cd",
+    "docs/REVIEW-IMPROVEMENT-DESIGN-PLAN-20261007.md": "2dc31f71962c04a13a82f6b79fc64c4c3d5b67eb75bb6c006cbb0f671aa99b89",
+    "UX-CONTRACT.md": "d8884ea3688fd68b3972d60bd73639bd561376c9f87996c8f963e5f0c59db620",
+    "DESIGN.md": "1f4d71541b166e33efc94e364508485252f179d52ff203bd3fa0a7e932f7c98a",
+    "target/release/neonmix-hub": "5164621c0cbb0c985dd86335f0437499c3b9d4f01fa258e5d70c7b039b225b3d",
+    "target/release/neonmix-desktop": "aee4ddb91e90a19d2d0ca438667fe5be60ad65c41457634c8d8cee633faa69e0",
+    "target/release/neonmix-background": "16d753781612297619348444bc51ff1a4d05905b0362430cd78af20358178219",
+    "target/release/neonmix-guardian": "374e084587cec8dd5ddc7a5786d193feca3a2923e819f1593ed998768379d127"
+  }
+}

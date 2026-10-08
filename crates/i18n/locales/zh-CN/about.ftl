@@ -1,0 +1,16 @@
+about-audio-mixing-across-devices-on-your-local-network = 局域网多设备音频混音
+about-build-information = 构建信息
+about-commit = 提交
+about-copied = 已复制 ✓
+about-copy-version-information = 复制版本信息
+about-display = 显示
+about-license = 许可
+about-only-affects-this-window = 仅影响本机窗口
+about-open-in-browser = 在浏览器中打开
+about-platform = 平台
+about-reduce-motion = 减少动态效果
+about-reduced-motion-is-on = 已减少动态效果
+about-signal-particles-and-radar-scans-become-static-and = 开启后，信号流动光点与雷达扫描改为静态显示，一次性动画直接显示结果；电平与状态照常更新。也可用环境变量 NEONMIX_REDUCE_MOTION=1 开启。
+about-source-repository = 源码仓库
+about-version = 版本
+about-version-value = 版本 { $version }

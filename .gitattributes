@@ -1,0 +1,3 @@
+
+# Patch containers retain indentation from checksum-locked upstream context.
+patches/*.patch whitespace=-blank-at-eol,-space-before-tab

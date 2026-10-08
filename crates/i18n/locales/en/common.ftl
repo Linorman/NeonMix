@@ -1,0 +1,15 @@
+common-yes = Yes
+common-no = No
+common-cancel = Cancel
+common-confirm = Confirm
+common-close = Close
+common-save = Save
+common-retry = Retry
+common-copy = Copy
+common-copied = Copied
+common-clear = Clear
+common-search = Search
+common-on = On
+common-off = Off
+common-unknown = Unknown
+common-unavailable = Unavailable

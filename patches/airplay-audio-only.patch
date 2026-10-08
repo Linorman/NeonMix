@@ -34,7 +34,7 @@
  }
  
  // GCM AES 128
-@@ -348,66 +336,93 @@
+@@ -348,68 +336,101 @@
      EVP_PKEY *pkey;
  };
  
@@ -82,24 +82,8 @@
 +    return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
 +}
 +
- ed25519_key_t *ed25519_key_generate(const char *device_id, const char *keyfile, int *result) {
--    EVP_PKEY_CTX *pctx = NULL;
--    BIO *bp = NULL;
--    FILE *file = NULL;
--    bool new_pk = false;
--    bool use_keyfile = strlen(keyfile);
--
--    *result = 0;
--
-+    (void) device_id;
-+    if (result) *result = 0;
-+    if (!keyfile || !keyfile[0]) return NULL;
-+    FILE *file = fopen(keyfile, "rb");
-+    if (!file) return NULL;
-+    unsigned char pem[4096];
-+    size_t size = fread(pem, 1, sizeof(pem), file);
-+    int readable = !ferror(file) && feof(file);
-+    fclose(file);
++ed25519_key_t *ed25519_key_from_pem(const unsigned char *pem, size_t size) {
++    if (!pem || !size || size >= 4096) return NULL;
 +    EVP_PKEY *pkey = NULL;
 +    BIO *bio = NULL;
 +    char *name = NULL, *header = NULL;
@@ -108,7 +92,7 @@
 +    size_t first = 0;
 +    while (first < size && identity_space(pem[first])) first++;
 +    static const char begin[] = "-----BEGIN PRIVATE KEY-----";
-+    if (!readable || size - first < sizeof(begin) - 1 ||
++    if (size - first < sizeof(begin) - 1 ||
 +        memcmp(pem + first, begin, sizeof(begin) - 1)) goto done;
 +    /* Never pass our CRT's FILE* to OpenSSL: MSVC OpenSSL + MinGW otherwise
 +     * reaches OPENSSL_Uplink/no OPENSSL_Applink on Windows. */
@@ -125,9 +109,25 @@
 +    OPENSSL_free(name);
 +    OPENSSL_free(header);
 +    BIO_free(bio);
-+    OPENSSL_cleanse(pem, sizeof(pem));
 +    if (!pkey) return NULL;
-     ed25519_key_t *key = (ed25519_key_t *) calloc(1, sizeof(ed25519_key_t));
++    ed25519_key_t *key = (ed25519_key_t *) calloc(1, sizeof(ed25519_key_t));
++    if (!key) {
++        EVP_PKEY_free(pkey);
++        return NULL;
++    }
++    key->pkey = pkey;
++    return key;
++}
+ ed25519_key_t *ed25519_key_generate(const char *device_id, const char *keyfile, int *result) {
+-    EVP_PKEY_CTX *pctx = NULL;
+-    BIO *bp = NULL;
+-    FILE *file = NULL;
+-    bool new_pk = false;
+-    bool use_keyfile = strlen(keyfile);
+-
+-    *result = 0;
+-
+-    ed25519_key_t *key = (ed25519_key_t *) calloc(1, sizeof(ed25519_key_t));
 -    assert(key);
 -   
 -    if (use_keyfile) {
@@ -178,13 +178,22 @@
 -            }
 -        }
 -    }
-+    if (!key) {
-+        EVP_PKEY_free(pkey);
-+        return NULL;
-+    }
-+    key->pkey = pkey;
++    (void) device_id;
++    if (result) *result = 0;
++    if (!keyfile || !keyfile[0]) return NULL;
++    FILE *file = fopen(keyfile, "rb");
++    if (!file) return NULL;
++    unsigned char pem[4096];
++    size_t size = fread(pem, 1, sizeof(pem), file);
++    int readable = !ferror(file) && feof(file);
++    fclose(file);
++    ed25519_key_t *key = readable ? ed25519_key_from_pem(pem, size) : NULL;
++    OPENSSL_cleanse(pem, sizeof(pem));
      return key;
  }
++
+ 
+ ed25519_key_t *ed25519_key_from_raw(const unsigned char data[ED25519_KEY_SIZE]) {
  
 --- a/lib/crypto.h
 +++ b/lib/crypto.h
@@ -197,6 +206,14 @@
  
  // GCM AES 128
  
+@@ -83,6 +83,7 @@
+ 
+ typedef struct ed25519_key_s ed25519_key_t;
+ 
++ed25519_key_t *ed25519_key_from_pem(const unsigned char *pem, size_t len);
+ ed25519_key_t *ed25519_key_generate(const char *device_id, const char * keyfile, int * result);
+ ed25519_key_t *ed25519_key_from_raw(const unsigned char data[ED25519_KEY_SIZE]);
+ void ed25519_key_get_raw(unsigned char data[ED25519_KEY_SIZE], const ed25519_key_t *key);
 --- a/lib/dnssd.h
 +++ b/lib/dnssd.h
 @@ -47,6 +47,7 @@
@@ -639,18 +656,28 @@
  
 --- a/lib/pairing.c
 +++ b/lib/pairing.c
-@@ -96,6 +96,10 @@
+@@ -94,7 +94,19 @@
      }
  
      pairing->ed = ed25519_key_generate(device_id, keyfile, result);
+-
 +    if (!pairing->ed) {
 +        free(pairing);
 +        return NULL;
 +    }
- 
++
++    return pairing;
++}
++
++pairing_t *pairing_init_from_pem(const unsigned char *pem, size_t len) {
++    pairing_t *pairing = calloc(1, sizeof(pairing_t));
++    if (!pairing) return NULL;
++    pairing->ed = ed25519_key_from_pem(pem, len);
++    if (!pairing->ed) { free(pairing); return NULL; }
      return pairing;
  }
-@@ -168,12 +168,15 @@
+ 
+@@ -168,12 +180,15 @@
          return -1;
      }
  
@@ -667,7 +694,7 @@
  
      session->status = STATUS_HANDSHAKE;
      return 0;
-@@ -500,7 +503,7 @@
+@@ -500,7 +515,7 @@
  int
  srp_new_user(pairing_session_t *session, pairing_t *pairing, const char *device_id, const char *pin,
               const char **salt, int *len_salt, const char **pk, int *len_pk) {
@@ -676,7 +703,7 @@
          return -1;
      }
  
-@@ -530,18 +533,19 @@
+@@ -530,18 +545,19 @@
                                         (const unsigned char **) &srp_s, &len_s,
                                         (const unsigned char **) &srp_v, &len_v,
                                         NULL, NULL);
@@ -704,7 +731,7 @@
                                      srp_b, len_b,
                                      (const unsigned char **) &srp_B, &len_B,
                                      NULL, NULL, 1);
-@@ -557,6 +561,7 @@
+@@ -557,6 +573,7 @@
                      int len_A, unsigned char *proof, int client_proof_len, int proof_len) {
      int authenticated  = 0;
      const unsigned char *B =  NULL;
@@ -712,7 +739,7 @@
      const unsigned char *b = session->srp->private_key;
      int len_b = SRP_PRIVATE_KEY_SIZE;
      int len_B = 0;
-@@ -571,6 +576,7 @@
+@@ -571,6 +588,7 @@
                                                      b, len_b,
                                                      &B, &len_B, NULL, NULL, 1);
  
@@ -720,7 +747,7 @@
      srp_verifier_verify_session(verifier, proof, &M2);
      authenticated = srp_verifier_is_authenticated(verifier);
      if (authenticated == 0) {
-@@ -585,13 +591,15 @@
+@@ -585,13 +603,15 @@
          return -2;
      }
      memcpy(session->srp->session_key, session_key, len_K);
@@ -737,6 +764,16 @@
      unsigned char aesKey[16] = {0}, aesIV[16] = {0};
      unsigned char hash[SHA512_DIGEST_LENGTH] = {0};
      unsigned char pk[ED25519_KEY_SIZE] = {0};
+--- a/lib/pairing.h
++++ b/lib/pairing.h
+@@ -36,6 +36,7 @@
+ typedef struct pairing_s pairing_t;
+ typedef struct pairing_session_s pairing_session_t;
+ 
++pairing_t *pairing_init_from_pem(const unsigned char *pem, size_t len);
+ pairing_t *pairing_init_generate(const char *device_id, const char *keyfile, int *result);
+ void pairing_get_public_key(pairing_t *pairing, unsigned char public_key[ED25519_KEY_SIZE]);
+ 
 --- a/lib/raop.c
 +++ b/lib/raop.c
 @@ -19,6 +19,7 @@
@@ -983,7 +1020,39 @@
          return NULL;
      }
  
-@@ -679,6 +739,9 @@
+@@ -645,18 +705,9 @@
+     return raop;
+ }
+ 
+-int
+-raop_init2(raop_t *raop, int nohold, const char *device_id, const char *keyfile) {
+-    pairing_t *pairing = NULL;
++static int raop_init_pairing(raop_t *raop, int nohold, pairing_t *pairing) {
+     httpd_t *httpd = NULL;
+-
+-    /* create a new public key for pairing */
+-    int new_key = 0;
+-    pairing = pairing_init_generate(device_id, keyfile, &new_key);
+-    if (!pairing) {
+-        logger_log(raop->logger, LOGGER_ERR, "failed to create new public key for pairing");
+-        return -1;
+-    }
++    if (!pairing) return -1;
+     /* store PK as a string in raop->pk_str */
+     memset(raop->pk_str, 0, sizeof(raop->pk_str));
+ #ifdef PK
+@@ -668,10 +719,6 @@
+     strncpy(raop->pk_str, (const char *) pk_str, 2*ED25519_KEY_SIZE);
+     free(pk_str);
+ #endif
+-    if (new_key) {
+-        logger_log(raop->logger, LOGGER_INFO,"*** A new Public Key has been created and stored in %s", keyfile);
+-    }
+-
+     /* Set HTTP callbacks to our handlers */
+     httpd_callbacks_t httpd_cbs;
+     memset(&httpd_cbs, 0, sizeof(httpd_cbs));
+@@ -679,6 +726,9 @@
      httpd_cbs.conn_init = &conn_init;
      httpd_cbs.conn_request = &conn_request;
      httpd_cbs.conn_destroy = &conn_destroy;
@@ -993,7 +1062,19 @@
  
      /* Initialize the http daemon, (this will take a copy of httpd_cbs) */
      httpd = httpd_init(raop->logger, &httpd_cbs, nohold);
-@@ -697,9 +760,8 @@
+@@ -693,13 +743,20 @@
+     return 0;
+ }
+ 
++int raop_init2(raop_t *raop, int nohold, const char *device_id, const char *keyfile) {
++    int generated = 0;
++    return raop_init_pairing(raop, nohold, pairing_init_generate(device_id, keyfile, &generated));
++}
++int raop_init2_from_pem(raop_t *raop, int nohold, const unsigned char *pem, size_t len) {
++    return raop_init_pairing(raop, nohold, pairing_init_from_pem(pem, len));
++}
++
+ void
  raop_destroy(raop_t *raop) {
      if (raop) {
          raop_destroy_airplay_video(raop, -1);
@@ -1005,7 +1086,7 @@
          logger_destroy(raop->logger);
          if (raop->nonce) {
              free(raop->nonce);
-@@ -849,6 +911,10 @@
+@@ -849,6 +906,10 @@
      httpd_stop(raop->httpd);
  }
  
@@ -1016,7 +1097,7 @@
  void raop_remove_known_connections(raop_t * raop) {
      httpd_remove_known_connections(raop->httpd);
  }
-@@ -887,3 +953,7 @@
+@@ -887,3 +948,7 @@
  uint64_t get_local_time() {
      return raop_ntp_get_local_time();
  }
@@ -1087,16 +1168,18 @@
      bool  (*check_register) (void *cls, const char *pk_str);
      const char*  (*passwd) (void *cls, int *len);
      void  (*export_dacp) (void *cls, const char *active_remote, const char *dacp_id);
-@@ -122,6 +137,8 @@
+@@ -122,7 +137,10 @@
  uint64_t get_local_time();
  void raop_handle_eos(raop_t *raop);
  
 +RAOP_API void raop_set_receiver_uuid(raop_t *raop, const char *uuid);
 +RAOP_API const char *raop_get_public_key(raop_t *raop);
  RAOP_API raop_t *raop_init(raop_callbacks_t *callbacks);
++RAOP_API int raop_init2_from_pem(raop_t *raop, int nohold, const unsigned char *pem, size_t len);
  RAOP_API int raop_init2(raop_t *raop, int nohold, const char *device_id, const char *keyfile);
  RAOP_API void raop_set_log_level(raop_t *raop, int level);
-@@ -138,7 +155,8 @@
+ RAOP_API void raop_set_log_callback(raop_t *raop, raop_log_callback_t callback, void *cls);
+@@ -138,7 +156,8 @@
  RAOP_API void raop_stop_httpd(raop_t *raop);
  RAOP_API void raop_set_dnssd(raop_t *raop, dnssd_t *dnssd);
  RAOP_API void raop_destroy(raop_t *raop);
@@ -1392,7 +1475,7 @@
  }
  
  static void
-@@ -606,6 +622,48 @@
+@@ -606,6 +622,59 @@
      const char *data = NULL;
      int data_len = 0;
      data = http_request_get_data(request, &data_len);
@@ -1415,6 +1498,17 @@
 +        plist_get_uint_val(plist_dict_get_item(stream, "ct"), &ct);
 +        plist_get_uint_val(plist_dict_get_item(stream, "audioFormat"), &af);
 +        plist_get_bool_val(plist_dict_get_item(stream, "usingScreen"), &screen);
++        /* Validate optional integers before narrowing them or touching the
++         * active transport. Missing spf requests the codec default. */
++        plist_t spf_node = plist_dict_get_item(stream, "spf");
++        plist_t port_node = plist_dict_get_item(stream, "controlPort");
++        uint64_t frames = 0, port = 0;
++        plist_get_uint_val(spf_node, &frames);
++        plist_get_uint_val(port_node, &port);
++        if ((spf_node && (!PLIST_IS_UINT(spf_node) || frames > 8192)) ||
++            (port_node && (!PLIST_IS_UINT(port_node) || port > 65535))) {
++            plist_free(preflight); http_response_init(response, "RTSP/1.0", 400, "Invalid Audio Parameters"); return;
++        }
 +        if (type != 96 || screen || (ct != 1 && ct != 2 && ct != 4 && ct != 8) ||
 +            (af && af != 4 && af != 262144 && af != 4194304 && af != 16777216)) {
 +            plist_free(preflight); http_response_init(response, "RTSP/1.0", 415, "Audio Only"); return;
@@ -1441,7 +1535,7 @@
  
      dacp_id = http_request_get_header(request, "DACP-ID");
      active_remote_header = http_request_get_header(request, "Active-Remote");
-@@ -755,14 +813,14 @@
+@@ -755,14 +824,14 @@
          plist_t req_name_node = plist_dict_get_item(req_root_node, "name");
          plist_get_string_val(req_name_node, &name);  
          if (raop->callbacks.report_client_request) {
@@ -1458,7 +1552,7 @@
                  free (client_pk);
              }
          }
-@@ -772,7 +830,9 @@
+@@ -772,7 +841,9 @@
          model = NULL;
          plist_mem_free(name);
          name = NULL;
@@ -1468,7 +1562,7 @@
              /* client is not authorized to connect */
              plist_free(res_root_node);
              plist_free(req_root_node);
-@@ -802,6 +862,12 @@
+@@ -802,6 +873,12 @@
              free (str);
          }
          int ret = fairplay_decrypt(conn->fairplay, (unsigned char*) eaeskey, aeskey);
@@ -1481,7 +1575,7 @@
          logger_log(raop->logger, LOGGER_DEBUG, "fairplay_decrypt ret = %d", ret);
          if (logger_debug) {
              char *str = utils_data_to_string(aeskey, 16, 16);
-@@ -920,10 +986,11 @@
+@@ -920,10 +997,11 @@
          conn->raop_ntp = raop_ntp_init(raop->logger, &raop->callbacks, remote,
                                         conn->remotelen, (unsigned short) timing_rport, &time_protocol);
          raop_ntp_start(conn->raop_ntp, &timing_lport);
@@ -1496,7 +1590,7 @@
  
          /* the event port is not used in mirror mode or audio mode */
          unsigned short event_port = 0;
-@@ -949,34 +1016,6 @@
+@@ -949,34 +1027,6 @@
              logger_log(raop->logger, LOGGER_DEBUG, "type = %llu", type);
  
              switch (type) {
@@ -1531,7 +1625,7 @@
              case 96: {
                  // Audio
                  unsigned short cport = raop->control_lport, dport = raop->data_lport; 
-@@ -992,6 +1031,10 @@
+@@ -992,6 +1042,10 @@
                  plist_t req_stream_ct_node = plist_dict_get_item(req_stream_node, "ct");
                  plist_get_uint_val(req_stream_ct_node, &uint_val);
                  ct = (unsigned char) uint_val;
@@ -1542,7 +1636,15 @@
  
                  if (raop->callbacks.audio_get_format) {
                      /* get additional audio format parameters  */
-@@ -1024,7 +1067,7 @@
+@@ -1002,6 +1056,7 @@
+                     uint8_t bool_val = 0;
+ 
+                     plist_t req_stream_spf_node = plist_dict_get_item(req_stream_node, "spf");
++                    uint_val = 0; /* libplist leaves the output unchanged for a missing node. */
+                     plist_get_uint_val(req_stream_spf_node, &uint_val);
+                     spf = (unsigned short) uint_val;
+ 
+@@ -1024,7 +1079,7 @@
                          usingScreen = false;
                      }
  
@@ -1551,7 +1653,7 @@
                  }
  
                  if (conn->raop_rtp) {
-@@ -1147,7 +1190,7 @@
+@@ -1147,7 +1202,7 @@
                      raop_rtp_set_volume(conn->raop_rtp, vol);
                  } else if (raop->callbacks.audio_set_volume) {
                      /* set volume in playbin (hls) */
@@ -1560,7 +1662,7 @@
                  }
              } else if ((datalen >= 10) && !strncmp(datastr, "progress: ", 10)) {
                  uint32_t start = 0, curr = 0, end = 0;
-@@ -1206,7 +1249,7 @@
+@@ -1206,7 +1261,7 @@
      raop_t *raop = conn->raop;
      logger_log(raop->logger, LOGGER_DEBUG, "raop_handler_feedback");
      /* register receipt of client's "heartbeat" signal  */
@@ -1679,7 +1781,36 @@
          }
      }
  
-@@ -616,6 +616,7 @@
+@@ -380,8 +380,8 @@
+ raop_rtp_thread_udp(void *arg)
+ {
+     raop_rtp_t *raop_rtp = arg;
+-    unsigned char packet[RAOP_PACKET_LEN];
+-    unsigned int packetlen = 0;
++    unsigned char packet[RAOP_PACKET_LEN + 1];
++    int packetlen = 0;
+     struct sockaddr_storage saddr;
+     socklen_t saddrlen = 0;
+     bool got_remote_control_saddr = false;
+@@ -459,6 +459,9 @@
+             } else {
+                 packetlen = recvfrom(raop_rtp->csock, (char *)packet, sizeof(packet), 0, NULL, NULL);
+             }
++            /* Winsock reports WSAEMSGSIZE/WSAECONNRESET as -1. Never
++             * interpret its partially filled (or stale) buffer as a sync. */
++            if (packetlen < 2 || packetlen > RAOP_PACKET_LEN) continue;
+             int type_c = packet[1] & ~0x80;
+             logger_log(raop_rtp->logger, LOGGER_DEBUG, "\nraop_rtp type_c 0x%02x, packetlen = %d", type_c, packetlen);
+ 
+@@ -568,6 +571,7 @@
+             //int type_d = packet[1] & ~0x80;
+             //logger_log(raop_rtp->logger, LOGGER_DEBUG, "raop_rtp_thread_udp type_d 0x%02x, packetlen = %d", type_d, packetlen);
+ 	    
++            if (packetlen < 2 || packetlen > RAOP_PACKET_LEN) continue;
+             if (packetlen < 12)  {
+                 if (logger_debug) {
+                     char *str = utils_data_to_string(packet, packetlen, 16);
+@@ -616,6 +620,7 @@
                      audio_data.data_len = payload_size;
                      audio_data.data = payload;
                      audio_data.ct = raop_rtp->ct;
@@ -1687,7 +1818,7 @@
                      audio_data.ntp_time_remote = rtp_time_to_client_ntp(raop_rtp, rtp_timestamp);
                      audio_data.ntp_time_local  = raop_ntp_convert_remote_time(raop_rtp->ntp, audio_data.ntp_time_remote);
  
-@@ -628,7 +629,7 @@
+@@ -628,7 +633,7 @@
                                     (double) audio_data.ntp_time_remote /SEC, rtp_timestamp, seqnum, type, payload_size);
                      }
  
@@ -1696,7 +1827,7 @@
                      free(payload);
                  }
  
-@@ -666,8 +667,13 @@
+@@ -666,8 +671,13 @@
          return;
      }
  

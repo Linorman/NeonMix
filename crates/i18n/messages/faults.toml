@@ -1,0 +1,319 @@
+[[message]]
+id = "fault-generic-failure"
+
+[[message]]
+id = "fault-revision-conflict"
+
+[[message]]
+id = "fault-permission-denied"
+
+[[message]]
+id = "fault-unauthenticated"
+
+[[message]]
+id = "fault-invalid-argument"
+
+[[message]]
+id = "fault-not-found"
+
+[[message]]
+id = "fault-quota-exceeded"
+
+[[message]]
+id = "fault-receiver-busy"
+
+[[message]]
+id = "fault-room-capacity-full"
+
+[[message]]
+id = "fault-source-already-active"
+
+[[message]]
+id = "fault-source-blocked"
+
+[[message]]
+id = "fault-pairing-revoked"
+
+[[message]]
+id = "fault-stale-revision"
+
+[[message]]
+id = "fault-session-changed"
+
+[[message]]
+id = "fault-output-unavailable"
+
+[[message]]
+id = "fault-worker-unavailable"
+
+[[message]]
+id = "fault-upgrade-required"
+
+[[message]]
+id = "fault-hub-port-in-use"
+args = { port = "u64" }
+
+[[message]]
+id = "fault-migration-required"
+
+[[message]]
+id = "fault-credential-missing"
+
+[[message]]
+id = "fault-credential-permission-denied"
+
+[[message]]
+id = "fault-credential-store-busy"
+
+[[message]]
+id = "fault-administrator-credential-protected"
+
+[[message]]
+id = "fault-credential-io-failed"
+
+[[message]]
+id = "fault-credential-corrupt"
+
+[[message]]
+id = "fault-credential-version-unsupported"
+
+[[message]]
+id = "fault-credential-kind-mismatch"
+
+[[message]]
+id = "fault-credential-reference-invalid"
+
+[[message]]
+id = "fault-credential-already-exists"
+
+[[message]]
+id = "fault-credential-profile-missing"
+
+[[message]]
+id = "fault-setup-incomplete"
+
+[[message]]
+id = "fault-unsupported-audio-format"
+
+[[message]]
+id = "fault-capture-unavailable"
+
+[[message]]
+id = "fault-connection-unavailable"
+
+[[message]]
+id = "fault-background-timeout"
+
+[[message]]
+id = "fault-background-busy"
+
+[[message]]
+id = "fault-request-interrupted"
+
+[[message]]
+id = "fault-background-shutting-down"
+
+[[message]]
+id = "fault-runtime-unavailable"
+
+[[message]]
+id = "fault-process-already-running"
+
+[[message]]
+id = "fault-process-exited"
+
+[[message]]
+id = "fault-stop-failed"
+
+[[message]]
+id = "fault-stop-incomplete"
+
+[[message]]
+id = "fault-runtime-cleanup-incomplete"
+
+[[message]]
+id = "fault-lifecycle-owner-lost"
+
+[[message]]
+id = "fault-hub-setup-exists"
+
+[[message]]
+id = "fault-hub-settings-require-stop"
+
+[[message]]
+id = "fault-sender-requires-hub-stop"
+
+[[message]]
+id = "fault-hub-requires-sender-stop"
+
+[[message]]
+id = "fault-self-connection-forbidden"
+
+[[message]]
+id = "fault-output-binding-required"
+
+[[message]]
+id = "fault-invalid-output-binding"
+
+[[message]]
+id = "fault-discovery-incomplete"
+
+[[message]]
+id = "fault-invalid-backend-response"
+
+[[message]]
+id = "fault-ipc-invalid-request"
+
+[[message]]
+id = "fault-ipc-incompatible-version"
+
+[[message]]
+id = "fault-ipc-message-too-large"
+
+[[message]]
+id = "fault-invalid-path"
+
+[[message]]
+id = "fault-diagnostics-save-failed"
+
+[[message]]
+id = "fault-network-api-failed"
+
+[[message]]
+id = "fault-network-identity-unavailable"
+
+[[message]]
+id = "fault-network-identity-invalid"
+
+[[message]]
+id = "fault-network-token-unavailable"
+
+[[message]]
+id = "fault-network-module-unavailable"
+
+[[message]]
+id = "fault-network-package-path-invalid"
+
+[[message]]
+id = "fault-network-hash-unavailable"
+
+[[message]]
+id = "fault-network-package-read-failed"
+
+[[message]]
+id = "fault-network-record-invalid"
+
+[[message]]
+id = "fault-network-record-write-failed"
+
+[[message]]
+id = "fault-network-instance-invalid"
+
+[[message]]
+id = "fault-network-installation-invalid"
+
+[[message]]
+id = "fault-network-package-hash-mismatch"
+
+[[message]]
+id = "fault-network-requester-unavailable"
+
+[[message]]
+id = "fault-network-requester-invalid"
+
+[[message]]
+id = "fault-network-record-missing"
+
+[[message]]
+id = "fault-network-rule-owner-mismatch"
+
+[[message]]
+id = "fault-network-rule-readback-failed"
+
+[[message]]
+id = "fault-network-rule-remove-failed"
+
+[[message]]
+id = "fault-network-operation-required"
+
+[[message]]
+id = "fault-network-operation-invalid"
+
+[[message]]
+id = "fault-network-argument-invalid"
+
+[[message]]
+id = "fault-network-uac-cancelled"
+
+[[message]]
+id = "fault-incompatible-version"
+
+[[message]]
+id = "fault-playback-blocked"
+
+[[message]]
+id = "fault-already-active"
+
+[[message]]
+id = "fault-idempotency-conflict"
+
+[[message]]
+id = "fault-snapshot-required"
+
+[[message]]
+id = "fault-busy"
+
+[[message]]
+id = "fault-command-id-reused"
+
+[[message]]
+id = "fault-invalid-command"
+
+[[message]]
+id = "fault-invalid-command-id"
+
+[[message]]
+id = "fault-invalid-gain"
+
+[[message]]
+id = "fault-invalid-receiver-count"
+
+[[message]]
+id = "fault-invalid-receiver-name"
+
+[[message]]
+id = "fault-invalid-source-alias"
+
+[[message]]
+id = "fault-profile-unavailable"
+
+[[message]]
+id = "fault-profile-write-failed"
+
+[[message]]
+id = "fault-receiver-disabled"
+
+[[message]]
+id = "fault-receiver-unknown"
+
+[[message]]
+id = "fault-source-unknown"
+
+
+[[message]]
+id="fault-profile-durability-unconfirmed"
+
+[[message]]
+id="fault-configuration-recovery-required"
+
+[[message]]
+id="fault-output-object-replaced"
+
+[[message]]
+id = "fault-resource-owned-by-other-instance"
+
+[[message]]
+id = "fault-local-feedback-loop"
+
+[[message]]
+id = "fault-local-feedback-check-unavailable"

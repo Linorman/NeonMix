@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "upstream_commit": "df67c212a433cf6dda3676dd40c097900d24e645",
+  "files": [
+    "lib/fairplay_playfair.c",
+    "lib/raop_rtp.c",
+    "lib/http_response.c",
+    "lib/httpd.h",
+    "lib/raop.h",
+    "lib/pairing.c",
+    "lib/raop_ntp.h",
+    "lib/http_request.c",
+    "lib/stream.h",
+    "lib/crypto.h",
+    "lib/httpd.c",
+    "lib/http_response.h",
+    "lib/dnssdint.h",
+    "lib/pairing.h",
+    "lib/raop.c",
+    "lib/raop_handlers.h",
+    "lib/dnssd.h",
+    "lib/http_handlers.h",
+    "lib/raop_ntp.c",
+    "lib/crypto.c"
+  ],
+  "patch_sha256": "f34f34f5a84a018c6dbb7dad6992c62070635acd8ea74684a8e4cfbd9452ff76"
+}

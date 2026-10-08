@@ -1,0 +1,14 @@
+    Checking ring v0.17.14
+    Checking neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+    Checking once_cell v1.21.4
+    Checking mdns-sd v0.21.4 (/Volumes/projects-mac/NeonMix/vendor/mdns-sd-scoped)
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Checking neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+    Checking rustls-webpki v0.103.15
+    Checking rcgen v0.14.10
+    Checking rustls v0.23.45
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 11.70s

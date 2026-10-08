@@ -1,0 +1,13 @@
+events-source-joined = 「{ $name }」开始接入
+events-source-status = 「{ $name }」{ $status }
+events-source-solo = 「{ $name }」Solo
+events-source-unsolo = 「{ $name }」取消 Solo
+events-source-left = 「{ $name }」已离开房间
+events-output-restored = 实体输出已恢复
+events-output-lost = 实体输出丢失，等待设备恢复
+events-master-muted = 房间总静音
+events-master-unmuted = 取消房间总静音
+events-just-now = 刚刚
+events-seconds-ago = { $count } 秒前
+events-minutes-ago = { $count } 分钟前
+events-hours-ago = { $count } 小时前

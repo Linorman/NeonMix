@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-07",
+  "development_delivery": "Auto + zh-CN + en, fully embedded UI localization; limited developer package, not full cross-platform release",
+  "worktree_tests": {
+    "passed": 113,
+    "ignored": 2,
+    "log": "artifacts/i18n/final-worktree-tests.log"
+  },
+  "worktree_clippy": "passed; artifacts/i18n/final-worktree-clippy.log",
+  "format": "passed; artifacts/i18n/format.log",
+  "i18n_strict": {
+    "passed": true,
+    "checker": "Rust fluent-syntax AST + schema + representative rendering",
+    "catalog": "/Volumes/projects-mac/NeonMix/crates/i18n",
+    "stdout": "i18n AST/schema validation passed: 724 messages, 2 shipped locales\nGenerated 20 pseudo modules: /Volumes/projects-mac/NeonMix/artifacts/i18n/pseudo/en\nRust presentation-call AST validation passed\n",
+    "stderr": "",
+    "pseudo": {
+      "passed": true,
+      "path": "/Volumes/projects-mac/NeonMix/artifacts/i18n/pseudo/en",
+      "method": "Fluent AST text-node expansion (~50%); selectors and arguments preserved"
+    }
+  },
+  "macos_native": {
+    "passed": true,
+    "binary_sha256": "b05318078859552336309ab67a8406ad914b4d6004d7f1d15b9be292c1da5da5",
+    "switches": 54
+  },
+  "windows": "fixed source native core23/desktop52 earlier; final popup1/preferences3/i18n8/build/strict passed; see windows-report.md",
+  "linux": "offline cross type-check passed; native host unreachable",
+  "resource_performance": {
+    "resource_parse_ms": 0.44525000000000003,
+    "locales": [
+      {
+        "locale": "zh-CN",
+        "representative_messages": 1144,
+        "first_render_ms": 0.307458,
+        "warm_render_us_per_message": 0.12333369755244755
+      },
+      {
+        "locale": "en",
+        "representative_messages": 1144,
+        "first_render_ms": 0.257,
+        "warm_render_us_per_message": 0.1350597465034965
+      }
+    ],
+    "fifty_switches_and_full_renders_ms": 9.888792,
+    "fallback_diagnostics": 0
+  },
+  "package": {
+    "path": "artifacts/i18n/package/NeonMix-0.1.0-macos-arm64.dmg",
+    "sha256": "d54ede1c27a500f10183fd35b0ccfd8f435f23dc450518b20bd92889239260d7",
+    "signing": "ad-hoc, not notarized",
+    "source": "candidate-source-manifest.json; later working tree changes separately verified"
+  },
+  "pending": [
+    "native Linux GUI/menus/IME/AX",
+    "Windows actual tray/GUI/IME/screen reader and Chinese user-directory upgrade",
+    "VoiceOver listening and real Chinese IME audit",
+    "20 real playing-audio switches with request/session/PCM recording",
+    "full platform install/upgrade/signing/release gates"
+  ]
+}

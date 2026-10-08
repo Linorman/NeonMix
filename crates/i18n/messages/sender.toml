@@ -1,0 +1,247 @@
+[[message]]
+id = "sender-a-neonmix-device-available-in-system-sound-settings"
+
+[[message]]
+id = "sender-add-a-virtual-output-as-the-destination-for"
+
+[[message]]
+id = "sender-add-after-pairing"
+
+[[message]]
+id = "sender-add-virtual-output"
+
+[[message]]
+id = "sender-all-apps-using-this-output"
+
+[[message]]
+id = "sender-an-administrator-disconnected-this-device"
+
+[[message]]
+id = "sender-app-audio"
+
+[[message]]
+id = "sender-audio-from-every-app-using-this-virtual-output"
+
+[[message]]
+id = "sender-before-starting-select-this-virtual-device-as-the"
+
+[[message]]
+id = "sender-binding-identities"
+args = { device = "string", room = "string" }
+
+[[message]]
+id = "sender-blackhole-external-provider"
+
+[[message]]
+id = "sender-capture-frames-total"
+
+[[message]]
+id = "sender-capture-peak-session-maximum"
+
+[[message]]
+id = "sender-connecting"
+
+[[message]]
+id = "sender-connecting-room"
+args = { name = "string" }
+
+[[message]]
+id = "sender-device-name"
+
+[[message]]
+id = "sender-disable-output"
+
+[[message]]
+id = "sender-disabled"
+
+[[message]]
+id = "sender-disconnected-by-administrator"
+
+[[message]]
+id = "sender-discover-a-hub-on-your-local-network-and"
+
+[[message]]
+id = "sender-discover-rooms-on-the-local-network"
+
+[[message]]
+id = "sender-discovery-and-pairing"
+
+[[message]]
+id = "sender-discovery-count"
+args = { count = "u64" }
+
+[[message]]
+id = "sender-discovery-results-are-untrusted-the-invitation-s-pinned"
+
+[[message]]
+id = "sender-show"
+
+[[message]]
+id = "sender-enable-output"
+
+[[message]]
+id = "sender-enable-the-virtual-output-before-starting-to-send"
+
+[[message]]
+id = "sender-enabled"
+
+[[message]]
+id = "sender-establishing-an-encrypted-session-and-preparing-capture"
+
+[[message]]
+id = "sender-find-a-room-and-establish-trust-with-a"
+
+[[message]]
+id = "sender-forget-this-computer-s-pairing"
+
+[[message]]
+id = "sender-forget-this-computer-s-pairing-label"
+
+[[message]]
+id = "sender-forget-this-computer-s-pairing-then-use-a"
+
+[[message]]
+id = "sender-hide"
+
+[[message]]
+id = "sender-load-existing-output"
+
+[[message]]
+id = "sender-local-network-encrypted"
+
+[[message]]
+id = "sender-make-sure-the-hub-is-sharing-on-the"
+
+[[message]]
+id = "sender-neonmix-virtual-output"
+
+[[message]]
+id = "sender-no-room-paired"
+
+[[message]]
+id = "sender-not-added"
+
+[[message]]
+id = "sender-not-paired"
+
+[[message]]
+id = "sender-output-unavailable"
+
+[[message]]
+id = "sender-pair-with-room"
+
+[[message]]
+id = "sender-paired"
+
+[[message]]
+id = "sender-paired-room"
+args = { name = "string" }
+
+[[message]]
+id = "sender-paired-room-idle"
+args = { name = "string" }
+
+[[message]]
+id = "sender-paired-with-a-pinned-identity"
+
+[[message]]
+id = "sender-pairing-has-been-revoked"
+
+[[message]]
+id = "sender-paste-a-one-time-invitation-from-the-hub"
+
+[[message]]
+id = "sender-paste-an-invitation-to-pair"
+
+[[message]]
+id = "sender-physical-output"
+
+[[message]]
+id = "sender-ready-room"
+args = { name = "string" }
+
+[[message]]
+id = "sender-recovering-control"
+args = { name = "string" }
+
+[[message]]
+id = "sender-remove-binding"
+
+[[message]]
+id = "sender-remove-output-binding"
+
+[[message]]
+id = "sender-requires-a-connected-paired-sender-identity"
+
+[[message]]
+id = "sender-requires-a-paired-sender-identity-and-an-installed"
+
+[[message]]
+id = "sender-requires-pairing-playback-permission-and-an-enabled-virtual"
+
+[[message]]
+id = "sender-room"
+
+[[message]]
+id = "sender-save-output-name"
+
+[[message]]
+id = "sender-searching-for-rooms-on-the-local-network-via"
+
+[[message]]
+id = "sender-select-an-output-in-system-sound-settings"
+
+[[message]]
+id = "sender-sending-room"
+args = { name = "string" }
+
+[[message]]
+id = "sender-show-or-hide-invitation"
+
+[[message]]
+id = "sender-shown-after-connecting-to-a-room"
+
+[[message]]
+id = "sender-start-sending"
+
+[[message]]
+id = "sender-stop-sending"
+
+[[message]]
+id = "sender-stop-sending-disable-the-local-output-and-remove"
+
+[[message]]
+id = "sender-stop-sending-from-this-binding-and-keep-the"
+
+[[message]]
+id = "sender-the-audio-process-is-still-running-sending-will"
+
+[[message]]
+id = "sender-the-hub-must-allow-playback-again-you-can"
+
+[[message]]
+id = "sender-this-computer-is-paired-expand-to-change-rooms"
+
+[[message]]
+id = "sender-unavailable"
+
+[[message]]
+id = "sender-unnamed-room"
+
+[[message]]
+id = "sender-untrusted-identity"
+
+[[message]]
+id = "sender-virtual-output"
+
+[[message]]
+id = "sender-virtual-output-disabled"
+
+[[message]]
+id = "sender-virtual-output-name"
+
+[[message]]
+id = "sender-virtual-output-provider"
+
+[[message]]
+id = "sender-target-confirming"

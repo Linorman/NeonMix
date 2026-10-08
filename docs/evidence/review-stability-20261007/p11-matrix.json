@@ -1,0 +1,97 @@
+[
+  {
+    "case": "0+4",
+    "passed": true,
+    "hub_sha256": "a9a761778477f688c1f44e0c8b75fff6661d7272d7804181585cd97f32254333",
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "same_source_simultaneous_cross_receiver_has_one_owner": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "steady_digital_timing_quality": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    },
+    "recoveries_completed": 8
+  },
+  {
+    "case": "1+3",
+    "passed": true,
+    "hub_sha256": "a9a761778477f688c1f44e0c8b75fff6661d7272d7804181585cd97f32254333",
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "same_source_simultaneous_cross_receiver_has_one_owner": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "steady_digital_timing_quality": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    },
+    "recoveries_completed": 6
+  },
+  {
+    "case": "2+2",
+    "passed": true,
+    "hub_sha256": "a9a761778477f688c1f44e0c8b75fff6661d7272d7804181585cd97f32254333",
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "same_source_simultaneous_cross_receiver_has_one_owner": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "steady_digital_timing_quality": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    },
+    "recoveries_completed": 4
+  },
+  {
+    "case": "3+1",
+    "passed": true,
+    "hub_sha256": "a9a761778477f688c1f44e0c8b75fff6661d7272d7804181585cd97f32254333",
+    "scenarios": {
+      "explicit_idle_pairing_window_renews_without_worker_restart": true,
+      "distinct_receiver_and_source_identities_concurrent_encrypted_pcm": true,
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "occupied_receivers_locally_hidden_beyond_ten_seconds": true,
+      "command_replay_idempotent_and_stale_session_rejected": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "steady_digital_timing_quality": true,
+      "each_source_disconnect_preserves_other_sources": true,
+      "each_worker_crash_preserves_other_sources": true,
+      "paired_recovery_preserves_source_and_receiver_identity": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    },
+    "recoveries_completed": 2
+  },
+  {
+    "case": "4+0",
+    "passed": true,
+    "hub_sha256": "a9a761778477f688c1f44e0c8b75fff6661d7272d7804181585cd97f32254333",
+    "scenarios": {
+      "independent_native_tones_render_with_requested_mix": true,
+      "dynamic_unique_lanes_and_shared_output": true,
+      "full_room_native_start_rejected_without_reservation_leak": true,
+      "steady_digital_timing_quality": true,
+      "global_disable_stops_workers_hides_discovery_and_releases_reservations": true
+    },
+    "recoveries_completed": 0
+  }
+]

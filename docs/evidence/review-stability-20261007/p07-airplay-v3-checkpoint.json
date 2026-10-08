@@ -1,0 +1,117 @@
+{
+  "created_at": "2026-10-08T00:38:44.249459+00:00",
+  "scope": "AirPlay v3 configuration/event CAS, durable candidate version, Desktop frozen confirmations, macOS real TLS control/restart. FIFO/desired-applied and native platform media acceptance remain pending.",
+  "gate": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.558
+    },
+    "packaging": {
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.181
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 1.631
+    },
+    "tests": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 61.108
+    }
+  },
+  "rust_passed": 331,
+  "rust_ignored": 7,
+  "wire_result": "p07-airplay-v3-wire-result.json",
+  "sha256": {
+    "crates/airplay-adapter/src/control.rs": "af72bf54a5d372462ed94723b7ddf66508f3bdba4a375a43d0498a4f4395174b",
+    "crates/identity/src/airplay_profile.rs": "59afb99a910e05d47103121e5ba9ed00e39c126fd17374f4e4a8f843f84846c3",
+    "crates/desktop-service/src/intent.rs": "7f96f4d31603351dd823aae74ed3cccec20f2d36a50dcb0450cfd2a975019395",
+    "crates/desktop-service/tests/lifecycle.rs": "ba05fcab655a8ee1b7e6d3a0dd007ca4bb567d82ab1a5e1df3973e5a416f864a",
+    "apps/hub/src/airplay.rs": "cdd939b25dc52e73d3b8c50cb6bc976938609eb75129ef0fb88588bb4704269f",
+    "apps/hub/src/airplay_api.rs": "0957f643bd8f068de0895dee9ea75eed99f2b10e7d1d1d927fded50cc412528d",
+    "apps/desktop/src/intent.rs": "7329b968c782c9d34c4680fdc4ab04c11699794da003580de6537b323ac574eb",
+    "apps/desktop/src/commands.rs": "b5a1ab33b06ee2a1b1ea097eb05053cb76502fc83d8585d2e6962a46fa63fec2",
+    "apps/desktop/src/commands_tests.rs": "28ac22900f3fc71ed9dfdc35475e83fe856a98b1b162349839c5e56b1b7185f7",
+    "apps/desktop/src/pages/airplay.rs": "dbde0d8bd77552cd64eeca393629c6c2dd4e0bde3dc10ffe834745c0d5e5f0bd",
+    "tools/control_epoch_probe.py": "81853dc5629d882c27aba0a8e841e481802d73fe39814efffb2caf9d8ef86d70",
+    "docs/REVIEW-IMPROVEMENT-DESIGN-PLAN-20261007.md": "14ef151b00dd574efa089e3bc0802d766a152ba534bc4cd39bb900ef776250b7",
+    "docs/AIRPLAY-CONTRACT.md": "926e58585484f32011682421945cc321655a30f9d719e6eff5e681a4441ecfa7",
+    "docs/MEDIA-CONTROL-CONTRACT.md": "f83fe5a887a38f06ba8271efe55ad025629231d67aecb2e03a45468455bd0e07",
+    "docs/STATUS.md": "560164048471d064d49596a012a929516899a6b15d76e112f689308b5718c101",
+    "target/release/neonmix-hub": "89964be3191ed24707ab9dc501fbc5529a2ce34cf6c662ccbee09a4be9a9dda3",
+    "target/release/neonmix-desktop": "1d2d1694b0c7538408d41eda7cb99b906749d1c969dd7d33111121816e00386f",
+    "target/release/neonmix-background": "229f2aec60de670a25f9d03cc16efe19b0082ff650dfe6b257620acc12bebd43",
+    "target/release/neonmix-guardian": "0319322600ae640be404aec121b7bec123578fb89f72a2483f2a8fec10a38db6"
+  }
+}

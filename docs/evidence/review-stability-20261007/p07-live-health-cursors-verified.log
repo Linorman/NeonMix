@@ -1,0 +1,18 @@
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.35s
+     Running tests/transactions.rs (target/debug/deps/transactions-05a6221d44e3ec2f)
+
+running 10 tests
+test failed_preparation_aborts_only_the_candidate_and_keeps_health_updates ... ok
+test cached_receipt_does_not_bypass_current_principal_validation ... ok
+test staged_command_excludes_durable_writers_and_preserves_live_output_loss ... ok
+test completed_replay_precedes_unrelated_pending_transaction_and_checks_fingerprint ... ok
+test runtime_epoch_and_requesting_identity_are_checked_before_replay_or_side_effects ... ok
+test pending_health_reserves_final_sequence_for_commit_without_unversioned_mutation ... ok
+test unrelated_session_health_during_registration_is_retained_without_deferred_replay ... ok
+test health_false_get_true_then_commit_or_abort_preserves_each_public_cursor ... ok
+test session_ending_during_saved_mix_is_not_resurrected_but_preferences_survive ... ok
+test pending_health_keeps_bounded_event_history_and_requires_snapshot_after_eviction ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

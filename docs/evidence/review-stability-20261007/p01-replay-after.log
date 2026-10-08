@@ -1,0 +1,104 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.97s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_control-8d4cb683bae373d4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/authority.rs (target/debug/deps/authority-bc0d659ceb631516)
+
+running 11 tests
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test member_cannot_solo_or_change_others_and_master ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/transactions.rs (target/debug/deps/transactions-72fdce8a0b533075)
+
+running 4 tests
+test failed_preparation_aborts_only_the_candidate_and_keeps_health_updates ... ok
+test staged_command_excludes_durable_writers_and_preserves_live_output_loss ... ok
+test completed_replay_precedes_unrelated_pending_transaction_and_checks_fingerprint ... ok
+test cached_receipt_does_not_bypass_current_principal_validation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 57 tests
+test identity::tests::setup_crash_helper ... ok
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test server::admission::tests::last_slot_competition_is_atomic_for_one_hundred_rounds ... ok
+test server::admission::tests::paused_active_claim_does_not_expire ... ok
+test server::admission::tests::reservations_exclude_duplicates_and_native_overcommit ... ok
+test identity::tests::failed_pending_commit_preserves_secret_request_and_recovery_metadata ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test identity::tests::legacy_and_mixed_formats_never_enter_laboratory_branch ... ok
+test identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity ... ok
+test identity::tests::forget_is_resumable_and_protects_admin_kind_and_device_aliases ... ok
+test server::airplay::api::tests::explicit_pair_window_rotates_running_idle_receiver_and_replay_does_not_reopen ... ok
+test server::airplay::api::tests::failed_pair_window_queue_does_not_reset_attempts_or_generation ... ok
+test server::airplay::api::tests::command_ids_require_canonical_uuid_spelling_before_deduplication ... ok
+test server::airplay::api::tests::committed_revoke_has_receipt_when_session_ends_and_mixer_queue_fills_during_save ... ok
+test server::airplay::tests::admission_retries_profile_contention_without_blocking_media_or_extending_deadline ... ok
+test server::airplay::api::tests::configuration_reserves_four_source_capacity_before_disk_write_and_clears_on_failure ... ok
+test server::airplay::tests::deferred_grant_is_discarded_after_disconnect_before_reacquiring_profile ... ok
+test server::airplay::tests::existing_receiver_profiles_default_to_low_latency_and_keep_trust ... ok
+test server::airplay::tests::expired_or_disabled_pairing_window_never_returns_a_stale_pin ... ok
+test server::airplay::tests::fifth_pairing_challenge_can_finish_but_retry_does_not_renew_attempt_budget ... ok
+test server::airplay::api::tests::member_snapshot_of_uninitialized_airplay_is_read_only ... ok
+test server::airplay::tests::idle_coreaudio_epoch_change_keeps_pin_window_but_active_media_is_revoked ... ok
+test server::airplay::tests::full_grant_preserves_all_hub_identity_fields ... ok
+test server::airplay::tests::media_transport_rejects_authenticated_truncation_and_oversized_frame ... ok
+test server::airplay::tests::stop_and_disconnect_fail_closed_even_when_control_consumer_stalls ... ok
+test server::airplay::tests::worker_queue_failures_keep_the_failed_stage_without_raw_messages ... ok
+test server::airplay::tests::worker_transport_failure_preserves_specific_reader_cause_without_masking_decoder ... ok
+test server::airplay::api::tests::metadata_edits_keep_receiver_identity_and_redact_cached_pairing_pins ... ok
+test server::airplay::api::tests::rename_success_followed_by_sync_error_is_acknowledged_as_committed ... ok
+test identity::tests::setup_force_exit_preserves_incomplete_identity_and_refuses_retry ... ok
+test server::airplay::tests::bounded_media_backpressure_preserves_burst_packets_and_stop_remains_independent ... ok
+test server::pairing_tests::cancelled_http_redemption_still_finishes_book_and_durable_authority ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::airplay::api::tests::repair_running_idle_receiver_discards_old_binding_and_opens_explicit_window ... ok
+test server::airplay::api::tests::snapshot_rechecks_role_after_waiting_for_profile_transaction ... ok
+test server::airplay::api::tests::live_configuration_stops_only_removed_idle_entries_and_preserves_retained_claim ... ok
+test server::airplay::api::tests::partial_identity_preparation_retains_disabled_recoverable_entries ... ok
+test server::airplay::api::tests::individual_disable_is_persistent_and_global_disable_preserves_configuration ... ok
+test server::airplay::api::tests::stale_session_is_rejected_before_any_durable_change ... ok
+test server::pairing_tests::pairing_save_releases_engine_and_keeps_book_until_concurrent_retry_and_cancel ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test virtual_output::tests::binding_requires_exact_provider_uid_and_both_sides ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test server::transaction_tests::native_external_preparation_failure_returns_the_reserved_lane_without_writing ... ok
+test server::transaction_tests::in_flight_native_start_owns_the_last_multi_source_slot ... ok
+test server::transaction_tests::native_failed_disk_write_aborts_candidate_and_returns_lane ... ok
+test server::transaction_tests::native_ids_cannot_collide_with_reserved_airplay_context_before_prepare ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test server::transaction_tests::native_http_replay_returns_original_response_without_external_work ... ok
+test server::transaction_tests::native_http_replay_keeps_original_media_parameters_after_session_ends_and_during_pending ... ok
+test server::transaction_tests::native_start_releases_engine_during_preparation_and_persistence ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+
+test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.47s
+
+   Doc-tests neonmix_control
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

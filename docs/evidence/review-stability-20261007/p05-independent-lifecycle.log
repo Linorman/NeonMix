@@ -1,0 +1,21 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error: prefix `pid` is unknown
+   --> crates/desktop-service/tests/lifecycle.rs:943:120
+    |
+943 | ...("snapshot)","control) printf '%s' "$$" > "$0.mutation-pid"; exec /bin/sleep 20;;\nsnapshot)");
+    |                                                           ^^^ unknown prefix
+    |
+    = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+    |
+943 |     let script=std::fs::read_to_string(&binary).unwrap().replace("snapshot)","control) printf '%s' "$$" > "$0.mutation-pid "; exec /bin/sleep 20;;\nsnapshot)");
+    |                                                                                                                           +
+
+error: expected one of `)`, `,`, `.`, `?`, or an operator, found `$`
+   --> crates/desktop-service/tests/lifecycle.rs:943:101
+    |
+943 | ...ce("snapshot)","control) printf '%s' "$$" > "$0.mutation-pid"; exec /bin/sleep 20;;\nsnapshot)");
+    |                                          ^ expected one of `)`, `,`, `.`, `?`, or an operator
+
+error: could not compile `neonmix-desktop-service` (test "lifecycle") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

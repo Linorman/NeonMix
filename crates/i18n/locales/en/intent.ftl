@@ -1,0 +1,12 @@
+intent-queued = Queued
+intent-in-flight = Sending
+intent-acknowledged = Confirmed
+intent-conflict = Changed elsewhere; review before retrying
+intent-failed = Failed; draft retained
+intent-unknown = Result unknown; reconcile the original request
+intent-cancelled = Cancelled
+intent-queue-full = Too many operations; please wait
+intent-target-ended = The original session ended
+intent-context-changed = Room or identity changed; queued operations cancelled
+intent-undo-conflict = This setting changed; it cannot be restored directly
+intent-reconcile = Reconcile result

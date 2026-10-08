@@ -62,11 +62,18 @@ impl Fixture {
         neonmix_identity::files::write_new(&path, &serde_json::to_vec(&value).unwrap()).unwrap();
     }
     fn child(&self) -> PathBuf {
+        // The production owner requires its packaged sibling. Pin the same
+        // already-built guardian into this isolated fixture installation.
+        std::fs::hard_link(
+            PathBuf::from(env!("CARGO_BIN_EXE_neonmix-guardian")),
+            self.0.join("neonmix-guardian"),
+        )
+        .unwrap();
         let path = self.0.join("fixture-child");
         // Exec replaces the shell: the fixture has no grandchildren to leak.
         std::fs::write(&path,br#"#!/bin/sh
 case "$1" in
-serve|send) printf '{"event":"media_started","token":"SECRET_TOKEN"}\n'; exec /bin/sleep 60;;
+serve|send) if [ "$1" = serve ]; then event=hub_started; else event=sender_started; fi; printf '{"event":"%s","token":"SECRET_TOKEN"}\n' "$event"; IFS= read -r stop; printf '{"event":"shutdown_complete"}\n'; exit 0;;
 snapshot) printf '%s' "$$" > "$0.query-pid"; exec /bin/sleep 30;;
 devices) printf '[]\n';;
 diagnostics) printf '{"meters":{"lanes":[{"stream_id":9,"peak":0.1,"rms":0.02}]},"private_key":"SECRET_KEY","device_name":"PRIVATE_DEVICE","address":"PRIVATE_HOST"}\n';;
@@ -113,6 +120,97 @@ async fn request(client: &Client, request: Request) -> neonmix_desktop_service::
 }
 async fn status(client: &Client) -> ServiceStatus {
     serde_json::from_value(request(client, Request::Status).await.data).unwrap()
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn bound_intent_rejects_identity_swap_and_preserves_id_and_frozen_credential_metadata() {
+    let fixture = Fixture::new();
+    let hub_id = uuid::Uuid::new_v4();
+    let identity = uuid::Uuid::new_v4();
+    fixture.write(
+        "hub/admin.json",
+        json!({"secret_ref":"placeholder","hub_id":hub_id,"device_id":identity}),
+    );
+    let helper = fixture.0.join("intent-helper.py");
+    std::fs::write(&helper, br#"#!/usr/bin/env python3
+import json,pathlib,sys
+a=sys.argv
+credential=pathlib.Path(a[a.index('--credential')+1])
+command=pathlib.Path(a[a.index('--command')+1])
+original=credential.parent/'admin.json'
+p=json.loads(original.read_text());p['device_id']='00000000-0000-4000-8000-000000000009';original.write_text(json.dumps(p))
+print(json.dumps({'command':json.loads(command.read_text()),'profile':json.loads(credential.read_text()),'frozen':credential.name.startswith('.neonmix-intent-')}))
+"#).unwrap();
+    std::fs::set_permissions(&helper, std::fs::Permissions::from_mode(0o700)).unwrap();
+    let running = daemon::serve_with_binaries(fixture.0.clone(), helper.clone(), helper);
+    let server = tokio::spawn(running);
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    assert_eq!(
+        status(&client).await.intent_version,
+        neonmix_desktop_service::INTENT_VERSION
+    );
+    let id = uuid::Uuid::new_v4();
+    let runtime = uuid::Uuid::new_v4();
+    let command = neonmix_control::Command {
+        control_version: 1,
+        expected_config_revision: None,
+        expected_event_sequence: None,
+        request_id: id,
+        runtime_epoch: Some(runtime),
+        credential_id: Some(identity),
+        expected_revision: Some(17),
+        operation: neonmix_control::Operation::OutputMix {
+            gain_db: Some(-9.),
+            muted: None,
+        },
+    };
+    let result = request(
+        &client,
+        Request::Intent {
+            credential: "hub/admin.json".into(),
+            hub: Some("https://localhost:7443".into()),
+            hub_id,
+            credential_id: identity,
+            command: neonmix_desktop_service::IntentCommand::Native(command.clone()),
+        },
+    )
+    .await;
+    assert!(result.ok, "{:?}", result.error);
+    assert_eq!(result.data["command"]["request_id"], id.to_string());
+    assert_eq!(result.data["command"]["expected_revision"], 17);
+    assert_eq!(result.data["profile"]["device_id"], identity.to_string());
+    assert_eq!(result.data["frozen"], true);
+    assert!(
+        std::fs::read_dir(fixture.0.join("hub"))
+            .unwrap()
+            .all(|entry| !entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with(".neonmix-intent-"))
+    );
+    assert!(
+        std::fs::read_dir(fixture.0.join("commands"))
+            .unwrap()
+            .next()
+            .is_none()
+    );
+    let swapped = request(
+        &client,
+        Request::Intent {
+            credential: "hub/admin.json".into(),
+            hub: None,
+            hub_id,
+            credential_id: identity,
+            command: neonmix_desktop_service::IntentCommand::Native(command),
+        },
+    )
+    .await;
+    assert!(!swapped.ok);
+    assert_eq!(swapped.error.as_deref(), Some("unauthenticated"));
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
 }
 async fn wait(client: &Client) {
     for _ in 0..100 {
@@ -345,7 +443,18 @@ async fn private_transport_rejects_unknown_commands_versions_oversize_paths_and_
         std::fs::Permissions::from_mode(0o666),
     )
     .unwrap();
+    assert!(client.request(&Request::Devices).is_err());
+    std::fs::set_permissions(
+        fixture.0.join("lifecycle.sock"),
+        std::fs::Permissions::from_mode(0o666),
+    )
+    .unwrap();
     assert!(client.request(&Request::Status).is_err());
+    std::fs::set_permissions(
+        fixture.0.join("lifecycle.sock"),
+        std::fs::Permissions::from_mode(0o600),
+    )
+    .unwrap();
     std::fs::set_permissions(
         fixture.0.join("ipc.sock"),
         std::fs::Permissions::from_mode(0o600),
@@ -549,7 +658,10 @@ async fn forgetting_a_sender_stops_media_disables_persisted_binding_and_removes_
         "profiles/sender.json",
         json!({"secret_ref":"sender-ref","hub_id":uuid::Uuid::new_v4()}),
     );
-    fixture.write("output/binding.json", json!({"revision":5,"enabled":true}));
+    fixture.write(
+        "output/binding.json",
+        json!({"revision":5,"output_id":uuid::Uuid::new_v4(),"enabled":true}),
+    );
     let directory = fixture.0.clone();
     let server = tokio::spawn(daemon::serve_with_binaries(
         directory,
@@ -688,6 +800,601 @@ async fn metadata_versions_and_admin_aliases_fail_closed_without_loading_secrets
                 .all(|p| p.credential != Path::new("profiles/member.json"))
         );
     }
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn structured_faults_take_priority_and_unknown_stderr_is_never_a_ui_message() {
+    use neonmix_desktop_service::FaultCode;
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    let daemon = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary.clone(),
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let cases = [
+        (
+            r#"{"fault":{"code":"hub_port_in_use","params":{"port":9000}},"error":"permission_denied"}"#,
+            "worker_unavailable SECRET_TOKEN",
+            FaultCode::HubPortInUse,
+            Some(9000),
+        ),
+        (
+            r#"{"fault":{"code":"hub_port_in_use","params":{"port":7443,"token":"SECRET_TOKEN"}},"error":"session_changed"}"#,
+            "SECRET_TOKEN",
+            FaultCode::SessionChanged,
+            None,
+        ),
+        (
+            r#"{"error":"revision_conflict"}"#,
+            "worker_unavailable SECRET_TOKEN",
+            FaultCode::RevisionConflict,
+            None,
+        ),
+        (
+            r#"{"error":"unknown_future_error"}"#,
+            "SECRET_TOKEN private arbitrary failure",
+            FaultCode::GenericFailure,
+            None,
+        ),
+        (
+            "{}",
+            "address already in use SECRET_TOKEN",
+            FaultCode::HubPortInUse,
+            Some(7443),
+        ),
+        (
+            "{}",
+            "Error: credential_permission_denied SECRET_TOKEN",
+            FaultCode::CredentialPermissionDenied,
+            None,
+        ),
+        (
+            r#"{"error":"network_uac_cancelled"}"#,
+            "SECRET_TOKEN",
+            FaultCode::NetworkUacCancelled,
+            None,
+        ),
+        (
+            r#"{"error":"runtime_cleanup_incomplete"}"#,
+            "SECRET_TOKEN",
+            FaultCode::RuntimeCleanupIncomplete,
+            None,
+        ),
+    ];
+    for (stdout, stderr, code, port) in cases {
+        std::fs::write(
+            &binary,
+            format!(
+                "#!/bin/sh\nprintf '%s\\n' '{stdout}'\nprintf '%s\\n' '{stderr}' >&2\nexit 1\n"
+            ),
+        )
+        .unwrap();
+        let reply = request(&client, Request::Devices).await;
+        assert!(!reply.ok);
+        let wire = serde_json::to_string(&reply).unwrap();
+        assert!(!wire.contains("SECRET_TOKEN"));
+        let fault = reply.fault.unwrap();
+        assert_eq!(fault.code, code);
+        assert_eq!(fault.params.port, port);
+    }
+    assert!(request(&client, Request::Shutdown).await.ok);
+    daemon.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn status_stays_available_during_a_hung_ordinary_query_and_stop_interrupts_it() {
+    use neonmix_desktop_service::FaultCode;
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    std::fs::write(
+        &binary,
+        b"#!/bin/sh\nprintf '%s' \"$$\" > \"$0.query-pid\"\nexec /bin/sleep 30\n",
+    )
+    .unwrap();
+    let daemon = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary.clone(),
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let query_client = client.clone();
+    let query = tokio::spawn(async move { request(&query_client, Request::Devices).await });
+    // This barrier proves that the ordinary child is actually hung; startup
+    // under the parallel lifecycle suite is not the Status/Stop latency target.
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    while !binary.with_extension("query-pid").exists() && tokio::time::Instant::now() < deadline {
+        if query.is_finished() {
+            let result = query.await.unwrap();
+            let _ = request(&client, Request::Shutdown).await;
+            daemon.await.unwrap().unwrap();
+            panic!(
+                "ordinary query ended before its startup barrier: {:?}",
+                result.error
+            );
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    if !binary.with_extension("query-pid").exists() {
+        let _ = request(&client, Request::Shutdown).await;
+        daemon.await.unwrap().unwrap();
+        let _ = query.await;
+        panic!("ordinary child did not reach startup barrier within five seconds");
+    }
+    let busy = request(&client, Request::Status).await;
+    assert!(busy.ok, "independent Status failed: {:?}", busy.error);
+    assert!(request(&client, Request::HubStop).await.ok);
+    assert_eq!(
+        query.await.unwrap().fault.unwrap().code,
+        FaultCode::RequestInterrupted
+    );
+    assert!(request(&client, Request::Shutdown).await.ok);
+    daemon.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn ready_followed_by_stats_is_immediately_ready_through_real_ipc() {
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    fixture.write(
+        "hub/server.json",
+        json!({"private_key_ref":"fixture-tls","room_name":"room","output":"physical"}),
+    );
+    let script = std::fs::read_to_string(&binary).unwrap().replace(
+        "IFS= read -r stop;",
+        "printf '{\"event\":\"hub_stats\"}\n'; IFS= read -r stop;",
+    );
+    std::fs::write(&binary, script).unwrap();
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary,
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let start = std::time::Instant::now();
+    let reply = request(&client, Request::HubStart).await;
+    assert!(reply.ok, "{:?}", reply.error);
+    assert!(
+        start.elapsed() < Duration::from_secs(1),
+        "ready lost behind the ordinary log"
+    );
+    let active = status(&client).await;
+    assert!(active.hub.ready && active.hub.running);
+    assert_eq!(active.hub.last_event.unwrap()["event"], "hub_stats");
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn slow_remote_mutation_and_full_ordinary_quota_do_not_block_status_or_stop() {
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    fixture.write(
+        "hub/server.json",
+        json!({"private_key_ref":"fixture-tls","room_name":"room","output":"physical"}),
+    );
+    fixture.write("hub/admin.json", json!({"secret_ref":"fixture-admin"}));
+    let script = std::fs::read_to_string(&binary).unwrap().replace(
+        "snapshot)",
+        r#"control) printf '%s' "$$" > "$0.mutation-pid"; /bin/sleep 20; printf '{"event":"control_completed"}\n';;
+snapshot)"#,
+    );
+    std::fs::write(&binary, script).unwrap();
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary.clone(),
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    assert!(request(&client, Request::HubStart).await.ok);
+    let pid = status(&client).await.hub.pid.unwrap();
+    let remote_client = client.clone();
+    let mutation = tokio::spawn(async move {
+        request(
+            &remote_client,
+            Request::Control {
+                credential: "hub/admin.json".into(),
+                hub: None,
+                expected_revision: 1,
+                operation: neonmix_control::Operation::OutputMix {
+                    gain_db: Some(-9.),
+                    muted: None,
+                },
+            },
+        )
+        .await
+    });
+    let deadline = std::time::Instant::now() + Duration::from_secs(3);
+    while !fixture.0.join("fixture-child.mutation-pid").exists() {
+        assert!(std::time::Instant::now() < deadline);
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    let mut saturated = Vec::new();
+    for _ in 0..7 {
+        let mut stream = UnixStream::connect(fixture.0.join("ipc.sock")).unwrap();
+        stream.write_all(&128u32.to_be_bytes()).unwrap();
+        stream.write_all(b"{").unwrap();
+        saturated.push(stream);
+    }
+    let start = std::time::Instant::now();
+    for _ in 0..20 {
+        assert!(status(&client).await.hub.running);
+    }
+    let stopped = request(&client, Request::HubStop).await;
+    assert!(stopped.ok, "{:?}", stopped.error);
+    assert!(stopped.data["operation_id"].is_string());
+    assert!(
+        start.elapsed() < Duration::from_secs(2),
+        "lifecycle request waited on a remote write or ordinary quota"
+    );
+    assert!(!status(&client).await.hub.running);
+    assert!(
+        !mutation.is_finished(),
+        "write was cancelled by a local media stop"
+    );
+    #[allow(unsafe_code)]
+    // SAFETY: zero-signal checks the media PID supplied by this fixture daemon.
+    unsafe {
+        assert_eq!(libc::kill(pid as libc::pid_t, 0), -1);
+    }
+    drop(saturated);
+    // A mutating CLI may have committed remotely; let its existing request end.
+    let completed = mutation.await.unwrap();
+    assert!(completed.ok);
+    assert_eq!(completed.data["event"], "control_completed");
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
+    assert!(!fixture.0.join("lifecycle.sock").exists());
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn disconnected_stop_client_still_reaps_and_late_ready_cannot_restart_media() {
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    fixture.write(
+        "hub/server.json",
+        json!({"private_key_ref":"fixture-tls","room_name":"room","output":"physical"}),
+    );
+    let script = std::fs::read_to_string(&binary).unwrap();
+    // The real stdin STOP is the barrier: Ready is emitted only after Stop.
+    let script=script.replace("serve|send)","serve) printf '{\"event\":\"booting\"}\n'; IFS= read -r stop; printf '{\"event\":\"hub_started\"}\n'; exit 0;;\nunused-serve|send)");
+    std::fs::write(&binary, script).unwrap();
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary,
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let starting_client = client.clone();
+    let starting = tokio::spawn(async move { request(&starting_client, Request::HubStart).await });
+    let deadline = std::time::Instant::now() + Duration::from_secs(3);
+    let pid = loop {
+        let current = status(&client).await;
+        if let Some(pid) = current.hub.pid {
+            assert!(!current.hub.ready);
+            break pid;
+        }
+        assert!(std::time::Instant::now() < deadline);
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    };
+    let bytes = serde_json::to_vec(&Envelope {
+        version: PROTOCOL_VERSION,
+        request: Request::HubStop,
+    })
+    .unwrap();
+    let mut abandoned = UnixStream::connect(fixture.0.join("lifecycle.sock")).unwrap();
+    abandoned
+        .write_all(&(bytes.len() as u32).to_be_bytes())
+        .unwrap();
+    abandoned.write_all(&bytes).unwrap();
+    drop(abandoned);
+    assert!(!starting.await.unwrap().ok);
+    let stopped = status(&client).await;
+    assert!(!stopped.hub.running && !stopped.hub.ready);
+    #[allow(unsafe_code)]
+    // SAFETY: checks only this fixture's already stopped child.
+    unsafe {
+        assert_eq!(libc::kill(pid as libc::pid_t, 0), -1);
+    }
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn frozen_lifecycle_identity_and_stop_generation_reject_late_start_and_wrong_instance_stop() {
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    fixture.write(
+        "hub/server.json",
+        json!({"private_key_ref":"fixture-tls","room_name":"room","output":"physical"}),
+    );
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary,
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let view = status(&client).await.lifecycle.unwrap();
+    let old_start = Request::LifecycleStart {
+        instance_generation: view.instance_generation,
+        expected_stop_generation: view.hub_stop_generation,
+        request: Box::new(Request::HubStart),
+    };
+    assert!(request(&client, old_start.clone()).await.ok);
+    let stop = request(
+        &client,
+        Request::LifecycleStop {
+            instance_generation: view.instance_generation,
+            request: Box::new(Request::HubStop),
+        },
+    )
+    .await;
+    assert!(stop.ok);
+    assert_eq!(stop.data["lifecycle"]["hub_stop_generation"], 1);
+    let rejected = request(&client, old_start).await;
+    assert!(!rejected.ok);
+    assert_eq!(
+        rejected.fault.unwrap().code,
+        neonmix_desktop_service::FaultCode::RequestInterrupted
+    );
+    assert!(!status(&client).await.hub.running);
+    let fresh = status(&client).await.lifecycle.unwrap();
+    assert!(
+        request(
+            &client,
+            Request::LifecycleStart {
+                instance_generation: fresh.instance_generation,
+                expected_stop_generation: fresh.hub_stop_generation,
+                request: Box::new(Request::HubStart)
+            }
+        )
+        .await
+        .ok
+    );
+    let pid = status(&client).await.hub.pid;
+    let old_owner = request(
+        &client,
+        Request::LifecycleStop {
+            instance_generation: uuid::Uuid::new_v4(),
+            request: Box::new(Request::HubStop),
+        },
+    )
+    .await;
+    assert!(!old_owner.ok);
+    assert_eq!(
+        status(&client).await.hub.pid,
+        pid,
+        "another instance's request stopped current media"
+    );
+    assert!(
+        !request(
+            &client,
+            Request::LifecycleStop {
+                instance_generation: view.instance_generation,
+                request: Box::new(Request::Devices)
+            }
+        )
+        .await
+        .ok
+    );
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn ipc_settings_and_background_restart_use_the_same_recoverable_config_owner() {
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    fixture.write(
+        "hub/server.json",
+        json!({"private_key_ref":"fixture-tls","room_name":"Old room","output":"old-output"}),
+    );
+    let authority =
+        neonmix_control::Authority::new("old-output".into(), "Admin".into(), &"a".repeat(64))
+            .unwrap();
+    neonmix_identity::files::write_new(
+        &fixture.0.join("hub/state.json"),
+        &serde_json::to_vec_pretty(&authority.persistent()).unwrap(),
+    )
+    .unwrap();
+    transport::protect_directory(&fixture.0.join("hub")).unwrap();
+    let profile = fixture.0.join("hub/server.json");
+    let validate = |bytes: &[u8]| {
+        neonmix_control::Authority::restore(
+            serde_json::from_slice(bytes).map_err(|_| "invalid state")?,
+        )
+        .map(|_| ())
+        .map_err(|_| "invalid authority".into())
+    };
+    let mut reached = false;
+    let interrupted = neonmix_identity::hub_settings::update_with(
+        &profile,
+        "recovered-output",
+        "Recovered room",
+        &validate,
+        &mut |stage| {
+            if stage == neonmix_identity::hub_settings::Stage::StatePublished {
+                reached = true;
+                Err(std::io::ErrorKind::Other.into())
+            } else {
+                Ok(())
+            }
+        },
+    );
+    assert!(
+        interrupted.is_err() && reached,
+        "transaction never reached state publication: {interrupted:?}"
+    );
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary,
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let recovered = status(&client).await.hub_settings.unwrap();
+    assert_eq!(recovered.output, "recovered-output");
+    assert_eq!(recovered.name, "Recovered room");
+    let revision = |path: &Path| {
+        serde_json::from_slice::<serde_json::Value>(
+            &neonmix_identity::files::read_private(path, 8 * 1024 * 1024).unwrap(),
+        )
+        .unwrap()["revision"]
+            .as_u64()
+            .unwrap()
+    };
+    assert_eq!(revision(&fixture.0.join("hub/state.json")), 2);
+    let saved = request(
+        &client,
+        Request::HubSettings {
+            settings: HubSettings {
+                output: "final-output".into(),
+                name: "Final room".into(),
+            },
+        },
+    )
+    .await;
+    assert!(saved.ok, "{:?}", saved.error);
+    let current = status(&client).await.hub_settings.unwrap();
+    assert_eq!(current.output, "final-output");
+    assert_eq!(current.name, "Final room");
+    assert_eq!(revision(&fixture.0.join("hub/state.json")), 3);
+    assert!(
+        request(
+            &client,
+            Request::HubSettings {
+                settings: HubSettings {
+                    output: current.output,
+                    name: current.name
+                }
+            }
+        )
+        .await
+        .ok
+    );
+    assert_eq!(
+        revision(&fixture.0.join("hub/state.json")),
+        3,
+        "retry applied another business revision"
+    );
+    assert!(request(&client, Request::Shutdown).await.ok);
+    server.await.unwrap().unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn output_ipc_forwards_frozen_id_and_native_sync_uses_the_acknowledged_object() {
+    use neonmix_desktop_service::OutputAction;
+    let fixture = Fixture::new();
+    let _binary = fixture.child();
+    let captured = uuid::Uuid::new_v4();
+    let replacement = uuid::Uuid::new_v4();
+    let helper = fixture.0.join("output-cas-helper.py");
+    let source = r#"#!/usr/bin/env python3
+import json,pathlib,sys
+args=sys.argv[1:]
+directory=pathlib.Path(args[args.index('--directory')+1]);current=json.loads((directory/'binding.json').read_text())
+operation=args[1]
+(directory/'calls.jsonl').open('a').write(json.dumps({'operation':operation,'arguments':args})+'\n')
+if operation=='rename':
+    if args[args.index('--expected-output-id')+1]!=current['output_id']:print('output_object_replaced',file=sys.stderr);sys.exit(1)
+    acknowledged=dict(current);acknowledged['revision']+=1
+    # Another client replaces the object before the follow-up native sync.
+    (directory/'binding.json').write_text(json.dumps({'output_id':'REPLACEMENT','revision':acknowledged['revision'],'provider':'neonmix'}))
+    print(json.dumps(acknowledged))
+elif operation=='sync-name':
+    if args[args.index('--expected-output-id')+1]!=current['output_id']:print('output_object_replaced',file=sys.stderr);sys.exit(1)
+    print(json.dumps(current))
+else:print(json.dumps(current))
+"#;
+    std::fs::write(
+        &helper,
+        source.replace("REPLACEMENT", &replacement.to_string()),
+    )
+    .unwrap();
+    std::fs::set_permissions(&helper, std::fs::Permissions::from_mode(0o700)).unwrap();
+    fixture.write(
+        "output/binding.json",
+        json!({"output_id":captured,"revision":1,"provider":"neonmix"}),
+    );
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        helper.clone(),
+        helper,
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let renamed = request(
+        &client,
+        Request::Output {
+            directory: "output".into(),
+            action: OutputAction::Rename {
+                expected_output_id: captured,
+                expected_revision: 1,
+                name: "saved name".into(),
+            },
+        },
+    )
+    .await;
+    assert!(renamed.ok, "{:?}", renamed.error);
+    assert_eq!(renamed.data["output_id"], captured.to_string());
+    assert_eq!(renamed.data["native_name_synced"], false);
+    let calls = std::fs::read_to_string(fixture.0.join("output/calls.jsonl")).unwrap();
+    let calls: Vec<serde_json::Value> = calls
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(calls.len(), 2);
+    for (index, revision) in [(0, "1"), (1, "2")] {
+        let args = calls[index]["arguments"].as_array().unwrap();
+        let id = args
+            .iter()
+            .position(|item| item == "--expected-output-id")
+            .unwrap();
+        let rev = args
+            .iter()
+            .position(|item| item == "--expected-revision")
+            .unwrap();
+        assert_eq!(args[id + 1], captured.to_string());
+        assert_eq!(args[rev + 1], revision);
+    }
+    let old = request(
+        &client,
+        Request::Output {
+            directory: "output".into(),
+            action: OutputAction::Rename {
+                expected_output_id: captured,
+                expected_revision: 1,
+                name: "old command".into(),
+            },
+        },
+    )
+    .await;
+    assert!(!old.ok);
+    assert_eq!(
+        old.fault.unwrap().code,
+        neonmix_desktop_service::FaultCode::OutputObjectReplaced
+    );
+    let mut legacy = std::os::unix::net::UnixStream::connect(fixture.0.join("ipc.sock")).unwrap();
+    let value=serde_json::to_vec(&json!({"version":1,"request":{"type":"output","directory":"output","action":{"action":"disable","expected_revision":1}}})).unwrap();
+    legacy
+        .write_all(&(value.len() as u32).to_be_bytes())
+        .unwrap();
+    legacy.write_all(&value).unwrap();
+    let mut header = [0; 4];
+    legacy.read_exact(&mut header).unwrap();
+    let mut body = vec![0; u32::from_be_bytes(header) as usize];
+    legacy.read_exact(&mut body).unwrap();
+    let rejected: neonmix_desktop_service::Reply = serde_json::from_slice(&body).unwrap();
+    assert!(!rejected.ok, "legacy request acquired current UUID");
     assert!(request(&client, Request::Shutdown).await.ok);
     server.await.unwrap().unwrap();
 }

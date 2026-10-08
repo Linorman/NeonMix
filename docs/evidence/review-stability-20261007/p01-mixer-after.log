@@ -1,0 +1,18 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+warning: unused variable: `row`
+   --> apps/desktop/src/palette.rs:396:40
+    |
+396 | ...                   let (rect, row) = ui.allocate_exact_size(
+    |                                  ^^^ help: if this is intentional, prefix it with an underscore: `_row`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 1 warning (run `cargo fix --bin "neonmix-desktop" -p neonmix-desktop --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.41s
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-ab7b9d7918bc97f7)
+
+running 1 test
+test tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.02s
+

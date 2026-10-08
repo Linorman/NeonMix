@@ -1,0 +1,12 @@
+intent-queued = 待提交
+intent-in-flight = 正在提交
+intent-acknowledged = 已确认
+intent-conflict = 设置已变化，请核对后重试
+intent-failed = 提交失败，草稿已保留
+intent-unknown = 结果待确认，请核对原请求
+intent-cancelled = 操作已取消
+intent-queue-full = 操作过多，请等待
+intent-target-ended = 原会话已结束
+intent-context-changed = 房间或身份已切换，旧操作已取消
+intent-undo-conflict = 此设置已被修改，无法直接还原
+intent-reconcile = 核对结果

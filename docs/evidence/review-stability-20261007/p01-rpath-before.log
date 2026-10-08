@@ -1,0 +1,38 @@
+FF
+======================================================================
+FAIL: test_delete_failure_is_fatal_and_never_adds_replacement (test_package_macos.RpathTests.test_delete_failure_is_fatal_and_never_adds_replacement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/tests/test_package_macos.py", line 47, in test_delete_failure_is_fatal_and_never_adds_replacement
+    self.assertEqual(len(calls), 1, 'must stop at first failed mutation')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 1 : must stop at first failed mutation
+
+======================================================================
+FAIL: test_rpath_load_commands_preserve_complete_paths (test_package_macos.RpathTests.test_rpath_load_commands_preserve_complete_paths)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/tests/test_package_macos.py", line 30, in test_rpath_load_commands_preserve_complete_paths
+    self.assertEqual(package.rpaths('fixture'), [
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        '/Volumes/My Drive/霓虹 混音/lib',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        '@loader_path/../Frameworks', '/plain/lib'])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['/not/an/rpath', '@loader_path/../Frameworks', '/plain/lib'] != ['/Volumes/My Drive/霓虹 混音/lib', '@loader_path/../Frameworks', '/plain/lib']
+
+First differing element 0:
+'/not/an/rpath'
+'/Volumes/My Drive/霓虹 混音/lib'
+
+- ['/not/an/rpath', '@loader_path/../Frameworks', '/plain/lib']
+?    ^ ^ ^^ ^^^^^
+
++ ['/Volumes/My Drive/霓虹 混音/lib', '@loader_path/../Frameworks', '/plain/lib']
+?    ^ ^^^^^ ^^^^^^^^ ^^^^^^^^^
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.003s
+
+FAILED (failures=2)

@@ -6,6 +6,9 @@ use egui::{Align, CornerRadius, Layout, Margin, Stroke};
 
 impl Desktop {
     pub(crate) fn hub_page(&mut self, ui: &mut egui::Ui) {
+        let text_hub_create_room = self.tr(&Message::HubCreateRoom);
+        let text_hub_start_sharing = self.tr(&Message::HubStartSharing);
+        let text_hub_invite_device = self.tr(&Message::HubInviteDevice);
         let configured = self
             .status
             .as_ref()
@@ -24,9 +27,12 @@ impl Desktop {
                 }
             };
             let steps = [
-                ("创建房间", state(configured, true)),
-                ("开始共享", state(running, configured)),
-                ("邀请设备", state(invited, configured && running)),
+                (text_hub_create_room.as_str(), state(configured, true)),
+                (text_hub_start_sharing.as_str(), state(running, configured)),
+                (
+                    text_hub_invite_device.as_str(),
+                    state(invited, configured && running),
+                ),
             ];
             if widgets::stepper(ui, &steps) == Some(2) {
                 self.panels.insert("invite", true);
@@ -49,16 +55,34 @@ impl Desktop {
     }
 
     fn room_hero(&mut self, ui: &mut egui::Ui, configured: bool, running: bool) {
+        let text_hub_sharing = self.tr(&Message::HubSharing);
+        let text_hub_not_sharing = self.tr(&Message::HubNotSharing);
+        let text_hub_not_created = self.tr(&Message::HubNotCreated);
+        let text_hub_stop_sharing = self.tr(&Message::HubStopSharing);
+        let text_hub_start_sharing = self.tr(&Message::HubStartSharing);
+        let text_hub_stop_sharing_the_room_stops_playing_paired_devices =
+            self.tr(&Message::HubStopSharingTheRoomStopsPlayingPairedDevices);
+        let text_hub_save_or_discard_your_changes_first =
+            self.tr(&Message::HubSaveOrDiscardYourChangesFirst);
+        let text_hub_start_sharing_devices_on_your_local_network_can =
+            self.tr(&Message::HubStartSharingDevicesOnYourLocalNetworkCan);
+        let text_hub_create_room = self.tr(&Message::HubCreateRoom);
+        let text_hub_enter_a_room_name_and_select_a_physical =
+            self.tr(&Message::HubEnterARoomNameAndSelectAPhysical);
+        let text_hub_room_name = self.tr(&Message::HubRoomName);
+        let text_hub_name_your_room = self.tr(&Message::HubNameYourRoom);
+        let text_hub_the_output_is_bound_to_its_device_identity =
+            self.tr(&Message::HubTheOutputIsBoundToItsDeviceIdentity);
         let saved = self.status.as_ref().and_then(|s| s.hub_settings.clone());
         let dirty = saved
             .as_ref()
             .is_some_and(|s| s.name != self.room.trim() || s.output != self.output);
         let (state, tone) = if running {
-            ("共享中", Tone::Success)
+            (text_hub_sharing.as_str(), Tone::Success)
         } else if configured {
-            ("未共享", Tone::Neutral)
+            (text_hub_not_sharing.as_str(), Tone::Neutral)
         } else {
-            ("尚未创建", Tone::Neutral)
+            (text_hub_not_created.as_str(), Tone::Neutral)
         };
         let shown = widgets::surface(
             ui,
@@ -78,18 +102,24 @@ impl Desktop {
                         // One switch: its accessible name is the action it performs.
                         let busy = this.pending("hub-start") || this.pending("hub-stop");
                         let label = if running {
-                            "停止共享"
+                            text_hub_stop_sharing.as_str()
                         } else {
-                            "开始共享"
+                            text_hub_start_sharing.as_str()
                         };
                         let switch =
                             crate::viz::switch(ui, running || !dirty, running, busy, label);
                         let switch = if running {
-                            switch.on_hover_text("停止共享：房间停止播放；已配对设备与设置保留")
+                            switch.on_hover_text(
+                                text_hub_stop_sharing_the_room_stops_playing_paired_devices
+                                    .as_str(),
+                            )
                         } else if dirty {
-                            switch.on_hover_text("先保存或放弃未保存的更改")
+                            switch
+                                .on_hover_text(text_hub_save_or_discard_your_changes_first.as_str())
                         } else {
-                            switch.on_hover_text("开始共享：局域网中的设备可以向房间发送声音")
+                            switch.on_hover_text(
+                                text_hub_start_sharing_devices_on_your_local_network_can.as_str(),
+                            )
                         };
                         if switch.clicked() && !busy && (running || !dirty) {
                             this.request(if running {
@@ -102,10 +132,12 @@ impl Desktop {
                         ui,
                         !this.room.trim().is_empty() && !this.output.is_empty(),
                         this.pending("hub-settings"),
-                        "创建房间",
+                        text_hub_create_room.as_str(),
                         Kind::Primary,
                     )
-                    .on_disabled_hover_text("填写房间名称并选择实体输出设备")
+                    .on_disabled_hover_text(
+                        text_hub_enter_a_room_name_and_select_a_physical.as_str(),
+                    )
                     .clicked()
                     {
                         this.request(Request::HubSetup {
@@ -125,7 +157,13 @@ impl Desktop {
                             egui::vec2(width, 56.0),
                             Layout::top_down(Align::Min),
                             |ui| {
-                                widgets::title_field(ui, "房间名称", &mut self.room, "为房间命名");
+                                widgets::title_field(
+                                    ui,
+                                    "hub-room-name",
+                                    text_hub_room_name.as_str(),
+                                    &mut self.room,
+                                    text_hub_name_your_room.as_str(),
+                                );
                             },
                         );
                         ui.allocate_ui_with_layout(
@@ -135,7 +173,13 @@ impl Desktop {
                         );
                     });
                 } else {
-                    widgets::title_field(ui, "房间名称", &mut self.room, "为房间命名");
+                    widgets::title_field(
+                        ui,
+                        "hub-room-name",
+                        text_hub_room_name.as_str(),
+                        &mut self.room,
+                        text_hub_name_your_room.as_str(),
+                    );
                     ui.allocate_ui_with_layout(
                         egui::vec2(ui.available_width(), theme::CONTROL_HEIGHT),
                         Layout::right_to_left(Align::Center),
@@ -148,10 +192,15 @@ impl Desktop {
                 }
                 widgets::note(
                     ui,
-                    "输出按设备身份绑定，不跟随系统默认设备；共享仅面向局域网。",
+                    text_hub_the_output_is_bound_to_its_device_identity.as_str(),
                 );
-                if let Some(e) = self.status.as_ref().and_then(|s| s.hub.error.clone()) {
-                    widgets::error_text(ui, user_error(e));
+                if let Some(process) = self
+                    .status
+                    .as_ref()
+                    .map(|s| &s.hub)
+                    .filter(|process| process.error.is_some() || process.fault.is_some())
+                {
+                    widgets::error_text(ui, self.tr(&process_error(process)));
                 }
                 if let Some(snapshot) = self.snapshot.clone() {
                     ui.separator();
@@ -223,9 +272,16 @@ impl Desktop {
     }
 
     fn output_picker(&mut self, ui: &mut egui::Ui) {
+        let text_hub_physical_output_device = self.tr(&Message::HubPhysicalOutputDevice);
+        let text_hub_select_a_device = self.tr(&Message::HubSelectADevice);
+        let text_hub_physical_output = self.tr(&Message::HubPhysicalOutput);
+        let text_hub_refresh_devices = self.tr(&Message::HubRefreshDevices);
+        let text_hub_play_test_tone = self.tr(&Message::HubPlayTestTone);
+        let text_hub_play_a_quiet_2_second_test_tone_at =
+            self.tr(&Message::HubPlayAQuiet2SecondTestToneAt);
         ui.vertical(|ui| {
             ui.spacing_mut().item_spacing.y = 4.0;
-            let label = widgets::caption(ui, "实体输出设备");
+            let label = widgets::caption(ui, text_hub_physical_output_device.as_str());
             ui.horizontal_wrapped(|ui| {
                 let width = (ui.available_width() - 210.0).clamp(160.0, 360.0);
                 let response = egui::ComboBox::from_id_salt("output")
@@ -234,7 +290,7 @@ impl Desktop {
                         self.devices
                             .iter()
                             .find(|d| d.id == self.output)
-                            .map_or("请选择设备", |d| d.name.as_str()),
+                            .map_or(text_hub_select_a_device.as_str(), |d| d.name.as_str()),
                     )
                     .show_ui(ui, |ui| {
                         for device in &self.devices {
@@ -250,12 +306,12 @@ impl Desktop {
                     })
                     .response
                     .labelled_by(label.id);
-                widgets::label_combo(&response, "实体输出");
+                widgets::label_combo(&response, text_hub_physical_output.as_str());
                 if widgets::button_busy(
                     ui,
                     true,
                     self.pending("devices"),
-                    "刷新设备",
+                    text_hub_refresh_devices.as_str(),
                     Kind::Secondary,
                 )
                 .clicked()
@@ -266,10 +322,10 @@ impl Desktop {
                     ui,
                     !self.output.is_empty(),
                     self.pending("test-tone"),
-                    "播放测试音",
+                    text_hub_play_test_tone.as_str(),
                     Kind::Secondary,
                 )
-                .on_hover_text("在所选设备上播放 −36 dBFS、2 秒的低音量测试音")
+                .on_hover_text(text_hub_play_a_quiet_2_second_test_tone_at.as_str())
                 .clicked()
                 {
                     self.request(Request::TestTone {
@@ -285,6 +341,10 @@ impl Desktop {
 
     /// Edits apply only on 保存设置; while sharing they wait for a stop.
     fn unsaved_bar(&mut self, ui: &mut egui::Ui, saved: &HubSettings, running: bool) {
+        let text_hub_unsaved_changes = self.tr(&Message::HubUnsavedChanges);
+        let text_hub_stop_sharing_before_saving = self.tr(&Message::HubStopSharingBeforeSaving);
+        let text_hub_save_settings = self.tr(&Message::HubSaveSettings);
+        let text_hub_discard_changes = self.tr(&Message::HubDiscardChanges);
         egui::Frame::new()
             .fill(theme::WARNING.gamma_multiply(0.08))
             .stroke(Stroke::new(1.0, theme::WARNING.gamma_multiply(0.35)))
@@ -293,16 +353,16 @@ impl Desktop {
             .show(ui, |ui| {
                 ui.set_min_width(ui.available_width());
                 ui.horizontal_wrapped(|ui| {
-                    widgets::dot(ui, "有未保存的更改", Tone::Warning);
+                    widgets::dot(ui, text_hub_unsaved_changes.as_str(), Tone::Warning);
                     if running {
-                        widgets::note(ui, "停止共享后才能保存。");
+                        widgets::note(ui, text_hub_stop_sharing_before_saving.as_str());
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if widgets::button_busy(
                             ui,
                             !running && !self.room.trim().is_empty() && !self.output.is_empty(),
                             self.pending("hub-settings"),
-                            "保存设置",
+                            text_hub_save_settings.as_str(),
                             Kind::Primary,
                         )
                         .clicked()
@@ -314,7 +374,9 @@ impl Desktop {
                                 },
                             });
                         }
-                        if widgets::button(ui, "放弃更改", Kind::Secondary).clicked() {
+                        if widgets::button(ui, text_hub_discard_changes.as_str(), Kind::Secondary)
+                            .clicked()
+                        {
                             self.room = saved.name.clone();
                             self.output = saved.output.clone();
                         }
@@ -325,6 +387,7 @@ impl Desktop {
 
     /// Who is in the room, at a glance; the full list lives in 设备管理.
     fn member_strip(&mut self, ui: &mut egui::Ui, snapshot: &Snapshot) {
+        let text_hub_manage_devices = self.tr(&Message::HubManageDevices);
         let mut devices: Vec<_> = snapshot.devices.values().collect();
         devices.sort_by_key(|d| (d.revoked, !d.playback_allowed, d.name.clone()));
         let airplay = self.airplay_sources();
@@ -347,7 +410,10 @@ impl Desktop {
                 let r = widgets::avatar(ui, &device.name, color, 28.0);
                 ui.painter()
                     .circle_stroke(r.rect.center(), 14.5, Stroke::new(2.0, theme::SURFACE));
-                r.on_hover_text(format!("{}（{}）", device.name, role_name(device.role)));
+                r.on_hover_text(self.tr(&Message::HubMemberRole {
+                    name: (device.name).to_string(),
+                    role: self.tr(&role_name(device.role)),
+                }));
             }
             for source in airplay.iter().take(6usize.saturating_sub(devices.len())) {
                 widgets::avatar(
@@ -360,46 +426,65 @@ impl Desktop {
             ui.spacing_mut().item_spacing.x = 8.0;
             ui.add_space(14.0);
             ui.label(
-                RichText::new(format!("{} 条配对记录", devices.len() + airplay.len()))
-                    .color(theme::TEXT),
+                RichText::new(self.tr(&Message::HubPairingRecordCount {
+                    count: (devices.len() + airplay.len()) as u64,
+                }))
+                .color(theme::TEXT),
             );
             if sending > 0 {
-                widgets::dot(ui, &format!("{sending} 台正在发送"), Tone::Success);
+                widgets::dot(
+                    ui,
+                    &self.tr(&Message::HubSendingDeviceCount {
+                        count: (sending) as u64,
+                    }),
+                    Tone::Success,
+                );
             }
-            if widgets::small_button(ui, true, "管理设备").clicked() {
+            if widgets::small_button(ui, true, text_hub_manage_devices.as_str()).clicked() {
                 self.navigate(Page::Devices);
             }
         });
     }
 
     fn invite_panel(&mut self, ui: &mut egui::Ui) {
+        let text_hub_invite_device = self.tr(&Message::HubInviteDevice);
+        let text_hub_one_time_invitation_valid_for_120_seconds =
+            self.tr(&Message::HubOneTimeInvitationValidFor120Seconds);
+        let text_hub_invitation_created = self.tr(&Message::HubInvitationCreated);
+        let text_hub_an_invitation_lets_one_device_join_the_room =
+            self.tr(&Message::HubAnInvitationLetsOneDeviceJoinTheRoom);
+        let text_hub_create_one_time_invitation = self.tr(&Message::HubCreateOneTimeInvitation);
+        let text_hub_requires_a_connected_local_administrator_identity =
+            self.tr(&Message::HubRequiresAConnectedLocalAdministratorIdentity);
         let can_invite = self.writable() && self.admin();
         let open = self.panel_open("invite", true);
         let issued = !self.issued_invitation.is_empty();
         let panel = widgets::panel(
             ui,
             "invite",
-            "邀请设备",
-            Some("一次性邀请，120 秒内有效"),
+            text_hub_invite_device.as_str(),
+            Some(text_hub_one_time_invitation_valid_for_120_seconds.as_str()),
             open,
             |ui| {
                 if issued {
-                    widgets::pill(ui, "邀请已创建", Tone::Accent);
+                    widgets::pill(ui, text_hub_invitation_created.as_str(), Tone::Accent);
                 }
             },
             |ui| {
                 widgets::note(
                     ui,
-                    "邀请允许一台设备加入房间。请私下交给目标设备，在其 Sender 页面粘贴。",
+                    text_hub_an_invitation_lets_one_device_join_the_room.as_str(),
                 );
                 if widgets::button_busy(
                     ui,
                     can_invite,
                     self.pending("invite"),
-                    "创建一次性邀请",
+                    text_hub_create_one_time_invitation.as_str(),
                     Kind::Primary,
                 )
-                .on_disabled_hover_text("需要已连接的本地管理员身份")
+                .on_disabled_hover_text(
+                    text_hub_requires_a_connected_local_administrator_identity.as_str(),
+                )
                 .clicked()
                 {
                     self.request(Request::Invite {
@@ -424,6 +509,13 @@ impl Desktop {
     }
 
     fn issued_invite(&mut self, ui: &mut egui::Ui) {
+        let text_hub_invitation_content = self.tr(&Message::HubInvitationContent);
+        let text_hub_expired = self.tr(&Message::HubExpired);
+        let text_hub_copied = self.tr(&Message::HubCopied);
+        let text_hub_copy_invitation = self.tr(&Message::HubCopyInvitation);
+        let text_hub_hide_invitation_content = self.tr(&Message::HubHideInvitationContent);
+        let text_hub_show_invitation_content = self.tr(&Message::HubShowInvitationContent);
+        let text_hub_cancel_invitation = self.tr(&Message::HubCancelInvitation);
         widgets::inset(ui, |ui| {
             let now = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -437,10 +529,10 @@ impl Desktop {
                 .map(|expiry| (expiry as f64 - now).max(0.0) as f32);
             let caption = ui
                 .horizontal(|ui| {
-                    let caption = widgets::caption(ui, "邀请内容");
+                    let caption = widgets::caption(ui, text_hub_invitation_content.as_str());
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| match remaining {
                         Some(0) => {
-                            widgets::pill(ui, "已过期", Tone::Warning);
+                            widgets::pill(ui, text_hub_expired.as_str(), Tone::Warning);
                         }
                         Some(s) => {
                             // Real time left of the 120 s validity.
@@ -450,7 +542,9 @@ impl Desktop {
                                 120.0,
                                 34.0,
                             )
-                            .on_hover_text(format!("邀请剩余 {s} 秒"));
+                            .on_hover_text(
+                                self.tr(&Message::HubInvitationSecondsLeft { seconds: s }),
+                            );
                         }
                         None => {}
                     });
@@ -492,24 +586,25 @@ impl Desktop {
                     ui.ctx().request_repaint_after(Duration::from_millis(200));
                 }
                 let label = if copied {
-                    "已复制 ✓"
+                    text_hub_copied.as_str()
                 } else {
-                    "复制邀请"
+                    text_hub_copy_invitation.as_str()
                 };
                 if widgets::small_button(ui, true, label).clicked() {
                     ui.ctx().copy_text(self.issued_invitation.clone());
                     self.copied_at = Some(Instant::now());
                 }
                 let show = if self.show_invitation {
-                    "隐藏邀请内容"
+                    text_hub_hide_invitation_content.as_str()
                 } else {
-                    "显示邀请内容"
+                    text_hub_show_invitation_content.as_str()
                 };
                 if widgets::small_button(ui, true, show).clicked() {
                     self.show_invitation = !self.show_invitation;
                 }
                 if let Some(invitation_id) = self.invite_id
-                    && widgets::small_button(ui, true, "取消邀请").clicked()
+                    && widgets::small_button(ui, true, text_hub_cancel_invitation.as_str())
+                        .clicked()
                 {
                     self.request(Request::CancelInvite {
                         credential: self.credential.clone(),

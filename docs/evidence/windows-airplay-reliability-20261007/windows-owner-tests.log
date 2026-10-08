@@ -1,0 +1,39 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running unittests src\lib.rs (target\debug\deps\neonmix_desktop_service-1a13290ab31979f2.exe)
+
+running 2 tests
+test managed::tests::hung_process_is_forced_with_a_bounded_wait ... ok
+test managed::tests::cancelled_stop_completes_and_fifty_restarts_are_graceful ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 14.17s
+
+     Running unittests src\bin\neonmix-background.rs (target\debug\deps\neonmix_background-80521fe69e04b308.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\fault_contract.rs (target\debug\deps\fault_contract-ea8374b751c452a0.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\lifecycle.rs (target\debug\deps\lifecycle-c8f8ea2af50dca56.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\redaction.rs (target\debug\deps\redaction-b1b53267d68f724c.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\windows_native_ipc.rs (target\debug\deps\windows_native_ipc-7054b5859054dcea.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
