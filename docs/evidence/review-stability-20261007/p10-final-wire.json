@@ -1,0 +1,113 @@
+{
+  "passed": true,
+  "binary_sha256": "a9a761778477f688c1f44e0c8b75fff6661d7272d7804181585cd97f32254333",
+  "checks": {
+    "airplay_v3": {
+      "bootstrap_legacy_then_explicit_v3": true,
+      "config_increment_once": true,
+      "same_response_replay": true,
+      "mixed_conditions_rejected": true,
+      "config_and_receiver_identity_preserved_after_restart": true,
+      "old_epoch_rejected": true
+    },
+    "actual_callback_application": {
+      "desired": 2,
+      "applied": 2,
+      "runtime_matches": true
+    },
+    "same_runtime_start_replay_same_response": true,
+    "old_start_replay": {
+      "status": 400,
+      "error": "snapshot_required",
+      "no_media_recreated": true
+    },
+    "old_epoch_get_to_wss": {
+      "status": 400,
+      "error": "snapshot_required"
+    },
+    "legacy_subscription": {
+      "status": 426,
+      "error": "upgrade_required"
+    },
+    "real_control_client_resnapshot": {
+      "snapshots": 2,
+      "subscriptions": 2,
+      "old_session_removed": true
+    },
+    "new_epoch_subscription": 101,
+    "real_process_restart": true,
+    "persistent_config_preserved": true,
+    "no_old_sessions_or_streams": true,
+    "runtime_start_left_config_unchanged": true,
+    "v2_config_event_receipt": true
+  },
+  "client_observations": [
+    {
+      "connected": false,
+      "snapshots": 1,
+      "subscriptions": 0,
+      "applied_events": 0,
+      "runtime_epoch": "f59806fd-71c0-4be8-adcf-336777631e24",
+      "event_sequence": 4,
+      "config_revision": 3,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": true,
+      "snapshots": 1,
+      "subscriptions": 1,
+      "applied_events": 0,
+      "runtime_epoch": "f59806fd-71c0-4be8-adcf-336777631e24",
+      "event_sequence": 4,
+      "config_revision": 3,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": true,
+      "snapshots": 1,
+      "subscriptions": 1,
+      "applied_events": 1,
+      "runtime_epoch": "f59806fd-71c0-4be8-adcf-336777631e24",
+      "event_sequence": 5,
+      "config_revision": 4,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": false,
+      "snapshots": 1,
+      "subscriptions": 1,
+      "applied_events": 1,
+      "runtime_epoch": "f59806fd-71c0-4be8-adcf-336777631e24",
+      "event_sequence": 5,
+      "config_revision": 4,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": false,
+      "snapshots": 2,
+      "subscriptions": 1,
+      "applied_events": 1,
+      "runtime_epoch": "4667cef5-200a-4c6f-b8bf-f7daf36aff5b",
+      "event_sequence": 6,
+      "config_revision": 4,
+      "session_count": 0,
+      "active_session_count": 0
+    },
+    {
+      "connected": true,
+      "snapshots": 2,
+      "subscriptions": 2,
+      "applied_events": 1,
+      "runtime_epoch": "4667cef5-200a-4c6f-b8bf-f7daf36aff5b",
+      "event_sequence": 6,
+      "config_revision": 4,
+      "session_count": 0,
+      "active_session_count": 0
+    }
+  ],
+  "private_fixture_removed": true
+}

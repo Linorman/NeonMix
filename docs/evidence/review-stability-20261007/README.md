@@ -303,3 +303,10 @@ P10前最终补验发现GET可以读取冻结音频callback的旧电平。现沿
 `artifacts/installers/P10 稳定性 最终`保存ad-hoc签名app与DMG；DMG SHA256、包内29份库与制品见p10-macos-package-final.json。在第二个中文/空格目录复制完整app，独立Mach-O读取无开发引用，移除全部开发运行路径后五个payload启动、包内GStreamer和双路DTLS媒体完成；dyld加载路径未指向开发GStreamer。p10-relocation-final.json记录每payload哈希与临时app清理。只设置包内插件/扫描器和项目内registry/cache，与实际launcher一致；没有执行会把资料写入默认~/Library的launcher，也不把payload验证当作GUI或全新/升级安装验收。
 
 本地origin为私有GitHub仓库，基础stability工作流仍在待提交修改中，实际PR门禁正在整理。未合并发布，用户暂缓的实机/桌面/长测仍未关闭。
+
+
+## P11 软件组合（2026-10-08，实机/长测暂缓）
+
+同一最终Hub制品五组合4+0/3+1/2+2/1+3/0+4通过；每组合按startup/steady/fault/recovery/stopped记录，AirPlay20次定向disconnect/worker crash恢复、未受影响Native/AP会话连续性及既有严格质量计数条件通过。配对身份保留、容量拒绝不泄露reservation、全禁用关闭worker/运行key通过。p11-matrix.json及各组合原始result记录制品与场景；不是Apple硬件、独立模拟端延迟或资源长测。首轮3+1在disconnect阶段TypeError：新契约inactive meter为null，旧探针直接做数值比较；保留artifacts/review-checks/p11-digital首败，改为核对available=false/stream_id=0和实际callback render_state=Inactive/Stopped，不伪造零值，活动来源等待有效值。没有降低连续性或计数阈值。
+
+最终p10-final-wire.json再次验证真实Native/AirPlay版本组合、旧条件拒绝、完整响应重放、Hub重启GET→WSS重取与callback desired/applied；和上述五组合使用相同Hub制品。所有数字probe私有资料和owned进程已回收。
