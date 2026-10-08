@@ -1,5 +1,9 @@
 # NeonMix 实现状态
 
+## v0.2 安装包更新发布（2026-10-09）
+
+已按用户要求从修复提交 `571cceaa3` 原生重建两端 installer，并替换 GitHub v0.2 的 macOS ARM64 DMG、Windows x64 EXE、JSON 清单和 SHA256 清单。两端构建号一致；macOS 55 文件、签名、搬移/包内媒体，Windows 81 文件与包内 AirPlay 启动验证通过，五项远程附件的服务器 SHA256 和大小均已复核。保留原 Git 标签，发布说明指向新提交；旧附件已备份。详见 [发布记录](evidence/release-v02-20261009/README.md)。
+
 ## Windows 页面闪烁与 AirPlay 开启失败实机修复（2026-10-09）
 
 在指定 Windows 机器上复现 AirPlay `identity_permission`：普通密钥路径正常，后台实际传入的 `\\?\` 扩展路径被 MinGW 父目录解析误判。worker 现明确处理盘符/UNC 根，保留逐级目录与同句柄私有权限校验。真实后台→Hub→worker 的 1/2/4 入口各三轮启停全部 ready/published，关闭后无运行密钥遗留。页面导航的整页 60% 淡入和 6px 位移已移除，原代码文字 alpha 154 的回归复现后，新代码保持 255 和固定位置。
