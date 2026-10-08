@@ -40,7 +40,12 @@ pub const METER_WINDOW_FRAMES: usize = 2400;
 
 #[derive(Clone, Copy, Debug, Default, Serialize)]
 pub struct MeterSnapshot {
+    pub observed: bool,
+    pub sampled_at_ns: u64,
     pub stream_id: u64,
+    pub binding_generation: u64,
+    pub stream_epoch: u64,
+    pub output_epoch: u64,
     /// Maximum absolute sample across both channels, linear full scale.
     pub peak: f32,
     /// Root mean square across both channels, linear full scale.
@@ -53,16 +58,31 @@ pub struct MeterSnapshot {
 pub struct MeterStats {
     sequence: AtomicU64,
     stream_id: AtomicU64,
+    binding_generation: AtomicU64,
+    stream_epoch: AtomicU64,
+    output_epoch: AtomicU64,
     levels: AtomicU64,
+    sampled_at_ns: AtomicU64,
 }
 impl MeterStats {
-    fn publish(&self, stream_id: u64, peak: f32, rms: f32) {
+    fn publish(
+        &self,
+        stream_id: u64,
+        binding: (u64, u64, u64),
+        sampled_at_ns: u64,
+        peak: f32,
+        rms: f32,
+    ) {
         self.sequence.fetch_add(1, SeqCst);
         self.stream_id.store(stream_id, SeqCst);
+        self.binding_generation.store(binding.0, SeqCst);
+        self.stream_epoch.store(binding.1, SeqCst);
+        self.output_epoch.store(binding.2, SeqCst);
         self.levels.store(
             u64::from(peak.to_bits()) | (u64::from(rms.to_bits()) << 32),
             SeqCst,
         );
+        self.sampled_at_ns.store(sampled_at_ns, SeqCst);
         self.sequence.fetch_add(1, SeqCst);
     }
     /// Called off the audio thread. Contention returns silence rather than
@@ -75,9 +95,18 @@ impl MeterStats {
             }
             let stream_id = self.stream_id.load(SeqCst);
             let levels = self.levels.load(SeqCst);
+            let binding_generation = self.binding_generation.load(SeqCst);
+            let stream_epoch = self.stream_epoch.load(SeqCst);
+            let output_epoch = self.output_epoch.load(SeqCst);
+            let sampled_at_ns = self.sampled_at_ns.load(SeqCst);
             if before == self.sequence.load(SeqCst) {
                 return MeterSnapshot {
+                    observed: before != 0,
+                    sampled_at_ns,
                     stream_id,
+                    binding_generation,
+                    stream_epoch,
+                    output_epoch,
                     peak: f32::from_bits(levels as u32),
                     rms: f32::from_bits((levels >> 32) as u32),
                 };
@@ -101,13 +130,19 @@ impl MeterWindow {
         self.peak = self.peak.max(left.abs()).max(right.abs());
         self.squares += f64::from(left).powi(2) + f64::from(right).powi(2);
     }
-    fn publish(&mut self, stats: &MeterStats, stream_id: u64) {
+    fn publish(
+        &mut self,
+        stats: &MeterStats,
+        stream_id: u64,
+        binding: (u64, u64, u64),
+        sampled_at_ns: u64,
+    ) {
         let rms = if self.frames == 0 {
             0.0
         } else {
             (self.squares / (2 * self.frames) as f64).sqrt() as f32
         };
-        stats.publish(stream_id, self.peak, rms);
+        stats.publish(stream_id, binding, sampled_at_ns, self.peak, rms);
         *self = Self::default();
     }
 }
@@ -155,10 +190,30 @@ impl GainRamp {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum PlaybackKind {
+    #[default]
+    NativeAdaptive,
+    Timed,
+}
+
+#[repr(u64)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LaneRenderState {
+    Inactive = 0,
+    Priming = 1,
+    Running = 2,
+    Starved = 3,
+    Stopped = 4,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct LaneMix {
     pub stream_id: u64,
     pub epoch: u64,
+    pub binding_generation: u64,
+    /// Control-plane binding; queued PCM never selects the lane's mode.
+    pub playback_kind: PlaybackKind,
     pub gain_db: f32,
     pub muted: bool,
     pub solo: bool,
@@ -168,13 +223,15 @@ impl Default for LaneMix {
         Self {
             stream_id: 0,
             epoch: 0,
+            binding_generation: 1,
+            playback_kind: PlaybackKind::NativeAdaptive,
             gain_db: 0.0,
             muted: false,
             solo: false,
         }
     }
 }
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MixerConfig {
     pub lanes: [LaneMix; LANES],
     pub master_db: f32,
@@ -191,12 +248,48 @@ impl Default for MixerConfig {
         }
     }
 }
+#[derive(Clone, Copy)]
+struct ConfigCommand {
+    sequence: u64,
+    config: MixerConfig,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ConfigProgress {
+    pub desired_config_sequence: u64,
+    pub applied_config_sequence: u64,
+    pub queue_rejections: u64,
+}
+impl ConfigProgress {
+    pub fn pending(self) -> bool {
+        self.applied_config_sequence < self.desired_config_sequence
+    }
+}
 pub struct MixerControl {
-    commands: Producer<MixerConfig>,
+    commands: Producer<ConfigCommand>,
+    desired: Option<(u64, MixerConfig)>,
+    desired_since: Option<Instant>,
+    stats: Arc<MixerStats>,
+    authorizations: Vec<Arc<AtomicU64>>,
 }
 impl MixerControl {
+    /// Revocation does not wait for free slots in the DSP command queue.
+    pub fn revoke_lane(&self, lane: usize) {
+        if let Some(authorization) = self.authorizations.get(lane) {
+            authorization.store(0, std::sync::atomic::Ordering::Release);
+        }
+    }
     /// Single producer: while the owner serializes changes, a free slot can only
     /// become freer as the output consumer runs. Used for durable control commits.
+    pub fn pending_for(&self, now: Instant) -> Option<std::time::Duration> {
+        self.stats
+            .config_progress()
+            .pending()
+            .then(|| {
+                self.desired_since
+                    .map(|at| now.saturating_duration_since(at))
+            })
+            .flatten()
+    }
     pub fn has_capacity(&self) -> bool {
         self.commands.slots() > 0
     }
@@ -212,13 +305,39 @@ impl MixerControl {
                 "mixer gain must be -96..12 dB".into(),
             ));
         }
+        let sequence = match self.desired {
+            Some((sequence, previous)) if previous == config => sequence,
+            _ => {
+                let sequence = self
+                    .desired
+                    .map_or(0, |(sequence, _)| sequence)
+                    .checked_add(1)
+                    .ok_or_else(|| AudioError::Backend("mixer config sequence exhausted".into()))?;
+                self.desired = Some((sequence, config));
+                self.desired_since = Some(Instant::now());
+                self.stats
+                    .desired_config_sequence
+                    .store(sequence, std::sync::atomic::Ordering::Release);
+                sequence
+            }
+        };
         self.commands
-            .push(config)
-            .map_err(|_| AudioError::Backend("mixer command queue full".into()))
+            .push(ConfigCommand { sequence, config })
+            .map_err(|_| {
+                self.stats.config_queue_rejections.fetch_add(1, Relaxed);
+                AudioError::Backend("mixer command queue full".into())
+            })
     }
 }
 #[derive(Default)]
 pub struct MixerStats {
+    pub desired_config_sequence: AtomicU64,
+    pub applied_config_sequence: AtomicU64,
+    pub config_queue_rejections: AtomicU64,
+    /// Actual PCM consumed on the internal 48 kHz clock, including silent PCM.
+    pub rendered_pcm_frames_by_lane: [AtomicU64; LANES],
+    /// LaneRenderState on the audio consumer; never inferred from ingress.
+    pub render_state_by_lane: [AtomicU64; LANES],
     /// Post lane gain/Mute/Solo, before room master and limiter.
     pub lane_meters: [MeterStats; LANES],
     /// Actual rendered samples after master and limiter, before device conversion.
@@ -348,8 +467,40 @@ fn timed_kernel() -> Arc<TimedKernel> {
 
 /// Deadline-controlled asynchronous SRC, separate from native queue feedback.
 /// Callback timestamps are observations of phase, not commands to seek PCM.
+impl MixerStats {
+    /// Release from control and callback; read applied first to retain a valid
+    /// ordered pair even while the producer publishes the next desired target.
+    pub fn config_progress(&self) -> ConfigProgress {
+        let applied = self
+            .applied_config_sequence
+            .load(std::sync::atomic::Ordering::Acquire);
+        let desired = self
+            .desired_config_sequence
+            .load(std::sync::atomic::Ordering::Acquire);
+        ConfigProgress {
+            desired_config_sequence: desired,
+            applied_config_sequence: applied,
+            queue_rejections: self.config_queue_rejections.load(Relaxed),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Default)]
+struct TimedSegment {
+    start: u64,
+    end: u64,
+    anchor: (u64, u64),
+    first_pts: u64,
+}
+
 struct TimedPlayback {
     kernel: Arc<TimedKernel>,
+    // At most one descriptor per stored sample. Even legal one-frame packets
+    // cannot exhaust descriptors before PCM; no callback allocation or drop.
+    segments: [TimedSegment; FIFO],
+    segment_head: usize,
+    segment_count: usize,
+    transitioned: bool,
     fifo: [[f32; 2]; FIFO],
     head: usize,
     count: usize,
@@ -370,6 +521,10 @@ impl TimedPlayback {
     fn new(kernel: Arc<TimedKernel>) -> Self {
         Self {
             kernel,
+            segments: [TimedSegment::default(); FIFO],
+            segment_head: 0,
+            segment_count: 0,
+            transitioned: false,
             fifo: [[0.; 2]; FIFO],
             head: 0,
             count: 0,
@@ -388,6 +543,9 @@ impl TimedPlayback {
         }
     }
     fn reset(&mut self) {
+        self.segment_head = 0;
+        self.segment_count = 0;
+        self.transitioned = false;
         self.head = 0;
         self.count = 0;
         self.base = 0;
@@ -403,40 +561,87 @@ impl TimedPlayback {
         self.step = 1.;
         self.starved = false;
     }
+    fn activate_segment(&mut self) {
+        let segment = self.segments[self.segment_head];
+        self.base = segment.start;
+        self.end = segment.end;
+        self.anchor = Some(segment.anchor);
+        self.slope_anchor = Some((segment.start, segment.first_pts));
+        self.start_anchor = self.slope_anchor;
+        self.waiting_anchor = None;
+        self.position = None;
+        self.filtered_error = 0.;
+        self.source_rate = 1.;
+        self.slope_known = false;
+        self.step = 1.;
+        self.starved = false;
+    }
+    fn advance_segment(&mut self) {
+        let remaining = self.end.saturating_sub(self.base) as usize;
+        self.head = (self.head + remaining) % FIFO;
+        self.count -= remaining;
+        self.segment_head = (self.segment_head + 1) % FIFO;
+        self.segment_count -= 1;
+        self.activate_segment();
+        self.transitioned = true;
+    }
     fn append(&mut self, block: &AudioBlock) {
         let h = block.header;
         let at = h.presentation_time_ns.expect("validated timed PCM");
-        if self.anchor.is_none() {
-            self.base = h.source_sample_position;
-            self.end = self.base;
-            self.slope_anchor = Some((self.base, at));
-            self.start_anchor = Some((self.base, at));
+        let tail = (self.segment_head + self.segment_count.saturating_sub(1)) % FIFO;
+        let last = self.segments[tail];
+        let expected_pts = last.anchor.1.saturating_add(crate::clock::frames_to_ns(
+            h.source_sample_position.saturating_sub(last.anchor.0),
+            48_000,
+        ));
+        let continuous = self.segment_count != 0
+            && !(self.segment_count == 1 && self.starved)
+            && last.end == h.source_sample_position
+            && h.discontinuity_flags.0 == 0
+            && at.abs_diff(expected_pts) <= TIMED_START_JITTER_NS;
+        if continuous {
+            self.segments[tail].end = h.source_sample_position + u64::from(h.frame_count);
+            self.segments[tail].anchor = (h.source_sample_position, at);
+        } else {
+            let next = (self.segment_head + self.segment_count) % FIFO;
+            self.segments[next] = TimedSegment {
+                start: h.source_sample_position,
+                end: h.source_sample_position + u64::from(h.frame_count),
+                anchor: (h.source_sample_position, at),
+                first_pts: at,
+            };
+            self.segment_count += 1;
         }
-        if let Some((position, time)) = self.slope_anchor {
-            let ns = at.saturating_sub(time);
-            if ns >= 500_000_000 && h.source_sample_position >= position {
-                let rate =
-                    (h.source_sample_position - position) as f64 * 1e9 / (ns as f64 * 48000.);
-                if (0.99..=1.01).contains(&rate) {
-                    if self.slope_known {
-                        let seconds = ns as f64 / 1e9;
-                        self.source_rate += (rate - self.source_rate) * seconds / (2. + seconds);
-                    } else {
-                        self.source_rate = rate;
-                        self.slope_known = true;
-                    }
-                }
-                self.slope_anchor = Some((h.source_sample_position, at));
-            }
-        }
-        self.anchor = Some((h.source_sample_position, at));
         for frame in block.frames() {
             self.fifo[(self.head + self.count) % FIFO] = [finite(frame[0]), finite(frame[1])];
             self.count += 1;
         }
-        self.end = h
-            .source_sample_position
-            .saturating_add(u64::from(h.frame_count));
+        if self.segment_count == 1 {
+            if self.anchor.is_none() {
+                self.activate_segment();
+            } else {
+                if let Some((position, time)) = self.slope_anchor {
+                    let ns = at.saturating_sub(time);
+                    if ns >= 500_000_000 && h.source_sample_position >= position {
+                        let rate = (h.source_sample_position - position) as f64 * 1e9
+                            / (ns as f64 * 48000.);
+                        if (0.99..=1.01).contains(&rate) {
+                            if self.slope_known {
+                                let seconds = ns as f64 / 1e9;
+                                self.source_rate +=
+                                    (rate - self.source_rate) * seconds / (2. + seconds);
+                            } else {
+                                self.source_rate = rate;
+                                self.slope_known = true;
+                            }
+                        }
+                        self.slope_anchor = Some((h.source_sample_position, at));
+                    }
+                }
+                self.anchor = Some((h.source_sample_position, at));
+                self.end = self.segments[self.segment_head].end;
+            }
+        }
     }
     fn desired_position(&self, presentation_ns: u64) -> Option<f64> {
         self.anchor.map(|(position, time)| {
@@ -445,6 +650,33 @@ impl TimedPlayback {
         })
     }
     fn next(
+        &mut self,
+        presentation_ns: u64,
+        output: u64,
+        index: usize,
+        config: LaneMix,
+        stats: &MixerStats,
+    ) -> Option<[f32; 2]> {
+        // Expired segments are retired with a fixed budget, never an unbounded
+        // search for current audio. The next sample resumes the same scan.
+        for _ in 0..PCM_QUEUE_BLOCKS {
+            if self.position.is_some_and(|p| p >= self.end as f64 - 0.0001)
+                && self.segment_count > 1
+            {
+                self.advance_segment();
+                stats.discontinuities.fetch_add(1, Relaxed);
+            }
+            let frame = self.next_in_segment(presentation_ns, output, index, config, stats);
+            if frame.is_some()
+                || self.segment_count <= 1
+                || !self.position.is_some_and(|p| p >= self.end as f64 - 0.0001)
+            {
+                return frame;
+            }
+        }
+        None
+    }
+    fn next_in_segment(
         &mut self,
         presentation_ns: u64,
         output: u64,
@@ -487,7 +719,7 @@ impl TimedPlayback {
             // Only acquiring/reacquiring a genuinely elapsed timeline seeks.
             let late = (start.floor() as u64)
                 .saturating_sub(self.base)
-                .min(self.count as u64);
+                .min(self.end.saturating_sub(self.base));
             stats.timed_late_frames.fetch_add(late, Relaxed);
             if late > 0 {
                 stats.timed_late_frames_by_lane[index].fetch_add(late, Relaxed);
@@ -510,7 +742,9 @@ impl TimedPlayback {
         let center = position.floor() as u64;
         // Preserve past FIR support while evicting only samples already used.
         let keep = center.saturating_sub(TIMED_SUPPORT as u64);
-        let discard = keep.saturating_sub(self.base).min(self.count as u64) as usize;
+        let discard = keep
+            .saturating_sub(self.base)
+            .min(self.end.saturating_sub(self.base)) as usize;
         self.head = (self.head + discard) % FIFO;
         self.count -= discard;
         self.base += discard as u64;
@@ -541,6 +775,7 @@ impl TimedPlayback {
 
 struct Lane {
     input: BlockConsumer,
+    scan_budget: usize,
     resampler: SincFixedOut<f32>,
     planar_in: Vec<Vec<f32>>,
     planar_out: Vec<Vec<f32>>,
@@ -554,12 +789,16 @@ struct Lane {
     last_rendered: [f32; 2],
     retire_tail: [f32; 2],
     retire_remaining: usize,
+    retire_binding_generation: u64,
     source_end: u64,
     have_source: bool,
     started: bool,
+    /// Measurement lifetime is the binding, not the resampler reset cycle.
+    ever_started: bool,
+    rendering_pcm: bool,
+    stopped: bool,
     drift: DriftController,
     timed: TimedPlayback,
-    timed_mode: bool,
 }
 impl Lane {
     fn new(input: BlockConsumer, kernel: Arc<TimedKernel>) -> Result<Self, AudioError> {
@@ -581,6 +820,7 @@ impl Lane {
         let max_out = resampler.output_frames_max();
         Ok(Self {
             input,
+            scan_budget: PCM_QUEUE_BLOCKS,
             resampler,
             planar_in: vec![vec![0.0; max_in]; 2],
             planar_out: vec![vec![0.0; max_out]; 2],
@@ -594,12 +834,15 @@ impl Lane {
             last_rendered: [0.0; 2],
             retire_tail: [0.0; 2],
             retire_remaining: 0,
+            retire_binding_generation: 0,
             source_end: 0,
             have_source: false,
             started: false,
+            ever_started: false,
+            rendering_pcm: false,
+            stopped: false,
             drift: DriftController::default(),
             timed: TimedPlayback::new(kernel),
-            timed_mode: false,
         })
     }
     fn reset(&mut self) {
@@ -614,9 +857,9 @@ impl Lane {
         self.retire_remaining = 0;
         self.have_source = false;
         self.started = false;
+        self.rendering_pcm = false;
         self.drift.reset();
         self.timed.reset();
-        self.timed_mode = false;
     }
     fn timed_next(
         &mut self,
@@ -627,9 +870,9 @@ impl Lane {
         stats: &MixerStats,
     ) -> [f32; 2] {
         let Some(presentation_ns) = presentation_ns else {
+            self.observe(false, index, stats);
             return [0.0; 2];
         };
-        self.timed_mode = true;
         // Bounded copies occur only at FIFO refill. Capacity and age bounds are
         // unchanged; lookahead crosses variable-sized packet boundaries.
         if self.timed.count < MAX_BLOCK_FRAMES + 2 * TIMED_SUPPORT {
@@ -637,7 +880,12 @@ impl Lane {
                 if self.timed.count + MAX_BLOCK_FRAMES > FIFO {
                     break;
                 }
-                let Some(block) = self.input.pop_fresh(now_ns, 80_000_000) else {
+                let Some(block) = self.input.pop_fresh_budget(
+                    now_ns,
+                    80_000_000,
+                    Some(self.config.binding_generation),
+                    &mut self.scan_budget,
+                ) else {
                     break;
                 };
                 let h = block.header;
@@ -646,24 +894,13 @@ impl Lane {
                     || h.format != AudioFormat::INTERNAL
                     || h.frame_count == 0
                     || usize::from(h.frame_count) > MAX_BLOCK_FRAMES
+                    || h.source_sample_position
+                        .checked_add(u64::from(h.frame_count))
+                        .is_none()
                     || h.presentation_time_ns.is_none()
                 {
                     stats.rejected_blocks.fetch_add(1, Relaxed);
                     continue;
-                }
-                if self.timed.anchor.is_some()
-                    && (self.timed.starved
-                        || h.source_sample_position != self.timed.end
-                        || h.discontinuity_flags.0 != 0)
-                {
-                    // After PCM starvation (e.g. between AirPlay tracks), the
-                    // free-running cursor no longer describes the next decoded
-                    // frame. Reacquire its deadline instead of correcting a
-                    // multi-second gap with the drift servo. next() still waits
-                    // for future audio and skips genuinely elapsed samples.
-                    self.timed.reset();
-                    self.gain.restart_from_zero();
-                    stats.discontinuities.fetch_add(1, Relaxed);
                 }
                 self.timed.append(&block);
             }
@@ -681,16 +918,18 @@ impl Lane {
                 Relaxed,
             );
         }
+        if self.timed.transitioned {
+            self.timed.transitioned = false;
+            self.gain.restart_from_zero();
+        }
         let Some(frame) = frame else {
             // A future first deadline is intentional silence. After playback
             // has started, exhausted PCM is an underrun, just like native lanes.
-            if self.started && self.timed.starved {
-                stats.underrun_frames.fetch_add(1, Relaxed);
-                stats.underrun_frames_by_lane[index].fetch_add(1, Relaxed);
-            }
+            self.observe(false, index, stats);
             return [0.; 2];
         };
         self.started = true;
+        self.observe(true, index, stats);
         let gain = self.gain.next();
         let rendered = [finite(frame[0]) * gain, finite(frame[1]) * gain];
         self.last_rendered = rendered;
@@ -703,6 +942,7 @@ impl Lane {
             || h.format != AudioFormat::INTERNAL
             || h.frame_count == 0
             || usize::from(h.frame_count) > MAX_BLOCK_FRAMES
+            || h.presentation_time_ns.is_some()
         {
             stats.rejected_blocks.fetch_add(1, Relaxed);
             return;
@@ -734,7 +974,12 @@ impl Lane {
             if self.count >= needed + MIN_RESERVE_FRAMES {
                 break;
             }
-            let Some(block) = self.input.pop_fresh(now_ns, 80_000_000) else {
+            let Some(block) = self.input.pop_fresh_budget(
+                now_ns,
+                80_000_000,
+                (self.config.stream_id != 0).then_some(self.config.binding_generation),
+                &mut self.scan_budget,
+            ) else {
                 break;
             };
             stats.pcm_queue_age_max_ns[index]
@@ -771,16 +1016,16 @@ impl Lane {
         }
         if self.config.stream_id == 0 || !self.started || self.count < needed {
             self.planar_out.iter_mut().for_each(|c| c.fill(0.0));
-            if self.config.stream_id != 0 && self.started {
+            if self.config.stream_id != 0 && self.ever_started {
                 stats.last_underrun_output_frame[index].store(output, Relaxed);
                 stats.last_underrun_fifo_frames[index].store(self.count as u64, Relaxed);
                 stats.last_underrun_needed_frames[index].store(needed as u64, Relaxed);
                 stats.last_underrun_source_end[index].store(self.source_end, Relaxed);
-                stats
-                    .underrun_frames
-                    .fetch_add(MAX_BLOCK_FRAMES as u64, Relaxed);
-                stats.underrun_frames_by_lane[index].fetch_add(MAX_BLOCK_FRAMES as u64, Relaxed);
-                self.reset();
+                // Reset DSP once on loss. Continued starvation must retain
+                // newly arriving priming PCM so recovery can refill normally.
+                if self.started {
+                    self.reset();
+                }
             }
             self.cursor = 0;
             self.available = MAX_BLOCK_FRAMES;
@@ -800,6 +1045,7 @@ impl Lane {
             Ok((_, written)) => {
                 self.cursor = 0;
                 self.available = written;
+                self.rendering_pcm = true;
             }
             Err(_) => {
                 self.reset();
@@ -816,7 +1062,15 @@ impl Lane {
         index: usize,
         stats: &MixerStats,
     ) -> [f32; 2] {
-        if self.timed_mode || self.input.next_is_timed() {
+        if self.config.stream_id != 0 && !self.input.binding_valid(self.config.binding_generation) {
+            if !self.stopped {
+                self.reset();
+                self.stopped = true;
+            }
+            stats.render_state_by_lane[index].store(LaneRenderState::Stopped as u64, Relaxed);
+            return [0.; 2];
+        }
+        if self.config.playback_kind == PlaybackKind::Timed {
             return self.timed_next(now_ns, presentation_ns, output, index, stats);
         }
         if self.cursor >= self.available {
@@ -827,6 +1081,7 @@ impl Lane {
             self.planar_out[1][self.cursor],
         ];
         self.cursor += 1;
+        self.observe(self.rendering_pcm, index, stats);
         // Buffering zeros must not spend the recovery envelope. Start its
         // five-ms sample clock only when this lane can consume source PCM.
         let gain = if self.started {
@@ -835,6 +1090,10 @@ impl Lane {
             self.gain.value
         };
         let mut rendered = [frame[0] * gain, frame[1] * gain];
+        if self.retire_remaining > 0 && !self.input.binding_valid(self.retire_binding_generation) {
+            self.retire_remaining = 0;
+            self.retire_tail = [0.; 2];
+        }
         if self.retire_remaining > 0 {
             let fade = self.retire_remaining as f32 / 240.0;
             rendered[0] += self.retire_tail[0] * fade;
@@ -844,11 +1103,35 @@ impl Lane {
         self.last_rendered = rendered;
         rendered
     }
+    fn observe(&mut self, valid_pcm: bool, index: usize, stats: &MixerStats) {
+        let state = if self.config.stream_id == 0 {
+            if self.stopped {
+                LaneRenderState::Stopped
+            } else {
+                LaneRenderState::Inactive
+            }
+        } else if valid_pcm {
+            self.ever_started = true;
+            stats.rendered_pcm_frames_by_lane[index].fetch_add(1, Relaxed);
+            LaneRenderState::Running
+        } else if self.ever_started {
+            stats.underrun_frames.fetch_add(1, Relaxed);
+            stats.underrun_frames_by_lane[index].fetch_add(1, Relaxed);
+            LaneRenderState::Starved
+        } else {
+            LaneRenderState::Priming
+        };
+        stats.render_state_by_lane[index].store(state as u64, Relaxed);
+    }
 }
 pub struct Mixer {
+    apply_at_next_frame: bool,
+    inside_render_block: bool,
+    callback_time_ns: Option<u64>,
     lanes: Vec<Lane>,
-    commands: Consumer<MixerConfig>,
+    commands: Consumer<ConfigCommand>,
     config: MixerConfig,
+    config_sequence: u64,
     stats: Arc<MixerStats>,
     origin: Instant,
     output: u64,
@@ -883,8 +1166,12 @@ impl Mixer {
         Ok((
             Self {
                 lanes,
+                apply_at_next_frame: false,
+                inside_render_block: false,
+                callback_time_ns: None,
                 commands: c,
                 config: MixerConfig::default(),
+                config_sequence: 0,
                 stats: stats.clone(),
                 origin,
                 output: 0,
@@ -896,19 +1183,52 @@ impl Mixer {
                 output_meter_window: MeterWindow::default(),
                 meter_limiter_min: 1.0,
             },
-            MixerControl { commands: p },
+            MixerControl {
+                commands: p,
+                desired: None,
+                desired_since: None,
+                stats: stats.clone(),
+                authorizations: inputs.iter().map(BlockProducer::authorization).collect(),
+            },
             inputs,
             stats,
         ))
     }
     pub fn render_block(&mut self, frames: &mut [[f32; 2]]) {
+        let previous = self.inside_render_block;
+        self.inside_render_block = true;
+        self.reset_scan_budgets();
         for f in frames {
             *f = self.next_frame();
         }
+        self.inside_render_block = previous;
+    }
+    fn reset_scan_budgets(&mut self) {
+        for lane in &mut self.lanes {
+            lane.scan_budget = PCM_QUEUE_BLOCKS;
+        }
+    }
+    /// Explicit callback submission clock, independent of the speaker PTS.
+    /// Embedders and deterministic simulations can supply the same clock used
+    /// by ingress; render speed then cannot masquerade as packet queue age.
+    /// Storage and loops are identical to render_block; no allocation or wait.
+    pub fn render_block_at(&mut self, now: Instant, frames: &mut [[f32; 2]]) {
+        let now_ns = now
+            .checked_duration_since(self.origin)
+            .map_or(0, |elapsed| {
+                elapsed.as_nanos().min(u128::from(u64::MAX)) as u64
+            });
+        let previous = self.callback_time_ns.replace(now_ns);
+        self.now_ns = now_ns;
+        self.render_block(frames);
+        self.callback_time_ns = previous;
     }
     /// Called on the control thread while no output callback owns this mixer.
     /// Clears stale audio and commands before reopening the same output device.
     pub fn discard_backlog(&mut self) {
+        // Output reopening may interrupt a logical 480-frame block. Apply
+        // the new output binding before consuming even its first fresh PCM.
+        self.apply_at_next_frame = true;
         for _ in 0..8 {
             let Ok(config) = self.commands.pop() else {
                 break;
@@ -922,6 +1242,7 @@ impl Mixer {
                 }
             }
             lane.reset();
+            lane.ever_started = false;
         }
         self.master.restart_from_zero();
         self.limiter = 1.0;
@@ -929,29 +1250,69 @@ impl Mixer {
         self.output_meter_window = MeterWindow::default();
         self.meter_limiter_min = 1.0;
         for (lane, meter) in self.lanes.iter().zip(&self.stats.lane_meters) {
-            meter.publish(lane.config.stream_id, 0.0, 0.0);
+            meter.publish(
+                lane.config.stream_id,
+                (
+                    lane.config.binding_generation,
+                    lane.config.epoch,
+                    self.config.output_epoch,
+                ),
+                self.now_ns,
+                0.0,
+                0.0,
+            );
         }
-        self.stats.output_meter.publish(0, 0.0, 0.0);
+        self.stats
+            .output_meter
+            .publish(0, (0, 0, self.config.output_epoch), self.now_ns, 0.0, 0.0);
         self.stats
             .limiter_gain_bits
             .store(u64::from(1.0f32.to_bits()), Relaxed);
     }
-    fn apply(&mut self, config: MixerConfig) {
+    fn apply(&mut self, command: ConfigCommand) {
+        let config = command.config;
+        if self.config.output_epoch != config.output_epoch {
+            self.output_meter_window = MeterWindow::default();
+            self.meter_limiter_min = 1.0;
+            self.stats
+                .output_meter
+                .publish(0, (0, 0, config.output_epoch), self.now_ns, 0.0, 0.0);
+        }
         let solo = config.lanes.iter().any(|l| l.stream_id != 0 && l.solo);
         for (index, (lane, next)) in self.lanes.iter_mut().zip(config.lanes).enumerate() {
-            let tail = lane.last_rendered;
+            let authorized = lane.input.binding_valid(lane.config.binding_generation);
+            let tail = if authorized {
+                lane.last_rendered
+            } else {
+                [0.; 2]
+            };
+            let old_binding = lane.config.binding_generation;
             let removed = lane.config.stream_id != 0 && next.stream_id == 0;
             if lane.config.stream_id != next.stream_id
                 || lane.config.epoch != next.epoch
+                || lane.config.binding_generation != next.binding_generation
+                || lane.config.playback_kind != next.playback_kind
                 || self.config.output_epoch != config.output_epoch
             {
                 lane.reset();
+                lane.ever_started = false;
                 self.lane_meter_windows[index] = MeterWindow::default();
-                self.stats.lane_meters[index].publish(next.stream_id, 0.0, 0.0);
+                self.stats.lane_meters[index].publish(
+                    next.stream_id,
+                    (next.binding_generation, next.epoch, config.output_epoch),
+                    self.now_ns,
+                    0.0,
+                    0.0,
+                );
             }
             if removed {
+                lane.stopped = true;
                 lane.retire_tail = tail;
-                lane.retire_remaining = 240;
+                lane.retire_remaining = if authorized { 240 } else { 0 };
+                lane.retire_binding_generation = old_binding;
+            }
+            if next.stream_id != 0 {
+                lane.stopped = false;
             }
             lane.config = next;
             lane.gain.set_target(
@@ -968,17 +1329,27 @@ impl Mixer {
             db_gain(config.master_db)
         });
         self.config = config;
+        self.config_sequence = command.sequence;
     }
 }
 impl StereoSource for Mixer {
     fn set_presentation_time(&mut self, at: Instant) {
+        self.reset_scan_budgets();
         self.presentation_anchor = at
             .checked_duration_since(self.origin)
             .map(|d| (self.output, d.as_nanos().min(u128::from(u64::MAX)) as u64));
     }
     fn next_frame(&mut self) -> [f32; 2] {
-        if self.output.is_multiple_of(MAX_BLOCK_FRAMES as u64) {
-            self.now_ns = self.origin.elapsed().as_nanos().min(u128::from(u64::MAX)) as u64;
+        if self.apply_at_next_frame || self.output.is_multiple_of(MAX_BLOCK_FRAMES as u64) {
+            self.apply_at_next_frame = false;
+            // A source used without callback hooks gets a bounded logical
+            // block budget. Real callbacks and render_block reset it once.
+            if !self.inside_render_block && self.presentation_anchor.is_none() {
+                self.reset_scan_budgets();
+            }
+            self.now_ns = self.callback_time_ns.unwrap_or_else(|| {
+                self.origin.elapsed().as_nanos().min(u128::from(u64::MAX)) as u64
+            });
             // Bounded command drain at the logical block boundary.
             for _ in 0..8 {
                 let Ok(config) = self.commands.pop() else {
@@ -986,6 +1357,9 @@ impl StereoSource for Mixer {
                 };
                 self.apply(config);
             }
+            self.stats
+                .applied_config_sequence
+                .store(self.config_sequence, std::sync::atomic::Ordering::Release);
         }
         let now_ns = self.now_ns;
         let presentation_ns = self.presentation_anchor.map(|(frame, at)| {
@@ -1025,11 +1399,23 @@ impl StereoSource for Mixer {
         self.meter_limiter_min = self.meter_limiter_min.min(self.limiter);
         if self.output_meter_window.frames == METER_WINDOW_FRAMES {
             for (index, lane) in self.lanes.iter().enumerate() {
-                self.lane_meter_windows[index]
-                    .publish(&self.stats.lane_meters[index], lane.config.stream_id);
+                self.lane_meter_windows[index].publish(
+                    &self.stats.lane_meters[index],
+                    lane.config.stream_id,
+                    (
+                        lane.config.binding_generation,
+                        lane.config.epoch,
+                        self.config.output_epoch,
+                    ),
+                    self.now_ns,
+                );
             }
-            self.output_meter_window
-                .publish(&self.stats.output_meter, 0);
+            self.output_meter_window.publish(
+                &self.stats.output_meter,
+                0,
+                (0, 0, self.config.output_epoch),
+                self.now_ns,
+            );
             self.stats
                 .limiter_gain_bits
                 .store(u64::from(self.meter_limiter_min.to_bits()), Relaxed);

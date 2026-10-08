@@ -1,0 +1,20 @@
+{"type":"grant_applied","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6,"stream_id":5,"format_epoch":7,"mapping_id":8}
+{"type":"flush","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6,"reason":"protocol"}
+{"type":"grant_applied","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":7,"stream_id":5,"format_epoch":7,"mapping_id":9}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":7}
+{"type":"pairing_request","worker_generation":7,"trust_generation":1,"connection_id":20,"pairing_request_id":1}
+{"type":"pairing_attempt","worker_generation":7,"attempts":1}
+{"type":"pairing_ended","worker_generation":7,"trust_generation":1,"connection_id":20,"pairing_request_id":1}
+{"type":"session_ended","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0}
+{"type":"pairing_request","worker_generation":7,"trust_generation":2,"connection_id":21,"pairing_request_id":2}
+{"type":"pairing_ended","worker_generation":7,"trust_generation":2,"connection_id":21,"pairing_request_id":2}
+{"type":"pairing_window_applied","worker_generation":7,"trust_generation":2}
+{"type":"pairing_request","worker_generation":7,"trust_generation":2,"connection_id":30,"pairing_request_id":3}
+{"type":"pairing_ended","worker_generation":7,"trust_generation":2,"connection_id":30,"pairing_request_id":3}
+{"type":"format","worker_generation":0,"connection_id":1,"request_id":0,"session_id":1,"stream_epoch":3,"codec":"pcm_s16","source_rate":44100,"source_frame_count":352}
+{"type":"format","worker_generation":0,"connection_id":1,"request_id":0,"session_id":1,"stream_epoch":3,"codec":"alac","source_rate":44100,"source_frame_count":4096}
+{"type":"format","worker_generation":0,"connection_id":1,"request_id":0,"session_id":1,"stream_epoch":3,"codec":"aac_lc","source_rate":44100,"source_frame_count":1024}
+control v2: generation, connection, request, session and epoch fencing passed
+codec 1: 24 bounded PCM chunks; source44100, pcm48000, timestamp and RTP wrap preserved
+codec 2: 40 bounded PCM chunks; source44100, pcm48000, timestamp and RTP wrap preserved
+codec 4: 51 bounded PCM chunks; source44100, pcm48000, timestamp and RTP wrap preserved

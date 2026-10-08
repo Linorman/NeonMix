@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0",
+  "commit": "aefb86903",
+  "dmg": "NeonMix-0.1.0-macos-arm64.dmg",
+  "dmg_bytes": 31438170,
+  "dmg_sha256": "29e50bfa7a6195dcbdc25fccfd8449852cdb9bdfdcbe789bd986de2804266ff7",
+  "bundled_libraries": 29,
+  "signing": "ad-hoc, not notarized",
+  "retained_app": "NeonMix.app"
+}

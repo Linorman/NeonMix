@@ -1,0 +1,23 @@
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+error: failed to run custom build command for `neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)`
+
+Caused by:
+  process didn't exit successfully: `/Volumes/projects-mac/NeonMix/target/debug/build/neonmix-i18n-68256b758e4c16ef/build-script-build` (exit status: 101)
+  --- stdout
+  cargo:rerun-if-changed=messages
+  cargo:rerun-if-changed=locales
+  cargo:rerun-if-changed=messages.toml
+
+  --- stderr
+
+  thread 'main' (51313454) panicked at crates/i18n/build.rs:13:65:
+  i18n catalog: /Volumes/projects-mac/NeonMix/crates/i18n/messages/diagnostics.toml: TOML parse error at line 227, column 11
+      |
+  227 | [[message.arg]]
+      |           ^^^
+  unknown field `arg`, expected one of `id`, `args`, `attributes`
+
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...

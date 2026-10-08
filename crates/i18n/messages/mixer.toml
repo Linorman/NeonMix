@@ -1,0 +1,164 @@
+[[message]]
+id = "mixer-audio-video-sync"
+
+[[message]]
+id = "mixer-channel"
+
+[[message]]
+id = "mixer-channel-detail-title"
+args = { name = "string" }
+
+[[message]]
+id = "mixer-channel-mute"
+args = { name = "string" }
+
+[[message]]
+id = "mixer-channel-volume"
+args = { name = "string" }
+
+[[message]]
+id = "mixer-channels-appear-here-after-a-sender-pairs-and"
+
+[[message]]
+id = "mixer-clock-drift"
+
+[[message]]
+id = "mixer-collapse"
+
+[[message]]
+id = "mixer-create-and-start-sharing-a-room-in-hub"
+
+[[message]]
+id = "mixer-details"
+
+[[message]]
+id = "mixer-details-accessible"
+args = { name = "string" }
+
+[[message]]
+id = "mixer-disconnect-airplay-source"
+
+[[message]]
+id = "mixer-disconnect-device"
+
+[[message]]
+id = "mixer-end-this-device-s-audio-and-revoke-its"
+
+[[message]]
+id = "mixer-end-this-device-s-session-allow-playback-again"
+
+[[message]]
+id = "mixer-go-to-hub-settings"
+
+[[message]]
+id = "mixer-go-to-sender"
+
+[[message]]
+id = "mixer-input-channels"
+
+[[message]]
+id = "mixer-input-count"
+args = { count = "u64" }
+
+[[message]]
+id = "mixer-last-60-seconds"
+
+[[message]]
+id = "mixer-levels-and-faders"
+
+[[message]]
+id = "mixer-levels-use-the-latest-50-ms-stereo-window"
+
+[[message]]
+id = "mixer-limiter-gain-reduction-top-to-bottom-12-db"
+
+[[message]]
+id = "mixer-limiter-value"
+args = { value = "string" }
+
+[[message]]
+id = "mixer-low-latency"
+
+[[message]]
+id = "mixer-master-controls-require-a-controller-or-administrator"
+
+[[message]]
+id = "mixer-master-controls-require-a-room-controller-or-administrator"
+
+[[message]]
+id = "mixer-master-muted"
+
+[[message]]
+id = "mixer-master-volume"
+
+[[message]]
+id = "mixer-media-network"
+
+[[message]]
+id = "mixer-mixer-queue-estimate"
+
+[[message]]
+id = "mixer-mute"
+
+[[message]]
+id = "mixer-mute-master"
+
+[[message]]
+id = "mixer-no-inputs"
+
+[[message]]
+id = "mixer-no-room-connected-yet"
+
+[[message]]
+id = "mixer-output-active"
+
+[[message]]
+id = "mixer-output-unavailable"
+
+[[message]]
+id = "mixer-output-unavailable-waiting-for-device-recovery"
+
+[[message]]
+id = "mixer-playback-mode-note"
+args = { mode = "string" }
+
+[[message]]
+id = "mixer-recording"
+
+[[message]]
+id = "mixer-revoke-airplay-pairing"
+
+[[message]]
+id = "mixer-rms-per-channel-hatching-marks-muted-or-solo"
+
+[[message]]
+id = "mixer-room-master"
+
+[[message]]
+id = "mixer-select-channel"
+
+[[message]]
+id = "mixer-state-summary"
+args = { count = "u64", muted = "u64", solo = "u64", revision = "u64" }
+
+[[message]]
+id = "mixer-the-limiter-is-reducing-output-peaks"
+
+[[message]]
+id = "mixer-unavailable"
+
+[[message]]
+id = "mixer-unmute-master"
+
+[[message]]
+id = "mixer-view-in-devices"
+
+[[message]]
+id = "mixer-volume"
+
+[[message]]
+id = "mixer-role-status"
+args = { role = "string", status = "string" }
+
+[[message]]
+id = "mixer-solo"

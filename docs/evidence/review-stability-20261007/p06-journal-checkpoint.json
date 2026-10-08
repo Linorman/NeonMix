@@ -1,0 +1,31 @@
+{
+  "stage": "P06 journal and recovery checkpoint",
+  "client_date": "2026-10-08",
+  "head": "aefb8690320cb114c974be2477b2ebb64dfadf1e",
+  "tracked_diff_sha256": "6afb1636717435ff49a63a09e67b21253c49f6597d8bf5d83c786b2ede5447ce",
+  "source_sha256": {
+    "crates/identity/src/files.rs": "2b0eabb045598dc299d9f9058a56556a5d4f48489d830cb607b11a3371555f0c",
+    "crates/identity/src/hub_settings.rs": "8ac2541febc07e90ea9e0af791485641eab43a08878ef452e91a3aa4dd530bfd",
+    "crates/identity/src/lib.rs": "7ce97ee97065ced7662f54eac95b6cb3fe1e809ad70b2f0e1bf9e5381b3b16a8",
+    "crates/identity/Cargo.toml": "27dbfd6320b12d824a34ca45f062efde4ca7c01794bc250e2317a9c300532e38",
+    "Cargo.lock": "616c7ffcae29f48853eac93bf836dbd6fa48631f84f03c654867e37e98cfd73a",
+    "apps/hub/src/identity.rs": "78670db2ed8276a14dc200f14a205291ef90e6622de8e331748b67f6b310b60e",
+    "crates/desktop-service/src/daemon.rs": "711ae2fc6ff06df6f971e4516c24067d18555975542320b00aa2b7f0627419da",
+    "crates/desktop-service/src/guardian.rs": "fa0a538e2f7e5310e2c32feb8e10ccb9ac85433246d7a19a2bbf5728c38a21fa",
+    "crates/desktop-service/src/fault.rs": "5f35c0bcf53b2fbfc8aa092e654c00293b952d1a31b721a281c04bc69610e3e6",
+    "crates/desktop-service/src/bin/neonmix-config-transaction-probe.rs": "37a44d2104cc31d7b758f1d6205d5fea1566557888c56947d64d43fc465195fd",
+    "crates/desktop-service/tests/lifecycle.rs": "daded5087b06a39418e9c34986d15d99cbb483194c7132e4d0895bf9d0f0ed84",
+    "apps/desktop/src/main.rs": "10057c9b070116cb0f7cadb240de8105c62bb596dc9c9f1e7fae399d57ac6e60",
+    "tools/config_transaction_probe.py": "fedbab0620001d5de0c45d434c1e61a3d9e399f11f794076e919cd7687bbbb5f",
+    "tools/archive_policy.py": "a4f1ffe4a28391d634b9dbe65cc89cd579511309a998f3f42ceb404236bee6e8",
+    "tools/tests/test_package_macos.py": "d7f3f7af98b621536b7c7f6c4f2417ca86462e33431fdec9ded92713a4569115"
+  },
+  "artifact_sha256": {
+    "target/debug/neonmix-config-transaction-probe": "8a7f62644430d2bed4e30171c07242222f5f6e4e2492db7ec13b3502c52c94b9",
+    "target/release/neonmix-hub": "e704a8d0dfda300360a94e1afd22401a4eaaf269a4ce8a7ebd815576f0793ece",
+    "target/release/neonmix-background": "4100ddfb5fe7a8feadccca5828a1f65024890ae332c39d9f14bb3f895abddd78",
+    "target/release/neonmix-guardian": "be52cc1649e033046cedfb5419b0a418cf3e1b42acfe98d2e8beb9f76c9753b5",
+    "target/release/neonmix-desktop": "4b32bc26d4035c12663963410de4ea37eb519eaf04bb8dc6fbb763c662e72862"
+  },
+  "scope": "macOS actual file fault and independent-process recovery; product config reader; local IPC. Not Windows/Linux native durability or power loss."
+}

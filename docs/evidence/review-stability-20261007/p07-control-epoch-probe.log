@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/control_epoch_probe.py", line 132, in <module>
+    if __name__=="__main__":main()
+                            ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/control_epoch_probe.py", line 110, in main
+    assert status==409 and error["error"]=="snapshot_required",(status,error)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (400, {'error': 'snapshot_required'})

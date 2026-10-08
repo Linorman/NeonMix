@@ -81,10 +81,11 @@ impl OwnerLock {
 pub fn run(
     directory: &Path,
     binding_directory: Option<&Path>,
+    instance_generation: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(not(target_os = "linux"))]
     {
-        let _ = (directory, binding_directory);
+        let _ = (directory, binding_directory, instance_generation);
         Err("virtual-output owner requires a Linux PipeWire user session; macOS/Windows devices are managed by the OS".into())
     }
     #[cfg(target_os = "linux")]
@@ -102,10 +103,24 @@ pub fn run(
         let address = SocketAddr::from_abstract_name(
             format!("neonmix.virtual-output.owner.{uid}").as_bytes(),
         )?;
-        let exclusive_node = UnixListener::bind_addr(&address)?;
+        let exclusive_node = UnixListener::bind_addr(&address).map_err(|error| {
+            if error.kind() == std::io::ErrorKind::AddrInUse {
+                std::io::Error::other("resource_owned_by_other_instance")
+            } else {
+                error
+            }
+        })?;
         exclusive_node.set_nonblocking(true)?;
         let _owner = OwnerLock::acquire(directory)?;
         let store = binding_directory.map(neonmix_output_binding::Store::new);
+        let mut identity = neonmix_output_binding::owner::OwnerIdentity::new(
+            instance_generation,
+            store
+                .as_ref()
+                .map(neonmix_output_binding::Store::load)
+                .transpose()?
+                .map(|b| b.output_id),
+        )?;
         let read_name = || -> Result<String, Box<dyn std::error::Error>> {
             let Some(store) = &store else {
                 return Ok("NeonMix".into());
@@ -169,7 +184,17 @@ pub fn run(
                         stream.set_read_timeout(Some(Duration::from_millis(200)))?;
                         stream.set_write_timeout(Some(Duration::from_millis(200)))?;
                         let mut bytes=Vec::new();
-                        let result=(&mut stream).take(257).read_to_end(&mut bytes)
+                        if (&mut stream).take((neonmix_output_binding::owner::OWNER_MESSAGE_LIMIT + 1) as u64).read_to_end(&mut bytes).is_err() || bytes.len() > neonmix_output_binding::owner::OWNER_MESSAGE_LIMIT { continue; }
+                        if bytes.first() == Some(&0) {
+                            let inspection = serde_json::from_slice::<neonmix_output_binding::owner::OwnerInspection>(&bytes[1..]);
+                            let reply = if inspection.is_ok_and(|request| request.version == 1 && request.kind == "inspect_owner") {
+                                identity.ready = sink.as_ref().is_some_and(|sink| sink.is_running());
+                                serde_json::to_vec(&identity)?
+                            } else { br#"{"error":"upgrade_required"}"#.to_vec() };
+                            let _ = stream.write_all(&reply);
+                            continue;
+                        }
+                        let result=Ok::<(), std::io::Error>(())
                             .map_err(|e|e.to_string()).and_then(|_|String::from_utf8(bytes).map_err(|e|e.to_string()))
                             .and_then(|requested| {
                                 let node=sink.as_ref().ok_or("local virtual output is recovering")?;

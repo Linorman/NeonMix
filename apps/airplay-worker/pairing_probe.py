@@ -53,7 +53,7 @@ def receiver(directory, keyfile, known=(), blocked=()):
             value = events.get(timeout=5)
             assert value['type'] == expected, value['type']
             return value
-        config = dict(control_version=2,worker_generation=7,trust_generation=1,pairing_remaining_ms=600000,pairing_attempts=0,media_address=f'127.0.0.1:{media.getsockname()[1]}', ipc_token='a'*64,
+        config = dict(control_version=2, pcm_version=2, session_control_version=1,worker_generation=7,trust_generation=1,pairing_remaining_ms=600000,pairing_attempts=0,media_address=f'127.0.0.1:{media.getsockname()[1]}', ipc_token='a'*64,
                       device_id='001122334455', receiver_uuid='00112233-4455-6677-8899-aabbccddeeff',
                       keyfile=str(keyfile), name='NeonMix pairing probe', pin='1234', rtsp_port=0,
                       session_id=1, stream_id=2, stream_epoch=1, format_epoch=1, mapping_id=1,

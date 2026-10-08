@@ -1,0 +1,57 @@
+    Checking neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Checking neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+    Checking neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+error[E0382]: borrow of moved value: `output_binding`
+    --> apps/hub/src/sender.rs:115:17
+     |
+  54 |         output_binding,
+     |         -------------- move occurs because `output_binding` has type `std::option::Option<std::path::PathBuf>`, which does not implement the `Copy` trait
+  55 |     } = options;
+  56 |     let store = output_binding.map(neonmix_output_binding::Store::new);
+     |                 -------------- --------------------------------------- `output_binding` moved due to this method call
+     |                 |
+     |                 help: consider calling `.as_ref()` or `.as_mut()` to borrow the type's contents
+...
+ 115 |                 output_binding.as_ref().ok_or("output_binding_required")?,
+     |                 ^^^^^^^^^^^^^^ value borrowed here after move
+     |
+note: `std::option::Option::<T>::map` takes ownership of the receiver `self`, which moves `output_binding`
+    --> /Users/linorman/.rustup/toolchains/1.95.0-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/option.rs:1160:28
+     |
+1160 |     pub const fn map<U, F>(self, f: F) -> Option<U>
+     |                            ^^^^
+help: you can `clone` the value and consume it, but this might not be your desired behavior
+     |
+  56 |     let store = output_binding.clone().map(neonmix_output_binding::Store::new);
+     |                               ++++++++
+
+error[E0382]: borrow of moved value: `output_binding`
+    --> apps/hub/src/sender.rs:115:17
+     |
+  54 |         output_binding,
+     |         -------------- move occurs because `output_binding` has type `std::option::Option<PathBuf>`, which does not implement the `Copy` trait
+  55 |     } = options;
+  56 |     let store = output_binding.map(neonmix_output_binding::Store::new);
+     |                 -------------- --------------------------------------- `output_binding` moved due to this method call
+     |                 |
+     |                 help: consider calling `.as_ref()` or `.as_mut()` to borrow the type's contents
+...
+ 115 |                 output_binding.as_ref().ok_or("output_binding_required")?,
+     |                 ^^^^^^^^^^^^^^ value borrowed here after move
+     |
+note: `std::option::Option::<T>::map` takes ownership of the receiver `self`, which moves `output_binding`
+    --> /Users/linorman/.rustup/toolchains/1.95.0-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/option.rs:1160:28
+     |
+1160 |     pub const fn map<U, F>(self, f: F) -> Option<U>
+     |                            ^^^^
+help: you can `clone` the value and consume it, but this might not be your desired behavior
+     |
+  56 |     let store = output_binding.clone().map(neonmix_output_binding::Store::new);
+     |                               ++++++++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 1 previous error

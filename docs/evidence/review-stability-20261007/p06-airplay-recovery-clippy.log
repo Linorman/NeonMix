@@ -1,0 +1,78 @@
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error: variable does not need to be mutable
+    --> apps/hub/src/airplay_api.rs:1889:13
+     |
+1889 |         let mut guard = profiles.lock().unwrap();
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `-D unused-mut` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(unused_mut)]`
+
+error: this `if` statement can be collapsed
+    --> apps/hub/src/airplay_api.rs:1203:5
+     |
+1203 | /     if final_save_attempted {
+1204 | |         if let Some(publication) = error.downcast_ref::<neonmix_identity::files::PublicationError>()
+1205 | |         {
+1206 | |             if publication.publication != neonmix_identity::files::Publication::NotPublished {
+...    |
+1217 | |     }
+     | |_____^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#collapsible_if
+     = note: `-D clippy::collapsible-if` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+     |
+1203 ~     if final_save_attempted
+1204 ~         && let Some(publication) = error.downcast_ref::<neonmix_identity::files::PublicationError>()
+1205 |         {
+ ...
+1215 |             }
+1216 ~         }
+     |
+
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: this can be `std::io::Error::other(_)`
+    --> apps/hub/src/airplay_api.rs:1627:25
+     |
+1627 |                       Err(std::io::Error::new(
+     |  _________________________^
+1628 | |                         std::io::ErrorKind::Other,
+1629 | |                         "injected directory sync failure",
+1630 | |                     ))
+     | |_____________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#io_other_error
+     = note: `-D clippy::io-other-error` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::io_other_error)]`
+help: use `std::io::Error::other`
+     |
+1627 ~                     Err(std::io::Error::other(
+1628 ~                         "injected directory sync failure",
+     |
+
+error: this `MutexGuard` is held across an await point
+    --> apps/hub/src/airplay_api.rs:1889:13
+     |
+1889 |         let mut guard = profiles.lock().unwrap();
+     |             ^^^^^^^^^
+     |
+     = help: consider using an async-aware `Mutex` type or ensuring the `MutexGuard` is dropped before calling `await`
+note: these are all the await points this lock is held through
+    --> apps/hub/src/airplay_api.rs:1951:10
+     |
+1951 |         .await
+     |          ^^^^^
+...
+1970 |         .await
+     |          ^^^^^
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#await_holding_lock
+     = note: `-D clippy::await-holding-lock` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::await_holding_lock)]`
+
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 4 previous errors

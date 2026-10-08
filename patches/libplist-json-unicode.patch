@@ -1,0 +1,41 @@
+--- a/src/jplist.c
++++ b/src/jplist.c
+@@ -614,8 +614,25 @@
+                         free(strval);
+                         return NULL;
+                     }
++                    size_t consumed = 6;
++                    if (val >= 0xd800 && val <= 0xdbff) {
++                        unsigned low = 0;
++                        if (str_len-i < 12 || strval[i+6] != '\\' || strval[i+7] != 'u' ||
++                            !(isxdigit(strval[i+8]) && isxdigit(strval[i+9]) && isxdigit(strval[i+10]) && isxdigit(strval[i+11])) ||
++                            sscanf(strval+i+8, "%04x", &low) != 1 || low < 0xdc00 || low > 0xdfff) {
++                            free(strval); return NULL;
++                        }
++                        val = 0x10000 + ((val-0xd800)<<10) + (low-0xdc00);
++                        consumed = 12;
++                    } else if (val >= 0xdc00 && val <= 0xdfff) {free(strval); return NULL;}
+                     int bytelen = 0;
+-                    if (val >= 0x800) {
++                    if (val >= 0x10000) {
++                        strval[i] = (char)(0xf0 | (val >> 18));
++                        strval[i+1] = (char)(0x80 | ((val >> 12) & 0x3f));
++                        strval[i+2] = (char)(0x80 | ((val >> 6) & 0x3f));
++                        strval[i+3] = (char)(0x80 | (val & 0x3f));
++                        bytelen = 4;
++                    } else if (val >= 0x800) {
+                         /* three bytes */
+                         strval[i]   = (char)(0xE0 + ((val >> 12) & 0xF));
+                         strval[i+1] = (char)(0x80 + ((val >> 6) & 0x3F));
+@@ -631,8 +648,9 @@
+                         strval[i] = (char)(val & 0x7F);
+                         bytelen = 1;
+                     }
+-                    memmove(strval+i+bytelen, strval+i+6, str_len - (i+5));
+-                    str_len -= (6-bytelen);
++                    memmove(strval+i+bytelen, strval+i+consumed, str_len - (i+consumed) + 1);
++                    str_len -= consumed-bytelen;
++                    i += bytelen-1;
+                 }   break;
+                 default:
+                     PLIST_JSON_ERR("%s: invalid escape sequence '%.*s'\n", __func__, 2, strval+i);

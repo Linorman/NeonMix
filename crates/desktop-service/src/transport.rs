@@ -118,40 +118,48 @@ pub fn same_user(stream: &tokio::net::UnixStream) -> bool {
 }
 pub fn request(directory: &Path, request: &Request) -> Result<Reply> {
     check_directory(directory)?;
-    let path = directory.join("ipc.sock");
-    let metadata = std::fs::symlink_metadata(&path).map_err(|e| e.to_string())?;
+    let path = directory.join(if crate::manager::is_lifecycle(request) {
+        "lifecycle.sock"
+    } else {
+        "ipc.sock"
+    });
+    let metadata = std::fs::symlink_metadata(&path).map_err(crate::client_io_error)?;
     if !metadata.file_type().is_socket() || metadata.uid() != uid() || metadata.mode() & 0o077 != 0
     {
-        return Err("insecure IPC socket".into());
+        return Err("permission_denied".into());
     }
     let bytes = serde_json::to_vec(&Envelope {
         version: PROTOCOL_VERSION,
         request: request.clone(),
     })
-    .map_err(|e| e.to_string())?;
+    .map_err(|_| "ipc_invalid_request".to_string())?;
     if bytes.len() > MAX_MESSAGE_BYTES {
-        return Err("IPC request too large".into());
+        return Err("ipc_message_too_large".into());
     }
-    let mut stream = UnixStream::connect(path).map_err(|e| e.to_string())?;
+    let mut stream = UnixStream::connect(path).map_err(crate::client_io_error)?;
     stream
         .set_read_timeout(Some(IPC_TIMEOUT))
-        .map_err(|e| e.to_string())?;
+        .map_err(crate::client_io_error)?;
     stream
         .set_write_timeout(Some(IPC_TIMEOUT))
-        .map_err(|e| e.to_string())?;
+        .map_err(crate::client_io_error)?;
     stream
         .write_all(&(bytes.len() as u32).to_be_bytes())
         .and_then(|_| stream.write_all(&bytes))
-        .map_err(|e| e.to_string())?;
+        .map_err(crate::client_io_error)?;
     let mut header = [0; 4];
-    stream.read_exact(&mut header).map_err(|e| e.to_string())?;
+    stream
+        .read_exact(&mut header)
+        .map_err(crate::client_io_error)?;
     let len = u32::from_be_bytes(header) as usize;
     if len > MAX_MESSAGE_BYTES {
-        return Err("IPC reply too large".into());
+        return Err("ipc_message_too_large".into());
     }
     let mut body = vec![0; len];
-    stream.read_exact(&mut body).map_err(|e| e.to_string())?;
-    serde_json::from_slice(&body).map_err(|e| e.to_string())
+    stream
+        .read_exact(&mut body)
+        .map_err(crate::client_io_error)?;
+    serde_json::from_slice(&body).map_err(|_| "invalid_backend_response".into())
 }
 
 pub type Stream = tokio::net::UnixStream;
@@ -161,7 +169,14 @@ pub struct Listener {
 }
 impl Listener {
     pub fn bind(directory: &Path) -> Result<Self> {
-        let path = directory.join("ipc.sock");
+        Self::bind_endpoint(directory, false)
+    }
+    pub(crate) fn bind_endpoint(directory: &Path, lifecycle: bool) -> Result<Self> {
+        let path = directory.join(if lifecycle {
+            "lifecycle.sock"
+        } else {
+            "ipc.sock"
+        });
         if path.exists() {
             let metadata = std::fs::symlink_metadata(&path).map_err(|e| e.to_string())?;
             if !metadata.file_type().is_socket() || metadata.uid() != uid() {

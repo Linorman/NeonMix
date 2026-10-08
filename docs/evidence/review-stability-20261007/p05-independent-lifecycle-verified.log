@@ -1,0 +1,9 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error[E0433]: cannot find type `FaultCode` in this scope
+   --> crates/desktop-service/tests/lifecycle.rs:906:9
+    |
+906 |         FaultCode::RequestInterrupted
+    |         ^^^^^^^^^ use of undeclared type `FaultCode`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `neonmix-desktop-service` (test "lifecycle") due to 1 previous error

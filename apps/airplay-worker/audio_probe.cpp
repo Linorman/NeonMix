@@ -36,14 +36,15 @@ int main(){
             require(w.granted&&w.context.session==4,"owner grant not applied");
             Worker::destroy(&w,1);Worker::flush(&w,1);Worker::volume(&w,1,-144.f);
             require(w.admitted&&w.granted&&w.gain==1.f,"old connection changed owner");
-            command(R"({"type":"disconnect","worker_generation":7,"connection_id":2,"session_id":4,"stream_epoch":5})");
+            command(R"({"type":"disconnect","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":5})");
             require(w.admitted,"stale epoch disconnected owner");
             Worker::flush(&w,2);require(!w.granted&&w.admitted,"owner flush lost session");
             command(R"({"type":"grant","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_id":5,"stream_epoch":6,"format_epoch":7,"mapping_id":8})");
             require(!w.granted,"stale epoch reopened media");
             command(R"({"type":"grant","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_id":5,"stream_epoch":7,"format_epoch":7,"mapping_id":9})");
             require(w.granted&&w.context.mapping==9,"new epoch grant not applied");
-            command(R"({"type":"revoke","worker_generation":7,"connection_id":2,"session_id":4,"stream_epoch":7})");
+            command(R"({"type":"revoke","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":7})");
+            {std::unique_lock<std::mutex>l(w.state_mutex);require(w.admission_cv.wait_for(l,std::chrono::seconds(2),[&]{return !w.closing&&!w.admitted;}),"revoke cleanup timeout");}
             require(!w.admitted&&w.blocked.count("owner"),"targeted revoke failed");
             w.admitted=true;w.active_connection=9;w.active_request=10;w.context={11,12,13,14,15};
             Worker::destroy(&w,2);require(w.admitted,"delayed old owner close ended successor");
@@ -53,9 +54,10 @@ int main(){
             for(unsigned i=0;i<100;i++){bool pending=false;{std::lock_guard<std::mutex>l(w.state_mutex);pending=w.pairing_pending;}if(pending)break;std::this_thread::sleep_for(std::chrono::milliseconds(1));}
             command(R"({"type":"pairing_admit","worker_generation":7,"trust_generation":1,"connection_id":20,"pairing_request_id":1,"allowed":true,"attempts":1})");
             challenger.join();require(pairing_result,"Hub-authorized pairing challenge rejected");
-            w.admission_pending=true;w.admission_answer=true;w.pending_connection=20;
+            w.admission_pending=true;w.admission_answer=true;w.pending_connection=20;w.admission_id=1;
             command(R"({"type":"trust_update","worker_generation":7,"trust_generation":2,"known_client_keys":[],"blocked_client_keys":[],"pairing_allowed":true})");
             require(w.trust_generation==2&&!w.admission_pending&&!w.admission_answer,"trust update retained old admission");
+            {std::unique_lock<std::mutex>l(w.state_mutex);require(w.admission_cv.wait_for(l,std::chrono::seconds(2),[&]{return !w.closing;}),"trust cleanup timeout");}
             Worker::registered(&w,20,"device","delayed-key","name");
             require(!w.known.count("delayed-key"),"late registration restored old trust");
             require(!Worker::pairing(&w,20,false),"old SRP phase survived trust change");
@@ -82,11 +84,32 @@ int main(){
             running=true;Worker w;w.admitted=true;w.active_connection=1;w.context={1,2,3,4,5};w.spf=ct==2?4096:ct==4?1024:352;
             std::vector<std::vector<uint8_t>> packets;if(ct==1)for(unsigned i=0;i<24;i++)packets.emplace_back(w.spf*4,0);else packets=encoded_packets(ct);
             uint64_t start=1780000000000000000ULL;uint32_t rtp=0xffffff00;unsigned index=0;
-            for(auto &p:packets){audio_decode_struct d{};d.data=p.data();d.data_len=p.size();d.ct=ct;d.source_rate=44100;d.rtp_time=rtp;d.ntp_time_local=start+(uint64_t)index*w.spf*1000000000/44100;Worker::audio(&w,1,nullptr,&d);rtp+=w.spf;index++;}
+            for(auto &p:packets){audio_decode_struct d{};d.data=p.data();d.data_len=p.size();d.ct=ct;d.source_rate=44100;d.rtp_time=rtp;d.ntp_time_local=start+(uint64_t)index*w.spf*1000000000/44100+(ct==1?index*4000ULL:0);Worker::audio(&w,1,nullptr,&d);rtp+=w.spf;index++;}
             for(unsigned i=0;i<100;i++){bool ready=false;{std::lock_guard<std::mutex>l(w.queue_mutex);ready=!w.packets.empty();}if(ready)break;std::this_thread::sleep_for(std::chrono::milliseconds(10));}
             {std::lock_guard<std::mutex>l(w.queue_mutex);if(w.packets.empty())throw std::runtime_error("decoder emitted no PCM for ct="+std::to_string(ct));
-                for(auto&p:w.packets){if(memcmp(p.data(),"NMAM",4)||field(p,6,2)!=112||field(p,88,4)!=44100||field(p,104,4)!=48000||field(p,92,2)>480||field(p,64,8)<start||field(p,56,8)<0xffffff00)throw std::runtime_error("PCM metadata validation failed");for(size_t at=112;at<p.size();at+=4){float v;memcpy(&v,p.data()+at,4);if(!std::isfinite(v))throw std::runtime_error("PCM contains invalid values");}}
+                uint64_t normalized_end=0;bool first=true;
+                for(auto&p:w.packets){if(memcmp(p.data(),"NMAM",4)||field(p,4,2)!=2||field(p,6,2)!=120||field(p,88,4)!=44100||field(p,104,4)!=48000||field(p,92,2)>480||field(p,64,8)<start||field(p,56,8)<0xffffff00)throw std::runtime_error("PCM metadata validation failed");uint64_t normalized=field(p,112,8);if(!first&&normalized!=normalized_end)throw std::runtime_error("SRC chunk coordinate drift: expected="+std::to_string(normalized_end)+" actual="+std::to_string(normalized)+" pts="+std::to_string(field(p,64,8))+" source="+std::to_string(field(p,56,8)));first=false;normalized_end=normalized+field(p,92,2);for(size_t at=120;at<p.size();at+=4){float v;memcpy(&v,p.data()+at,4);if(!std::isfinite(v))throw std::runtime_error("PCM contains invalid values");}}
                 std::cout<<"codec "<<ct<<": "<<w.packets.size()<<" bounded PCM chunks; source44100, pcm48000, timestamp and RTP wrap preserved\n";
+            }
+            w.admitted=false;w.clear_decoder();
+        }
+        {
+            auto require=[](bool condition,const std::string &message){if(!condition)throw std::runtime_error(message);};
+            running=true;Worker w;w.admitted=true;w.active_connection=1;w.context={1,2,3,4,5};w.spf=352;
+            const uint64_t start=1780000000000000000ULL;uint32_t rtp=0xffffff00;std::vector<uint8_t>pcm(352*4,0);
+            for(unsigned i=0;i<24;i++){
+                if(i==12)rtp+=441;
+                audio_decode_struct d{};d.data=pcm.data();d.data_len=pcm.size();d.ct=1;d.source_rate=44100;d.rtp_time=rtp;
+                d.ntp_time_local=start+(uint64_t)(i*352+(i>=12?441:0))*1000000000/44100;
+                Worker::audio(&w,1,nullptr,&d);rtp+=352;
+            }
+            {std::unique_lock<std::mutex>l(w.queue_mutex);require(w.queue_cv.wait_for(l,std::chrono::seconds(2),[&]{return w.packets.size()>=24;}),"gap decoder timeout");
+                uint64_t end=0,gap=0;bool first=true;unsigned boundaries=0;
+                for(const auto &p:w.packets){uint64_t position=field(p,112,8);if(!first){require(position>=end,"SRC overlap at gap");gap+=position-end;}
+                    first=false;end=position+field(p,92,2);boundaries+=field(p,12,4)!=0;}
+                require(gap>=479&&gap<=481,"ten-ms source gap was compressed: "+std::to_string(gap));
+                require(boundaries==2,"SRC did not isolate gap FIR");
+                std::cout<<"source gap: "<<gap<<" internal frames, two SRC/FIR segments preserved\n";
             }
             w.admitted=false;w.clear_decoder();
         }

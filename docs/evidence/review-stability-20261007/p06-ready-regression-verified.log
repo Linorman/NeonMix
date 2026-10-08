@@ -1,0 +1,24 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.70s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 1 test
+test managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit ... FAILED
+
+failures:
+
+---- managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit stdout ----
+
+thread 'managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit' (50140173) panicked at crates/desktop-service/src/managed.rs:663:13:
+assertion `left == right` failed: ready-then-log: Err("background_timeout"), ProcessStatus { guardian_version: 1, guardian_result: Some(GuardianResult { version: 1, forced: false, cleanup_complete: true, child_exit_code: Some(0), runtime_keys_observed: 0, cleanup_failures: [], error_code: None, failure_stage: None }), owner_pid: None, running: false, ready: false, stopping: false, stop_result: Some(StopResult { graceful: true, forced: false, elapsed_ms: 23, exit_code: Some(0), cleanup_complete: true }), pid: None, error: Some("后台请求超时。请检查后台状态后重试。"), fault: Some(Fault { code: BackgroundTimeout, params: FaultParams { port: None } }), last_event: Some(Object {"event": String("managed_child_ready"), "guardian_version": Number(1), "kind": String("hub_started"), "pid": Number(97393)}), metrics: Some(Object {"event": String("hub_stats")}) }
+  left: false
+ right: true
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 1.95s
+
+error: test failed, to rerun pass `-p neonmix-desktop-service --lib`

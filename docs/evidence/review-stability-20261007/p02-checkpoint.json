@@ -1,0 +1,28 @@
+{
+  "captured_at": "2026-10-07T16:44:23.817119+08:00",
+  "head": "aefb8690320cb114c974be2477b2ebb64dfadf1e",
+  "source_sha256": {
+    "apps/desktop/src/intent.rs": "e60946ece9e5afcb94c9fd526c05c4519f7a545a80231e5aef8370f80350087d",
+    "apps/desktop/src/commands.rs": "73632f5ed555a81742e40a7352b066ef4f4acd79270140c8be2637c625529c7e",
+    "apps/desktop/src/commands_tests.rs": "50900ae8d40962a4318bc6b1c845c04bf2f186a5b61659be56f780a51c389ac2",
+    "apps/desktop/src/main.rs": "40d7ef33237da599b5038fa914b308956b95bde6537cc98f0316409e63c45bea",
+    "apps/desktop/src/lanes.rs": "1f3922796963de9d08c6e1ab1e06fb24dc66bf6a059fad2db9abf81310287ca9",
+    "apps/desktop/src/shell.rs": "ba603bf4949ce212235925a7235c1d50603df39c309bdc45098c8914673c9683",
+    "crates/control/src/lib.rs": "d26caf25640850b1198494e70c689ca4ab506efa9f69a0b98086306058512c60",
+    "crates/desktop-service/src/intent.rs": "65eba75f1c641fc2b5888a207c2c01080bbce597421223f12fd0b13b587da25b",
+    "crates/desktop-service/src/lib.rs": "063d33094b046238bb5b0aa73c9b63f876bcddc57efce118776a2e97e14d46e1",
+    "crates/desktop-service/src/daemon.rs": "7f90f0dd20bedf3adec4ae508a735c97dd6922d8a62a4658d1bd6c2815681fae",
+    "crates/airplay-adapter/src/control.rs": "cfd88a0e6800dcc93f71dc3c8cbde3a8f6e9e925eae8b941387ee66167185143",
+    "apps/hub/src/airplay_api.rs": "015cbdf5cd9d7d3f2752126a3d7522fc3866e62a544d3e5e518fc321b0981d05"
+  },
+  "artifact_sha256": {
+    "target/release/neonmix-desktop": "8593e0ec22d52a96a568469d3ec8e225b7399907159c2cafd03181026abf5264",
+    "target/release/neonmix-hub": "cc57c763260685c693e8708a5876db57b5b2e5ee91b8589d56d7cb3ceb3d6c3f",
+    "target/release/neonmix-background": "7af20203cab6ccbb3f03a1b7f0e6e26daf7a4c3d00dc12599d0582ad0c564090"
+  },
+  "tests": {
+    "passed": 243,
+    "ignored": 4
+  },
+  "scope": "P02 deterministic states, actual IPC, API guards; native 600x440 screenshots are preview from recorded public state, not live-media or real IME/VoiceOver acceptance"
+}

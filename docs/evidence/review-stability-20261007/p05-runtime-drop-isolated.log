@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 1 test
+test managed::tests::failed_runtime_drop_keeps_guardian_alive_until_its_hung_media_exits ... FAILED
+
+failures:
+
+---- managed::tests::failed_runtime_drop_keeps_guardian_alive_until_its_hung_media_exits stdout ----
+
+thread 'managed::tests::failed_runtime_drop_keeps_guardian_alive_until_its_hung_media_exits' (49901838) panicked at crates/desktop-service/src/managed.rs:566:9:
+assertion `left == right` failed: runtime teardown killed supervisor before media cleanup
+  left: (true, false)
+ right: (false, false)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    managed::tests::failed_runtime_drop_keeps_guardian_alive_until_its_hung_media_exits
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 8.02s
+
+error: test failed, to rerun pass `-p neonmix-desktop-service --lib`

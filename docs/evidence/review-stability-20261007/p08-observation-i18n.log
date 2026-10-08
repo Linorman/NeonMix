@@ -1,0 +1,2 @@
+i18n validation failed: stale/invalid UI hardcoding exception at apps/desktop/src/pages/console.rs:404
+i18n AST/schema validation passed: 739 messages, 2 shipped locales

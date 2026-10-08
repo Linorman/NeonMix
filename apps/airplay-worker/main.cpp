@@ -24,12 +24,14 @@ extern "C" {
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <functional>
 #include <vector>
 #ifndef _WIN32
 #include <sys/un.h>
 #endif
 using Clock = std::chrono::steady_clock;
 static std::atomic<bool> running{true};
+static std::atomic<bool> failed{false};
 static std::mutex event_mutex;
 static std::string quote(const std::string &s) {
     std::string out="\"";
@@ -41,7 +43,7 @@ static void event(const std::string &type,const std::string &fields="") {
     std::string line="{\"type\":"+quote(type)+(fields.empty()?"":","+fields)+"}\n";
     if(line.size()>4096||platform::write_event(line.data(),line.size())!=(platform::Count)line.size()) running=false;
 }
-static void fatal(const std::string &message) {event("fatal","\"message\":"+quote(message));running=false;}
+static void fatal(const std::string &message) {if(!failed.exchange(true))event("fatal","\"message\":"+quote(message));running=false;}
 static plist_t parse(const std::string &s) {
     plist_t p=nullptr;
     if(s.size()>16384||plist_from_json(s.data(),s.size(),&p)!=PLIST_ERR_SUCCESS||!PLIST_IS_DICT(p)) {
@@ -50,9 +52,9 @@ static plist_t parse(const std::string &s) {
     return p;
 }
 static std::string str(plist_t p,const char *k,const std::string &fallback="") {
-    char *v=nullptr;auto n=plist_dict_get_item(p,k);if(!n)return fallback;
+    auto n=plist_dict_get_item(p,k);if(!n)return fallback;
     if(!PLIST_IS_STRING(n))throw std::runtime_error(std::string("string required: ")+k);
-    plist_get_string_val(n,&v);std::string s=v?v:"";free(v);return s;
+    uint64_t length=0;const char *value=plist_get_string_ptr(n,&length);std::string s=value?std::string(value,length):"";return s;
 }
 static uint64_t number(plist_t p,const char*k,uint64_t fallback=0) {
     auto n=plist_dict_get_item(p,k);if(!n)return fallback;
@@ -72,13 +74,30 @@ static std::set<std::string> keyset(plist_t p,const char*k) {
 }
 struct Context { uint64_t session=0,stream=0,epoch=0,format=0,mapping=0; };
 struct Mark {uint64_t pts,position,uncertainty;};
+struct SessionState {
+    Context context;std::atomic<float> gain{1.0f};
+    GstElement *pipeline=nullptr,*source=nullptr,*sink=nullptr;
+    unsigned codec=0,source_rate=44100,spf=352;
+    std::deque<Mark> marks;uint32_t previous_rtp=0;uint64_t extended_rtp=0;bool have_rtp=false;
+    Mark normalization_anchor{};bool have_normalization_anchor=false;
+    uint64_t pcm_origin=0,source_origin=0;bool have_pcm_origin=false;
+    uint64_t last_audio_pts=0;uint32_t last_audio_rtp=0;
+    std::deque<std::vector<uint8_t>> packets;uint64_t sequence=0;
+};
+struct OwnerKey {uint64_t generation=0,connection=0,request=0;
+    bool operator==(const OwnerKey &other) const {return generation==other.generation&&connection==other.connection&&request==other.request;}
+};
+struct CloseTicket {OwnerKey owner;Context context;bool remove_connection=false;};
+enum class SessionBarrier {AdmissionPending,AdmittedAwaitGrant,GrantBeforeInstall,GrantInstalled,GrantApplied};
 struct Worker {
     raop_t *raop=nullptr;dnssd_t *dns=nullptr;platform::Socket media=platform::invalid_socket;
 #ifdef _WIN32
     platform::MediaPipe media_pipe;
 #endif
     std::mutex state_mutex,decode_mutex,queue_mutex;std::condition_variable admission_cv,pairing_cv,queue_cv;
-    Context context;std::atomic<bool> admitted{false},granted{true},pairing_enabled{true};
+    SessionState session;
+    Context &context=session.context;std::atomic<float> &gain=session.gain;
+    std::atomic<bool> admitted{false},granted{true},pairing_enabled{true};
     Clock::time_point trace_started=Clock::now();
     bool protocol_trace_enabled=false;bool admission_answer=false,admission_pending=false;uint64_t admission_id=0,authorization_generation=0;std::set<std::string> known,blocked;
     uint64_t trust_generation=1,pairing_window_generation=1;std::map<uint64_t,uint64_t> pairing_generations,pairing_slots;
@@ -86,11 +105,76 @@ struct Worker {
     bool pairing_pending=false,pairing_answer=false;
     uint64_t worker_generation=0,active_connection=0,active_request=0,pending_connection=0;
     std::map<uint64_t,std::string> verified_keys;std::string verified_key;Clock::time_point pin_deadline;unsigned pairing_attempts=0;
-    GstElement *pipeline=nullptr,*source=nullptr,*sink=nullptr;unsigned codec=0,source_rate=44100,spf=352;
-    std::deque<Mark> marks;uint32_t previous_rtp=0;uint64_t extended_rtp=0;bool have_rtp=false;
-    uint64_t last_audio_pts=0;uint32_t last_audio_rtp=0;
-    std::deque<std::vector<uint8_t>> packets;uint64_t sequence=0;std::atomic<float> gain{1.0f};
+    // Compatibility aliases keep the decoder/PCM implementation on the same
+    // SessionState owner; resets below define its two distinct lifetimes.
+    GstElement *&pipeline=session.pipeline,*&source=session.source,*&sink=session.sink;
+    unsigned &codec=session.codec,&source_rate=session.source_rate,&spf=session.spf;
+    std::deque<Mark> &marks=session.marks;uint32_t &previous_rtp=session.previous_rtp;
+    uint64_t &extended_rtp=session.extended_rtp;bool &have_rtp=session.have_rtp;
+    uint64_t &last_audio_pts=session.last_audio_pts;uint32_t &last_audio_rtp=session.last_audio_rtp;
+    std::deque<std::vector<uint8_t>> &packets=session.packets;uint64_t &sequence=session.sequence;
+    bool closing=false,close_queued=false,close_shutdown=false;CloseTicket close_ticket;
+    std::deque<uint64_t> closed_connections;
+    std::deque<OwnerKey> cancelled;std::condition_variable close_cv;std::thread closer;
+#ifdef NEONMIX_AUDIO_TEST_SEAM
+    std::function<void(SessionBarrier)> barrier;
+#endif
     std::thread writer;
+    Worker():closer([this]{close_loop();}){}
+    void seam(SessionBarrier point) {
+#ifdef NEONMIX_AUDIO_TEST_SEAM
+        if(barrier)barrier(point);
+#else
+        (void)point;
+#endif
+    }
+    bool cancelled_locked(const OwnerKey &key) const {return std::find(cancelled.begin(),cancelled.end(),key)!=cancelled.end();}
+    void latch_cancel_locked(const OwnerKey &key) {
+        if(cancelled_locked(key))return;
+        if(cancelled.size()==128)cancelled.pop_front();cancelled.push_back(key);
+    }
+    bool close_locked(const OwnerKey &key,bool revoke,bool remove_connection) {
+        if(!key.connection||!key.request||key.generation!=worker_generation)return false;
+        if(closing){
+            if(!(close_ticket.owner==key))return false;
+            close_ticket.remove_connection=close_ticket.remove_connection||remove_connection;
+            if(revoke&&!verified_key.empty()){blocked.insert(verified_key);known.erase(verified_key);}
+            return true;
+        }
+        bool active=admitted&&active_connection==key.connection&&active_request==key.request;
+        bool pending=!admitted&&pending_connection==key.connection&&admission_id==key.request;
+        if(!active&&!pending)return cancelled_locked(key);
+        ++authorization_generation;latch_cancel_locked(key);granted=false;
+        if(std::find(closed_connections.begin(),closed_connections.end(),key.connection)==closed_connections.end()) {
+            if(closed_connections.size()==128)closed_connections.pop_front();closed_connections.push_back(key.connection);
+        }
+        if(close_shutdown){admitted=false;return true;}
+        closing=true;
+        if(pending){admission_answer=false;admission_pending=false;admission_cv.notify_all();}
+        if(revoke){auto found=verified_keys.find(key.connection);std::string public_key=active?verified_key:(found==verified_keys.end()?"":found->second);
+            if(!public_key.empty()){blocked.insert(public_key);known.erase(public_key);}}
+        close_ticket={key,active?context:Context{},remove_connection};close_queued=true;close_cv.notify_one();return true;
+    }
+    void close_loop() {
+        for(;;){CloseTicket ticket;
+            {std::unique_lock<std::mutex>l(state_mutex);close_cv.wait(l,[this]{return close_queued||close_shutdown;});
+                if(!close_queued)return;ticket=close_ticket;close_queued=false;}
+            {std::lock_guard<std::mutex>d(decode_mutex);
+                {std::lock_guard<std::mutex>l(state_mutex);admitted=false;granted=false;}
+                clear_decoder();last_audio_pts=0;{std::lock_guard<std::mutex>q(queue_mutex);packets.clear();}}
+            // Library connection removal must not hold decode_mutex: the old
+            // protocol thread may need it once more to observe gate closure.
+            {std::lock_guard<std::mutex>l(state_mutex);ticket.remove_connection=close_ticket.remove_connection;}
+            if(ticket.remove_connection&&raop)raop_remove_connection_id(raop,ticket.owner.connection);
+            {std::lock_guard<std::mutex>l(state_mutex);
+                verified_keys.erase(ticket.owner.connection);pairing_generations.erase(ticket.owner.connection);pairing_end_locked(ticket.owner.connection);
+                active_connection=0;active_request=0;context={};verified_key.clear();gain=1.f;sequence=0;
+                if(pending_connection==ticket.owner.connection&&admission_id==ticket.owner.request){pending_connection=0;admission_pending=false;admission_answer=false;}
+                closing=false;admission_cv.notify_all();}
+            event("session_ended","\"worker_generation\":"+std::to_string(ticket.owner.generation)+",\"connection_id\":"+std::to_string(ticket.owner.connection)
+                +",\"request_id\":"+std::to_string(ticket.owner.request)+",\"session_id\":"+std::to_string(ticket.context.session)+",\"stream_epoch\":"+std::to_string(ticket.context.epoch));
+        }
+    }
     std::string provenance_locked(uint64_t connection=0,uint64_t request=0) const {
         return "\"worker_generation\":"+std::to_string(worker_generation)+",\"connection_id\":"+std::to_string(connection?connection:active_connection)+",\"request_id\":"+std::to_string(request?request:active_request);
     }
@@ -98,7 +182,7 @@ struct Worker {
         return provenance_locked()+",\"session_id\":"+std::to_string(context.session)+",\"stream_epoch\":"+std::to_string(context.epoch);
     }
     std::string context_fields() {std::lock_guard<std::mutex>l(state_mutex);return context_fields_locked();}
-    bool owns(uint64_t connection) {std::lock_guard<std::mutex>l(state_mutex);return admitted && active_connection==connection;}
+    bool owns(uint64_t connection) {std::lock_guard<std::mutex>l(state_mutex);return !closing&&admitted && active_connection==connection;}
     void set_context(plist_t p) {std::lock_guard<std::mutex>l(state_mutex);
         context={number(p,"session_id"),number(p,"stream_id"),number(p,"stream_epoch"),number(p,"format_epoch"),number(p,"mapping_id")};
         constexpr uint64_t control_max=(1ULL<<53)-1;
@@ -106,7 +190,7 @@ struct Worker {
            context.session>control_max||context.stream>control_max||context.epoch>control_max||context.format>control_max||context.mapping>control_max)
             throw std::runtime_error("Hub control context must be in 1..2^53-1; refusing possible JSON integer truncation");
     }
-    void clear_decoder() {if(pipeline){gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(pipeline);}pipeline=source=sink=nullptr;codec=0;{std::lock_guard<std::mutex>l(state_mutex);marks.clear();have_rtp=false;}}
+    void clear_decoder() {if(pipeline){gst_element_set_state(pipeline,GST_STATE_NULL);gst_object_unref(pipeline);}pipeline=source=sink=nullptr;codec=0;{std::lock_guard<std::mutex>l(state_mutex);marks.clear();have_rtp=false;session.have_normalization_anchor=false;session.have_pcm_origin=false;}}
     // Caller holds decode_mutex. This invalidates only media, keeping the
     // verified source and RTSP owner. Hub supplies a fresh epoch before PCM.
     void reset_media_locked(const char *reason) {
@@ -114,7 +198,8 @@ struct Worker {
         {std::lock_guard<std::mutex>l(queue_mutex);packets.clear();}
         event("flush",context_fields()+",\"reason\":"+quote(reason));
     }
-    ~Worker(){running=false;queue_cv.notify_all();if(media!=platform::invalid_socket)platform::shutdown_socket(media);if(writer.joinable())writer.join();if(raop)raop_destroy(raop);if(dns)dnssd_destroy(dns);clear_decoder();if(media!=platform::invalid_socket)platform::close_socket(media);}
+    ~Worker(){running=false;admission_cv.notify_all();pairing_cv.notify_all();queue_cv.notify_all();if(media!=platform::invalid_socket)platform::shutdown_socket(media);if(writer.joinable())writer.join();
+        {std::lock_guard<std::mutex>l(state_mutex);close_shutdown=true;close_cv.notify_all();}if(closer.joinable())closer.join();if(raop)raop_destroy(raop);if(dns)dnssd_destroy(dns);clear_decoder();if(media!=platform::invalid_socket)platform::close_socket(media);}
     platform::Count send_media(const void *bytes,size_t length) {
 #ifdef _WIN32
         if(media_pipe.connected())return media_pipe.write(bytes,length,running);
@@ -162,24 +247,45 @@ struct Worker {
         auto buffer=gst_sample_get_buffer(sample);GstMapInfo map{};
         if(!gst_buffer_map(buffer,&map,GST_MAP_READ)){gst_sample_unref(sample);return GST_FLOW_ERROR;}
         uint64_t pts=GST_BUFFER_PTS(buffer);if(pts==GST_CLOCK_TIME_NONE||!w.admitted||!w.granted){gst_buffer_unmap(buffer,&map);gst_sample_unref(sample);return GST_FLOW_OK;}
-        Mark mark{pts,0,UINT64_MAX};unsigned rate=44100;Context context;
+        Mark mark{pts,0,UINT64_MAX},normalization_anchor{};unsigned rate=44100;Context context;
         {std::lock_guard<std::mutex>l(w.state_mutex);rate=w.source_rate;context=w.context;
             while(w.marks.size()>1 && w.marks[1].pts<=pts)w.marks.pop_front();
-            if(w.marks.empty()){gst_buffer_unmap(buffer,&map);gst_sample_unref(sample);return GST_FLOW_OK;}mark=w.marks.front();}
+            if(w.marks.empty()){gst_buffer_unmap(buffer,&map);gst_sample_unref(sample);return GST_FLOW_OK;}mark=w.marks.front();
+            if(!w.session.have_normalization_anchor){w.session.normalization_anchor=mark;w.session.have_normalization_anchor=true;}
+            normalization_anchor=w.session.normalization_anchor;}
         size_t frames=map.size/8;
         if(map.size%8 || frames>8192){fatal("invalid decoded PCM size");frames=0;}
         for(size_t offset=0;offset<frames;offset+=480){
-            size_t count=std::min<size_t>(480,frames-offset);std::vector<uint8_t>p(112+count*8,0);
+            size_t count=std::min<size_t>(480,frames-offset);std::vector<uint8_t>p(120+count*8,0);
             auto put=[&p](size_t at,uint64_t v,unsigned n){for(unsigned i=0;i<n;i++)p[at+i]=(uint8_t)(v>>(8*i));};
-            std::memcpy(p.data(),"NMAM",4);put(4,1,2);put(6,112,2);put(8,count*8,4);
+            std::memcpy(p.data(),"NMAM",4);put(4,2,2);put(6,120,2);put(8,count*8,4);
             put(16,context.session,8);put(24,context.stream,8);put(32,context.epoch,8);put(40,context.format,8);put(48,w.sequence++,8);
             uint64_t chunkpts=pts+(offset*1000000000ULL)/48000;
             int64_t dt=(int64_t)chunkpts-(int64_t)mark.pts;
             int64_t position=(int64_t)mark.position+dt*(int64_t)rate/1000000000LL;
             if(position<0){fatal("invalid source timeline");break;}
+            // Use the SRC's own output offset when available. Decoders that
+            // omit offsets still expose the resampler's fixed output PTS grid;
+            // never recompute that grid from a newer, jittered NTP source mark.
+            uint64_t normalized=0;
+            if(GST_BUFFER_OFFSET_IS_VALID(buffer)){
+                if(GST_BUFFER_OFFSET(buffer)>UINT64_MAX-offset-count){fatal("invalid normalized timeline");break;}
+                normalized=GST_BUFFER_OFFSET(buffer)+offset;
+            }else{
+                if(chunkpts<normalization_anchor.pts){fatal("invalid normalized timeline");break;}
+                uint64_t elapsed=chunkpts-normalization_anchor.pts;
+                normalized=gst_util_uint64_scale_round(elapsed,48000,1000000000ULL);
+            }
+            if(!w.session.have_pcm_origin){w.session.pcm_origin=normalized;w.session.source_origin=(uint64_t)position;w.session.have_pcm_origin=true;}
+            if(normalized<w.session.pcm_origin){fatal("source position reversed");break;}
+            uint64_t source_delta=gst_util_uint64_scale(normalized-w.session.pcm_origin,rate,48000);
+            if(source_delta>UINT64_MAX-w.session.source_origin){fatal("source position overflow");break;}
+            position=w.session.source_origin+source_delta;
+            put(112,normalized,8);
+            if(offset==0&&GST_BUFFER_IS_DISCONT(buffer))put(12,1,4);
             put(56,(uint64_t)position,8);put(64,chunkpts,8);put(72,context.mapping,8);put(80,mark.uncertainty,8);
             put(88,rate,4);put(92,count,2);p[94]=2;p[95]=1;float gain=w.gain;uint32_t bits;memcpy(&bits,&gain,4);put(96,bits,4);p[101]=1;put(104,48000,4);
-            std::memcpy(p.data()+112,map.data+offset*8,count*8);
+            std::memcpy(p.data()+120,map.data+offset*8,count*8);
             {std::lock_guard<std::mutex>l(w.queue_mutex);if(w.packets.size()>=200){fatal("PCM queue limit exceeded");break;}w.packets.emplace_back(std::move(p));}w.queue_cv.notify_one();
         }
         gst_buffer_unmap(buffer,&map);gst_sample_unref(sample);return GST_FLOW_OK;
@@ -220,6 +326,7 @@ struct Worker {
                 long double rtp_delta=(long double)(int32_t)(data->rtp_time-w.last_audio_rtp)*1000000000.L/data->source_rate;
                 if(std::fabs(pts_delta-rtp_delta)>50000000.L){w.reset_media_locked("timestamp_jump");return;}
             }
+            bool source_gap=w.last_audio_pts && (uint32_t)(data->rtp_time-w.last_audio_rtp)!=w.spf;
             w.last_audio_pts=data->ntp_time_local;w.last_audio_rtp=data->rtp_time;
             if(!w.pipeline||w.codec!=data->ct)w.decoder(data->ct,data->source_rate,w.spf);
             {std::lock_guard<std::mutex>s(w.state_mutex);
@@ -233,7 +340,13 @@ struct Worker {
                 if(w.marks.size()>1024)throw std::runtime_error("decoder metadata limit exceeded");
             }
             if(gst_app_src_get_current_level_bytes(GST_APP_SRC(w.source))>262144)throw std::runtime_error("decoder compressed queue limit exceeded");
+            uint64_t source_position=0;{std::lock_guard<std::mutex>s(w.state_mutex);source_position=w.extended_rtp;}
             auto b=gst_buffer_new_allocate(nullptr,data->data_len,nullptr);gst_buffer_fill(b,0,data->data,data->data_len);GST_BUFFER_PTS(b)=data->ntp_time_local;GST_BUFFER_DTS(b)=GST_CLOCK_TIME_NONE;GST_BUFFER_DURATION(b)=((uint64_t)w.spf*1000000000ULL)/data->source_rate;
+            GST_BUFFER_OFFSET(b)=source_position;GST_BUFFER_OFFSET_END(b)=source_position+w.spf;
+            // audioresample tolerates ~31 ms of timestamp mismatch by default.
+            // Real missing RTP frames must end the SRC segment even below that
+            // tolerance, so its FIR cannot mix samples across a source gap.
+            if(source_gap)GST_BUFFER_FLAG_SET(b,GST_BUFFER_FLAG_DISCONT);
             if(gst_app_src_push_buffer(GST_APP_SRC(w.source),b)!=GST_FLOW_OK)throw std::runtime_error("audio decoder rejected packet");
         }catch(const std::exception&e){fatal(e.what());}
     }
@@ -258,6 +371,7 @@ struct Worker {
         event("pairing_ended",pairing_fields_locked(connection,slot->second,pairing_generations[connection]));pairing_slots.erase(slot);
     }
     static bool pairing(void*cls,uint64_t connection,bool new_attempt){auto&w=*(Worker*)cls;std::unique_lock<std::mutex>l(w.state_mutex);
+        if(w.closing||std::find(w.closed_connections.begin(),w.closed_connections.end(),connection)!=w.closed_connections.end())return false;
         if(w.admitted||!w.pairing_enabled||Clock::now()>=w.pin_deadline||w.pairing_attempts>5)return false;
         auto attempt=w.pairing_generations.find(connection);
         if(!new_attempt)return attempt==w.pairing_generations.end()||attempt->second==w.trust_generation;
@@ -281,22 +395,28 @@ struct Worker {
         bool current_pin=attempt!=w.pairing_generations.end() && attempt->second==w.trust_generation && Clock::now()<w.pin_deadline && w.pairing_attempts<=5;
         return w.pairing_enabled && !w.blocked.count(pk) && (w.known.count(pk) || (current_pin && w.known.size()+w.blocked.size()<64));
     }
-    static void verified(void*cls,uint64_t connection,const char*pk){auto&w=*(Worker*)cls;std::lock_guard<std::mutex>l(w.state_mutex);w.verified_keys[connection]=pk?pk:"";}
+    static void verified(void*cls,uint64_t connection,const char*pk){auto&w=*(Worker*)cls;std::lock_guard<std::mutex>l(w.state_mutex);w.verified_keys[connection]=pk?pk:"";w.closed_connections.erase(std::remove(w.closed_connections.begin(),w.closed_connections.end(),connection),w.closed_connections.end());}
     static void request(void*cls,uint64_t connection,char*device,char*,char*name,bool*admit){auto&w=*(Worker*)cls;
         std::unique_lock<std::mutex>l(w.state_mutex);
         auto key=w.verified_keys.find(connection);
         if(key==w.verified_keys.end()||key->second.empty()||!w.known.count(key->second)||w.blocked.count(key->second)||!w.pairing_enabled){*admit=false;return;}
         // Repeat SETUP belongs to the existing owner. A second verified socket
         // must never overwrite the active decoder/session or its public key.
+        if(w.closing){*admit=false;return;}
         if(w.admitted){*admit=w.active_connection==connection && w.verified_key==key->second;return;}
-        if(w.admission_pending){*admit=false;return;}
+        if(w.pending_connection){*admit=false;return;}
         w.admission_pending=true;w.admission_answer=false;w.pending_connection=connection;++w.admission_id;
+        uint64_t request_id=w.admission_id;
         uint64_t generation=w.authorization_generation,trust=w.trust_generation;std::string verified=key->second;
         event("admit_request","\"trust_generation\":"+std::to_string(trust)+","+w.provenance_locked(connection,w.admission_id)+",\"client_public_key\":"+quote(key->second)+",\"device_id\":"+quote(device?device:"")+",\"name\":"+quote(name?name:""));
-        bool answered=w.admission_cv.wait_for(l,std::chrono::milliseconds(500),[&w]{return !w.admission_pending||!running;});
-        *admit=answered&&w.admission_answer&&running&&w.pairing_enabled&&generation==w.authorization_generation&&!w.blocked.count(verified);
-        w.admission_pending=false;w.pending_connection=0;
-        if(*admit){w.admitted=true;w.active_connection=connection;w.active_request=w.admission_id;w.verified_key=verified;w.context={};w.granted=false;
+        l.unlock();w.seam(SessionBarrier::AdmissionPending);l.lock();
+        bool answered=w.admission_cv.wait_for(l,std::chrono::milliseconds(500),[&w,request_id,generation]{return !w.admission_pending||w.admission_id!=request_id||w.authorization_generation!=generation||!running;});
+        *admit=answered&&w.admission_id==request_id&&w.admission_answer&&running&&w.pairing_enabled&&!w.closing&&generation==w.authorization_generation
+            &&!w.cancelled_locked({w.worker_generation,connection,request_id})&&!w.blocked.count(verified);
+        if(w.pending_connection==connection&&w.admission_id==request_id){w.admission_pending=false;w.pending_connection=0;}
+        if(*admit){w.active_connection=connection;w.active_request=request_id;w.verified_key=verified;w.context={};w.gain=1.f;w.sequence=0;w.granted=false;w.admitted=true;
+            l.unlock();w.seam(SessionBarrier::AdmittedAwaitGrant);l.lock();
+            if(w.closing||!w.admitted||generation!=w.authorization_generation||w.cancelled_locked({w.worker_generation,connection,request_id})){*admit=false;return;}
             event("session_started","\"trust_generation\":"+std::to_string(trust)+","+w.context_fields_locked()+",\"client_public_key\":"+quote(w.verified_key)+",\"device_id\":"+quote(device?device:"")+",\"name\":"+quote(name?name:""));}
     }
     static void registered(void*cls,uint64_t connection,const char*device,const char*pk,const char*name){auto&w=*(Worker*)cls;
@@ -312,16 +432,15 @@ struct Worker {
         w.pairing_end_locked(connection);
     }
     static void destroy(void*cls,uint64_t connection){auto&w=*(Worker*)cls;
-        std::lock_guard<std::mutex>d(w.decode_mutex);
-        {std::lock_guard<std::mutex>l(w.state_mutex);w.verified_keys.erase(connection);w.pairing_end_locked(connection);w.pairing_generations.erase(connection);
-            if(!w.admitted||connection!=w.active_connection)return;
-            w.admitted=false;w.granted=false;event("session_ended",w.context_fields_locked());
-            w.active_connection=0;w.active_request=0;w.context={};w.verified_key.clear();}
-        w.clear_decoder();{std::lock_guard<std::mutex>q(w.queue_mutex);w.packets.clear();}w.last_audio_pts=0;
+        std::lock_guard<std::mutex>l(w.state_mutex);w.pairing_end_locked(connection);w.pairing_generations.erase(connection);
+        uint64_t request=w.admitted&&connection==w.active_connection?w.active_request:
+            (connection==w.pending_connection?w.admission_id:0);
+        w.close_locked({w.worker_generation,connection,request},false,false);
+        w.verified_keys.erase(connection);
     }
     static void flush(void*cls,uint64_t connection){auto&w=*(Worker*)cls;std::lock_guard<std::mutex>l(w.decode_mutex);if(w.owns(connection))w.reset_media_locked("protocol");}
     static double volume_initial(void*){return 0.;}
-    static void volume(void*cls,uint64_t connection,float db){auto&w=*(Worker*)cls;std::lock_guard<std::mutex>l(w.state_mutex);if(!std::isfinite(db)||!w.admitted||connection!=w.active_connection)return;w.gain=db<=-144?0.f:std::min(1.f,std::pow(10.f,db/20.f));event("volume",w.context_fields_locked()+",\"volume_db\":"+std::to_string(db));}
+    static void volume(void*cls,uint64_t connection,float db){auto&w=*(Worker*)cls;std::lock_guard<std::mutex>l(w.state_mutex);if(!std::isfinite(db)||w.closing||!w.admitted||connection!=w.active_connection)return;w.gain=db<=-144?0.f:std::min(1.f,std::pow(10.f,db/20.f));event("volume",w.context_fields_locked()+",\"volume_db\":"+std::to_string(db));}
     static void reset(void*cls,uint64_t connection,int){flush(cls,connection);}
     void command(plist_t p){auto type=str(p,"type");
         if(type=="stop"){running=false;admission_cv.notify_all();pairing_cv.notify_all();return;}
@@ -344,14 +463,25 @@ struct Worker {
         else if(type=="admit"){std::lock_guard<std::mutex>l(state_mutex);
             if(admission_pending && number(p,"connection_id")==pending_connection && number(p,"request_id")==admission_id){admission_answer=boolean_field(p,"allowed");admission_pending=false;admission_cv.notify_all();}}
         else if(type=="grant"){std::lock_guard<std::mutex>d(decode_mutex);
+            seam(SessionBarrier::GrantBeforeInstall);
             {std::lock_guard<std::mutex>l(state_mutex);
-                if(!admitted||number(p,"connection_id")!=active_connection||number(p,"request_id")!=active_request)return;
+                if(closing||!admitted||number(p,"connection_id")!=active_connection||number(p,"request_id")!=active_request
+                    ||cancelled_locked({worker_generation,active_connection,active_request}))return;
                 if(context.session && (number(p,"session_id")!=context.session || number(p,"stream_epoch")<=context.epoch))return;
+                // Installation and cancellation serialize on this same lock.
+                Context next={number(p,"session_id"),number(p,"stream_id"),number(p,"stream_epoch"),number(p,"format_epoch"),number(p,"mapping_id")};
+                constexpr uint64_t max=(1ULL<<53)-1;
+                if(!next.session||!next.stream||!next.epoch||!next.format||!next.mapping||next.session>max||next.stream>max||next.epoch>max||next.format>max||next.mapping>max)
+                    throw std::runtime_error("invalid grant context");
+                context=next;
             }
-            set_context(p);
+            seam(SessionBarrier::GrantInstalled);
             if(pipeline&&codec)emit_format();
-            {std::lock_guard<std::mutex>l(state_mutex);event("grant_applied",context_fields_locked()+",\"stream_id\":"+std::to_string(context.stream)+",\"format_epoch\":"+std::to_string(context.format)+",\"mapping_id\":"+std::to_string(context.mapping));}
-            granted=true;
+            {std::lock_guard<std::mutex>l(state_mutex);
+                if(closing||!admitted||number(p,"connection_id")!=active_connection||number(p,"request_id")!=active_request
+                    ||cancelled_locked({worker_generation,active_connection,active_request}))return;
+                granted=true;event("grant_applied",context_fields_locked()+",\"stream_id\":"+std::to_string(context.stream)+",\"format_epoch\":"+std::to_string(context.format)+",\"mapping_id\":"+std::to_string(context.mapping));}
+            seam(SessionBarrier::GrantApplied);
         }
         else if(type=="allow"){pairing_enabled=true;}
         else if(type=="trust_update"){
@@ -362,17 +492,14 @@ struct Worker {
             while(!pairing_slots.empty())pairing_end_locked(pairing_slots.begin()->first);
             if(pairing_pending){pairing_pending=false;pairing_answer=false;pairing_cv.notify_all();}
             trust_generation=next_generation;known=std::move(next_known);blocked=std::move(next_blocked);pairing_enabled=boolean_field(p,"pairing_allowed");
-            if(admission_pending){++authorization_generation;admission_pending=false;admission_answer=false;admission_cv.notify_all();}
+            if(pending_connection){close_locked({worker_generation,pending_connection,admission_id},false,true);}
+            if(admitted&&(!pairing_enabled||blocked.count(verified_key)||!known.count(verified_key))){close_locked({worker_generation,active_connection,active_request},true,true);}
         }
         else if(type=="disconnect"||type=="revoke"){
-            uint64_t connection=number(p,"connection_id");
-            {std::lock_guard<std::mutex>d(decode_mutex);std::lock_guard<std::mutex>l(state_mutex);
-                if(!admitted||connection!=active_connection||number(p,"session_id")!=context.session||number(p,"stream_epoch")!=context.epoch)return;
-                ++authorization_generation;granted=false;
-                if(type=="revoke"&&!verified_key.empty()){blocked.insert(verified_key);known.erase(verified_key);}
-            }
-            destroy(this,connection);
-            if(raop)raop_remove_connection_id(raop,connection);
+            OwnerKey key={worker_generation,number(p,"connection_id"),number(p,"request_id")};
+            std::lock_guard<std::mutex>l(state_mutex);
+            if(granted&&admitted&&!closing && (number(p,"session_id")!=context.session||number(p,"stream_epoch")!=context.epoch))return;
+            close_locked(key,type=="revoke",true);
         }else throw std::runtime_error("unsupported control command");
     }
 };
@@ -397,7 +524,9 @@ int main(){
         }
         if(!startup_complete)throw std::runtime_error("startup control timed out");
         auto config=parse(first);
+        if(number(config,"pcm_version")!=2)throw std::runtime_error("PCM IPC v2 required");
         if(number(config,"control_version")!=2)throw std::runtime_error("control IPC v2 required");
+        if(number(config,"session_control_version")!=1)throw std::runtime_error("session control capability required");
         worker.worker_generation=number(config,"worker_generation");
         if(!worker.worker_generation||worker.worker_generation>=(1ULL<<53))throw std::runtime_error("worker_generation must be in 1..2^53-1");
         worker.trust_generation=number(config,"trust_generation");
@@ -410,7 +539,7 @@ int main(){
         auto address=str(config,"media_address"),token=str(config,"ipc_token"),device=str(config,"device_id"),keyfile=str(config,"keyfile"),name=str(config,"name","NeonMix"),pin=str(config,"pin"),receiver_uuid=str(config,"receiver_uuid");
         if(device.size()!=12||device.find_first_not_of("0123456789abcdefABCDEF")!=std::string::npos||name.empty()||name.size()>80||pin.size()!=4||pin.find_first_not_of("0123456789")!=std::string::npos)throw std::runtime_error("invalid receiver configuration");
         if(receiver_uuid.size()!=36 || receiver_uuid[8]!='-' || receiver_uuid[13]!='-' || receiver_uuid[18]!='-' || receiver_uuid[23]!='-' || receiver_uuid.find_first_not_of("0123456789abcdefABCDEF-")!=std::string::npos)throw std::runtime_error("valid stable receiver UUID required");
-        keyfile=platform::private_key_path(keyfile);
+        auto private_key=platform::read_private_key(keyfile);
         worker.known=keyset(config,"known_client_keys");worker.blocked=keyset(config,"blocked_client_keys");if(worker.known.size()+worker.blocked.size()>64)throw std::runtime_error("client key limit exceeded");worker.pairing_enabled=boolean_field(config,"pairing_allowed",true);worker.protocol_trace_enabled=boolean_field(config,"protocol_trace",false);
         auto portvalue=number(config,"rtsp_port",0);if(portvalue>65535)throw std::runtime_error("invalid listening port");plist_free(config);
         if(!getenv("GST_PLUGIN_SYSTEM_PATH_1_0") && platform::set_environment("GST_PLUGIN_SYSTEM_PATH_1_0",NEONMIX_AUDIO_PLUGIN_DIR,1))throw std::runtime_error("plugin environment configuration failed");
@@ -421,7 +550,9 @@ int main(){
         worker.connect_media(address,token);
         raop_callbacks_t callbacks{};callbacks.cls=&worker;callbacks.audio_process=Worker::audio;callbacks.audio_get_format=Worker::format;callbacks.audio_flush=Worker::flush;callbacks.audio_set_volume=Worker::volume;callbacks.audio_set_client_volume=Worker::volume_initial;callbacks.conn_destroy=Worker::destroy;callbacks.conn_reset=Worker::reset;callbacks.report_client_request=Worker::request;callbacks.display_pin=Worker::pin;callbacks.register_client=Worker::registered;callbacks.check_register=Worker::check;callbacks.pairing_detail=Worker::detail;callbacks.protocol_trace=Worker::trace;callbacks.protocol_transport=Worker::transport;callbacks.client_allowed=Worker::allowed;callbacks.verified_client=Worker::verified;callbacks.pairing_allowed=Worker::pairing;
         worker.raop=raop_init(&callbacks);if(!worker.raop)throw std::runtime_error("receiver allocation failed");raop_set_log_level(worker.raop,-1);raop_set_log_callback(worker.raop,[](void*,int,const char*){},nullptr);
-        if(raop_init2(worker.raop,0,device.c_str(),keyfile.c_str())<0)throw std::runtime_error("receiver identity initialization failed");
+        int identity_result=raop_init2_from_pem(worker.raop,0,private_key->bytes.data(),private_key->size);
+        private_key->clear();
+        if(identity_result<0)throw std::runtime_error("identity_format_invalid");
         raop_set_receiver_uuid(worker.raop,receiver_uuid.c_str());
         raop_set_plist(worker.raop,"pin",10000+std::stoi(pin));raop_set_plist(worker.raop,"hls",0);
         unsigned char hw[6];for(unsigned i=0;i<6;i++)hw[i]=std::stoul(device.substr(i*2,2),nullptr,16);
@@ -431,7 +562,7 @@ int main(){
         for(int i:{9,11,12,14,18,19,20,27,30})dnssd_set_airplay_features(worker.dns,i,1);
         raop_set_dnssd(worker.raop,worker.dns);unsigned short port=(unsigned short)portvalue;
         if(raop_start_httpd(worker.raop,&port)<0||!port)throw std::runtime_error("RTSP listen failed");
-        event("ready","\"control_version\":2,\"worker_generation\":"+std::to_string(worker.worker_generation)+",\"port\":"+std::to_string(port)+",\"public_key\":"+quote(raop_get_public_key(worker.raop))+",\"features\":"+std::to_string(dnssd_get_airplay_features(worker.dns)));
+        event("ready","\"control_version\":2,\"session_control_version\":1,\"pcm_version\":2,\"identity_loader_version\":1,\"stop_version\":1,\"worker_generation\":"+std::to_string(worker.worker_generation)+",\"port\":"+std::to_string(port)+",\"public_key\":"+quote(raop_get_public_key(worker.raop))+",\"features\":"+std::to_string(dnssd_get_airplay_features(worker.dns)));
         std::string line;
         while(running){char bytes[2048];auto count=platform::read_control(bytes,sizeof(bytes),100);
             if(count<0){running=false;break;}
@@ -441,6 +572,6 @@ int main(){
             {std::lock_guard<std::mutex>l(worker.decode_mutex);if(worker.pipeline){auto bus=gst_element_get_bus(worker.pipeline);auto message=gst_bus_pop_filtered(bus,(GstMessageType)(GST_MESSAGE_ERROR));if(message){GError*e=nullptr;char*debug=nullptr;gst_message_parse_error(message,&e,&debug);fatal(e?e->message:"decoder error");if(e)g_error_free(e);g_free(debug);gst_message_unref(message);}gst_object_unref(bus);}}
         }
         raop_stop_httpd(worker.raop);
-        return 0;
+        return failed?1:0;
     }catch(const std::exception&e){fatal(e.what());return 1;}
 }

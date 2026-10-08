@@ -1,0 +1,805 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling sys-locale v0.3.2
+   Compiling zerocopy-derive v0.8.59
+   Compiling synstructure v0.14.0
+   Compiling displaydoc v0.2.7
+   Compiling zerovec-derive v0.11.6
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling bytemuck_derive v1.12.1
+   Compiling foreign-types-macros v0.2.4
+   Compiling tokio-macros v2.7.2
+   Compiling clap_derive v4.6.7
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.3
+   Compiling zerocopy v0.8.59
+   Compiling foreign-types v0.5.0
+   Compiling tinystr v0.8.4
+   Compiling tokio v1.53.1
+   Compiling zerofrom v0.1.8
+   Compiling bytemuck v1.25.2
+   Compiling thiserror v2.0.21
+   Compiling clap v4.6.7
+   Compiling serde v1.0.229
+   Compiling ahash v0.8.12
+   Compiling half v2.7.1
+   Compiling unic-langid-impl v0.9.6
+   Compiling core-graphics v0.23.2
+   Compiling yoke v0.8.3
+   Compiling fluent-syntax v0.12.0
+   Compiling muda v0.21.0
+   Compiling tiff v0.11.3
+   Compiling emath v0.31.1
+   Compiling unic-langid v0.9.6
+   Compiling winit v0.30.13
+   Compiling toml_datetime v0.6.11
+   Compiling serde_spanned v0.6.9
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+   Compiling neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+   Compiling ecolor v0.31.1
+   Compiling intl_pluralrules v7.0.2
+   Compiling intl-memoizer v0.5.3
+   Compiling toml_edit v0.22.27
+   Compiling epaint v0.31.1
+   Compiling fluent-langneg v0.13.1
+   Compiling image v0.25.10
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling tray-icon v0.26.0
+   Compiling accesskit_winit v0.23.1
+   Compiling glutin-winit v0.5.0
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling toml v0.8.23
+   Compiling fluent-bundle v0.16.0
+   Compiling egui v0.31.1
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling arboard v3.6.1
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling egui_glow v0.31.1
+   Compiling icu_provider v2.3.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling webbrowser v1.2.4
+   Compiling egui-winit v0.31.1
+   Compiling eframe v0.31.1
+warning: unused import: `ResolvedLocale`
+  --> apps/desktop/src/main.rs:10:49
+   |
+10 | use neonmix_i18n::{Message, LanguagePreference, ResolvedLocale};
+   |                                                 ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0061]: this function takes 6 arguments but 5 arguments were supplied
+   --> apps/desktop/src/pages/airplay.rs:634:13
+    |
+634 |             widgets::field_sized(
+    |             ^^^^^^^^^^^^^^^^^^^^
+...
+642 |                 false,
+    |                 ----- argument #4 of type `&mut std::string::String` is missing
+    |
+note: function defined here
+   --> apps/desktop/src/widgets.rs:552:8
+    |
+552 | pub fn field_sized(
+    |        ^^^^^^^^^^^
+...
+556 |     value: &mut String,
+    |     ------------------
+help: provide the argument
+    |
+634 |             widgets::field_sized(
+...
+641 |                 &mut draft,
+642 ~                 /* &mut std::string::String */,
+643 ~                 false,
+    |
+
+error[E0308]: mismatched types
+    --> apps/desktop/src/pages/diagnostics.rs:673:56
+     |
+ 673 |                     widgets::error_text(ui, user_error(error.clone()));
+     |                                             ---------- ^^^^^^^^^^^^^ expected `UiError`, found `String`
+     |                                             |
+     |                                             arguments to this function are incorrect
+     |
+note: function defined here
+    --> apps/desktop/src/main.rs:1129:4
+     |
+1129 | fn user_error(error: UiError) -> Message {
+     |    ^^^^^^^^^^ --------------
+help: call `Into::into` on this expression to convert `std::string::String` into `UiError`
+     |
+ 673 |                     widgets::error_text(ui, user_error(error.clone().into()));
+     |                                                                     +++++++
+
+error[E0277]: the trait bound `std::string::String: From<neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/pages/diagnostics.rs:673:45
+    |
+673 |                     widgets::error_text(ui, user_error(error.clone()));
+    |                     -------------------     ^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `From<neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                     |
+    |                     required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `error_text`
+   --> apps/desktop/src/widgets.rs:529:43
+    |
+529 | pub fn error_text(ui: &mut Ui, text: impl Into<String>) {
+    |                                           ^^^^^^^^^^^^ required by this bound in `error_text`
+
+error[E0308]: mismatched types
+    --> apps/desktop/src/pages/diagnostics.rs:705:52
+     |
+ 705 |                 widgets::error_text(ui, user_error(error.clone()));
+     |                                         ---------- ^^^^^^^^^^^^^ expected `UiError`, found `String`
+     |                                         |
+     |                                         arguments to this function are incorrect
+     |
+note: function defined here
+    --> apps/desktop/src/main.rs:1129:4
+     |
+1129 | fn user_error(error: UiError) -> Message {
+     |    ^^^^^^^^^^ --------------
+help: call `Into::into` on this expression to convert `std::string::String` into `UiError`
+     |
+ 705 |                 widgets::error_text(ui, user_error(error.clone().into()));
+     |                                                                 +++++++
+
+error[E0277]: the trait bound `std::string::String: From<neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/pages/diagnostics.rs:705:41
+    |
+705 |                 widgets::error_text(ui, user_error(error.clone()));
+    |                 -------------------     ^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `From<neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                 |
+    |                 required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `error_text`
+   --> apps/desktop/src/widgets.rs:529:43
+    |
+529 | pub fn error_text(ui: &mut Ui, text: impl Into<String>) {
+    |                                           ^^^^^^^^^^^^ required by this bound in `error_text`
+
+error[E0308]: mismatched types
+    --> apps/desktop/src/pages/room.rs:198:56
+     |
+ 198 |                     widgets::error_text(ui, user_error(e));
+     |                                             ---------- ^ expected `UiError`, found `String`
+     |                                             |
+     |                                             arguments to this function are incorrect
+     |
+note: function defined here
+    --> apps/desktop/src/main.rs:1129:4
+     |
+1129 | fn user_error(error: UiError) -> Message {
+     |    ^^^^^^^^^^ --------------
+help: call `Into::into` on this expression to convert `std::string::String` into `UiError`
+     |
+ 198 |                     widgets::error_text(ui, user_error(e.into()));
+     |                                                         +++++++
+
+error[E0277]: the trait bound `std::string::String: From<neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/pages/room.rs:198:45
+    |
+198 |                     widgets::error_text(ui, user_error(e));
+    |                     -------------------     ^^^^^^^^^^^^^ the trait `From<neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                     |
+    |                     required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `error_text`
+   --> apps/desktop/src/widgets.rs:529:43
+    |
+529 | pub fn error_text(ui: &mut Ui, text: impl Into<String>) {
+    |                                           ^^^^^^^^^^^^ required by this bound in `error_text`
+
+error[E0308]: mismatched types
+    --> apps/desktop/src/pages/sender.rs:467:56
+     |
+ 467 |                     widgets::error_text(ui, user_error(e));
+     |                                             ---------- ^ expected `UiError`, found `String`
+     |                                             |
+     |                                             arguments to this function are incorrect
+     |
+note: function defined here
+    --> apps/desktop/src/main.rs:1129:4
+     |
+1129 | fn user_error(error: UiError) -> Message {
+     |    ^^^^^^^^^^ --------------
+help: call `Into::into` on this expression to convert `std::string::String` into `UiError`
+     |
+ 467 |                     widgets::error_text(ui, user_error(e.into()));
+     |                                                         +++++++
+
+error[E0277]: the trait bound `std::string::String: From<neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/pages/sender.rs:467:45
+    |
+467 |                     widgets::error_text(ui, user_error(e));
+    |                     -------------------     ^^^^^^^^^^^^^ the trait `From<neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                     |
+    |                     required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `error_text`
+   --> apps/desktop/src/widgets.rs:529:43
+    |
+529 | pub fn error_text(ui: &mut Ui, text: impl Into<String>) {
+    |                                           ^^^^^^^^^^^^ required by this bound in `error_text`
+
+error[E0277]: `neonmix_i18n::Message` doesn't implement `std::fmt::Display`
+  --> apps/desktop/src/palette.rs:68:29
+   |
+68 |                 format!("前往 {title}"),
+   |                               ^^^^^^^ `neonmix_i18n::Message` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `neonmix_i18n::Message`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+
+error[E0277]: `neonmix_i18n::Message` doesn't implement `std::fmt::Display`
+  --> apps/desktop/src/palette.rs:80:34
+   |
+80 |                 format!("还原：{}", undo.label),
+   |                                --   ^^^^^^^^^^ `neonmix_i18n::Message` cannot be formatted with the default formatter
+   |                                |
+   |                                required by this formatting parameter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `neonmix_i18n::Message`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+   --> apps/desktop/src/palette.rs:441:50
+    |
+441 |                 if on { "总静音" } else { "取消总静音" }.into(),
+    |                                                          ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+    |
+    = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+   --> apps/desktop/src/palette.rs:476:24
+    |
+476 |                 "退出后台".into(),
+    |                            ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+    |
+    = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+   --> apps/desktop/src/palette.rs:477:56
+    |
+477 |                 "停止本实例的共享、发送和全部音频连接。关闭窗口不会停止音频；退出后台会。".into(),
+    |                                                                                            ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+    |
+    = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0308]: mismatched types
+  --> apps/desktop/src/shell.rs:15:28
+   |
+15 |         if self.message != self.shown_message {
+   |            ------------    ^^^^^^^^^^^^^^^^^^ expected `Message`, found `Option<Message>`
+   |            |
+   |            expected because this is `neonmix_i18n::Message`
+   |
+   = note: expected enum `neonmix_i18n::Message`
+              found enum `std::option::Option<neonmix_i18n::Message>`
+help: consider using `Option::expect` to unwrap the `std::option::Option<neonmix_i18n::Message>` value, panicking if the value is an `Option::None`
+   |
+15 |         if self.message != self.shown_message.expect("REASON") {
+   |                                              +++++++++++++++++
+
+error[E0308]: mismatched types
+  --> apps/desktop/src/shell.rs:22:34
+   |
+22 |             self.shown_message = self.message.clone();
+   |             ------------------   ^^^^^^^^^^^^^^^^^^^^ expected `Option<Message>`, found `Message`
+   |             |
+   |             expected due to the type of this binding
+   |
+   = note: expected enum `std::option::Option<neonmix_i18n::Message>`
+              found enum `neonmix_i18n::Message`
+help: try wrapping the expression in `Some`
+   |
+22 |             self.shown_message = Some(self.message.clone());
+   |                                  +++++                    +
+
+error[E0277]: the trait bound `neonmix_i18n::Message: Hash` is not satisfied
+   --> apps/desktop/src/shell.rs:90:30
+    |
+ 90 |                     .id_salt(self.page.title())
+    |                      ------- ^^^^^^^^^^^^^^^^^ the trait `Hash` is not implemented for `neonmix_i18n::Message`
+    |                      |
+    |                      required by a bound introduced by this call
+    |
+note: required by a bound in `eframe::egui::ScrollArea::id_salt`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/containers/scroll_area.rs:315:44
+    |
+315 |     pub fn id_salt(mut self, id_salt: impl std::hash::Hash) -> Self {
+    |                                            ^^^^^^^^^^^^^^^ required by this bound in `ScrollArea::id_salt`
+help: consider removing this method call, as the receiver has type `Page` and `Page: Hash` trivially holds
+    |
+ 90 -                     .id_salt(self.page.title())
+ 90 +                     .id_salt(self.page)
+    |
+
+error[E0277]: the trait bound `neonmix_i18n::Message: ToString` is not satisfied
+   --> apps/desktop/src/shell.rs:235:86
+    |
+235 |                 egui::WidgetInfo::selected(egui::WidgetType::Button, true, selected, title)
+    |                 --------------------------                                           ^^^^^ the trait `std::fmt::Display` is not implemented for `neonmix_i18n::Message`
+    |                 |
+    |                 required by a bound introduced by this call
+    |
+    = note: required for `neonmix_i18n::Message` to implement `ToString`
+note: required by a bound in `WidgetInfo::selected`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/data/output.rs:613:81
+    |
+613 |     pub fn selected(typ: WidgetType, enabled: bool, selected: bool, label: impl ToString) -> Self {
+    |                                                                                 ^^^^^^^^ required by this bound in `WidgetInfo::selected`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: ToString` is not satisfied
+   --> apps/desktop/src/shell.rs:276:17
+    |
+273 |             painter.text(
+    |                     ---- required by a bound introduced by this call
+...
+276 |                 title,
+    |                 ^^^^^ the trait `std::fmt::Display` is not implemented for `neonmix_i18n::Message`
+    |
+    = note: required for `neonmix_i18n::Message` to implement `ToString`
+note: required by a bound in `eframe::egui::Painter::text`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/painter.rs:505:20
+    |
+501 |     pub fn text(
+    |            ---- required by a bound in this associated function
+...
+505 |         text: impl ToString,
+    |                    ^^^^^^^^ required by this bound in `Painter::text`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+   --> apps/desktop/src/shell.rs:375:28
+    |
+375 |                     "退出后台".into(),
+    |                                ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+    |
+    = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+   --> apps/desktop/src/shell.rs:377:26
+    |
+377 |                         .into(),
+    |                          ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+    |
+    = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0277]: the trait bound `std::string::String: From<neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/shell.rs:521:31
+    |
+521 |                 RichText::new(title)
+    |                 ------------- ^^^^^ the trait `From<neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                 |
+    |                 required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `eframe::egui::RichText::new`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/widget_text.rs:102:27
+    |
+102 |     pub fn new(text: impl Into<String>) -> Self {
+    |                           ^^^^^^^^^^^^ required by this bound in `RichText::new`
+
+error[E0308]: mismatched types
+   --> apps/desktop/src/shell.rs:626:13
+    |
+626 | /             format!(
+627 | |                 "总音量 {} → {} dB",
+628 | |                 widgets::gain_text(current),
+629 | |                 widgets::gain_text(gain)
+630 | |             ),
+    | |_____________^ expected `Message`, found `String`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+   --> apps/desktop/src/shell.rs:644:46
+    |
+644 |             if on { "总静音" } else { "取消总静音" }.into(),
+    |                                                      ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+    |
+    = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0277]: `neonmix_i18n::Message` doesn't implement `std::fmt::Display`
+   --> apps/desktop/src/shell.rs:715:57
+    |
+715 |                         RichText::new(format!("已调整：{}", undo.label))
+    |                                                        --   ^^^^^^^^^^ `neonmix_i18n::Message` cannot be formatted with the default formatter
+    |                                                        |
+    |                                                        required by this formatting parameter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `neonmix_i18n::Message`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+
+error[E0277]: the trait bound `std::string::String: From<&neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/shell.rs:745:43
+    |
+745 | ...                   RichText::new(&self.message)
+    |                       ------------- ^^^^^^^^^^^^^ the trait `From<&neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                       |
+    |                       required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `&neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `eframe::egui::RichText::new`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/widget_text.rs:102:27
+    |
+102 |     pub fn new(text: impl Into<String>) -> Self {
+    |                           ^^^^^^^^^^^^ required by this bound in `RichText::new`
+
+error[E0277]: the trait bound `WidgetText: From<&neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/shell.rs:751:36
+    |
+751 |                     .on_hover_text(&self.message);
+    |                      ------------- ^^^^^^^^^^^^^ the trait `From<&neonmix_i18n::Message>` is not implemented for `WidgetText`
+    |                      |
+    |                      required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `WidgetText` implements `From<&Box<str>>`
+              `WidgetText` implements `From<&std::string::String>`
+              `WidgetText` implements `From<&str>`
+              `WidgetText` implements `From<Arc<eframe::egui::Galley>>`
+              `WidgetText` implements `From<Box<str>>`
+              `WidgetText` implements `From<Cow<'_, str>>`
+              `WidgetText` implements `From<eframe::egui::RichText>`
+              `WidgetText` implements `From<eframe::egui::text::LayoutJob>`
+              `WidgetText` implements `From<std::string::String>`
+    = note: required for `&neonmix_i18n::Message` to implement `Into<WidgetText>`
+note: required by a bound in `Response::on_hover_text`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/response.rs:805:43
+    |
+805 |     pub fn on_hover_text(self, text: impl Into<WidgetText>) -> Self {
+    |                                           ^^^^^^^^^^^^^^^^ required by this bound in `Response::on_hover_text`
+
+error[E0277]: the trait bound `std::string::String: From<&neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/shell.rs:775:35
+    |
+775 |                     RichText::new(&confirmation.label)
+    |                     ------------- ^^^^^^^^^^^^^^^^^^^ the trait `From<&neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                     |
+    |                     required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `&neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `eframe::egui::RichText::new`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/widget_text.rs:102:27
+    |
+102 |     pub fn new(text: impl Into<String>) -> Self {
+    |                           ^^^^^^^^^^^^ required by this bound in `RichText::new`
+
+error[E0277]: the trait bound `std::string::String: From<&neonmix_i18n::Message>` is not satisfied
+   --> apps/desktop/src/shell.rs:780:40
+    |
+780 |                 ui.label(RichText::new(&confirmation.consequence).color(theme::TEXT_2));
+    |                          ------------- ^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `From<&neonmix_i18n::Message>` is not implemented for `std::string::String`
+    |                          |
+    |                          required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `From<T>`:
+              `std::string::String` implements `From<&mut str>`
+              `std::string::String` implements `From<&std::string::String>`
+              `std::string::String` implements `From<&str>`
+              `std::string::String` implements `From<Box<str>>`
+              `std::string::String` implements `From<Cow<'_, str>>`
+              `std::string::String` implements `From<Uuid>`
+              `std::string::String` implements `From<char>`
+              `std::string::String` implements `From<clap::Id>`
+            and 3 others
+    = note: required for `&neonmix_i18n::Message` to implement `Into<std::string::String>`
+note: required by a bound in `eframe::egui::RichText::new`
+   --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/widget_text.rs:102:27
+    |
+102 |     pub fn new(text: impl Into<String>) -> Self {
+    |                           ^^^^^^^^^^^^ required by this bound in `RichText::new`
+
+error[E0308]: mismatched types
+   --> apps/desktop/src/shell.rs:784:59
+    |
+784 |                     if widgets::button_enabled(ui, !busy, &action, Kind::Danger).clicked() {
+    |                        -----------------------            ^^^^^^^ expected `&str`, found `&Message`
+    |                        |
+    |                        arguments to this function are incorrect
+    |
+    = note: expected reference `&str`
+               found reference `&neonmix_i18n::Message`
+note: function defined here
+   --> apps/desktop/src/widgets.rs:286:8
+    |
+286 | pub fn button_enabled(ui: &mut Ui, enabled: bool, text: &str, kind: Kind) -> Response {
+    |        ^^^^^^^^^^^^^^                             ----------
+
+error[E0308]: mismatched types
+   --> apps/desktop/src/viz.rs:211:13
+    |
+209 |         let state = label(
+    |                     ----- arguments to this function are incorrect
+210 |             painter,
+211 |             step.state.word(ui),
+    |             ^^^^^^^^^^^^^^^^^^^ expected `&str`, found `String`
+    |
+note: function defined here
+   --> apps/desktop/src/viz.rs:253:4
+    |
+253 | fn label(
+    |    ^^^^^
+254 |     painter: &egui::Painter,
+255 |     text: &str,
+    |     ----------
+help: consider borrowing here
+    |
+211 |             &step.state.word(ui),
+    |             +
+
+error[E0061]: this function takes 5 arguments but 4 arguments were supplied
+    --> apps/desktop/src/main.rs:1367:21
+     |
+1367 |                     widgets::field(ui, "受测字段", &mut value, secret);
+     |                     ^^^^^^^^^^^^^^                             ------ argument #4 of type `&mut std::string::String` is missing
+     |
+note: function defined here
+    --> apps/desktop/src/widgets.rs:548:8
+     |
+ 548 | pub fn field(ui: &mut Ui, id_salt: impl std::hash::Hash, label: &str, value: &mut String, secret: bool) -> Response {
+     |        ^^^^^                                                          ------------------
+help: provide the argument
+     |
+1367 |                     widgets::field(ui, "受测字段", &mut value, /* &mut std::string::String */, secret);
+     |                                                                +++++++++++++++++++++++++++++++
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+    --> apps/desktop/src/main.rs:1404:43
+     |
+1404 |                 app.message = "设备不可用，请刷新".into();
+     |                                                    ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+     |
+     = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0061]: this function takes 5 arguments but 4 arguments were supplied
+    --> apps/desktop/src/main.rs:1626:25
+     |
+1626 |                         widgets::field(ui, "房间名称", &mut value, false);
+     |                         ^^^^^^^^^^^^^^                             ----- argument #4 of type `&mut std::string::String` is missing
+     |
+note: function defined here
+    --> apps/desktop/src/widgets.rs:548:8
+     |
+ 548 | pub fn field(ui: &mut Ui, id_salt: impl std::hash::Hash, label: &str, value: &mut String, secret: bool) -> Response {
+     |        ^^^^^                                                          ------------------
+help: provide the argument
+     |
+1626 |                         widgets::field(ui, "房间名称", &mut value, /* &mut std::string::String */, false);
+     |                                                                    +++++++++++++++++++++++++++++++
+
+error[E0277]: the trait bound `UiError: From<&str>` is not satisfied
+    --> apps/desktop/src/main.rs:1660:30
+     |
+1660 |         done.send(Err("连接中断".into())).unwrap();
+     |                                  ^^^^ unsatisfied trait bound
+     |
+help: the trait `From<&str>` is not implemented for `UiError`
+      but trait `From<std::string::String>` is implemented for it
+    --> apps/desktop/src/main.rs:1126:1
+     |
+1126 | impl From<String> for UiError {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = help: for that trait implementation, expected `std::string::String`, found `&str`
+     = note: required for `&str` to implement `Into<UiError>`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+    --> apps/desktop/src/main.rs:1710:20
+     |
+1710 |             "退出后台".into(),
+     |                        ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+     |
+     = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0277]: the trait bound `neonmix_i18n::Message: From<&str>` is not satisfied
+    --> apps/desktop/src/main.rs:1711:23
+     |
+1711 |             "停止本实例音频".into(),
+     |                              ^^^^ the trait `From<&str>` is not implemented for `neonmix_i18n::Message`
+     |
+     = note: required for `&str` to implement `Into<neonmix_i18n::Message>`
+
+error[E0308]: mismatched types
+    --> apps/desktop/src/main.rs:2048:13
+     |
+2047 |         app.message =
+     |         ----------- expected due to the type of this binding
+2048 |             "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。".repeat(3);
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Message`, found `String`
+     |
+help: try wrapping the expression in a variant of `neonmix_i18n::Message`
+     |
+2048 |             neonmix_i18n::Message::AboutVersionValue { version: "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。".repeat(3) };
+     |             +++++++++++++++++++++++++++++++++++++++++++++++++++                                                                                      +
+2048 |             neonmix_i18n::Message::DevicesRevokeTitle { name: "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。".repeat(3) };
+     |             +++++++++++++++++++++++++++++++++++++++++++++++++                                                                                      +
+2048 |             neonmix_i18n::Message::DiagnosticsCaptureFrameValue { value: "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。".repeat(3) };
+     |             ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++                                                                                      +
+2048 |             neonmix_i18n::Message::DiagnosticsChannelId { id: "状态已被其他操作更新，请核对后重试；未提交的设备名称与别名草稿仍会保留。".repeat(3) };
+     |             +++++++++++++++++++++++++++++++++++++++++++++++++                                                                                      +
+     = and 35 other candidates
+
+error[E0277]: the trait bound `UiError: From<&str>` is not satisfied
+    --> apps/desktop/src/main.rs:2235:44
+     |
+2235 |             error: Some("connection reset".into()),
+     |                                            ^^^^ unsatisfied trait bound
+     |
+help: the trait `From<&str>` is not implemented for `UiError`
+      but trait `From<std::string::String>` is implemented for it
+    --> apps/desktop/src/main.rs:1126:1
+     |
+1126 | impl From<String> for UiError {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = help: for that trait implementation, expected `std::string::String`, found `&str`
+     = note: required for `&str` to implement `Into<UiError>`
+
+error[E0500]: closure requires unique access to `*self` but it is already borrowed
+   --> apps/desktop/src/pages/devices.rs:333:27
+    |
+247 |         let info = |ui: &mut egui::Ui| {
+    |                    ------------------- borrow occurs here
+...
+263 |                         widgets::pill(ui, &self.tr(&role_name(device.role)), Tone::Neutral);
+    |                                            ---- first borrow occurs due to use of `*self` in closure
+...
+333 |             ui.horizontal(|ui| {
+    |                           ^^^^ closure construction occurs here
+...
+338 |                     info,
+    |                     ---- first borrow later captured here by closure
+339 |                 );
+340 |                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| actions(self, ui));
+    |                                                                                   ---- second borrow occurs due to use of `*self` in closure
+
+error[E0500]: closure requires unique access to `*self` but it is already borrowed
+   --> apps/desktop/src/pages/mixer.rs:256:13
+    |
+238 |         widgets::card_ex(
+    |         ---------------- first borrow later used by call
+...
+243 |             |ui| {
+    |             ---- borrow occurs here
+...
+248 |                         &self.tr(&Message::MixerLimiterValue {
+    |                          ---- first borrow occurs due to use of `*self` in closure
+...
+256 |             |ui| {
+    |             ^^^^ closure construction occurs here
+...
+295 |                                     let (commit, response) = self.gain_control(
+    |                                                              ---- second borrow occurs due to use of `*self` in closure
+
+error[E0502]: cannot borrow `*self` as mutable because it is also borrowed as immutable
+   --> apps/desktop/src/pages/mixer.rs:553:52
+    |
+425 |                 let name_block = |ui: &mut egui::Ui, width: f32| {
+    |                                  ------------------------------- immutable borrow occurs here
+...
+472 |                                                 RichText::new(format!("{} ·", self.tr(role)))
+    |                                                                               ---- first borrow occurs due to use of `*self` in closure
+...
+553 |                 ui.add_enabled_ui(self.writable(), |ui| {
+    |                                                    ^^^^ mutable borrow occurs here
+...
+556 |                             if name_block(ui, 196.0).clicked() {
+    |                                ---------- immutable borrow later captured here by closure
+...
+575 |                                         let (commit, response) = self.gain_control(
+    |                                                                  ---- second borrow occurs due to use of `*self` in closure
+
+error[E0507]: cannot move out of `state`, a captured variable in an `Fn` closure
+    --> apps/desktop/src/widgets.rs:1631:112
+     |
+1622 |             let state = match step {
+     |                 ----- captured outer variable
+...
+1627 |             response.widget_info(|| {
+     |                                  -- captured by this `Fn` closure
+...
+1631 |                     text(ui, &Message::WidgetsStepAccessible { number: (i + 1) as u64, label: (*label).into(), state }),
+     |                                                                                                                ^^^^^ move occurs because `state` has type `std::string::String`, which does not implement the `Copy` trait
+     |
+help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
+    --> /Volumes/projects-mac/NeonMix/.local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egui-0.31.1/src/response.rs:946:47
+     |
+ 946 |     pub fn widget_info(&self, make_info: impl Fn() -> crate::WidgetInfo) {
+     |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+help: consider cloning the value if the performance cost is acceptable
+     |
+1631 |                     text(ui, &Message::WidgetsStepAccessible { number: (i + 1) as u64, label: (*label).into(), state: state.clone() }),
+     |                                                                                                                     +++++++++++++++
+
+Some errors have detailed explanations: E0061, E0277, E0308, E0500, E0502, E0507.
+For more information about an error, try `rustc --explain E0061`.
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 1 warning
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 43 previous errors; 1 warning emitted

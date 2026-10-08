@@ -1,0 +1,304 @@
+[[message]]
+id = "hub-adding-entries-keeps-existing-sources-connected-disconnect-sources"
+
+[[message]]
+id = "hub-airplay-entry"
+
+[[message]]
+id = "hub-airplay-receiver-entries"
+
+[[message]]
+id = "hub-airplay-repair-consequence"
+args = { name = "string" }
+
+[[message]]
+id = "hub-airplay-repair-entry"
+args = { name = "string" }
+
+[[message]]
+id = "hub-airplay-repair-title"
+args = { name = "string" }
+
+[[message]]
+id = "hub-airplay-revoke-title"
+args = { name = "string" }
+
+[[message]]
+id = "hub-airplay-source"
+
+[[message]]
+id = "hub-aliases-are-only-used-for-room-display-they"
+
+[[message]]
+id = "hub-allow-playback-again"
+
+[[message]]
+id = "hub-an-invitation-lets-one-device-join-the-room"
+
+[[message]]
+id = "hub-applies-on-this-entry-s-next-start-receiver"
+
+[[message]]
+id = "hub-audio-video-sync"
+
+[[message]]
+id = "hub-cancel"
+
+[[message]]
+id = "hub-cancel-invitation"
+
+[[message]]
+id = "hub-clear-alias"
+
+[[message]]
+id = "hub-connect-to-a-room-to-view-and-enable"
+
+[[message]]
+id = "hub-connected"
+
+[[message]]
+id = "hub-copied"
+
+[[message]]
+id = "hub-copy-invitation"
+
+[[message]]
+id = "hub-create-one-time-invitation"
+
+[[message]]
+id = "hub-create-room"
+
+[[message]]
+id = "hub-discard-changes"
+
+[[message]]
+id = "hub-disconnect-airplay-source"
+
+[[message]]
+id = "hub-disconnect-this-source-to-change-its-playback-mode"
+
+[[message]]
+id = "hub-disconnected"
+
+[[message]]
+id = "hub-discovery-fault"
+
+[[message]]
+id = "hub-each-device-uses-a-free-entry-occupied-entries"
+
+[[message]]
+id = "hub-edit-alias"
+
+[[message]]
+id = "hub-edit-entry-name"
+
+[[message]]
+id = "hub-enable-a-free-entry-in-hub-settings-then"
+
+[[message]]
+id = "hub-end-this-device-s-audio-and-revoke-its"
+
+[[message]]
+id = "hub-enter-a-name-without-control-characters-up-to"
+
+[[message]]
+id = "hub-enter-a-room-name-and-select-a-physical"
+
+[[message]]
+id = "hub-enter-an-alias-without-control-characters-up-to"
+
+[[message]]
+id = "hub-entry"
+
+[[message]]
+id = "hub-entry-fault"
+
+[[message]]
+id = "hub-entry-name"
+
+[[message]]
+id = "hub-expired"
+
+[[message]]
+id = "hub-hidden-from-discovery"
+
+[[message]]
+id = "hub-hide-invitation-content"
+
+[[message]]
+id = "hub-hide-pairing-code"
+
+[[message]]
+id = "hub-invitation-content"
+
+[[message]]
+id = "hub-invitation-created"
+
+[[message]]
+id = "hub-invitation-seconds-left"
+args = { seconds = "u64" }
+
+[[message]]
+id = "hub-invite-device"
+
+[[message]]
+id = "hub-low-latency"
+
+[[message]]
+id = "hub-manage-devices"
+
+[[message]]
+id = "hub-member-role"
+args = { name = "string", role = "string" }
+
+[[message]]
+id = "hub-name-your-room"
+
+[[message]]
+id = "hub-not-created"
+
+[[message]]
+id = "hub-not-sharing"
+
+[[message]]
+id = "hub-off"
+
+[[message]]
+id = "hub-on"
+
+[[message]]
+id = "hub-one-time-invitation-valid-for-120-seconds"
+
+[[message]]
+id = "hub-open-pairing-window"
+
+[[message]]
+id = "hub-pairing-code-for-this-entry"
+
+[[message]]
+id = "hub-pairing-record-count"
+args = { count = "u64" }
+
+[[message]]
+id = "hub-pairing-revoked"
+
+[[message]]
+id = "hub-physical-output"
+
+[[message]]
+id = "hub-physical-output-device"
+
+[[message]]
+id = "hub-play-a-quiet-2-second-test-tone-at"
+
+[[message]]
+id = "hub-play-test-tone"
+
+[[message]]
+id = "hub-playback-blocked"
+
+[[message]]
+id = "hub-playback-mode"
+
+[[message]]
+id = "hub-preparing"
+
+[[message]]
+id = "hub-publicly-discoverable"
+
+[[message]]
+id = "hub-receiver-entry-count"
+
+[[message]]
+id = "hub-refresh-devices"
+
+[[message]]
+id = "hub-requires-a-connected-local-administrator-identity"
+
+[[message]]
+id = "hub-revoke-airplay-pairing"
+
+[[message]]
+id = "hub-room-administrators-manage-reception-and-pairing"
+
+[[message]]
+id = "hub-room-input-capacity"
+
+[[message]]
+id = "hub-room-name"
+
+[[message]]
+id = "hub-save"
+
+[[message]]
+id = "hub-save-or-discard-your-changes-first"
+
+[[message]]
+id = "hub-save-settings"
+
+[[message]]
+id = "hub-select-a-device"
+
+[[message]]
+id = "hub-sending-device-count"
+args = { count = "u64" }
+
+[[message]]
+id = "hub-set-alias"
+
+[[message]]
+id = "hub-sharing"
+
+[[message]]
+id = "hub-show-invitation-content"
+
+[[message]]
+id = "hub-show-pairing-code"
+
+[[message]]
+id = "hub-source-alias"
+
+[[message]]
+id = "hub-start-sharing"
+
+[[message]]
+id = "hub-start-sharing-devices-on-your-local-network-can"
+
+[[message]]
+id = "hub-stop-sharing"
+
+[[message]]
+id = "hub-stop-sharing-before-saving"
+
+[[message]]
+id = "hub-stop-sharing-the-room-stops-playing-paired-devices"
+
+[[message]]
+id = "hub-the-output-is-bound-to-its-device-identity"
+
+[[message]]
+id = "hub-turn-off-airplay-reception"
+
+[[message]]
+id = "hub-turn-off-this-entry"
+
+[[message]]
+id = "hub-turn-off-this-entry-to-edit-its-name"
+
+[[message]]
+id = "hub-turn-on-airplay-reception"
+
+[[message]]
+id = "hub-turn-on-this-entry"
+
+[[message]]
+id = "hub-unsaved-changes"
+
+[[message]]
+id = "hub-updating-discovery"
+
+[[message]]
+id = "hub-waiting-for-a-room-connection"
+
+[[message]]
+id = "hub-waiting-for-connection"

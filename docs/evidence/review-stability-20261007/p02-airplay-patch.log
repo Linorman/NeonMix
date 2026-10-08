@@ -1,0 +1,13 @@
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.86s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 3 tests
+test server::airplay::api::tests::source_patch_rejects_empty_invalid_and_replaced_session_before_save ... ok
+test server::airplay::api::tests::solo_only_source_patch_has_no_persistent_side_effect ... ok
+test server::airplay::api::tests::source_field_patch_preserves_other_client_mute_and_session_solo ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 57 filtered out; finished in 0.15s
+

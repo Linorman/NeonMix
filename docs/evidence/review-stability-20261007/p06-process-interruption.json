@@ -1,0 +1,310 @@
+{
+  "passed": true,
+  "scope": "actual private journal/files, independent writer SIGKILL and fresh recovery; no power-loss or Windows filesystem claim",
+  "probe_sha256": "b524d01792aaba55bfab2bb75de8021758c1edbfc2c8c620b0ed33e0f77ad698",
+  "cases": [
+    {
+      "index": 1,
+      "stage": "Write(Journal, CreateTemporary)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 2,
+      "stage": "Write(Journal, WriteTemporary)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 3,
+      "stage": "Write(Journal, SyncTemporary)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 4,
+      "stage": "Write(Journal, SyncPreparedDirectory)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 5,
+      "stage": "Write(Journal, Publish)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 6,
+      "stage": "Write(Journal, Published)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 7,
+      "stage": "Write(Journal, SyncPublishedDirectory)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 8,
+      "stage": "Prepared",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 9,
+      "stage": "Write(Journal, CreateTemporary)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 10,
+      "stage": "Write(Journal, WriteTemporary)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 11,
+      "stage": "Write(Journal, SyncTemporary)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 12,
+      "stage": "Write(Journal, SyncPreparedDirectory)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 13,
+      "stage": "Write(Journal, Publish)",
+      "new": false,
+      "revision": 1,
+      "passed": true
+    },
+    {
+      "index": 14,
+      "stage": "Write(Journal, Published)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 15,
+      "stage": "Write(Journal, SyncPublishedDirectory)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 16,
+      "stage": "CommitDecided",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 17,
+      "stage": "Write(Journal, CreateTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 18,
+      "stage": "Write(Journal, WriteTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 19,
+      "stage": "Write(Journal, SyncTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 20,
+      "stage": "Write(Journal, SyncPreparedDirectory)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 21,
+      "stage": "Write(Journal, Publish)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 22,
+      "stage": "Write(Journal, Published)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 23,
+      "stage": "Write(Journal, SyncPublishedDirectory)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 24,
+      "stage": "Write(State, CreateTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 25,
+      "stage": "Write(State, WriteTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 26,
+      "stage": "Write(State, SyncTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 27,
+      "stage": "Write(State, SyncPreparedDirectory)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 28,
+      "stage": "Write(State, Publish)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 29,
+      "stage": "Write(State, Published)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 30,
+      "stage": "Write(State, SyncPublishedDirectory)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 31,
+      "stage": "StatePublished",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 32,
+      "stage": "Write(Profile, CreateTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 33,
+      "stage": "Write(Profile, WriteTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 34,
+      "stage": "Write(Profile, SyncTemporary)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 35,
+      "stage": "Write(Profile, SyncPreparedDirectory)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 36,
+      "stage": "Write(Profile, Publish)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 37,
+      "stage": "Write(Profile, Published)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 38,
+      "stage": "Write(Profile, SyncPublishedDirectory)",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 39,
+      "stage": "ProfilePublished",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 40,
+      "stage": "Verified",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 41,
+      "stage": "RemoveJournal",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 42,
+      "stage": "JournalRemoved",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    },
+    {
+      "index": 43,
+      "stage": "SyncRemoval",
+      "new": true,
+      "revision": 2,
+      "passed": true
+    }
+  ],
+  "boundaries": 43,
+  "fixtures_removed": true
+}

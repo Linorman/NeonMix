@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 335, in <module>
+    main()
+    ~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 302, in main
+    successor = rig.client(1); new_owner = successor.setup(); successor.stream(); rig.grant(new_owner, 200, 2)
+                                           ~~~~~~~~~~~~~~~^^
+  File "/Volumes/projects-mac/NeonMix/tools/airplay_session_probe.py", line 232, in setup
+    assert code == 200, f'SETUP status {code}; event counts ' + str({kind:sum(e["type"]==kind for e in self.rig.events) for kind in ['admit_request','session_started','session_ended']})
+           ^^^^^^^^^^^
+AssertionError: SETUP status 403; event counts {'admit_request': 2, 'session_started': 0, 'session_ended': 2}

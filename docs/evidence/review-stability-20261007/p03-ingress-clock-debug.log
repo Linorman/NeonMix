@@ -1,0 +1,18 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 31.52s
+     Running tests/ingress.rs (target/debug/deps/ingress-ccf382a133e04bed)
+
+running 8 tests
+test already_applied_protocol_gain_is_not_multiplied_twice_and_late_packet_drops ... ok
+test unix_mapping_preserves_source_domain_and_release_obeys_device_budget ... ok
+test old_epoch_duplicates_clock_jump_and_bad_payload_fail_closed ... ok
+test full_short_queue_never_invalidates_already_released_pcm ... ok
+test low_latency_keeps_bounds_rejects_late_packets_and_preserves_short_deadlines ... ok
+test low_latency_removes_protocol_prefetch_without_modulating_packet_timing ... ok
+test four_second_and_byte_limits_hold_for_large_and_tiny_packets ... ok
+test low_latency_preserves_pcm_through_deep_device_callbacks ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.10s
+

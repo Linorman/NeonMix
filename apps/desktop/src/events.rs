@@ -2,20 +2,21 @@
 //! only from consecutive snapshots in this window; never persisted.
 use super::*;
 use crate::widgets::Tone;
+use neonmix_i18n::Localizer;
 use std::collections::{BTreeMap, VecDeque};
 
 pub(crate) const KEEP: usize = 20;
 
 pub(crate) struct RoomEvent {
     pub(crate) at: Instant,
-    pub(crate) text: String,
+    pub(crate) text: EventText,
     pub(crate) tone: Tone,
 }
 
 #[derive(Clone, PartialEq)]
 pub(crate) struct Mark {
     pub(crate) name: String,
-    pub(crate) status: &'static str,
+    pub(crate) status: Message,
     pub(crate) tone: Tone,
     pub(crate) solo: bool,
 }
@@ -27,23 +28,70 @@ pub(crate) struct Marks {
     pub(crate) output_muted: bool,
 }
 
-/// Sentences for the changes from `prev` to `next`, oldest first.
-pub(crate) fn diff(prev: &Marks, next: &Marks) -> Vec<(String, Tone)> {
+/// Event identity and arguments remain independent of the displayed locale.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) enum EventText {
+    Joined { name: String },
+    Status { name: String, status: Message },
+    Solo { name: String, enabled: bool },
+    Left { name: String },
+    Output { available: bool },
+    MasterMute { muted: bool },
+}
+
+impl EventText {
+    pub(crate) fn render(&self, localizer: &Localizer) -> String {
+        let message = match self {
+            Self::Joined { name } => Message::EventsSourceJoined { name: name.clone() },
+            Self::Status { name, status } => Message::EventsSourceStatus {
+                name: name.clone(),
+                status: localizer.render(status),
+            },
+            Self::Solo {
+                name,
+                enabled: true,
+            } => Message::EventsSourceSolo { name: name.clone() },
+            Self::Solo {
+                name,
+                enabled: false,
+            } => Message::EventsSourceUnsolo { name: name.clone() },
+            Self::Left { name } => Message::EventsSourceLeft { name: name.clone() },
+            Self::Output { available: true } => Message::EventsOutputRestored,
+            Self::Output { available: false } => Message::EventsOutputLost,
+            Self::MasterMute { muted: true } => Message::EventsMasterMuted,
+            Self::MasterMute { muted: false } => Message::EventsMasterUnmuted,
+        };
+        localizer.render(&message)
+    }
+}
+
+/// Changes from `prev` to `next`, oldest first. Rendering never adds events.
+pub(crate) fn diff(prev: &Marks, next: &Marks) -> Vec<(EventText, Tone)> {
     let mut out = Vec::new();
     for (key, mark) in &next.lanes {
         match prev.lanes.get(key) {
-            None => out.push((format!("「{}」开始接入", mark.name), Tone::Success)),
+            None => out.push((
+                EventText::Joined {
+                    name: mark.name.clone(),
+                },
+                Tone::Success,
+            )),
             Some(old) => {
                 if old.status != mark.status {
-                    out.push((format!("「{}」{}", mark.name, mark.status), mark.tone));
+                    out.push((
+                        EventText::Status {
+                            name: mark.name.clone(),
+                            status: mark.status.clone(),
+                        },
+                        mark.tone,
+                    ));
                 }
                 if old.solo != mark.solo {
                     out.push((
-                        format!(
-                            "「{}」{}",
-                            mark.name,
-                            if mark.solo { "Solo" } else { "取消 Solo" }
-                        ),
+                        EventText::Solo {
+                            name: mark.name.clone(),
+                            enabled: mark.solo,
+                        },
                         Tone::Solo,
                     ));
                 }
@@ -52,22 +100,37 @@ pub(crate) fn diff(prev: &Marks, next: &Marks) -> Vec<(String, Tone)> {
     }
     for (key, mark) in &prev.lanes {
         if !next.lanes.contains_key(key) {
-            out.push((format!("「{}」已离开房间", mark.name), Tone::Neutral));
+            out.push((
+                EventText::Left {
+                    name: mark.name.clone(),
+                },
+                Tone::Neutral,
+            ));
         }
     }
     if prev.output_available != next.output_available {
-        out.push(if next.output_available {
-            ("实体输出已恢复".into(), Tone::Success)
-        } else {
-            ("实体输出丢失，等待设备恢复".into(), Tone::Warning)
-        });
+        out.push((
+            EventText::Output {
+                available: next.output_available,
+            },
+            if next.output_available {
+                Tone::Success
+            } else {
+                Tone::Warning
+            },
+        ));
     }
     if prev.output_muted != next.output_muted {
-        out.push(if next.output_muted {
-            ("房间总静音".into(), Tone::Warning)
-        } else {
-            ("取消房间总静音".into(), Tone::Neutral)
-        });
+        out.push((
+            EventText::MasterMute {
+                muted: next.output_muted,
+            },
+            if next.output_muted {
+                Tone::Warning
+            } else {
+                Tone::Neutral
+            },
+        ));
     }
     out
 }
@@ -139,22 +202,19 @@ fn push(events: &mut VecDeque<RoomEvent>, event: RoomEvent) {
     events.truncate(KEEP);
 }
 
-/// "刚刚", "12 秒前", "3 分钟前".
-pub(crate) fn ago(at: Instant) -> String {
-    let s = at.elapsed().as_secs();
-    match s {
-        0..=4 => "刚刚".into(),
-        5..=59 => format!("{s} 秒前"),
-        60..=3599 => format!("{} 分钟前", s / 60),
-        _ => format!("{} 小时前", s / 3600),
-    }
+/// Relative display time uses the current locale without changing event time.
+pub(crate) fn ago(localizer: &Localizer, at: Instant) -> String {
+    localizer.render(&neonmix_i18n::LocaleFormat::relative_time_message(
+        at.elapsed().as_secs(),
+    ))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use neonmix_i18n::ResolvedLocale;
 
-    fn mark(name: &str, status: &'static str, solo: bool) -> Mark {
+    fn mark(name: &str, status: Message, solo: bool) -> Mark {
         Mark {
             name: name.into(),
             status,
@@ -167,8 +227,8 @@ mod tests {
     fn diff_names_joins_changes_leaves_and_output_in_order() {
         let prev = Marks {
             lanes: [
-                (1, mark("A", "正在播放", false)),
-                (2, mark("B", "正在播放", false)),
+                (1, mark("A", Message::SessionPlaying, false)),
+                (2, mark("B", Message::SessionPlaying, false)),
             ]
             .into(),
             output_available: true,
@@ -176,25 +236,62 @@ mod tests {
         };
         let next = Marks {
             lanes: [
-                (1, mark("A", "已静音", true)),
-                (3, mark("iPhone", "正在接收", false)),
+                (1, mark("A", Message::LaneMuted, true)),
+                (3, mark("iPhone", Message::LaneReceiving, false)),
             ]
             .into(),
             output_available: false,
             output_muted: false,
         };
-        let text: Vec<String> = diff(&prev, &next).into_iter().map(|e| e.0).collect();
+        let text: Vec<EventText> = diff(&prev, &next).into_iter().map(|e| e.0).collect();
         assert_eq!(
             text,
             [
-                "「A」已静音",
-                "「A」Solo",
-                "「iPhone」开始接入",
-                "「B」已离开房间",
-                "实体输出丢失，等待设备恢复"
+                EventText::Status {
+                    name: "A".into(),
+                    status: Message::LaneMuted
+                },
+                EventText::Solo {
+                    name: "A".into(),
+                    enabled: true
+                },
+                EventText::Joined {
+                    name: "iPhone".into()
+                },
+                EventText::Left { name: "B".into() },
+                EventText::Output { available: false },
             ]
         );
         assert!(diff(&next, &next).is_empty());
+    }
+
+    #[test]
+    fn switching_locale_rerenders_existing_history_without_new_events() {
+        let marks = Marks {
+            lanes: [(1, mark("中文设备", Message::SessionPlaying, false))].into(),
+            output_available: true,
+            output_muted: false,
+        };
+        let before = marks.clone();
+        let at = Instant::now();
+        let event = RoomEvent {
+            at,
+            text: EventText::Status {
+                name: "中文设备".into(),
+                status: Message::SessionPlaying,
+            },
+            tone: Tone::Success,
+        };
+        let mut localizer = Localizer::new(ResolvedLocale::ZhCn);
+        let chinese = event.text.render(&localizer);
+        localizer.set_locale(ResolvedLocale::En);
+        let english = event.text.render(&localizer);
+        assert_ne!(chinese, english);
+        assert!(chinese.contains("中文设备"));
+        assert!(english.contains("中文设备"));
+        assert_eq!(event.at, at);
+        assert!(diff(&before, &marks).is_empty());
+        assert!(localizer.diagnostics().is_empty());
     }
 
     #[test]
@@ -205,12 +302,14 @@ mod tests {
                 &mut events,
                 RoomEvent {
                     at: Instant::now(),
-                    text: i.to_string(),
+                    text: EventText::Joined {
+                        name: i.to_string(),
+                    },
                     tone: Tone::Neutral,
                 },
             );
         }
         assert_eq!(events.len(), KEEP);
-        assert_eq!(events[0].text, "29");
+        assert_eq!(events[0].text, EventText::Joined { name: "29".into() });
     }
 }

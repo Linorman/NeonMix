@@ -1,0 +1,11 @@
+{
+  "platform": "Linux PipeWire",
+  "scope": "real node/owner; no PCM or physical device",
+  "binary_sha256": "212ddf5b47ea1bd88c09a0e97cd8d1dea4975dc6685ef5faec2c69e56756f1a0",
+  "passed": true,
+  "second_directory_rejected_and_first_preserved": true,
+  "kernel_owner_released": true,
+  "new_instance_can_acquire_after_first_exit": true,
+  "fixture_removed": true,
+  "all_owned_children_exited": true
+}

@@ -1,0 +1,5 @@
+[ 36%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-session-probe.dir/session_probe.cpp.o
+[100%] Linking CXX executable neonmix-airplay-session-probe
+[100%] Built target neonmix-airplay-session-probe

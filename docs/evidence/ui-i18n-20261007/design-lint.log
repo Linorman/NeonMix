@@ -1,0 +1,241 @@
+{
+  "findings": [
+    {
+      "severity": "warning",
+      "path": "typography.display.0",
+      "message": "'0' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.1",
+      "message": "'1' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.2",
+      "message": "'2' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.3",
+      "message": "'3' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.4",
+      "message": "'4' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.5",
+      "message": "'5' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.6",
+      "message": "'6' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.7",
+      "message": "'7' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.8",
+      "message": "'8' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.9",
+      "message": "'9' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.10",
+      "message": "'10' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.11",
+      "message": "'11' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "typography.display.12",
+      "message": "'12' is not a recognized typography property. Valid properties: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, fontFeature, fontVariation."
+    },
+    {
+      "severity": "warning",
+      "path": "components.signalFlow.note",
+      "message": "'note' is not a recognized component sub-token. Valid sub-tokens: backgroundColor, textColor, typography, rounded, padding, size, height, width.",
+      "rule": "broken-ref"
+    },
+    {
+      "severity": "warning",
+      "path": "components.channelStrip.note",
+      "message": "'note' is not a recognized component sub-token. Valid sub-tokens: backgroundColor, textColor, typography, rounded, padding, size, height, width.",
+      "rule": "broken-ref"
+    },
+    {
+      "severity": "warning",
+      "path": "components.button.variants",
+      "message": "'variants' is not a recognized component sub-token. Valid sub-tokens: backgroundColor, textColor, typography, rounded, padding, size, height, width.",
+      "rule": "broken-ref"
+    },
+    {
+      "severity": "warning",
+      "path": "components.fader.note",
+      "message": "'note' is not a recognized component sub-token. Valid sub-tokens: backgroundColor, textColor, typography, rounded, padding, size, height, width.",
+      "rule": "broken-ref"
+    },
+    {
+      "severity": "warning",
+      "path": "components.panel.note",
+      "message": "'note' is not a recognized component sub-token. Valid sub-tokens: backgroundColor, textColor, typography, rounded, padding, size, height, width.",
+      "rule": "broken-ref"
+    },
+    {
+      "severity": "warning",
+      "path": "components.palette.note",
+      "message": "'note' is not a recognized component sub-token. Valid sub-tokens: backgroundColor, textColor, typography, rounded, padding, size, height, width.",
+      "rule": "broken-ref"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.backgroundDeep",
+      "message": "'backgroundDeep' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.sidebar",
+      "message": "'sidebar' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.raised",
+      "message": "'raised' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.hover",
+      "message": "'hover' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.input",
+      "message": "'input' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.border",
+      "message": "'border' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.borderStrong",
+      "message": "'borderStrong' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.text",
+      "message": "'text' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.textSecondary",
+      "message": "'textSecondary' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.textMuted",
+      "message": "'textMuted' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.sourceNative",
+      "message": "'sourceNative' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.sourceAirplay",
+      "message": "'sourceAirplay' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.sourceHub",
+      "message": "'sourceHub' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.sourceOutput",
+      "message": "'sourceOutput' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.solo",
+      "message": "'solo' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.success",
+      "message": "'success' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.warning",
+      "message": "'warning' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.danger",
+      "message": "'danger' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.meterLow",
+      "message": "'meterLow' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.meterMid",
+      "message": "'meterMid' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "warning",
+      "path": "colors.meterHigh",
+      "message": "'meterHigh' is defined but never referenced by any component.",
+      "rule": "orphaned-tokens"
+    },
+    {
+      "severity": "info",
+      "message": "Design system defines 24 colors, 4 typography scales, 3 rounding levels, 4 spacing tokens, 6 components.",
+      "rule": "token-summary"
+    }
+  ],
+  "summary": {
+    "errors": 0,
+    "warnings": 40,
+    "infos": 1
+  }
+}

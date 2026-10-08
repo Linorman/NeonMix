@@ -1,0 +1,44 @@
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":0,"stream_epoch":0}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":0,"stream_epoch":0}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":0,"stream_epoch":0}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":2,"request_id":3,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"grant_applied","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6,"stream_id":5,"format_epoch":7,"mapping_id":8}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":20,"request_id":1,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"volume","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"volume_db":-144.000000}
+{"type":"flush","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"reason":"protocol"}
+{"type":"session_ended","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":21,"request_id":2,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":21,"request_id":2,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":20,"request_id":1,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"volume","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"volume_db":-18.000000}
+{"type":"flush","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"reason":"protocol"}
+{"type":"session_ended","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":21,"request_id":2,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":21,"request_id":2,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":20,"request_id":1,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"volume","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"volume_db":0.000000}
+{"type":"flush","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0,"reason":"protocol"}
+{"type":"session_ended","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0}
+{"type":"admit_request","trust_generation":1,"worker_generation":7,"connection_id":21,"request_id":2,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_started","trust_generation":1,"worker_generation":7,"connection_id":21,"request_id":2,"session_id":0,"stream_epoch":0,"client_public_key":"owner","device_id":"","name":""}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6}
+cancel barrier 0 passed
+cancel barrier 1 passed
+cancel barrier 2 passed
+cancel barrier 3 passed
+cancel barrier 4 passed
+session volume -144 passed
+session volume -18 passed
+session volume 0 passed

@@ -9,6 +9,7 @@
 **/.credentials/
 **/runtime-key-*
 **/.neonmix-migration-*.staging/
+**/.neonmix-intent-*.json
 
 # Private receiver identity recovery journals.
 **/receiver.json.pending

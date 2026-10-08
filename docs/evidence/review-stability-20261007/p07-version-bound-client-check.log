@@ -1,0 +1,58 @@
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Checking neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+error[E0609]: no field `device_id` on type `&Credential`
+  --> apps/hub/src/sender.rs:49:50
+   |
+49 |     let principal = if let Some(id) = credential.device_id {
+   |                                                  ^^^^^^^^^ unknown field
+   |
+   = note: available fields are: `route`, `hub_id`, `token`, `certificate`
+
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 1 previous error
+error[E0308]: mismatched types
+    --> apps/desktop/src/main.rs:1920:47
+     |
+1920 |                 assert_eq!(expected_revision, snapshot.revision);
+     |                                               ^^^^^^^^^^^^^^^^^ expected `Option<u64>`, found `u64`
+     |
+     = note: expected enum `std::option::Option<u64>`
+                found type `u64`
+help: try wrapping the expression in `Some`
+     |
+1920 |                 assert_eq!(expected_revision, Some(snapshot.revision));
+     |                                               +++++                 +
+
+error[E0308]: mismatched types
+    --> apps/desktop/src/main.rs:2236:47
+     |
+2236 |                 assert_eq!(expected_revision, snapshot.revision);
+     |                                               ^^^^^^^^^^^^^^^^^ expected `Option<u64>`, found `u64`
+     |
+     = note: expected enum `std::option::Option<u64>`
+                found type `u64`
+help: try wrapping the expression in `Some`
+     |
+2236 |                 assert_eq!(expected_revision, Some(snapshot.revision));
+     |                                               +++++                 +
+
+error[E0308]: mismatched types
+    --> apps/desktop/src/main.rs:2429:47
+     |
+2429 |                 assert_eq!(expected_revision, snapshot.revision);
+     |                                               ^^^^^^^^^^^^^^^^^ expected `Option<u64>`, found `u64`
+     |
+     = note: expected enum `std::option::Option<u64>`
+                found type `u64`
+help: try wrapping the expression in `Some`
+     |
+2429 |                 assert_eq!(expected_revision, Some(snapshot.revision));
+     |                                               +++++                 +
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 3 previous errors

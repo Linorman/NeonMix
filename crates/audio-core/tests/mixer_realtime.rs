@@ -12,7 +12,8 @@ use std::{
 static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 #[test]
 fn dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output() {
-    let (mut mixer, mut control, mut inputs, _) = Mixer::new(Instant::now()).unwrap();
+    let origin = Instant::now();
+    let (mut mixer, mut control, mut inputs, _) = Mixer::new(origin).unwrap();
     let mut config = MixerConfig::default();
     config.lanes[0] = LaneMix {
         stream_id: 1,
@@ -48,7 +49,7 @@ fn dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output() {
             b.header.stream_epoch = 2;
             control.apply(config).unwrap();
         }
-        mixer.render_block(&mut frames);
+        mixer.render_block_at(origin + Duration::from_millis(n * 10), &mut frames);
     }
     let measured = region.change();
     assert_eq!(measured.allocations, 0);
@@ -61,6 +62,7 @@ fn dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output() {
     config.lanes[0] = LaneMix {
         stream_id: 1,
         epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     };
     control.apply(config).unwrap();
@@ -79,7 +81,64 @@ fn dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output() {
             config.lanes[0].muted = false;
             control.apply(config).unwrap();
         }
-        timed.render_block(&mut frames);
+        if n == 900 {
+            // Reopen between logical boundaries and apply the new binding
+            // before the first new frame, with no allocation or destruction.
+            timed.discard_backlog();
+            config.output_epoch += 1;
+            control.apply(config).unwrap();
+        }
+        timed.render_block_at(origin + Duration::from_millis(n * 10), &mut frames);
+    }
+    let measured = region.change();
+    assert_eq!(measured.allocations, 0);
+    assert_eq!(measured.reallocations, 0);
+    assert_eq!(measured.deallocations, 0);
+
+    let origin = Instant::now();
+    let (mut mixer, mut control, mut inputs, _) = Mixer::new(origin).unwrap();
+    let mut config = MixerConfig {
+        master_db: 0.,
+        ..Default::default()
+    };
+    config.lanes[0] = LaneMix {
+        stream_id: 1,
+        epoch: 1,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
+        ..Default::default()
+    };
+    control.apply(config).unwrap();
+    let mut a = AudioBlock::empty(1, AudioFormat::INTERNAL);
+    a.header.stream_epoch = 1;
+    a.header.frame_count = 1;
+    a.header.arrival_ns = u64::MAX;
+    a.header.discontinuity_flags = Discontinuity::NONE;
+    a.pcm.fill([0.2; 2]);
+    let region = Region::new(GLOBAL);
+    for tick in 0..64 {
+        // Eight separate one-frame segments; every FIR boundary is isolated,
+        // including a large missing time span. Descriptors are preallocated.
+        for segment in 0..8 {
+            a.header.source_sample_position = tick * 480 + segment * 2;
+            a.header.presentation_time_ns = Some(
+                1_000_000_000
+                    + neonmix_core::clock::frames_to_ns(a.header.source_sample_position, 48000),
+            );
+            inputs[0].push(a);
+        }
+        mixer.set_presentation_time(
+            origin + Duration::from_nanos(1_000_000_000 + tick * 10_000_000),
+        );
+        mixer.render_block_at(origin, &mut frames);
+        if tick == 16 {
+            while control.has_capacity() {
+                control.apply(config).unwrap();
+            }
+            control.revoke_lane(0);
+            mixer.render_block_at(origin, &mut frames);
+            config.lanes[0].binding_generation = inputs[0].bind_next().unwrap();
+            control.apply(config).unwrap();
+        }
     }
     let measured = region.change();
     assert_eq!(measured.allocations, 0);

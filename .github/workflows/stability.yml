@@ -1,0 +1,58 @@
+name: Stability regression
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deterministic:
+    name: Stability deterministic (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.local/cargo
+      RUSTUP_HOME: ${{ github.workspace }}/.local/rustup
+      CARGO_TARGET_DIR: ${{ github.workspace }}/target
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Project-local temporary files (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir -p .local/tmp
+          echo "TMPDIR=$GITHUB_WORKSPACE/.local/tmp" >> "$GITHUB_ENV"
+          echo "TMP=$GITHUB_WORKSPACE/.local/tmp" >> "$GITHUB_ENV"
+          echo "TEMP=$GITHUB_WORKSPACE/.local/tmp" >> "$GITHUB_ENV"
+      - name: Project-local temporary files (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .local/tmp | Out-Null
+          foreach ($name in @('TMPDIR', 'TMP', 'TEMP')) {
+            "$name=$env:GITHUB_WORKSPACE/.local/tmp" >> $env:GITHUB_ENV
+          }
+      - name: Pinned project-local Rust
+        run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt --component clippy
+      - name: Deterministic checks (Unix)
+        if: runner.os != 'Windows'
+        run: tools/dev python3 tools/review_check.py
+      - name: Deterministic checks (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tools/dev.ps1 python tools/review_check.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stability-${{ matrix.os }}-${{ github.sha }}
+          path: artifacts/review-checks/
+          retention-days: 30

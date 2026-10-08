@@ -1,0 +1,80 @@
+[[message]]
+id = "devices-all"
+
+[[message]]
+id = "devices-allow-playback-again"
+
+[[message]]
+id = "devices-clear"
+
+[[message]]
+id = "devices-connect-to-a-hub-to-view-and-manage"
+
+[[message]]
+id = "devices-credentials-invalid"
+
+[[message]]
+id = "devices-devices-appear-here-after-a-sender-pairs-or"
+
+[[message]]
+id = "devices-disconnect-device"
+
+[[message]]
+id = "devices-disconnected"
+
+[[message]]
+id = "devices-end-this-device-s-media-and-control-connections"
+
+[[message]]
+id = "devices-input"
+
+[[message]]
+id = "devices-local-audio-device-identities"
+
+[[message]]
+id = "devices-local-audio-devices-are-unavailable"
+
+[[message]]
+id = "devices-local-count-note"
+args = { count = "u64" }
+
+[[message]]
+id = "devices-no-devices"
+
+[[message]]
+id = "devices-no-devices-match-your-search-and-filters-clear"
+
+[[message]]
+id = "devices-no-matches"
+
+[[message]]
+id = "devices-no-room-connected"
+
+[[message]]
+id = "devices-output"
+
+[[message]]
+id = "devices-playback-blocked"
+
+[[message]]
+id = "devices-refresh-devices"
+
+[[message]]
+id = "devices-revoke-pairing"
+
+[[message]]
+id = "devices-revoke-title"
+args = { name = "string" }
+
+[[message]]
+id = "devices-revoked"
+
+[[message]]
+id = "devices-search-devices"
+
+[[message]]
+id = "devices-sending"
+
+[[message]]
+id = "devices-stream-count"
+args = { count = "u64" }

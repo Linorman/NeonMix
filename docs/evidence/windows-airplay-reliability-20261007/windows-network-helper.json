@@ -1,0 +1,20 @@
+{
+  "scope": "native rule maintenance only; firewall and network profiles unchanged",
+  "checks": {
+    "idempotent_install_and_repair": true,
+    "validated_custom_control_port": true,
+    "path_mismatch_detected_and_repaired": true,
+    "external_block_retained": true,
+    "isolated_instance_and_repeated_remove": true,
+    "missing_rules_reported": true
+  },
+  "profiles": [
+    0,
+    0,
+    0
+  ],
+  "effective_policy_code": 4,
+  "helper_sha256": "a001019f10997bba00e6a2c287f41d37d1b5c7f3e78262195145dacfbe31d9bd",
+  "uac_cross_user": "not_run",
+  "public_iphone_playback": "not_run"
+}

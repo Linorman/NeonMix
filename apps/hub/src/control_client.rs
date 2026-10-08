@@ -44,7 +44,9 @@ pub fn subscribe(mut credential: Credential, mut hub: String) -> Result<Subscrip
                 let mut state:Snapshot=response.error_for_status()?.json().await?;
                 if let Err(error)=crate::identity::check_hub(&credential,state.hub_id) {current.rejected=true;return Err(error);}
                 current.snapshots+=1;current.state=Some(Arc::new(state.clone()));current.connected=false;publish.send_replace(current.clone());
-                let mut url=reqwest::Url::parse(&hub)?;url.set_scheme("wss").map_err(|_|"invalid WSS scheme")?;url.set_path("/v1/events");url.set_query(Some(&format!("after={}",state.revision)));
+                if state.control_version != neonmix_control::CONTROL_VERSION || state.runtime_epoch.is_nil()
+                    || state.event_sequence != state.revision {return Err("control subscription requires protocol upgrade".into());}
+                let mut url=reqwest::Url::parse(&hub)?;url.set_scheme("wss").map_err(|_|"invalid WSS scheme")?;url.set_path("/v1/events");url.set_query(Some(&format!("control_version={}&runtime_epoch={}&after={}",state.control_version,state.runtime_epoch,state.event_sequence)));
                 let mut request=url.as_str().into_client_request()?;
                 request.headers_mut().insert("authorization",format!("Bearer {}",credential.token).parse()?);
                 let config=tokio_tungstenite::tungstenite::protocol::WebSocketConfig::default().max_message_size(Some(262144)).max_frame_size(Some(262144));

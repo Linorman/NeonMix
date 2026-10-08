@@ -1,9 +1,11 @@
 //! Shared controls. Colours come from `theme`; motion from `animation`.
 use crate::animation;
+use crate::localization::text;
 use crate::theme;
 use eframe::egui::{
     self, Align, Color32, CornerRadius, Layout, Margin, Response, RichText, Stroke, StrokeKind, Ui,
 };
+use neonmix_i18n::Message;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Tone {
@@ -414,7 +416,8 @@ pub fn surface<R>(
 ) -> egui::InnerResponse<R> {
     let slot = ui.painter().add(egui::Shape::Noop);
     let shown = egui::Frame::new().inner_margin(margin).show(ui, body);
-    let glow = glow.map(|c| animation::color(ui.ctx(), shown.response.id.with("glow"), c));
+    // Drawn as given: the frame's id is positional, so easing it would let a
+    // card briefly take the glow colour of whichever card held that id before.
     ui.painter().set(
         slot,
         crate::fx::surface(
@@ -438,6 +441,8 @@ pub fn card_ex<R>(
     trailing: impl FnOnce(&mut Ui),
     body: impl FnOnce(&mut Ui) -> R,
 ) -> R {
+    // Callers scope dynamic cards by business identity. Display titles never
+    // participate in rail animation identity across language changes.
     let rail_id = ui.next_auto_id().with("rail");
     let margin = Margin {
         left: 18,
@@ -540,18 +545,25 @@ pub fn mono(ui: &mut Ui, text: impl Into<String>) {
 
 /// Labelled single-line input. The caption is the accessible name and
 /// focuses the input when clicked. Enter never submits (IME safety).
-pub fn field(ui: &mut Ui, label: &str, value: &mut String, secret: bool) -> Response {
-    field_sized(ui, label, value, secret, 440.0)
+pub fn field(
+    ui: &mut Ui,
+    id_salt: impl std::hash::Hash,
+    label: &str,
+    value: &mut String,
+    secret: bool,
+) -> Response {
+    field_sized(ui, id_salt, label, value, secret, 440.0)
 }
 
 pub fn field_sized(
     ui: &mut Ui,
+    id_salt: impl std::hash::Hash,
     label: &str,
     value: &mut String,
     secret: bool,
     max_width: f32,
 ) -> Response {
-    let id = ui.make_persistent_id(label);
+    let id = ui.make_persistent_id(("field", id_salt));
     ui.vertical(|ui| {
         ui.spacing_mut().item_spacing.y = 4.0;
         let caption = ui.add(
@@ -577,8 +589,14 @@ pub fn field_sized(
 
 /// Inline-editable title: reads as a heading, edits in place. The small
 /// caption above is its accessible name; an underline shows hover/focus.
-pub fn title_field(ui: &mut Ui, label: &str, value: &mut String, hint: &str) -> Response {
-    let id = ui.make_persistent_id(label);
+pub fn title_field(
+    ui: &mut Ui,
+    id_salt: impl std::hash::Hash,
+    label: &str,
+    value: &mut String,
+    hint: &str,
+) -> Response {
+    let id = ui.make_persistent_id(("title-field", id_salt));
     ui.vertical(|ui| {
         ui.spacing_mut().item_spacing.y = 2.0;
         let caption = ui.add(
@@ -640,21 +658,42 @@ pub fn select_value<T: PartialEq>(
     current: &mut T,
     value: T,
     label: impl Into<egui::WidgetText>,
-) {
-    if ui.selectable_value(current, value, label).clicked() {
+) -> Response {
+    let response = ui.selectable_value(current, value, label);
+    if response.clicked() {
+        // Returning focus to the parent must not deliver this activation key
+        // again to the selector in another layout pass.
+        ui.input_mut(|input| {
+            input.consume_key(egui::Modifiers::NONE, egui::Key::Space);
+            input.consume_key(egui::Modifiers::NONE, egui::Key::Enter);
+        });
+        // ComboBox uses Memory's popup manager rather than Ui's menu_state.
+        // Keyboard selection has no pointer click to close it automatically.
+        ui.memory_mut(|memory| memory.close_popup());
         ui.close_menu();
     }
+    response
 }
 
 /// Small rounded status label. Colour always accompanies text. Painted
 /// directly so its size never depends on the surrounding layout.
 pub fn pill(ui: &mut Ui, text: &str, tone: Tone) -> Response {
+    pill_sized(ui, text, tone, f32::INFINITY)
+}
+
+/// A bounded status chip; its full value remains in accessibility output.
+pub fn pill_sized(ui: &mut Ui, text: &str, tone: Tone, max_width: f32) -> Response {
+    // The surrounding business scope plus control position owns animation;
+    // localized display text never changes this identity.
     let color = animation::color(ui.ctx(), ui.next_auto_id().with("pill"), tone.color());
-    let galley = ui.painter().layout_no_wrap(
+    let mut job = egui::text::LayoutJob::simple(
         text.to_owned(),
         egui::FontId::proportional(theme::SMALL),
         color,
+        (max_width - 18.0).max(1.0),
     );
+    job.wrap.max_rows = 1;
+    let galley = ui.painter().layout_job(job);
     let size = galley.size() + egui::vec2(18.0, 6.0);
     let (rect, response) = ui.allocate_exact_size(size, egui::Sense::hover());
     ui.painter().rect(
@@ -695,7 +734,7 @@ pub fn dot(ui: &mut Ui, text: &str, tone: Tone) -> Response {
 
 /// Label/value rows in a two-column grid. Values are monospace so columns of
 /// counters line up.
-pub fn kv_grid(ui: &mut Ui, id: &str, rows: &[(&str, String)]) {
+pub fn kv_grid<L: AsRef<str>>(ui: &mut Ui, id: &str, rows: &[(L, String)]) {
     ui.spacing_mut().interact_size.y = 18.0;
     egui::Grid::new(id)
         .num_columns(2)
@@ -704,7 +743,7 @@ pub fn kv_grid(ui: &mut Ui, id: &str, rows: &[(&str, String)]) {
         .show(ui, |ui| {
             for (label, value) in rows {
                 ui.label(
-                    RichText::new(*label)
+                    RichText::new(label.as_ref())
                         .size(theme::SMALL)
                         .color(theme::TEXT_2),
                 );
@@ -990,7 +1029,11 @@ fn readout(ui: &mut Ui, peak: Option<f64>, rms: Option<f64>) {
         match peak {
             Some(p) => {
                 let hot = to_db(p).is_some_and(|db| db > -6.0);
-                ui.label(RichText::new("峰值").size(11.5).color(theme::TEXT_3));
+                ui.label(
+                    RichText::new(text(ui, &Message::WidgetsPeak))
+                        .size(11.5)
+                        .color(theme::TEXT_3),
+                );
                 ui.label(
                     RichText::new(db_text(p))
                         .monospace()
@@ -999,7 +1042,11 @@ fn readout(ui: &mut Ui, peak: Option<f64>, rms: Option<f64>) {
                 );
             }
             None => {
-                ui.label(RichText::new("电平未取得").size(11.5).color(theme::TEXT_3));
+                ui.label(
+                    RichText::new(text(ui, &Message::WidgetsLevelUnavailable))
+                        .size(11.5)
+                        .color(theme::TEXT_3),
+                );
             }
         }
         if let Some(r) = rms {
@@ -1612,16 +1659,20 @@ pub fn stepper(ui: &mut Ui, steps: &[(&str, Step)]) -> Option<usize> {
             let size = egui::vec2(28.0 + galley.size().x + 6.0, 24.0);
             let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
             let state = match step {
-                Step::Done => "已完成",
-                Step::Current => "下一步",
-                Step::Todo => "未开始",
+                Step::Done => text(ui, &Message::WidgetsStepDone),
+                Step::Current => text(ui, &Message::WidgetsStepCurrent),
+                Step::Todo => text(ui, &Message::WidgetsStepTodo),
             };
+            let access_label = text(
+                ui,
+                &Message::WidgetsStepAccessible {
+                    number: (i + 1) as u64,
+                    label: (*label).into(),
+                    state,
+                },
+            );
             response.widget_info(|| {
-                egui::WidgetInfo::labeled(
-                    egui::WidgetType::Button,
-                    true,
-                    format!("步骤 {}：{label}（{state}）", i + 1),
-                )
+                egui::WidgetInfo::labeled(egui::WidgetType::Button, true, access_label.clone())
             });
             let circle = egui::pos2(rect.left() + 12.0, rect.center().y);
             let (fill, ring, text) = match step {
@@ -1838,5 +1889,135 @@ pub fn command_hint(key: &str) -> String {
         format!("⌘{key}")
     } else {
         format!("Ctrl+{key}")
+    }
+}
+
+#[cfg(test)]
+mod localization_tests {
+    use super::*;
+
+    #[test]
+    fn translated_field_labels_keep_focus_draft_and_identity() {
+        let ctx = egui::Context::default();
+        theme::install(&ctx);
+        let mut draft = "未保存的中文草稿".to_owned();
+        let mut first = None;
+        for (frame, caption) in ["设备名称", "Device name"].into_iter().enumerate() {
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    let response = field(ui, "device-name", caption, &mut draft, false);
+                    if frame == 0 {
+                        response.request_focus();
+                        first = Some(response.id);
+                    } else {
+                        assert_eq!(Some(response.id), first);
+                        assert!(response.has_focus());
+                    }
+                });
+            });
+        }
+        assert_eq!(draft, "未保存的中文草稿");
+    }
+
+    #[test]
+    fn identical_display_labels_do_not_alias_business_field_ids() {
+        let ctx = egui::Context::default();
+        theme::install(&ctx);
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            egui::CentralPanel::default().show(ctx, |ui| {
+                let a = field(ui, "first-name", "Name", &mut String::new(), false).id;
+                let b = field(ui, "second-name", "Name", &mut String::new(), false).id;
+                assert_ne!(a, b);
+            });
+        });
+    }
+
+    #[test]
+    fn keyboard_combo_selection_closes_popup_and_returns_focus() {
+        fn draw(
+            ctx: &egui::Context,
+            input: egui::RawInput,
+            selected: &mut bool,
+        ) -> (egui::Id, Option<egui::Id>) {
+            let original = *selected;
+            let mut combo_id = None;
+            let mut option_id = None;
+            let _ = ctx.run(input, |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    let shown = egui::ComboBox::from_id_salt("keyboard-language")
+                        .selected_text(if *selected { "English" } else { "简体中文" })
+                        .show_ui(ui, |ui| {
+                            select_value(ui, selected, false, "简体中文");
+                            option_id = Some(select_value(ui, selected, true, "English").id);
+                        });
+                    combo_id = Some(shown.response.id);
+                    if *selected {
+                        shown.response.request_focus();
+                    }
+                    if *selected != original {
+                        ctx.request_discard("simulate locale layout change");
+                    }
+                });
+            });
+            (combo_id.unwrap(), option_id)
+        }
+        let ctx = egui::Context::default();
+        theme::install(&ctx);
+        let mut selected = false;
+        let (combo_id, _) = draw(&ctx, egui::RawInput::default(), &mut selected);
+        ctx.memory_mut(|memory| memory.open_popup(combo_id.with("popup")));
+        let (_, option) = draw(&ctx, egui::RawInput::default(), &mut selected);
+        let option_id = option.expect("open popup must publish the English option");
+        ctx.memory_mut(|memory| memory.request_focus(option_id));
+        let key = |pressed| egui::RawInput {
+            events: vec![egui::Event::Key {
+                key: egui::Key::Space,
+                physical_key: None,
+                pressed,
+                repeat: false,
+                modifiers: egui::Modifiers::NONE,
+            }],
+            ..Default::default()
+        };
+        draw(&ctx, key(true), &mut selected);
+        assert!(selected, "Space must select the focused option");
+        assert!(
+            !ctx.input(|input| input.key_pressed(egui::Key::Space)),
+            "handled Space must be consumed before parent focus returns"
+        );
+        assert!(
+            !egui::ComboBox::is_open(&ctx, combo_id),
+            "keyboard selection must close the popup"
+        );
+        assert_eq!(ctx.memory(|memory| memory.focused()), Some(combo_id));
+        draw(&ctx, key(false), &mut selected);
+        assert!(selected);
+        assert!(
+            !egui::ComboBox::is_open(&ctx, combo_id),
+            "keyup must not reopen the popup"
+        );
+    }
+
+    #[test]
+    fn translated_inline_title_keeps_identity_and_focus() {
+        let ctx = egui::Context::default();
+        theme::install(&ctx);
+        let mut title = "房间".to_owned();
+        let mut first = None;
+        for (frame, caption) in ["房间名称", "Room name"].into_iter().enumerate() {
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    let response = title_field(ui, "room-name", caption, &mut title, "");
+                    if frame == 0 {
+                        response.request_focus();
+                        first = Some(response.id);
+                    } else {
+                        assert_eq!(Some(response.id), first);
+                        assert!(response.has_focus());
+                    }
+                });
+            });
+        }
+        assert_eq!(title, "房间");
     }
 }

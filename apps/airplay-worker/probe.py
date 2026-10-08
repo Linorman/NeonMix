@@ -10,7 +10,7 @@ def main():
     state=BASE/'probe';state.mkdir(exist_ok=True);key=state/'identity.pem'
     subprocess.run(['/opt/homebrew/opt/openssl@3/bin/openssl','genpkey','-algorithm','ED25519','-out',str(key)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);key.chmod(0o600)
     media=socket.socket();media.bind(('127.0.0.1',0));media.listen(1)
-    config=dict(control_version=2,worker_generation=7,trust_generation=1,pairing_remaining_ms=600000,pairing_attempts=0,media_address=f'127.0.0.1:{media.getsockname()[1]}',ipc_token='a'*64,device_id='001122334455',receiver_uuid='00112233-4455-6677-8899-aabbccddeeff',keyfile=str(key),name='NeonMix probe',pin='1234',rtsp_port=0,session_id=1,stream_id=2,stream_epoch=1,format_epoch=1,mapping_id=1,pairing_allowed=True,known_client_keys=[],blocked_client_keys=[])
+    config=dict(control_version=2, pcm_version=2, session_control_version=1,worker_generation=7,trust_generation=1,pairing_remaining_ms=600000,pairing_attempts=0,media_address=f'127.0.0.1:{media.getsockname()[1]}',ipc_token='a'*64,device_id='001122334455',receiver_uuid='00112233-4455-6677-8899-aabbccddeeff',keyfile=str(key),name='NeonMix probe',pin='1234',rtsp_port=0,session_id=1,stream_id=2,stream_epoch=1,format_epoch=1,mapping_id=1,pairing_allowed=True,known_client_keys=[],blocked_client_keys=[])
     config['protocol_trace']=os.environ.get('NEONMIX_AIRPLAY_PROBE_TRACE')=='1'
     env=os.environ.copy();env['GST_PLUGIN_SYSTEM_PATH_1_0']=str(BASE/'plugins');env['GST_REGISTRY']=str(BASE/'probe-registry.bin')
     process=subprocess.Popen([os.environ.get('NEONMIX_AIRPLAY_WORKER',str(BASE/'build/neonmix-airplay-worker'))],env=env,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
@@ -166,7 +166,7 @@ def main():
     for i in range(24):
         packet=b'\x80\x60'+struct.pack('>HII',i,(rtp+i*352)&0xffffffff,0)+encrypted;cport.sendto(packet,('127.0.0.1',ports['dataPort']));time.sleep(.003)
     connection.settimeout(3);packet=b''
-    while len(packet)<112:packet+=connection.recv(112-len(packet))
+    while len(packet)<120:packet+=connection.recv(120-len(packet))
     assert packet[:4]==b'NMAM' and struct.unpack_from('<I',packet,88)[0]==44100 and struct.unpack_from('<I',packet,104)[0]==48000
     assert struct.unpack_from('<Q',packet,32)[0]==3 and 0<struct.unpack_from('<H',packet,92)[0]<=480
     assert 0<struct.unpack_from('<Q',packet,80)[0]<20000000

@@ -1,0 +1,13 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.41s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 1 test
+READINESS expected=Some("hub_started") event="hub_started" running=true stopping=true fault=None
+READINESS expected=Some("hub_started") event="hub_started" running=true stopping=false fault=None
+READINESS expected=Some("hub_started") event="hub_stats" running=true stopping=false fault=None
+READINESS expected=Some("hub_started") event="hub_started" running=true stopping=true fault=None
+test managed::ready_tests::five_real_child_startup_cases_use_latched_readiness_and_confirmed_exit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 1.50s
+

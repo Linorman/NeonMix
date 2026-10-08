@@ -46,9 +46,14 @@ pub struct PairingBinding {
     pub source_id: String,
     pub revoked: bool,
 }
+fn initial_config_revision() -> u64 {
+    1
+}
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ReceiverProfile {
+    #[serde(default = "initial_config_revision")]
+    pub config_revision: u64,
     pub version: u16,
     pub credential_store: CredentialStore,
     pub multi_receiver: bool,
@@ -73,7 +78,30 @@ fn name_valid(value: &str, limit: usize) -> bool {
     !value.trim().is_empty() && value.len() <= limit && !value.chars().any(char::is_control)
 }
 impl ReceiverProfile {
+    /// Assign one persistent version to a new candidate; repeated sync of an
+    /// already assigned candidate never allocates another configuration.
+    pub fn prepare_change(&self, next: &mut Self) -> Result<()> {
+        next.validate()?;
+        if next.config_revision < self.config_revision {
+            return Err("profile_revision_conflict".into());
+        }
+        let mut old = serde_json::to_value(self)?;
+        let mut new = serde_json::to_value(&*next)?;
+        old.as_object_mut().unwrap().remove("config_revision");
+        new.as_object_mut().unwrap().remove("config_revision");
+        if old != new && next.config_revision == self.config_revision {
+            next.config_revision = self
+                .config_revision
+                .checked_add(1)
+                .ok_or("configuration_revision_exhausted")?;
+        }
+        Ok(())
+    }
+
     pub fn validate(&self) -> Result<()> {
+        if self.config_revision == 0 {
+            return Err("credential_corrupt".into());
+        }
         if self.version != 2 {
             return Err("credential_version_unsupported".into());
         }
@@ -234,6 +262,10 @@ pub fn parse(bytes: &[u8]) -> Result<ReceiverProfile> {
 pub fn load(path: &Path) -> Result<ReceiverProfile> {
     parse(&files::read_private(path, MAX_PROFILE_BYTES)?)
 }
+/// True while identity creation has a recoverable private journal.
+pub fn operation_pending(path: &Path) -> Result<bool> {
+    Ok(read_pending(path)?.is_some())
+}
 pub fn save(path: &Path, profile: &ReceiverProfile) -> Result<()> {
     if read_pending(path)?.is_some() {
         return Err("airplay_profile_operation_pending".into());
@@ -246,7 +278,7 @@ fn write_profile(path: &Path, profile: &ReceiverProfile) -> Result<()> {
     if bytes.len() > MAX_PROFILE_BYTES {
         return Err("credential_corrupt".into());
     }
-    files::replace(path, &bytes)?;
+    files::replace_reported(path, &bytes)?;
     Ok(())
 }
 fn validate_secret(store: &FileCredentialStore, reference: &str) -> Result<()> {
@@ -276,6 +308,7 @@ pub fn migrate_v1(path: &Path, legacy_uuid: Uuid, legacy_name: &str) -> Result<R
     validate_secret(&store, &key_reference)?;
     let receiver_id = legacy_uuid;
     let mut profile = ReceiverProfile {
+        config_revision: 1,
         version: 2,
         credential_store: CredentialStore::File,
         multi_receiver: false,
@@ -341,7 +374,7 @@ fn same_profile(a: &ReceiverProfile, b: &ReceiverProfile) -> bool {
 }
 impl PendingReceiver {
     fn receiver(&self) -> Result<&ReceiverEndpoint> {
-        if self.version != 1 {
+        if !matches!(self.version, 1 | 2) {
             return Err("credential_version_unsupported".into());
         }
         self.next.validate()?;
@@ -355,6 +388,9 @@ impl PendingReceiver {
             previous.validate()?;
             let mut expected = previous.clone();
             expected.receivers.push(receiver.clone());
+            if self.version == 2 {
+                previous.prepare_change(&mut expected)?;
+            }
             if !same_profile(&expected, &self.next) {
                 return Err("credential_corrupt".into());
             }
@@ -497,6 +533,7 @@ pub fn create(path: &Path, receiver_uuid: Uuid, name: &str) -> Result<ReceiverPr
     }
     let reference = Uuid::new_v4().to_string();
     let profile = ReceiverProfile {
+        config_revision: 1,
         version: 2,
         credential_store: CredentialStore::File,
         multi_receiver: false,
@@ -515,7 +552,7 @@ pub fn create(path: &Path, receiver_uuid: Uuid, name: &str) -> Result<ReceiverPr
         bindings: vec![],
     };
     let pending = PendingReceiver {
-        version: 1,
+        version: 2,
         previous: None,
         next: profile,
         receiver_id: receiver_uuid,
@@ -574,8 +611,9 @@ pub fn add_receiver(
         enabled,
         default_playback_mode: PlaybackMode::LowLatency,
     });
+    profile.prepare_change(&mut next)?;
     let pending = PendingReceiver {
-        version: 1,
+        version: 2,
         previous: Some(profile.clone()),
         next,
         receiver_id: receiver_uuid,
@@ -629,6 +667,39 @@ mod tests {
     fn public(value: u8) -> String {
         STANDARD.encode([value; 32])
     }
+    #[test]
+    fn imported_profile_and_identity_staging_keep_monotonic_config_without_repeated_sync_bumps() {
+        let fixture = Fixture::new();
+        let id = Uuid::new_v4();
+        let original = create(&fixture.path(), id, "Receiver").unwrap();
+        let mut old = serde_json::to_value(&original).unwrap();
+        old.as_object_mut().unwrap().remove("config_revision");
+        let imported = parse(&serde_json::to_vec(&old).unwrap()).unwrap();
+        assert_eq!(imported.config_revision, 1);
+        assert_eq!(
+            imported.receivers[0].key_reference,
+            original.receivers[0].key_reference
+        );
+        let mut staged = original.clone();
+        add_receiver(&fixture.path(), &mut staged, "Input 2", false).unwrap();
+        assert_eq!(staged.config_revision, 2);
+        let mut next = staged.clone();
+        next.multi_receiver = true;
+        next.receivers[1].enabled = true;
+        staged.prepare_change(&mut next).unwrap();
+        assert_eq!(next.config_revision, 3);
+        staged.prepare_change(&mut next).unwrap();
+        assert_eq!(next.config_revision, 3);
+        save(&fixture.path(), &next).unwrap();
+        assert_eq!(load(&fixture.path()).unwrap().config_revision, 3);
+        let mut exhausted = next.clone();
+        exhausted.config_revision = u64::MAX;
+        let mut changed = exhausted.clone();
+        changed.receivers[0].name = "changed".into();
+        assert!(exhausted.prepare_change(&mut changed).is_err());
+        assert_eq!(changed.config_revision, u64::MAX);
+    }
+
     #[test]
     fn migration_preserves_identity_trust_and_rollback_uses_current_revocations() {
         let fixture = Fixture::new();

@@ -1,4 +1,9 @@
 //! Local output identity and permission state. File I/O is control-thread-only.
+pub mod owner;
+#[cfg(target_os = "linux")]
+#[allow(unsafe_code)]
+mod owner_linux;
+
 use serde::{Deserialize, Serialize};
 use std::{
     fmt,
@@ -105,6 +110,8 @@ pub enum Error {
     Invalid(&'static str),
     #[error("revision conflict (current {0})")]
     Conflict(u64),
+    #[error("output_object_replaced")]
+    ObjectReplaced,
     #[error(
         "one output is already bound; explicitly remove it before selecting another Hub/device"
     )]
@@ -208,12 +215,24 @@ impl Store {
         self.commit(&binding)?;
         Ok(binding)
     }
-    pub fn rename(&self, revision: u64, name: String) -> Result<OutputBinding, Error> {
+    pub fn rename(
+        &self,
+        expected_output_id: Uuid,
+        revision: u64,
+        name: String,
+    ) -> Result<OutputBinding, Error> {
         validate_name(&name)?;
-        self.edit(revision, |binding| binding.display_name = name)
+        self.edit(expected_output_id, revision, |binding| {
+            binding.display_name = name
+        })
     }
-    pub fn set_enabled(&self, revision: u64, enabled: bool) -> Result<OutputBinding, Error> {
-        self.edit_result(revision, |binding| {
+    pub fn set_enabled(
+        &self,
+        expected_output_id: Uuid,
+        revision: u64,
+        enabled: bool,
+    ) -> Result<OutputBinding, Error> {
+        self.edit_result(expected_output_id, revision, |binding| {
             if binding.enabled && !enabled {
                 binding.authorization_epoch = binding
                     .authorization_epoch
@@ -226,24 +245,24 @@ impl Store {
     }
     fn edit(
         &self,
+        expected_output_id: Uuid,
         revision: u64,
         operation: impl FnOnce(&mut OutputBinding),
     ) -> Result<OutputBinding, Error> {
-        self.edit_result(revision, |value| {
+        self.edit_result(expected_output_id, revision, |value| {
             operation(value);
             Ok(())
         })
     }
     fn edit_result(
         &self,
+        expected_output_id: Uuid,
         revision: u64,
         operation: impl FnOnce(&mut OutputBinding) -> Result<(), Error>,
     ) -> Result<OutputBinding, Error> {
         let _lock = self.lock()?;
         let mut binding = self.load()?;
-        if binding.revision != revision {
-            return Err(Error::Conflict(binding.revision));
-        }
+        check_expected(&binding, expected_output_id, revision)?;
         let old = binding.clone();
         operation(&mut binding)?;
         if binding == old {
@@ -257,15 +276,27 @@ impl Store {
         self.commit(&binding)?;
         Ok(binding)
     }
-    pub fn remove(&self, revision: u64) -> Result<OutputBinding, Error> {
+    pub fn remove(&self, expected_output_id: Uuid, revision: u64) -> Result<OutputBinding, Error> {
         let _lock = self.lock()?;
         let binding = self.load()?;
-        if binding.revision != revision {
-            return Err(Error::Conflict(binding.revision));
-        }
+        check_expected(&binding, expected_output_id, revision)?;
         fs::remove_file(self.directory.join("binding.json"))?;
         self.sync_directory()?;
         Ok(binding)
+    }
+    /// Native name effects must validate the captured object and keep its
+    /// management lock until the effect ends. Validation followed by an
+    /// unlocked load/side effect could rename a replacement's native resource.
+    pub fn with_expected<T, E: From<Error>>(
+        &self,
+        expected_output_id: Uuid,
+        revision: u64,
+        operation: impl FnOnce(&OutputBinding) -> Result<T, E>,
+    ) -> Result<T, E> {
+        let _lock = self.lock().map_err(E::from)?;
+        let binding = self.load().map_err(E::from)?;
+        check_expected(&binding, expected_output_id, revision).map_err(E::from)?;
+        operation(&binding)
     }
     fn commit(&self, binding: &OutputBinding) -> Result<(), Error> {
         let bytes = serde_json::to_vec_pretty(binding)?;
@@ -289,6 +320,19 @@ impl Store {
         File::open(&self.directory)?.sync_all()?;
         Ok(())
     }
+}
+
+fn check_expected(binding: &OutputBinding, id: Uuid, revision: u64) -> Result<(), Error> {
+    if id.is_nil() {
+        return Err(Error::Invalid("expected output ID is required"));
+    }
+    if binding.output_id != id {
+        return Err(Error::ObjectReplaced);
+    }
+    if binding.revision != revision {
+        return Err(Error::Conflict(binding.revision));
+    }
+    Ok(())
 }
 
 fn private_options() -> OpenOptions {

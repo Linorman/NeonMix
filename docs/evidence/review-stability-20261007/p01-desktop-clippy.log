@@ -1,0 +1,19 @@
+    Blocking waiting for file lock on build directory
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error: redundant field names in struct initialization
+   --> apps/desktop/src/pages/diagnostics.rs:106:21
+    |
+106 |                     late: late,
+    |                     ^^^^^^^^^^ help: replace it with: `late`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#redundant_field_names
+    = note: `-D clippy::redundant-field-names` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::redundant_field_names)]`
+
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 1 previous error

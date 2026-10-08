@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "binary_sha256": "706a4b0454be33a53cb074f8c0b6ade5828bdcdcb6ce43e213bcb09235b69428",
+  "scope": "real TLS/media pump and explicit virtual output; no physical speaker or 24h soak",
+  "checks": {
+    "loopback_same_endpoint_rejected_before_capture": true,
+    "lan_same_endpoint_rejected_before_capture": true,
+    "actual_duration_and_continuous_stop_reasons": true,
+    "ipv6_same_endpoint_rejected_before_capture": true
+  },
+  "all_owned_children_exited": true,
+  "private_fixture_removed": true
+}

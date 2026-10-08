@@ -4,10 +4,23 @@ use super::*;
 use crate::widgets::{Kind, Tone};
 use egui::{Align, Layout, Margin};
 
-const FILTERS: [&str; 4] = ["全部", "发送中", "已断开", "已撤销"];
-
 impl Desktop {
     pub(crate) fn devices_page(&mut self, ui: &mut egui::Ui) {
+        let text_devices_search_devices = self.tr(&Message::DevicesSearchDevices);
+        let text_devices_clear = self.tr(&Message::DevicesClear);
+        let text_devices_all = self.tr(&Message::DevicesAll);
+        let text_devices_sending = self.tr(&Message::DevicesSending);
+        let text_devices_disconnected = self.tr(&Message::DevicesDisconnected);
+        let text_devices_revoked = self.tr(&Message::DevicesRevoked);
+        let text_devices_no_room_connected = self.tr(&Message::DevicesNoRoomConnected);
+        let text_devices_connect_to_a_hub_to_view_and_manage =
+            self.tr(&Message::DevicesConnectToAHubToViewAndManage);
+        let text_devices_no_devices = self.tr(&Message::DevicesNoDevices);
+        let text_devices_devices_appear_here_after_a_sender_pairs_or =
+            self.tr(&Message::DevicesDevicesAppearHereAfterASenderPairsOr);
+        let text_devices_no_matches = self.tr(&Message::DevicesNoMatches);
+        let text_devices_no_devices_match_your_search_and_filters_clear =
+            self.tr(&Message::DevicesNoDevicesMatchYourSearchAndFiltersClear);
         let snapshot = self.snapshot.clone();
         let airplay = self.airplay_sources();
         let streams_of = |id: uuid::Uuid| {
@@ -46,15 +59,29 @@ impl Desktop {
                     .count(),
         ];
         ui.horizontal_wrapped(|ui| {
-            let changed = widgets::field_sized(ui, "搜索设备", &mut self.search, false, 280.0);
+            let changed = widgets::field_sized(
+                ui,
+                "devices-search-devices",
+                text_devices_search_devices.as_str(),
+                &mut self.search,
+                false,
+                280.0,
+            );
             let _ = changed;
             ui.with_layout(Layout::left_to_right(Align::Max), |ui| {
-                if !self.search.is_empty() && widgets::button(ui, "清除", Kind::Secondary).clicked()
+                if !self.search.is_empty()
+                    && widgets::button(ui, text_devices_clear.as_str(), Kind::Secondary).clicked()
                 {
                     self.search.clear();
                 }
                 ui.add_space(8.0);
-                let items: Vec<(&str, usize)> = FILTERS
+                let filters = [
+                    text_devices_all.as_str(),
+                    text_devices_sending.as_str(),
+                    text_devices_disconnected.as_str(),
+                    text_devices_revoked.as_str(),
+                ];
+                let items: Vec<(&str, usize)> = filters
                     .iter()
                     .copied()
                     .zip(counts.iter().copied())
@@ -65,7 +92,11 @@ impl Desktop {
             });
         });
         let Some(state) = snapshot.clone() else {
-            empty_card(ui, "未连接房间", "连接 Hub 后可查看和管理配对设备。");
+            empty_card(
+                ui,
+                text_devices_no_room_connected.as_str(),
+                text_devices_connect_to_a_hub_to_view_and_manage.as_str(),
+            );
             self.local_devices(ui);
             return;
         };
@@ -112,14 +143,14 @@ impl Desktop {
                 if needle.is_empty() && filter == 0 {
                     widgets::empty(
                         ui,
-                        "暂无设备",
-                        "Sender 配对或 AirPlay 来源连接后，设备会显示在这里。",
+                        text_devices_no_devices.as_str(),
+                        text_devices_devices_appear_here_after_a_sender_pairs_or.as_str(),
                     );
                 } else {
                     widgets::empty(
                         ui,
-                        "无匹配结果",
-                        "没有符合搜索和筛选条件的设备，清除条件后重试。",
+                        text_devices_no_matches.as_str(),
+                        text_devices_no_devices_match_your_search_and_filters_clear.as_str(),
                     );
                 }
             });
@@ -203,10 +234,17 @@ impl Desktop {
         device: &neonmix_control::Device,
         streams: usize,
     ) {
-        let (state_text, tone) = device_state(device, streams);
+        let text_devices_credentials_invalid = self.tr(&Message::DevicesCredentialsInvalid);
+        let text_devices_playback_blocked = self.tr(&Message::DevicesPlaybackBlocked);
+        let text_devices_revoke_pairing = self.tr(&Message::DevicesRevokePairing);
+        let text_devices_disconnect_device = self.tr(&Message::DevicesDisconnectDevice);
+        let text_devices_allow_playback_again = self.tr(&Message::DevicesAllowPlaybackAgain);
+        let (state_message, tone) = device_state(device, streams);
+        let state_text = self.tr(&state_message);
         let has_actions = !device.playback_allowed || device.role != Role::Admin;
         let show_actions = self.admin() && !device.revoked && has_actions;
         let wide = ui.available_width() >= 640.0;
+        let renderer = self.localization.renderer.clone();
         let info = |ui: &mut egui::Ui| {
             ui.horizontal(|ui| {
                 let color = if device.revoked {
@@ -223,17 +261,23 @@ impl Desktop {
                                 .font(theme::heading(theme::BODY))
                                 .color(theme::TEXT),
                         );
-                        widgets::pill(ui, role_name(device.role), Tone::Neutral);
+                        widgets::pill(ui, &renderer.render(&role_name(device.role)), Tone::Neutral);
                         let permission = if device.revoked {
-                            ("凭证已失效", Tone::Danger)
+                            (text_devices_credentials_invalid.as_str(), Tone::Danger)
                         } else if device.playback_allowed {
-                            (state_text, tone)
+                            (state_text.as_str(), tone)
                         } else {
-                            ("播放已禁止", Tone::Warning)
+                            (text_devices_playback_blocked.as_str(), Tone::Warning)
                         };
                         widgets::pill(ui, permission.0, permission.1);
                         if streams > 1 {
-                            widgets::pill(ui, &format!("{streams} 路"), Tone::Accent);
+                            widgets::pill(
+                                ui,
+                                &renderer.render(&Message::DevicesStreamCount {
+                                    count: (streams) as u64,
+                                }),
+                                Tone::Accent,
+                            );
                         }
                     });
                     widgets::mono(ui, format!("ID {}", device.id));
@@ -243,11 +287,14 @@ impl Desktop {
         let actions = |this: &mut Self, ui: &mut egui::Ui| {
             ui.add_enabled_ui(this.writable(), |ui| {
                 if device.role != Role::Admin {
-                    let revoke = widgets::button(ui, "撤销配对…", Kind::Quiet);
+                    let revoke =
+                        widgets::button(ui, text_devices_revoke_pairing.as_str(), Kind::Quiet);
                     if revoke.clicked() {
                         this.confirmation(
-                            format!("撤销 {} 的配对", device.name),
-                            "立即结束该设备的媒体和控制连接；旧凭证将失效，需要重新配对。".into(),
+                            Message::DevicesRevokeTitle {
+                                name: (device.name).to_string(),
+                            },
+                            Message::DevicesEndThisDeviceSMediaAndControlConnections,
                             Request::Control {
                                 credential: this.credential.clone(),
                                 hub: this.hub(),
@@ -262,14 +309,20 @@ impl Desktop {
                 }
                 if device.playback_allowed
                     && device.role != Role::Admin
-                    && widgets::button(ui, "断开设备", Kind::Secondary).clicked()
+                    && widgets::button(ui, text_devices_disconnect_device.as_str(), Kind::Secondary)
+                        .clicked()
                 {
                     this.operation(Operation::Disconnect {
                         device_id: device.id,
                     });
                 }
                 if !device.playback_allowed
-                    && widgets::button(ui, "重新允许播放", Kind::Primary).clicked()
+                    && widgets::button(
+                        ui,
+                        text_devices_allow_playback_again.as_str(),
+                        Kind::Primary,
+                    )
+                    .clicked()
                 {
                     this.operation(Operation::AllowPlayback {
                         device_id: device.id,
@@ -301,30 +354,43 @@ impl Desktop {
     }
 
     fn local_devices(&mut self, ui: &mut egui::Ui) {
+        let text_devices_local_audio_device_identities =
+            self.tr(&Message::DevicesLocalAudioDeviceIdentities);
+        let text_devices_refresh_devices = self.tr(&Message::DevicesRefreshDevices);
+        let text_devices_local_audio_devices_are_unavailable =
+            self.tr(&Message::DevicesLocalAudioDevicesAreUnavailable);
+        let text_devices_output = self.tr(&Message::DevicesOutput);
+        let text_devices_input = self.tr(&Message::DevicesInput);
         let open = self.panel_open("local-devices", false);
         let mut refresh = false;
         let count = self.devices.len();
         let panel = widgets::panel(
             ui,
             "local-devices",
-            "本机音频设备身份",
-            Some(&format!("{count} 个设备 · 用于选择实体输出与虚拟输出")),
+            text_devices_local_audio_device_identities.as_str(),
+            Some(&self.tr(&Message::DevicesLocalCountNote {
+                count: (count) as u64,
+            })),
             open,
             |ui| {
-                refresh = widgets::small_button(ui, true, "刷新设备").clicked();
+                refresh = widgets::small_button(ui, true, text_devices_refresh_devices.as_str())
+                    .clicked();
             },
             |ui| {
                 if self.devices.is_empty() {
-                    widgets::note(ui, "未取得本机音频设备。");
+                    widgets::note(
+                        ui,
+                        text_devices_local_audio_devices_are_unavailable.as_str(),
+                    );
                 }
                 for device in &self.devices {
                     ui.horizontal_wrapped(|ui| {
                         ui.label(RichText::new(&device.name).color(theme::TEXT));
                         if device.output.is_some() {
-                            widgets::pill(ui, "输出", Tone::Neutral);
+                            widgets::pill(ui, text_devices_output.as_str(), Tone::Neutral);
                         }
                         if device.input.is_some() {
-                            widgets::pill(ui, "输入", Tone::Neutral);
+                            widgets::pill(ui, text_devices_input.as_str(), Tone::Neutral);
                         }
                     });
                     widgets::mono(ui, &device.id);

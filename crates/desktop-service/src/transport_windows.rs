@@ -82,7 +82,7 @@ fn sid_string(sid: *mut c_void) -> Result<String> {
         )))
     }
 }
-fn process_sid(process: HANDLE) -> Result<String> {
+pub(crate) fn process_sid(process: HANDLE) -> Result<String> {
     let mut token = ptr::null_mut();
     // SAFETY: process is a live borrowed handle; token output is writable.
     if unsafe { OpenProcessToken(process, TOKEN_QUERY, &mut token) } == 0 {
@@ -115,7 +115,7 @@ fn process_sid(process: HANDLE) -> Result<String> {
     let user = unsafe { &*buffer.as_ptr().cast::<TOKEN_USER>() };
     sid_string(user.User.Sid)
 }
-fn current_sid() -> Result<String> {
+pub(crate) fn current_sid() -> Result<String> {
     // SAFETY: GetCurrentProcess returns a borrowed pseudo-handle, not owned/closed here.
     process_sid(unsafe { GetCurrentProcess() })
 }
@@ -353,13 +353,14 @@ pub fn lock(directory: &Path) -> Result<File> {
     }
     Ok(file)
 }
-fn pipe_name(directory: &Path) -> Result<String> {
+fn pipe_name(directory: &Path, lifecycle: bool) -> Result<String> {
     let directory = directory.canonicalize().map_err(|e| e.to_string())?;
     let hash = Sha256::digest(directory.to_string_lossy().to_lowercase().as_bytes());
     Ok(format!(
-        r"\\.\pipe\NeonMix.v1.{}.{:x}",
+        r"\\.\pipe\NeonMix.v1.{}.{:x}{}",
         current_sid()?,
-        hash
+        hash,
+        if lifecycle { ".lifecycle" } else { "" }
     ))
 }
 fn create_pipe(name: &str, first: bool) -> Result<NamedPipeServer> {
@@ -392,7 +393,10 @@ pub struct Listener {
 }
 impl Listener {
     pub fn bind(directory: &Path) -> Result<Self> {
-        let name = pipe_name(directory)?;
+        Self::bind_endpoint(directory, false)
+    }
+    pub(crate) fn bind_endpoint(directory: &Path, lifecycle: bool) -> Result<Self> {
+        let name = pipe_name(directory, lifecycle)?;
         let next = create_pipe(&name, true)?;
         Ok(Self {
             name,
@@ -413,20 +417,27 @@ pub fn same_user(stream: &NamedPipeServer) -> bool {
         && matches!((peer_sid(pid),current_sid()),(Ok(peer),Ok(current))if peer==current)
 }
 pub fn request(directory: &Path, request: &Request) -> Result<Reply> {
+    request_bound(directory, request, None)
+}
+pub fn request_bound(
+    directory: &Path,
+    request: &Request,
+    expected_pid: Option<u32>,
+) -> Result<Reply> {
     check_directory(directory)?;
-    let name = pipe_name(directory)?;
+    let name = pipe_name(directory, crate::manager::is_lifecycle(request))?;
     let bytes = serde_json::to_vec(&Envelope {
         version: PROTOCOL_VERSION,
         request: request.clone(),
     })
-    .map_err(|e| e.to_string())?;
+    .map_err(|_| "ipc_invalid_request".to_string())?;
     if bytes.len() > MAX_MESSAGE_BYTES {
-        return Err("IPC request too large".into());
+        return Err("ipc_message_too_large".into());
     }
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
-        .map_err(|e| e.to_string())?;
+        .map_err(crate::client_io_error)?;
     runtime.block_on(async {
         tokio::time::timeout(IPC_TIMEOUT, async {
             let mut stream = loop {
@@ -435,33 +446,37 @@ pub fn request(directory: &Path, request: &Request) -> Result<Reply> {
                     Err(error) if error.raw_os_error() == Some(231) => {
                         tokio::time::sleep(Duration::from_millis(20)).await
                     }
-                    Err(_) => return Err("后台不可用".into()),
+                    Err(_) => return Err("connection_unavailable".into()),
                 }
             };
             let mut pid = 0;
             // SAFETY: stream owns the live pipe; server PID output is valid.
             if unsafe { GetNamedPipeServerProcessId(stream.as_raw_handle().cast(), &mut pid) } == 0
+                || expected_pid.is_some_and(|expected| pid != expected)
                 || !matches!((peer_sid(pid),current_sid()),(Ok(peer),Ok(current))if peer==current)
             {
-                return Err("IPC 服务不属于当前用户".into());
+                return Err("permission_denied".into());
             }
             stream
                 .write_u32(bytes.len() as u32)
                 .await
-                .map_err(|e| e.to_string())?;
-            stream.write_all(&bytes).await.map_err(|e| e.to_string())?;
-            let size = stream.read_u32().await.map_err(|e| e.to_string())? as usize;
+                .map_err(crate::client_io_error)?;
+            stream
+                .write_all(&bytes)
+                .await
+                .map_err(crate::client_io_error)?;
+            let size = stream.read_u32().await.map_err(crate::client_io_error)? as usize;
             if size > MAX_MESSAGE_BYTES {
-                return Err("IPC reply too large".into());
+                return Err("ipc_message_too_large".into());
             }
             let mut body = vec![0; size];
             stream
                 .read_exact(&mut body)
                 .await
-                .map_err(|e| e.to_string())?;
-            serde_json::from_slice(&body).map_err(|_| "无效 IPC 回复".into())
+                .map_err(crate::client_io_error)?;
+            serde_json::from_slice(&body).map_err(|_| "invalid_backend_response".into())
         })
         .await
-        .map_err(|_| "IPC 请求超时")?
+        .map_err(|_| "background_timeout")?
     })
 }

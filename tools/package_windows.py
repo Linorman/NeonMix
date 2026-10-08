@@ -20,6 +20,7 @@ from pathlib import Path
 import pefile
 
 ROOT = Path(__file__).resolve().parents[1]
+VERSION = tomllib.loads((ROOT / 'Cargo.toml').read_text(encoding='utf-8'))['workspace']['package']['version']
 RELEASE = ROOT / 'target/release'
 PACKAGING = ROOT / 'packaging/windows'
 BINARIES = ['neonmix-desktop', 'neonmix-background', 'neonmix-hub', 'neonmix-audio',
@@ -98,8 +99,10 @@ def msvc_prefix():
     return Path(lock['prefix'])
 
 
-def stage(root, mingw, worker):
+def stage(root, mingw, worker, worker_gst=None, compiler_runtime=None):
     msvc = msvc_prefix()
+    worker_gst = worker_gst or mingw
+    compiler_runtime = compiler_runtime or mingw / 'bin'
     if root.exists():
         shutil.rmtree(root)
     bin_dir = root / 'bin'
@@ -118,7 +121,7 @@ def stage(root, mingw, worker):
             sys.exit(f'missing MSVC plugin {source}')
         shutil.copy2(source, root / 'plugins' / source.name)
     for name in AIRPLAY_PLUGINS:
-        source = mingw / 'lib/gstreamer-1.0' / f'libgst{name}.dll'
+        source = next((worker_gst / 'lib/gstreamer-1.0' / filename for filename in [f'libgst{name}.dll', f'gst{name}.dll'] if (worker_gst / 'lib/gstreamer-1.0' / filename).is_file()), worker_gst / 'lib/gstreamer-1.0' / f'libgst{name}.dll')
         if not source.is_file():
             sys.exit(f'missing MinGW plugin {source}')
         shutil.copy2(source, root / 'airplay/plugins' / source.name)
@@ -127,8 +130,24 @@ def stage(root, mingw, worker):
     msvc_roots = [bin_dir / f'{n}.exe' for n in BINARIES] + sorted((root / 'plugins').iterdir())
     mingw_roots = [worker_dir / 'neonmix-airplay-worker.exe'] + sorted((root / 'airplay/plugins').iterdir())
     collect(msvc_roots, [msvc / 'bin', msvc / 'lib'], bin_dir, owner)
-    collect(mingw_roots, [mingw / 'bin'], worker_dir, {})
+    collect(mingw_roots, [compiler_runtime, worker_gst / 'bin'], worker_dir, {})
 
+    # Compile the fixed helper against the exact staged socket-owner hashes.
+    header = root.parent / 'network_package.h'
+    header.write_text('#pragma once\n#define NEONMIX_PACKAGE_VERSION L"' + VERSION + '"\n' +
+                      '#define NEONMIX_HUB_SHA256 "' + sha256(bin_dir / 'neonmix-hub.exe') + '"\n' +
+                      '#define NEONMIX_WORKER_SHA256 "' + sha256(worker_dir / 'neonmix-airplay-worker.exe') + '"\n', encoding='utf-8')
+    subprocess.run(['cl', '/nologo', '/std:c++17', '/EHsc', '/O2', '/W3', '/WX', '/utf-8',
+                    f'/I{root.parent}', f'/Fe:{bin_dir / "neonmix-network-helper.exe"}',
+                    f'/Fo:{root.parent / "network_helper.obj"}', str(PACKAGING / 'network_helper.cpp'),
+                    '/link', 'ole32.lib', 'oleaut32.lib', 'uuid.lib', 'shell32.lib', 'advapi32.lib', 'bcrypt.lib'], check=True)
+    collect([bin_dir / 'neonmix-network-helper.exe'], [msvc / 'bin', msvc / 'lib'], bin_dir, owner)
+    (root / 'neonmix-installation.json').write_text(json.dumps({
+        'version': VERSION, 'managed_control': 1, 'worker_control': 2,
+        'files': {str(path.relative_to(root)).replace('\\', '/'): sha256(path)
+                  for path in [bin_dir / 'neonmix-hub.exe', bin_dir / 'neonmix-background.exe',
+                               bin_dir / 'neonmix-network-helper.exe', worker_dir / 'neonmix-airplay-worker.exe']}
+    }, indent=2) + '\n', encoding='utf-8')
     # Launcher: GUI-subsystem, no console window.
     subprocess.run(['cl', '/nologo', '/O2', '/W3', '/WX', '/utf-8', f'/Fe:{root / "NeonMix.exe"}',
                     f'/Fo:{root.parent / "launcher.obj"}', str(PACKAGING / 'launcher.c'),
@@ -141,17 +160,22 @@ def main():
     parser.add_argument('--mingw', type=Path, required=True, help='MSYS2 mingw64 prefix')
     parser.add_argument('--worker', type=Path, required=True, help='MinGW neonmix-airplay-worker.exe')
     parser.add_argument('--makensis', default='makensis')
+    parser.add_argument('--worker-gst', type=Path, help='Exact SDK/runtime prefix used by the worker build; default is --mingw')
+    parser.add_argument('--compiler-runtime', type=Path, help='Read-only MinGW compiler DLL directory; default is --mingw/bin')
     args = parser.parse_args()
     version = tomllib.loads((ROOT / 'Cargo.toml').read_text(encoding='utf-8'))['workspace']['package']['version']
-    commit = subprocess.run(['git', 'rev-parse', '--short=9', 'HEAD'], cwd=ROOT, check=True,
-                            capture_output=True, text=True).stdout.strip()
+    revision = subprocess.run(['git', 'rev-parse', '--short=9', 'HEAD'], cwd=ROOT,
+                              capture_output=True, text=True)
+    commit = revision.stdout.strip() if revision.returncode == 0 else None
     out = ROOT / 'artifacts/installers'
     out.mkdir(parents=True, exist_ok=True)
     root = out / 'NeonMix'
-    stage(root, args.mingw, args.worker)
+    stage(root, args.mingw, args.worker, args.worker_gst, args.compiler_runtime)
+    # Standalone user-mode maintenance client, extracted before replacing old files.
+    shutil.copy2(RELEASE / 'neonmix-background.exe', out / 'neonmix-maintenance.exe')
     installer = out / f'NeonMix-{version}-windows-x64-setup.exe'
     installer.unlink(missing_ok=True)
-    subprocess.run([args.makensis, f'/DVERSION={version}', f'/DSOURCE={root}',
+    subprocess.run([args.makensis, '/INPUTCHARSET', 'UTF8', f'/DVERSION={version}', f'/DSOURCE={root}',
                     f'/DOUTFILE={installer}', str(PACKAGING / 'neonmix.nsi')], check=True)
     report = {
         'version': version,
@@ -160,6 +184,10 @@ def main():
         'installer_bytes': installer.stat().st_size,
         'installer_sha256': sha256(installer),
         'signing': 'unsigned',
+        'worker_runtime': 'explicit matched SDK/runtime' if args.worker_gst else 'MinGW prefix',
+        'source_sha256': {str(p.relative_to(ROOT)): sha256(p) for folder in ['crates', 'apps', 'adapters', 'vendor', 'packaging/windows', 'patches'] for p in (ROOT / folder).rglob('*') if p.is_file()},
+        'network_helper_sha256': sha256(root / 'bin/neonmix-network-helper.exe'),
+        'staged_sha256': {str(p.relative_to(root)): sha256(p) for p in root.rglob('*') if p.is_file()},
         'stage_files': sum(1 for p in root.rglob('*') if p.is_file()),
     }
     (out / f'NeonMix-{version}-windows-x64.json').write_text(json.dumps(report, indent=2) + '\n')

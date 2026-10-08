@@ -1,0 +1,69 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0277]: `server::ApiError` doesn't implement `Debug`
+    --> apps/hub/src/airplay_api.rs:1952:10
+     |
+1952 |         .unwrap();
+     |          ^^^^^^ the trait `Debug` is not implemented for `server::ApiError`
+     |
+     = note: add `#[derive(Debug)]` to `server::ApiError` or manually `impl Debug for server::ApiError`
+note: required by a bound in `std::result::Result::<T, E>::unwrap`
+    --> /Users/linorman/.rustup/toolchains/1.95.0-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1229:12
+     |
+1227 |     pub fn unwrap(self) -> T
+     |            ------ required by a bound in this associated function
+1228 |     where
+1229 |         E: fmt::Debug,
+     |            ^^^^^^^^^^ required by this bound in `Result::<T, E>::unwrap`
+help: consider annotating `server::ApiError` with `#[derive(Debug)]`
+    -->  apps/hub/src/server.rs:292:1
+     |
+ 292 + #[derive(Debug)]
+ 293 | pub(super) struct ApiError(pub(super) ControlError);
+     |
+
+error[E0277]: `server::ApiError` doesn't implement `Debug`
+    --> apps/hub/src/airplay_api.rs:1970:10
+     |
+1970 |         .unwrap();
+     |          ^^^^^^ the trait `Debug` is not implemented for `server::ApiError`
+     |
+     = note: add `#[derive(Debug)]` to `server::ApiError` or manually `impl Debug for server::ApiError`
+note: required by a bound in `std::result::Result::<T, E>::unwrap`
+    --> /Users/linorman/.rustup/toolchains/1.95.0-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1229:12
+     |
+1227 |     pub fn unwrap(self) -> T
+     |            ------ required by a bound in this associated function
+1228 |     where
+1229 |         E: fmt::Debug,
+     |            ^^^^^^^^^^ required by this bound in `Result::<T, E>::unwrap`
+help: consider annotating `server::ApiError` with `#[derive(Debug)]`
+    -->  apps/hub/src/server.rs:292:1
+     |
+ 292 + #[derive(Debug)]
+ 293 | pub(super) struct ApiError(pub(super) ControlError);
+     |
+
+error[E0277]: `server::ApiError` doesn't implement `Debug`
+    --> apps/hub/src/airplay_api.rs:2003:10
+     |
+2003 |         .unwrap()
+     |          ^^^^^^ the trait `Debug` is not implemented for `server::ApiError`
+     |
+     = note: add `#[derive(Debug)]` to `server::ApiError` or manually `impl Debug for server::ApiError`
+note: required by a bound in `std::result::Result::<T, E>::unwrap`
+    --> /Users/linorman/.rustup/toolchains/1.95.0-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1229:12
+     |
+1227 |     pub fn unwrap(self) -> T
+     |            ------ required by a bound in this associated function
+1228 |     where
+1229 |         E: fmt::Debug,
+     |            ^^^^^^^^^^ required by this bound in `Result::<T, E>::unwrap`
+help: consider annotating `server::ApiError` with `#[derive(Debug)]`
+    -->  apps/hub/src/server.rs:292:1
+     |
+ 292 + #[derive(Debug)]
+ 293 | pub(super) struct ApiError(pub(super) ControlError);
+     |
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 3 previous errors

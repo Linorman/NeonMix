@@ -5,7 +5,8 @@ Run from the repository root through `tools/dev`:
 
     tools/dev python3 tools/package_macos.py [--skip-build]
 
-Everything lands in artifacts/installers/. The app is ad-hoc signed, not
+The default output is artifacts/installers/; --output selects another project-local
+directory and --keep-app retains the verified bundle. The app is ad-hoc signed, not
 notarized. Per-user data lives under ~/Library (see packaging/macos/launcher.c).
 """
 import argparse
@@ -19,6 +20,11 @@ import sys
 import tomllib
 from pathlib import Path
 
+try:
+    from .macho_references import relocation_problems
+except ImportError:  # Direct tools/dev python3 tools/package_macos.py invocation.
+    from macho_references import relocation_problems
+
 ROOT = Path(__file__).resolve().parents[1]
 PREFIX = ROOT / '.local/gstreamer/prefix'
 PLUGIN_DIR = PREFIX / 'lib/gstreamer-1.0'
@@ -27,7 +33,7 @@ RELEASE = ROOT / 'target/release'
 WORKER = ROOT / '.local/airplay/build/neonmix-airplay-worker'
 PACKAGING = ROOT / 'packaging/macos'
 BINARIES = ['neonmix-desktop', 'neonmix-background', 'neonmix-hub', 'neonmix-audio',
-            'neonmix-airplay-profile']
+            'neonmix-airplay-profile', 'neonmix-guardian']
 MEDIA_PLUGINS = ['coreelements', 'app', 'audioconvert', 'audioresample', 'libav', 'opus',
                  'rtp', 'rtpmanager', 'dtls', 'srtp']
 AIRPLAY_PLUGINS = ['coreelements', 'app', 'audioconvert', 'audioresample', 'libav']
@@ -55,12 +61,20 @@ def dependencies(binary):
 
 
 def rpaths(binary):
-    return re.findall(r'path (\S+) \(offset', output('otool', '-l', binary))
+    paths = []
+    for command in re.split(r'^Load command \d+\s*$', output('otool', '-l', binary), flags=re.M):
+        if not re.search(r'^\s*cmd LC_RPATH\s*$', command, flags=re.M):
+            continue
+        match = re.search(r'^\s*path (.+) \(offset \d+\)\s*$', command, flags=re.M)
+        if not match:
+            raise ValueError(f'{binary}: malformed LC_RPATH command')
+        paths.append(match.group(1))
+    return paths
 
 
 def set_rpath(binary, rpath):
     for old in rpaths(binary):
-        run('install_name_tool', '-delete_rpath', old, binary, capture_output=True, check=False)
+        run('install_name_tool', '-delete_rpath', old, binary, capture_output=True)
     run('install_name_tool', '-add_rpath', rpath, binary, capture_output=True)
 
 
@@ -117,7 +131,7 @@ def relink(binary, frameworks_rpath, frameworks):
         set_rpath(binary, frameworks_rpath)
     else:
         for old in rpaths(binary):
-            run('install_name_tool', '-delete_rpath', old, binary, capture_output=True, check=False)
+            run('install_name_tool', '-delete_rpath', old, binary, capture_output=True)
 
 
 def sign(path):
@@ -193,16 +207,7 @@ def assemble(app, version, build):
 
 
 def verify_relocation(app):
-    problems = []
-    for path in app.rglob('*'):
-        if not path.is_file() or not output('file', '-b', path).startswith('Mach-O'):
-            continue
-        for dep in dependencies(path):
-            if not dep.startswith(('@rpath/', '@loader_path/', '@executable_path/')):
-                problems.append(f'{path.relative_to(app)}: {dep}')
-        for rpath in rpaths(path):
-            if rpath.startswith('/'):
-                problems.append(f'{path.relative_to(app)}: rpath {rpath}')
+    problems = relocation_problems(app)
     if problems:
         sys.exit('non-relocatable references:\n' + '\n'.join(problems))
 
@@ -231,21 +236,28 @@ def sha256(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--skip-build', action='store_true', help='reuse existing release builds')
+    parser.add_argument('--output', type=Path, default=Path('artifacts/installers'),
+                        help='project-local output directory (default: artifacts/installers)')
+    parser.add_argument('--keep-app', action='store_true',
+                        help='retain the verified .app alongside the DMG')
     args = parser.parse_args()
+    out = (args.output if args.output.is_absolute() else ROOT / args.output).resolve()
+    if not out.is_relative_to(ROOT):
+        parser.error('--output must remain inside the project directory')
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         sys.exit('macOS installer must be built on Apple Silicon macOS')
     version = tomllib.loads((ROOT / 'Cargo.toml').read_text())['workspace']['package']['version']
     commit = output('git', 'rev-parse', '--short=9', 'HEAD').strip()
     if not args.skip_build:
         build_products()
-    out = ROOT / 'artifacts/installers'
     out.mkdir(parents=True, exist_ok=True)
     app = out / 'NeonMix.app'
     bundled = assemble(app, version, commit)
     verify_relocation(app)
     dmg = out / f'NeonMix-{version}-macos-arm64.dmg'
     make_dmg(app, dmg, f'NeonMix {version}')
-    shutil.rmtree(app)
+    if not args.keep_app:
+        shutil.rmtree(app)
     report = {
         'version': version,
         'commit': commit,
@@ -254,6 +266,7 @@ def main():
         'dmg_sha256': sha256(dmg),
         'bundled_libraries': len(bundled),
         'signing': 'ad-hoc, not notarized',
+        'retained_app': app.name if args.keep_app else None,
     }
     (out / f'NeonMix-{version}-macos-arm64.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report, indent=2))

@@ -2,6 +2,9 @@
 // Only local process IPC and private-file checks belong in this adapter.
 #pragma once
 #include <algorithm>
+#include <array>
+#include <filesystem>
+#include <memory>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
@@ -129,11 +132,12 @@ inline DWORD parent_process_id() {
 }
 class MediaPipe {
     HANDLE pipe=INVALID_HANDLE_VALUE;
+    HANDLE write_event=nullptr;
 public:
     MediaPipe()=default;
     MediaPipe(const MediaPipe&)=delete;
     MediaPipe& operator=(const MediaPipe&)=delete;
-    ~MediaPipe(){if(connected())CloseHandle(pipe);}
+    ~MediaPipe(){if(connected())CloseHandle(pipe);if(write_event)CloseHandle(write_event);}
     bool connected() const {return pipe!=INVALID_HANDLE_VALUE;}
     void connect(const std::string &address) {
         const std::string prefix="\\\\.\\pipe\\NeonMix.Airplay.v1.";
@@ -142,7 +146,7 @@ public:
             throw std::runtime_error("invalid private media pipe");
         std::wstring name(address.begin(),address.end());
         pipe=CreateFileW(name.c_str(),GENERIC_WRITE|READ_CONTROL,0,nullptr,OPEN_EXISTING,
-                         SECURITY_SQOS_PRESENT|SECURITY_IDENTIFICATION,nullptr);
+                         FILE_FLAG_OVERLAPPED|SECURITY_SQOS_PRESENT|SECURITY_IDENTIFICATION,nullptr);
         if(!connected())throw std::runtime_error("media IPC pipe connection failed");
         ULONG server_pid=0;DWORD parent_pid=parent_process_id();
         if(!parent_pid||!GetNamedPipeServerProcessId(pipe,&server_pid)||server_pid!=parent_pid)
@@ -178,23 +182,42 @@ public:
         }
         LocalFree(descriptor);
         if(!valid||!writable)throw std::runtime_error("media IPC pipe requires a protected owner-only DACL");
-        DWORD mode=PIPE_READMODE_BYTE|PIPE_NOWAIT;
-        if(!SetNamedPipeHandleState(pipe,&mode,nullptr,nullptr))throw std::runtime_error("media IPC pipe nonblocking configuration failed");
+        DWORD mode=PIPE_READMODE_BYTE|PIPE_WAIT;
+        if(!SetNamedPipeHandleState(pipe,&mode,nullptr,nullptr))throw std::runtime_error("media IPC pipe overlapped configuration failed");
+        write_event=CreateEventW(nullptr,TRUE,FALSE,nullptr);
+        if(!write_event)throw std::runtime_error("media IPC write event unavailable");
     }
     Count write(const void *bytes,size_t length,const std::atomic<bool> &running) {
-        // PIPE_NOWAIT returns immediately, including zero/partial byte writes
-        // under backpressure. One entire packet has a 250 ms budget; stop is
-        // observed between calls, with at most a 5 ms poll delay and no pending IO.
+        // Completion wakes the writer as soon as the Hub drains the pipe.
+        // PIPE_NOWAIT + sleep_for(5ms) can quantize each packet to a 15.6ms
+        // Windows scheduler tick, below 44.1kHz/352-frame audio throughput.
+        // Keep one pending write and the same 250ms whole-packet budget.
         auto deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(250);
         size_t offset=0;
         while(offset<length&&running){
+            if(!ResetEvent(write_event))return -1;
+            OVERLAPPED operation{};operation.hEvent=write_event;
             DWORD count=0;
             if(!WriteFile(pipe,static_cast<const uint8_t*>(bytes)+offset,
-                          static_cast<DWORD>(length-offset),&count,nullptr))return -1;
+                          static_cast<DWORD>(length-offset),&count,&operation)){
+                if(GetLastError()!=ERROR_IO_PENDING)return -1;
+                while(true){
+                    const DWORD result=WaitForSingleObject(write_event,5);
+                    if(result==WAIT_OBJECT_0)break;
+                    if(result!=WAIT_TIMEOUT||!running||std::chrono::steady_clock::now()>=deadline){
+                        CancelIoEx(pipe,&operation);
+                        // Cancellation is asynchronous. Drain completion before
+                        // freeing the packet or stack OVERLAPPED, even if the
+                        // original write won the cancellation race.
+                        GetOverlappedResult(pipe,&operation,&count,TRUE);
+                        return -1;
+                    }
+                }
+            }
+            if(!GetOverlappedResult(pipe,&operation,&count,FALSE)||!count||count>length-offset)return -1;
             offset+=count;
             if(offset==length)return static_cast<Count>(offset);
             if(std::chrono::steady_clock::now()>=deadline)return -1;
-            if(!count)std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
         return -1;
     }
@@ -250,21 +273,85 @@ inline Count read_control(void *bytes,size_t length,int timeout_ms) {
     return count>0?count:-1;
 #endif
 }
-inline std::string private_key_path(const std::string &path) {
-    if(path.empty() || path.find('\0')!=std::string::npos)throw std::runtime_error("invalid private key path");
+// Fixed-size, noncopyable secret storage. Its destructor also runs on read and
+// parse failures; volatile writes cannot be optimized away.
+class PrivateKey {
+public:
+    std::array<unsigned char,4096> bytes{};
+    size_t size=0;
+    PrivateKey()=default;
+    PrivateKey(const PrivateKey&)=delete;
+    PrivateKey& operator=(const PrivateKey&)=delete;
+    void clear() noexcept {
+        volatile unsigned char *data=bytes.data();
+        for(size_t i=0;i<bytes.size();i++)data[i]=0;
+        size=0;
+    }
+    ~PrivateKey(){clear();}
+};
+inline bool valid_utf8(const std::string &value) {
+    for(size_t i=0;i<value.size();){
+        auto first=static_cast<unsigned char>(value[i++]);
+        if(first<0x80)continue;
+        unsigned count=first>=0xc2&&first<=0xdf?1:first>=0xe0&&first<=0xef?2:first>=0xf0&&first<=0xf4?3:0;
+        if(!count||i+count>value.size())return false;
+        uint32_t code=first&((1u<<(6-count))-1);
+        for(unsigned j=0;j<count;j++){
+            auto next=static_cast<unsigned char>(value[i++]);
+            if((next&0xc0)!=0x80)return false;
+            code=(code<<6)|(next&0x3f);
+        }
+        if(code<(count==1?0x80u:count==2?0x800u:0x10000u)||code>0x10ffff||(code>=0xd800&&code<=0xdfff))return false;
+    }
+    return true;
+}
+inline std::unique_ptr<PrivateKey> read_private_key(const std::string &path
+#ifdef NEONMIX_IDENTITY_PROBE
+    , void (*validated_hook)(const std::string&)=nullptr
+#endif
+) {
+    if(path.empty() || path.find('\0')!=std::string::npos)throw std::runtime_error("identity_path_invalid");
+    if(!valid_utf8(path))throw std::runtime_error("identity_path_encoding");
+    auto key=std::make_unique<PrivateKey>();
 #ifdef _WIN32
-    // UTF-8 comes from JSON; Win32 ACL checks use wide paths. UxPlay fopen uses
-    // the process ANSI code page: reject lossy conversion rather than open a
-    // different key. Relocatable UTF-8 packaging remains a separate obligation.
     int size=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,path.c_str(),-1,nullptr,0);
-    if(!size)throw std::runtime_error("invalid UTF-8 private key path");
+    if(!size)throw std::runtime_error("identity_path_encoding");
     std::vector<wchar_t> wide(size);
-    MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,path.c_str(),-1,wide.data(),size);
+    if(!MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,path.c_str(),-1,wide.data(),size))
+        throw std::runtime_error("identity_path_encoding");
     size_t prefix=path.rfind("\\\\?\\",0)==0?4:0;
     size_t drive=(path.size()>prefix+1 && path[prefix+1]==':')?prefix+2:0;
-    if(path.find(':',drive)!=std::string::npos)throw std::runtime_error("private key alternate data stream refused");
-    HANDLE file=CreateFileW(wide.data(),GENERIC_READ|READ_CONTROL,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT,nullptr);
-    if(file==INVALID_HANDLE_VALUE)throw std::runtime_error("private key open failed");
+    if(path.find(':',drive)!=std::string::npos)throw std::runtime_error("identity_path_invalid");
+    DWORD count=GetFullPathNameW(wide.data(),0,nullptr,nullptr);
+    if(!count)throw std::runtime_error("identity_path_invalid");
+    std::vector<wchar_t> full(count);
+    if(!GetFullPathNameW(wide.data(),count,full.data(),nullptr))throw std::runtime_error("identity_path_invalid");
+    // Pin ancestors top down without delete-sharing, matching identity/files_windows.
+    // OPEN_REPARSE_POINT on the final file alone does not check junction parents.
+    auto absolute=std::filesystem::path(full.data());
+    std::vector<std::filesystem::path> parents;
+    for(auto parent=absolute.parent_path();!parent.empty();){
+        parents.push_back(parent);
+        auto next=parent.parent_path();if(next==parent)break;parent=next;
+    }
+    std::vector<std::unique_ptr<NativeHandle>> pinned;
+    for(auto it=parents.rbegin();it!=parents.rend();++it){
+        auto handle=std::make_unique<NativeHandle>(CreateFileW(it->c_str(),FILE_READ_ATTRIBUTES,
+            FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,
+            FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS,nullptr));
+        BY_HANDLE_FILE_INFORMATION info{};
+        if(handle->value==INVALID_HANDLE_VALUE || !GetFileInformationByHandle(handle->value,&info) ||
+           !(info.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) || (info.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT))
+            throw std::runtime_error("identity_permission_denied");
+        pinned.push_back(std::move(handle));
+    }
+    NativeHandle opened(CreateFileW(full.data(),GENERIC_READ|READ_CONTROL,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT,nullptr));
+    HANDLE file=opened.value;
+    if(file==INVALID_HANDLE_VALUE){
+        DWORD error=GetLastError();
+        throw std::runtime_error(error==ERROR_FILE_NOT_FOUND||error==ERROR_PATH_NOT_FOUND?
+            "identity_not_found":error==ERROR_ACCESS_DENIED?"identity_permission_denied":"identity_read_failed");
+    }
     bool valid=false;PSECURITY_DESCRIPTOR descriptor=nullptr;HANDLE token=nullptr;
     do {
         BY_HANDLE_FILE_INFORMATION info{};DWORD volume_flags=0;
@@ -296,23 +383,43 @@ inline std::string private_key_path(const std::string &path) {
         }
         FreeSid(owner_rights);valid=valid&&readable;
     }while(false);
-    if(token)CloseHandle(token);if(descriptor)LocalFree(descriptor);CloseHandle(file);
-    if(!valid)throw std::runtime_error("Hub private key requires a current-user regular file with a protected owner-only DACL");
-    BOOL lossy=FALSE;UINT codepage=GetACP();DWORD flags=codepage==CP_UTF8?WC_ERR_INVALID_CHARS:WC_NO_BEST_FIT_CHARS;
-    BOOL *used_default=codepage==CP_UTF8?nullptr:&lossy;
-    int narrow_size=WideCharToMultiByte(codepage,flags,wide.data(),-1,nullptr,0,nullptr,used_default);
-    if(!narrow_size||lossy)throw std::runtime_error("private key path cannot be represented by protocol file API");
-    std::string narrow(narrow_size,'\0');
-    if(!WideCharToMultiByte(codepage,flags,wide.data(),-1,narrow.data(),narrow_size,nullptr,used_default)||lossy)
-        throw std::runtime_error("private key path conversion failed");
-    narrow.pop_back();return narrow;
-#else
-    struct stat info{};
-    if(lstat(path.c_str(),&info)!=0||!S_ISREG(info.st_mode)||info.st_uid!=getuid()||(info.st_mode&0777)!=0600)
-        throw std::runtime_error("Hub private key must be current-user regular file with mode 0600");
-    return path;
+    if(token)CloseHandle(token);if(descriptor)LocalFree(descriptor);
+    if(!valid)throw std::runtime_error("identity_permission_denied");
+
+#ifdef NEONMIX_IDENTITY_PROBE
+    if(validated_hook)validated_hook(path);
 #endif
+    while(key->size<key->bytes.size()){
+        DWORD read=0;
+        if(!ReadFile(file,key->bytes.data()+key->size,static_cast<DWORD>(key->bytes.size()-key->size),&read,nullptr))
+            throw std::runtime_error("identity_read_failed");
+        if(!read)break;
+        key->size+=read;
+    }
+#else
+    struct Descriptor {
+        int value;
+        ~Descriptor(){if(value>=0)close(value);}
+    } opened{open(path.c_str(),O_RDONLY|O_NOFOLLOW|O_NONBLOCK|O_CLOEXEC)};
+    if(opened.value<0)throw std::runtime_error(errno==ENOENT?"identity_not_found":
+        errno==EACCES||errno==ELOOP?"identity_permission_denied":"identity_read_failed");
+    struct stat info{};
+    if(fstat(opened.value,&info)!=0||!S_ISREG(info.st_mode)||info.st_uid!=geteuid()||(info.st_mode&0777)!=0600)
+        throw std::runtime_error("identity_permission_denied");
+#ifdef NEONMIX_IDENTITY_PROBE
+    if(validated_hook)validated_hook(path);
+#endif
+    while(key->size<key->bytes.size()){
+        auto read=::read(opened.value,key->bytes.data()+key->size,key->bytes.size()-key->size);
+        if(read<0){if(errno==EINTR)continue;throw std::runtime_error("identity_read_failed");}
+        if(!read)break;
+        key->size+=static_cast<size_t>(read);
+    }
+#endif
+    if(!key->size || key->size>=key->bytes.size())throw std::runtime_error("identity_format_invalid");
+    return key;
 }
+
 } // namespace platform
 #ifdef _WIN32
 // The optional decoder probe includes main.cpp and uses this POSIX spelling.

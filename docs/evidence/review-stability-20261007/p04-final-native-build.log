@@ -1,0 +1,15 @@
+[ 43%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-worker.dir/main.cpp.o
+[100%] Linking CXX executable neonmix-airplay-worker
+[100%] Built target neonmix-airplay-worker
+[ 56%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-session-probe.dir/session_probe.cpp.o
+[100%] Linking CXX executable neonmix-airplay-session-probe
+[100%] Built target neonmix-airplay-session-probe
+[ 41%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-audio-probe.dir/audio_probe.cpp.o
+[100%] Linking CXX executable neonmix-airplay-audio-probe
+[100%] Built target neonmix-airplay-audio-probe

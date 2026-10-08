@@ -1,0 +1,44 @@
+[
+  {
+    "language": "zh-CN",
+    "width": 600,
+    "height": 440,
+    "directory": "artifacts/i18n/zh-CN/600",
+    "exit_code": 0
+  },
+  {
+    "language": "zh-CN",
+    "width": 1100,
+    "height": 760,
+    "directory": "artifacts/i18n/zh-CN/1100",
+    "exit_code": 0
+  },
+  {
+    "language": "zh-CN",
+    "width": 1600,
+    "height": 1000,
+    "directory": "artifacts/i18n/zh-CN/1600",
+    "exit_code": 0
+  },
+  {
+    "language": "en",
+    "width": 600,
+    "height": 440,
+    "directory": "artifacts/i18n/en/600",
+    "exit_code": 0
+  },
+  {
+    "language": "en",
+    "width": 1100,
+    "height": 760,
+    "directory": "artifacts/i18n/en/1100",
+    "exit_code": 0
+  },
+  {
+    "language": "en",
+    "width": 1600,
+    "height": 1000,
+    "directory": "artifacts/i18n/en/1600",
+    "exit_code": 0
+  }
+]

@@ -59,6 +59,13 @@ pub fn credential(path: &Path) -> Result<Credential> {
     }
 }
 pub fn config(path: &Path) -> Result<ServerConfig> {
+    // Resolve an interrupted settings commit before the strict output/state
+    // agreement and credential checks below can reject a recoverable pair.
+    neonmix_identity::hub_settings::recover(path, |bytes| {
+        Authority::restore(serde_json::from_slice(bytes).map_err(|_| "credential_corrupt")?)
+            .map(|_| ())
+            .map_err(|_| "credential_corrupt".into())
+    })?;
     let profile = match profiles::hub(path) {
         Ok(p) => p,
         Err(error) => {
@@ -537,6 +544,54 @@ mod tests {
         fn drop(&mut self) {
             let _ = std::fs::remove_dir_all(&self.0);
         }
+    }
+    #[test]
+    fn interrupted_output_settings_recover_before_product_config_agreement_checks() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join(".local/tmp")
+            .join(format!("config-start-recovery-{}", Uuid::new_v4()));
+        files::private_dir(&root).unwrap();
+        setup(&root, "old-output".into(), "Old room".into()).unwrap();
+        let profile = root.join("server.json");
+        let before = config(&profile).unwrap();
+        let failed = neonmix_identity::hub_settings::update_with(
+            &profile,
+            "new-output",
+            "New room",
+            &|bytes| {
+                Authority::restore(serde_json::from_slice(bytes).map_err(|_| "invalid state")?)
+                    .map(|_| ())
+                    .map_err(|_| "invalid authority".into())
+            },
+            &mut |stage| {
+                if stage == neonmix_identity::hub_settings::Stage::StatePublished {
+                    Err(std::io::ErrorKind::Other.into())
+                } else {
+                    Ok(())
+                }
+            },
+        );
+        assert!(failed.is_err());
+        // State is new while the profile is old: the previous config reader
+        // would reject this exact pair before it reached any recovery logic.
+        assert_eq!(profiles::hub(&profile).unwrap().output, "old-output");
+        let recovered = config(&profile).unwrap();
+        assert_eq!(recovered.output, "new-output");
+        assert_eq!(recovered.room_name.as_deref(), Some("New room"));
+        assert_eq!(recovered.certificate, before.certificate);
+        assert_eq!(recovered.private_key, before.private_key);
+        assert_eq!(recovered.devices[0].token, before.devices[0].token);
+        assert!(
+            !neonmix_identity::hub_settings::journal_path(&profile)
+                .unwrap()
+                .exists()
+        );
+        assert_eq!(config(&profile).unwrap().output, "new-output");
+        std::fs::remove_dir_all(root).unwrap();
     }
     #[test]
     fn setup_crash_helper() {

@@ -1,0 +1,262 @@
+[
+  {
+    "scenario": "idle",
+    "language": "zh-CN",
+    "fixture": "empty",
+    "samples": [
+      {
+        "pid": 17424,
+        "monotonic_ns": 844226913977500,
+        "cpu_ns": 220919625,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.47448245316378007,
+        "rss_bytes": 208994304,
+        "physical_footprint_bytes": 304841784,
+        "threads": 10,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 147,
+        "pageins": 249
+      },
+      {
+        "pid": 17424,
+        "monotonic_ns": 844227917652583,
+        "cpu_ns": 225338041,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.44022374121247365,
+        "rss_bytes": 208994304,
+        "physical_footprint_bytes": 304841784,
+        "threads": 10,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 155,
+        "pageins": 249
+      },
+      {
+        "pid": 17424,
+        "monotonic_ns": 844228918131416,
+        "cpu_ns": 229994083,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.4653813600472245,
+        "rss_bytes": 208814080,
+        "physical_footprint_bytes": 304694328,
+        "threads": 7,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 164,
+        "pageins": 249
+      },
+      {
+        "pid": 17424,
+        "monotonic_ns": 844229923202291,
+        "cpu_ns": 235038541,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.501900724165348,
+        "rss_bytes": 208814080,
+        "physical_footprint_bytes": 304694328,
+        "threads": 7,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 173,
+        "pageins": 249
+      }
+    ],
+    "binary_sha256": "761acab3bc55ecb9647f7bb9391d6e1183cff9836570a109c8c8531779330cf1",
+    "mean_cpu_one_core": 0.47049706964720656
+  },
+  {
+    "scenario": "four-inputs",
+    "language": "zh-CN",
+    "fixture": "full",
+    "samples": [
+      {
+        "pid": 18463,
+        "monotonic_ns": 844233947118666,
+        "cpu_ns": 284349000,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 2.537551409814151,
+        "rss_bytes": 210812928,
+        "physical_footprint_bytes": 320095312,
+        "threads": 9,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 269,
+        "pageins": 17
+      },
+      {
+        "pid": 18463,
+        "monotonic_ns": 844234952184125,
+        "cpu_ns": 310887958,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 2.6405203524161704,
+        "rss_bytes": 210812928,
+        "physical_footprint_bytes": 320095312,
+        "threads": 9,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 314,
+        "pageins": 17
+      },
+      {
+        "pid": 18463,
+        "monotonic_ns": 844235957250833,
+        "cpu_ns": 337819000,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 2.6795278149836,
+        "rss_bytes": 210747392,
+        "physical_footprint_bytes": 320029776,
+        "threads": 7,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 362,
+        "pageins": 17
+      },
+      {
+        "pid": 18463,
+        "monotonic_ns": 844236962265250,
+        "cpu_ns": 366029833,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 2.807007792406624,
+        "rss_bytes": 210747392,
+        "physical_footprint_bytes": 320029776,
+        "threads": 7,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 407,
+        "pageins": 17
+      }
+    ],
+    "binary_sha256": "761acab3bc55ecb9647f7bb9391d6e1183cff9836570a109c8c8531779330cf1",
+    "mean_cpu_one_core": 2.6661518424051365
+  },
+  {
+    "scenario": "idle",
+    "language": "en",
+    "fixture": "empty",
+    "samples": [
+      {
+        "pid": 18698,
+        "monotonic_ns": 844240980784750,
+        "cpu_ns": 222481708,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.4549606685050278,
+        "rss_bytes": 207618048,
+        "physical_footprint_bytes": 327943200,
+        "threads": 11,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 141,
+        "pageins": 48
+      },
+      {
+        "pid": 18698,
+        "monotonic_ns": 844241985842500,
+        "cpu_ns": 227532875,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.502574802293699,
+        "rss_bytes": 207618048,
+        "physical_footprint_bytes": 325600288,
+        "threads": 11,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 152,
+        "pageins": 48
+      },
+      {
+        "pid": 18698,
+        "monotonic_ns": 844242989187458,
+        "cpu_ns": 231810291,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.42631559224918136,
+        "rss_bytes": 207552512,
+        "physical_footprint_bytes": 325567520,
+        "threads": 9,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 165,
+        "pageins": 48
+      },
+      {
+        "pid": 18698,
+        "monotonic_ns": 844243994243250,
+        "cpu_ns": 236976041,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 0.5139764420162657,
+        "rss_bytes": 207388672,
+        "physical_footprint_bytes": 325403680,
+        "threads": 7,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 175,
+        "pageins": 48
+      }
+    ],
+    "binary_sha256": "761acab3bc55ecb9647f7bb9391d6e1183cff9836570a109c8c8531779330cf1",
+    "mean_cpu_one_core": 0.4744568762660435
+  },
+  {
+    "scenario": "four-inputs",
+    "language": "en",
+    "fixture": "full",
+    "samples": [
+      {
+        "pid": 18912,
+        "monotonic_ns": 844248011306791,
+        "cpu_ns": 365093750,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 3.41454623785152,
+        "rss_bytes": 210501632,
+        "physical_footprint_bytes": 306529336,
+        "threads": 9,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 263,
+        "pageins": 15
+      },
+      {
+        "pid": 18912,
+        "monotonic_ns": 844249012756500,
+        "cpu_ns": 407242958,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 4.208819236872932,
+        "rss_bytes": 210534400,
+        "physical_footprint_bytes": 306562104,
+        "threads": 9,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 307,
+        "pageins": 15
+      },
+      {
+        "pid": 18912,
+        "monotonic_ns": 844250018022125,
+        "cpu_ns": 466062375,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 5.851131833936926,
+        "rss_bytes": 208027648,
+        "physical_footprint_bytes": 306267192,
+        "threads": 6,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 350,
+        "pageins": 15
+      },
+      {
+        "pid": 18912,
+        "monotonic_ns": 844251020118958,
+        "cpu_ns": 503874500,
+        "mach_timebase_numer": 125,
+        "mach_timebase_denom": 3,
+        "cpu_percent_one_core": 3.7733005189529423,
+        "rss_bytes": 208027648,
+        "physical_footprint_bytes": 306267192,
+        "threads": 6,
+        "file_descriptors": 8,
+        "interrupt_wakeups": 396,
+        "pageins": 15
+      }
+    ],
+    "binary_sha256": "761acab3bc55ecb9647f7bb9391d6e1183cff9836570a109c8c8531779330cf1",
+    "mean_cpu_one_core": 4.31194945690358
+  }
+]

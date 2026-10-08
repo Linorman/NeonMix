@@ -1,0 +1,118 @@
+{
+  "created_at": "2026-10-07T23:46:30.742593+00:00",
+  "scope": "Native control v2 config/event domains and macOS real TLS/WSS Hub restart + actual watch client. AirPlay domains and desired/applied remain pending.",
+  "gate": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.56
+    },
+    "packaging": {
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.231
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 1.77
+    },
+    "tests": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 67.608
+    }
+  },
+  "rust_passed": 323,
+  "rust_ignored": 7,
+  "wire_result": "p07-native-version-wire-result.json",
+  "sha256": {
+    "crates/control/src/lib.rs": "f923dee379fbc7c2fb4dbf54f879b530a649237f79164a31208cb7c5e54252a0",
+    "crates/control/tests/version_domains.rs": "49c022d3765d55d1fbfb74df3ece8f9e0e8f81f46a37301c58d346d4bea972a5",
+    "crates/control/tests/transactions.rs": "a0b6a91f630731af81666c94cf0a5e83d855c66a3316c22e74fb9d6c2d6f6ecf",
+    "crates/identity/src/hub_settings.rs": "53113c875ac3ec984aadf5aa1a0a55587cf75d92e52c384381ffa14e59d54eba",
+    "apps/hub/src/server.rs": "6a2aefce4b1c3c722acb1db856a9c1d9c96345c4bc8e952ec640211877705a67",
+    "apps/hub/src/sender.rs": "4e984be62eb285afca433d0a8f58de6c8543a3aa7e7912c8cc736771586dc676",
+    "apps/hub/src/control_client.rs": "10d39fb1a5ffc66bcff8c0e8dac6f7f8e2fe3919212e10dca13a20c1053fecdb",
+    "apps/hub/src/pairing_api.rs": "707cbe082fb48d82a149ce6d2bc55908c0a38712bbf13760b4960c7126dd0c08",
+    "apps/desktop/src/commands.rs": "3da6eb1496c2ec5137be65a17c3e7e5bc3e185e9568a7ab7ccc174bc4aeda720",
+    "apps/desktop/src/main.rs": "fbfa6d3ffa774013e3c799c3e8336299079198e884f88fbf935355348e02a7c2",
+    "crates/desktop-service/src/daemon.rs": "7db0b091a02c30263e7ecb5325abf594ffe72260d856b4b4a7efbd66ad9d7346",
+    "tools/control_epoch_probe.py": "73b146a59a7f64840663bddea850e6ff87bd7c2ed01ff4c33c0ca42b8669b182",
+    "tools/e02_e04_probe.py": "08430c24bf84e9a7867ca11037c9acc340738f6e52be08b4a2cc91be954a64ce",
+    "docs/REVIEW-IMPROVEMENT-DESIGN-PLAN-20261007.md": "a17d28a0e2104ede27a6459d04eee3d6e1909eaddebf2704055347e6cb07e8ca",
+    "docs/MEDIA-CONTROL-CONTRACT.md": "0f2e890571e2666ddf7b16ada10aec4150d6a4cab1a023e511b4fdbf6b7e750e",
+    "target/release/neonmix-hub": "23f79a8c72da4ed4db20eaba8cb4efc0942309741f3277dab74724df99211f2b",
+    "target/release/neonmix-desktop": "04fcd78af0107e1a0cc380d255aedc5c1826b63a4c688df47beb7b94d50dd1fc",
+    "target/release/neonmix-background": "1df5caf44d6327419f8b3a7c95d4616df6e845a63df8b3ac4d944148e9d1af1d",
+    "target/release/neonmix-guardian": "1dd7be863a6b9fbbc6791b63a097600c958a44f6c749f6c0d9c3c377faf66233",
+    "docs/STATUS.md": "b42ed4e3585c02f27acec6d89d096c18eab712100e085ab9b5ee3ddf8f726f80"
+  }
+}

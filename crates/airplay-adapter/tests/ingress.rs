@@ -100,6 +100,7 @@ fn packet(seq: u64, target_ns: u64) -> PcmPacket {
             format_epoch: 4,
             sequence: seq,
             source_sample_position: seq * 441,
+            normalized_sample_position: seq * 480,
             presentation_time_ns: 1_000_000_000_000_000 + target_ns,
             mapping_id: 5,
             uncertainty_ns: 1000,
@@ -186,6 +187,8 @@ fn four_second_and_byte_limits_hold_for_large_and_tiny_packets() {
     let mut rejected = false;
     for seq in 1..2000 {
         let mut b = packet(seq, 1_000_000_000 + seq * 21_000);
+        b.header.normalized_sample_position = seq;
+        b.header.source_sample_position = seq * 44100 / 48000;
         b.header.frame_count = 1;
         b.samples.truncate(2);
         if i.push_at(b, now, wall()) == Err(IngressError::Full) {
@@ -260,6 +263,7 @@ fn low_latency_preserves_pcm_through_deep_device_callbacks() {
         config.lanes[0] = LaneMix {
             stream_id: 2,
             epoch: 3,
+            playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
             ..LaneMix::default()
         };
         control.apply(config).unwrap();
@@ -283,7 +287,7 @@ fn low_latency_preserves_pcm_through_deep_device_callbacks() {
             }
             ingress.release_due(origin + Duration::from_nanos(now_ns), &mut inputs[0]);
             mixer.set_presentation_time(origin + Duration::from_nanos(now_ns + latency_ns));
-            mixer.render_block(&mut rendered);
+            mixer.render_block_at(origin + Duration::from_nanos(now_ns), &mut rendered);
             if output > 24000 {
                 bad_samples += rendered
                     .iter()
@@ -303,5 +307,175 @@ fn low_latency_preserves_pcm_through_deep_device_callbacks() {
         );
         assert_eq!(bad_samples, 0, "steady PCM must be continuous");
         assert_eq!(stats.underrun_frames.load(Relaxed), 0);
+    }
+}
+
+#[test]
+fn prefetched_gap_keeps_the_first_tail_and_the_second_deadline() {
+    use neonmix_core::{
+        mixer::{LaneMix, Mixer, MixerConfig, PlaybackKind},
+        signal::StereoSource,
+    };
+    for period in [1usize, 127, 480, 1024] {
+        let origin = Instant::now();
+        let mut ingress = Ingress::new_at(origin, context(), origin, wall());
+        let (mut mixer, mut control, mut inputs, stats) = Mixer::new(origin).unwrap();
+        let mut config = MixerConfig {
+            master_db: 0.,
+            ..Default::default()
+        };
+        config.lanes[0] = LaneMix {
+            stream_id: 2,
+            epoch: 3,
+            playback_kind: PlaybackKind::Timed,
+            ..Default::default()
+        };
+        control.apply(config).unwrap();
+        let mut first = packet(0, 100_000_000);
+        first.samples.fill(0.4);
+        let mut second = packet(2, 120_000_000);
+        second.samples.fill(-0.6);
+        ingress.push_at(first, origin, wall()).unwrap();
+        ingress.push_at(second, origin, wall()).unwrap();
+        // Both descriptors reach the real Mixer before A's first sample.
+        assert_eq!(
+            ingress.release_due(origin + Duration::from_millis(60), &mut inputs[0]),
+            2
+        );
+        let mut rendered = Vec::new();
+        for frame in (0..1920).step_by(period) {
+            let count = period.min(1920 - frame);
+            let time = Duration::from_nanos(
+                90_000_000 + neonmix_core::clock::frames_to_ns(frame as u64, 48000),
+            );
+            mixer.set_presentation_time(origin + time);
+            let mut output = vec![[0.; 2]; count];
+            mixer.render_block_at(origin + Duration::from_millis(60), &mut output);
+            rendered.extend(output);
+        }
+        assert!(
+            rendered[800..950]
+                .iter()
+                .all(|f| (f[0] - 0.2).abs() < 0.001),
+            "period={period}: A tail lost during prefetch"
+        );
+        assert!(
+            rendered[..1440].iter().all(|f| f[0] >= -0.00001),
+            "period={period}: B appeared before 120ms"
+        );
+        assert!(
+            rendered[960..1440].iter().all(|f| f[0].abs() < 0.00001),
+            "gap must stay silent"
+        );
+        assert!(rendered[1800..].iter().all(|f| (f[0] + 0.3).abs() < 0.001));
+        assert_eq!(
+            stats
+                .timed_late_frames
+                .load(std::sync::atomic::Ordering::Relaxed),
+            0
+        );
+    }
+}
+
+#[test]
+fn normalized_coordinates_keep_gaps_after_rejection_and_check_pts_and_source() {
+    let now = Instant::now();
+    let mut ingress = Ingress::new_at(now, context(), now, wall());
+    ingress
+        .push_at(packet(0, 100_000_000), now, wall())
+        .unwrap();
+    let mut bad = packet(1, 110_000_000);
+    bad.samples[0] = f32::NAN;
+    assert_eq!(
+        ingress.push_at(bad, now, wall()),
+        Err(IngressError::Malformed)
+    );
+    ingress
+        .push_at(packet(2, 120_000_000), now, wall())
+        .unwrap();
+    assert_eq!(ingress.stats().source_gap_frames, 480);
+    assert_eq!(ingress.stats().last_normalized_sample_position, 960);
+    let mut conflicting = packet(3, 140_000_000);
+    assert_eq!(
+        ingress.push_at(conflicting.clone(), now, wall()),
+        Err(IngressError::Timeline)
+    );
+    assert_eq!(ingress.stats().pts_rejections, 1);
+    conflicting.header.presentation_time_ns = 1_000_000_130_000_000;
+    conflicting.header.source_sample_position += 441;
+    assert_eq!(
+        ingress.push_at(conflicting, now, wall()),
+        Err(IngressError::Timeline)
+    );
+    assert_eq!(ingress.stats().coordinate_rejections, 1);
+    let mut reversed = packet(3, 130_000_000);
+    reversed.header.normalized_sample_position = 959;
+    assert_eq!(
+        ingress.push_at(reversed, now, wall()),
+        Err(IngressError::Timeline)
+    );
+    // Rejections leave the fixed anchor and accepted tail untouched.
+    ingress
+        .push_at(packet(3, 130_000_000), now, wall())
+        .unwrap();
+    let (mut producer, mut consumer) = block_queue(8, Arc::new(AudioStats::default())).unwrap();
+    assert_eq!(
+        ingress.release_due(now + Duration::from_millis(80), &mut producer),
+        3
+    );
+    for expected in [0, 960, 1440] {
+        assert_eq!(
+            consumer
+                .pop_fresh(80_000_000, 80_000_000)
+                .unwrap()
+                .header
+                .source_sample_position,
+            expected
+        );
+    }
+    let mut replacement = context();
+    replacement.mapping_id += 1;
+    replacement.stream_epoch += 1;
+    ingress.reset_at(replacement, now, wall());
+    let mut fresh = packet(0, 100_000_000);
+    fresh.header.mapping_id += 1;
+    fresh.header.stream_epoch += 1;
+    ingress.push_at(fresh, now, wall()).unwrap();
+    assert_eq!(ingress.stats().last_normalized_sample_position, 0);
+}
+
+#[test]
+fn variable_src_chunks_preserve_the_same_media_grid_without_rounding_drift() {
+    for rate in [44_100, 48_000] {
+        let now = Instant::now();
+        let mut ingress = Ingress::new_at(now, context(), now, wall());
+        let (mut producer, mut consumer) = block_queue(8, Arc::new(AudioStats::default())).unwrap();
+        let mut position = 0u64;
+        for sequence in 0..2000 {
+            let frames = [1usize, 127, 352, 480, 17][sequence as usize % 5];
+            let mut media = packet(
+                sequence,
+                100_000_000 + neonmix_core::clock::frames_to_ns(position, 48_000),
+            );
+            media.header.source_rate = rate;
+            media.header.source_sample_position =
+                4_294_967_040 + position * u64::from(rate) / 48_000;
+            media.header.normalized_sample_position = position;
+            media.header.frame_count = frames as u16;
+            media.samples.resize(frames * 2, 0.25);
+            let pts = media.header.presentation_time_ns - 1_000_000_000_000_000;
+            let arrival = Duration::from_nanos(pts - 40_000_000);
+            ingress
+                .push_at(media, now + arrival, wall() + arrival)
+                .unwrap();
+            assert_eq!(ingress.release_due(now + arrival, &mut producer), 1);
+            let delivered = consumer.pop_fresh(pts - 40_000_000, 80_000_000).unwrap();
+            assert_eq!(delivered.header.source_sample_position, position);
+            assert_eq!(delivered.header.presentation_time_ns, Some(pts));
+            position += frames as u64;
+        }
+        assert_eq!(ingress.stats().source_gap_frames, 0);
+        assert_eq!(ingress.stats().coordinate_rejections, 0);
+        assert_eq!(ingress.stats().pts_rejections, 0);
     }
 }

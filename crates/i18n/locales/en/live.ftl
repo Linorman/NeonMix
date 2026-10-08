@@ -1,0 +1,52 @@
+live-after-sources-connect-select-one-on-the-left = After sources connect, select one on the left to adjust it here.
+live-cannot-connect-right-now-make-sure-the-hub = Cannot connect right now · Make sure the Hub is sharing on the same local network
+live-clock-drift = Clock drift
+live-connected = Connected
+live-create-a-room-or-join-one-on-your = Create a room or join one on your local network
+live-create-room = Create room
+live-deselect = Deselect
+live-diagnostics = Diagnostics
+live-discover-and-pair-with-rooms-on-your-local = Discover and pair with rooms on your local network in Sender
+live-hub-limiter-state = { $state } · Limiting { $value } dB
+live-hub-settings = Hub settings
+live-input-count =
+    { $count ->
+        [one] { $count } input
+       *[other] { $count } inputs
+    }
+live-join-room = Join room
+live-largest-queue-estimate = Largest queue estimate
+live-let-devices-on-the-local-network-send-audio = Let devices on the local network send audio to this room
+live-master-controls-require-a-room-controller-or-administrator = Master controls require a room controller or administrator.
+live-master-volume = Master volume
+live-media-network = Media network
+live-mixer-queue-estimate = Mixer queue estimate
+live-mute = Mute
+live-mute-master = Mute master
+live-native-sender = Native Sender
+live-neonmix-brings-audio-from-devices-on-your-local = NeonMix brings audio from devices on your local network into one room, mixes it, and plays it through a physical output.
+live-no-changes-yet-source-connections-disconnections-muting-and = No changes yet. Source connections, disconnections, muting, and network changes appear here.
+live-no-inputs = No inputs
+live-no-room-connected-yet = No room connected yet
+live-not-sharing-start-sharing-to-let-devices-connect = Not sharing · Start sharing to let devices connect
+live-open-in-mixer = Open in Mixer
+live-output-unavailable-waiting-for-device-recovery = Output unavailable · Waiting for device recovery
+live-paired-room = Paired room
+live-room = Room
+live-room-activity = Room activity
+live-room-master-volume = Room master volume
+live-room-overview = Room overview
+live-select-a-source-on-the-left-to-view = Select a source on the left to view and adjust it. Select the room core to open Mixer.
+live-set-up-this-computer-as-a-room-in = Set up this computer as a room in Hub settings
+live-sharing = Sharing
+live-signal-flow = Signal flow
+live-since-this-window-opened = Since this window opened
+live-sources-appear-on-the-left-and-join-the = Sources appear on the left and join the room when a Sender pairs and starts sending, or an AirPlay device connects.
+live-start-sharing = Start sharing
+live-status = Status
+live-status-is-stale = Status is stale
+live-type = Type
+live-unavailable = Unavailable
+live-unmute-master = Unmute master
+live-view-sender = View Sender
+live-volume = Volume

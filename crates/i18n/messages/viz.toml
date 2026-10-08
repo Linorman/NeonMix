@@ -1,0 +1,41 @@
+[[message]]
+id = "viz-stage-done"
+
+[[message]]
+id = "viz-stage-next"
+
+[[message]]
+id = "viz-stage-todo"
+
+[[message]]
+id = "viz-stage-fault"
+
+[[message]]
+id = "viz-step-accessible"
+args = { title = "string", detail = "string", state = "string" }
+
+[[message]]
+id = "viz-invitation-remaining"
+args = { seconds = "u64" }
+
+[[message]]
+id = "viz-capacity-idle"
+
+[[message]]
+id = "viz-native-source"
+
+[[message]]
+id = "viz-capacity-occupant"
+args = { name = "string", kind = "string" }
+
+[[message]]
+id = "viz-capacity-empty"
+args = { limit = "u64" }
+
+[[message]]
+id = "viz-capacity-summary"
+args = { count = "u64", limit = "u64", sources = "string" }
+
+[[message]]
+id = "viz-list-separator"
+

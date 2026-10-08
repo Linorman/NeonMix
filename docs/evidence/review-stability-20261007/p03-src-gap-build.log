@@ -1,0 +1,23 @@
+[ 50%] Built target plist
+[ 95%] Built target protocol
+[100%] Built target neonmix-airplay-worker
+[ 36%] Built target plist
+[ 95%] Built target protocol
+[ 97%] Building CXX object CMakeFiles/neonmix-airplay-audio-probe.dir/audio_probe.cpp.o
+/Volumes/projects-mac/NeonMix/apps/airplay-worker/audio_probe.cpp:105:59: error: use of undeclared identifier 'require'
+  105 |             {std::unique_lock<std::mutex>l(w.queue_mutex);require(w.queue_cv.wait_for(l,std::chrono::seconds(2),[&]{return w.packets.size()>=24;}),"gap decoder timeout");
+      |                                                           ^~~~~~~
+/Volumes/projects-mac/NeonMix/apps/airplay-worker/audio_probe.cpp:107:90: error: use of undeclared identifier 'require'
+  107 |                 for(const auto &p:w.packets){uint64_t position=field(p,112,8);if(!first){require(position>=end,"SRC overlap at gap");gap+=position-end;}
+      |                                                                                          ^~~~~~~
+/Volumes/projects-mac/NeonMix/apps/airplay-worker/audio_probe.cpp:109:17: error: use of undeclared identifier 'require'
+  109 |                 require(gap>=479&&gap<=481,"ten-ms source gap was compressed: "+std::to_string(gap));
+      |                 ^~~~~~~
+/Volumes/projects-mac/NeonMix/apps/airplay-worker/audio_probe.cpp:110:17: error: use of undeclared identifier 'require'
+  110 |                 require(boundaries==2,"SRC did not isolate gap FIR");
+      |                 ^~~~~~~
+4 errors generated.
+make[3]: *** [CMakeFiles/neonmix-airplay-audio-probe.dir/audio_probe.cpp.o] Error 1
+make[2]: *** [CMakeFiles/neonmix-airplay-audio-probe.dir/all] Error 2
+make[1]: *** [CMakeFiles/neonmix-airplay-audio-probe.dir/rule] Error 2
+make: *** [neonmix-airplay-audio-probe] Error 2

@@ -1,0 +1,18 @@
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Checking neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+error[E0433]: cannot find module or crate `airplay_api` in this scope
+   --> apps/hub/src/airplay.rs:255:22
+    |
+255 |     recovery: Option<airplay_api::Recovery>,
+    |                      ^^^^^^^^^^^ use of unresolved module or unlinked crate `airplay_api`
+    |
+help: to make use of source file apps/hub/src/airplay_api.rs, use `mod airplay_api` in this file to declare the module
+   --> apps/hub/src/main.rs:1:1
+    |
+  1 + mod airplay_api;
+    |
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 1 previous error

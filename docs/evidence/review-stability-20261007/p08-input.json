@@ -1,0 +1,13 @@
+{
+  "head": "aefb8690320cb114c974be2477b2ebb64dfadf1e",
+  "diff_sha256": "937c30c6daad28fda855b3a18be5d9a6e47c16d9e817faed02102c897d7973f2",
+  "files": {
+    "apps/desktop/src/main.rs": "9c95f2e4a2a2e0913f731eb6368ec8c35fa3af71bc42771d313f9668f04e825c",
+    "apps/desktop/src/measurement.rs": "5ba26f509e7c70819e4bb0bd172b97b9707232d8345bb58a18054c0a667ab8b1",
+    "apps/desktop/src/pages/diagnostics.rs": "df0d15763b9bffa223d099ae38e13cf9c91b94d100d8e032b434cace22363d31",
+    "apps/desktop/src/pages/sender.rs": "281f344e06675a877ac84dc812c4d9794b7c68bb080db1a87a7159481dc596ed",
+    "apps/hub/src/sender.rs": "4e984be62eb285afca433d0a8f58de6c8543a3aa7e7912c8cc736771586dc676",
+    "crates/desktop-service/src/lib.rs": "7000e589869bcc0e3a377036a64305c5b59676e414dd45ada386cd9b31c434bc",
+    "crates/desktop-service/src/daemon.rs": "4cd39af8c9263a1cd155ed60b1d96aa97722a9189f6cbdac53d5ef616c101dcf"
+  }
+}
