@@ -8,7 +8,7 @@ use crate::widgets::{FaderSize, Kind, Tone};
 use egui::{Align, Layout, Margin};
 
 const INSPECTOR_WIDTH: f32 = 300.0;
-const SIDE_BY_SIDE: f32 = 900.0;
+const SIDE_BY_SIDE: f32 = 1000.0;
 
 fn edge(lane: &Lane, any_solo: bool) -> Edge {
     match lane.session {
@@ -30,6 +30,7 @@ fn edge(lane: &Lane, any_solo: bool) -> Edge {
 
 impl Desktop {
     fn room_label(&self) -> String {
+        let text_live_room = self.tr(&Message::LiveRoom);
         self.remote_room
             .clone()
             .or_else(|| {
@@ -38,7 +39,7 @@ impl Desktop {
                     .and_then(|s| s.hub_settings.as_ref())
                     .map(|h| h.name.clone())
             })
-            .unwrap_or_else(|| "房间".into())
+            .unwrap_or_else(|| text_live_room.as_str().into())
     }
 
     pub(crate) fn output_name(&self, state: &Snapshot) -> String {
@@ -50,14 +51,30 @@ impl Desktop {
     }
 
     fn flow_model(&self, state: &Snapshot, lanes: &[Lane]) -> flow::Model {
+        let text_live_type = self.tr(&Message::LiveType);
+        let text_live_native_sender = self.tr(&Message::LiveNativeSender);
+        let text_live_status = self.tr(&Message::LiveStatus);
+        let text_live_volume = self.tr(&Message::LiveVolume);
+        let text_live_mixer_queue_estimate = self.tr(&Message::LiveMixerQueueEstimate);
+        let text_live_unavailable = self.tr(&Message::LiveUnavailable);
+        let text_live_clock_drift = self.tr(&Message::LiveClockDrift);
+        let text_live_media_network = self.tr(&Message::LiveMediaNetwork);
+        let text_live_output_unavailable_waiting_for_device_recovery =
+            self.tr(&Message::LiveOutputUnavailableWaitingForDeviceRecovery);
+        let text_live_status_is_stale = self.tr(&Message::LiveStatusIsStale);
+        let text_live_sharing = self.tr(&Message::LiveSharing);
+        let text_live_connected = self.tr(&Message::LiveConnected);
         let any_solo = lanes.iter().any(|l| l.solo);
-        let meters = self.diagnostics.as_ref().and_then(|v| v.pointer("/meters"));
+        let meters = self.meters_current();
         let sources = lanes
             .iter()
             .map(|lane| {
-                let detail = match lane.role {
-                    Some(role) => format!("{role} · {}", lane.status),
-                    None => lane.status.to_owned(),
+                let detail = match lane.role.as_ref() {
+                    Some(role) => self.tr(&Message::MixerRoleStatus {
+                        role: self.tr(role),
+                        status: self.tr(&lane.status),
+                    }),
+                    None => self.tr(&lane.status),
                 };
                 let appear = self
                     .joined
@@ -75,6 +92,7 @@ impl Desktop {
                     key: lane.key,
                     name: lane.name.clone(),
                     detail,
+                    status: self.tr(&lane.status),
                     detail_color: lane.tone.color(),
                     airplay: lane.is_airplay(),
                     mine: lane.mine,
@@ -88,26 +106,29 @@ impl Desktop {
                     rms: lane.rms,
                     facts: vec![
                         (
-                            "类型",
+                            text_live_type.clone(),
                             if lane.is_airplay() {
                                 "AirPlay".into()
                             } else {
-                                "原生 Sender".into()
+                                text_live_native_sender.clone()
                             },
                         ),
-                        ("状态", lane.status.into()),
-                        ("音量", format!("{} dB", widgets::gain_text(lane.gain))),
+                        (text_live_status.clone(), self.tr(&lane.status)),
                         (
-                            "Mixer 队列估计",
+                            text_live_volume.clone(),
+                            format!("{} dB", widgets::gain_text(lane.gain)),
+                        ),
+                        (
+                            text_live_mixer_queue_estimate.clone(),
                             lane.queue_ms
-                                .map_or("未取得".into(), |ms| format!("{ms:.1} ms")),
+                                .map_or(text_live_unavailable.clone(), |ms| format!("{ms:.1} ms")),
                         ),
                         (
-                            "时钟漂移",
+                            text_live_clock_drift.clone(),
                             lane.drift_ppm
-                                .map_or("未取得".into(), |p| format!("{p:+.1} ppm")),
+                                .map_or(text_live_unavailable.clone(), |p| format!("{p:+.1} ppm")),
                         ),
-                        ("媒体网络", lane.network.0.into()),
+                        (text_live_media_network.clone(), self.tr(&lane.network.0)),
                     ],
                 }
             })
@@ -127,19 +148,25 @@ impl Desktop {
             .count();
         let sharing = self.status.as_ref().is_some_and(|s| s.hub.running);
         let (hub_state, hub_tone) = if !state.output.available {
-            ("输出丢失 · 等待设备恢复", Tone::Warning)
+            (
+                text_live_output_unavailable_waiting_for_device_recovery.as_str(),
+                Tone::Warning,
+            )
         } else if !self.writable() {
-            ("状态已过期", Tone::Warning)
+            (text_live_status_is_stale.as_str(), Tone::Warning)
         } else if sharing {
-            ("共享中", Tone::Success)
+            (text_live_sharing.as_str(), Tone::Success)
         } else {
-            ("已连接", Tone::Success)
+            (text_live_connected.as_str(), Tone::Success)
         };
         let limiter = meters
             .and_then(|m| m.get("limiter_gain"))
             .and_then(Value::as_f64);
         let hub_state = match limiter.filter(|g| *g < 0.999 && *g > 0.0) {
-            Some(g) => format!("{hub_state} · 限幅 {} dB", widgets::db_text(g)),
+            Some(g) => self.tr(&Message::LiveHubLimiterState {
+                state: (hub_state).to_string(),
+                value: (widgets::db_text(g)).to_string(),
+            }),
             None => hub_state.to_owned(),
         };
         flow::Model {
@@ -223,33 +250,40 @@ impl Desktop {
         model: &flow::Model,
         count: usize,
     ) -> Option<flow::Action> {
+        let text_live_signal_flow = self.tr(&Message::LiveSignalFlow);
+        let text_live_no_inputs = self.tr(&Message::LiveNoInputs);
+        let text_live_native_sender = self.tr(&Message::LiveNativeSender);
+        let text_live_sources_appear_on_the_left_and_join_the =
+            self.tr(&Message::LiveSourcesAppearOnTheLeftAndJoinThe);
         widgets::surface(ui, None, Margin::symmetric(18, 14), |ui| {
             ui.set_min_width(ui.available_width());
             ui.horizontal(|ui| {
                 ui.label(
-                    RichText::new("信号汇流")
+                    RichText::new(text_live_signal_flow.as_str())
                         .font(theme::heading(theme::SECTION))
                         .color(theme::TEXT),
                 );
                 widgets::pill(
                     ui,
                     &if count == 0 {
-                        "暂无输入".to_owned()
+                        text_live_no_inputs.as_str().to_owned()
                     } else {
-                        format!("{count} 路输入")
+                        self.tr(&Message::LiveInputCount {
+                            count: (count) as u64,
+                        })
                     },
                     Tone::Neutral,
                 );
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     legend(ui, theme::SRC_AIRPLAY, "AirPlay");
-                    legend(ui, theme::SRC_NATIVE, "原生 Sender");
+                    legend(ui, theme::SRC_NATIVE, text_live_native_sender.as_str());
                 });
             });
             let action = flow::show(ui, model);
             if count == 0 {
                 widgets::note(
                     ui,
-                    "Sender 配对并开始发送，或 AirPlay 设备连接后，来源会出现在左侧并接入房间。",
+                    text_live_sources_appear_on_the_left_and_join_the.as_str(),
                 );
             }
             action
@@ -257,14 +291,92 @@ impl Desktop {
         .inner
     }
 
+    /// No authoritative room state: say which of the three situations this
+    /// is (local room not sharing, paired room unreachable, nothing yet)
+    /// and offer the one action that moves it forward.
     fn live_empty(&mut self, ui: &mut egui::Ui) {
+        let text_live_paired_room = self.tr(&Message::LivePairedRoom);
+        let text_live_not_sharing_start_sharing_to_let_devices_connect =
+            self.tr(&Message::LiveNotSharingStartSharingToLetDevicesConnect);
+        let text_live_cannot_connect_right_now_make_sure_the_hub =
+            self.tr(&Message::LiveCannotConnectRightNowMakeSureTheHub);
+        let text_live_no_room_connected_yet = self.tr(&Message::LiveNoRoomConnectedYet);
+        let text_live_create_a_room_or_join_one_on_your =
+            self.tr(&Message::LiveCreateARoomOrJoinOneOnYour);
+        let text_live_signal_flow = self.tr(&Message::LiveSignalFlow);
+        let text_live_neonmix_brings_audio_from_devices_on_your_local =
+            self.tr(&Message::LiveNeonmixBringsAudioFromDevicesOnYourLocal);
+        let text_live_start_sharing = self.tr(&Message::LiveStartSharing);
+        let text_live_let_devices_on_the_local_network_send_audio =
+            self.tr(&Message::LiveLetDevicesOnTheLocalNetworkSendAudio);
+        let text_live_hub_settings = self.tr(&Message::LiveHubSettings);
+        let text_live_view_sender = self.tr(&Message::LiveViewSender);
+        let text_live_diagnostics = self.tr(&Message::LiveDiagnostics);
+        let text_live_create_room = self.tr(&Message::LiveCreateRoom);
+        let text_live_set_up_this_computer_as_a_room_in =
+            self.tr(&Message::LiveSetUpThisComputerAsARoomIn);
+        let text_live_join_room = self.tr(&Message::LiveJoinRoom);
+        let text_live_discover_and_pair_with_rooms_on_your_local =
+            self.tr(&Message::LiveDiscoverAndPairWithRoomsOnYourLocal);
+        enum Empty {
+            LocalStopped(String, Option<uuid::Uuid>),
+            Unreachable(String),
+            Nothing,
+        }
+        let status = self.status.as_ref();
+        let local_admin = self.credential == std::path::Path::new("hub/admin.json");
+        let situation = match status.and_then(|s| s.hub_settings.as_ref()) {
+            Some(settings) if local_admin && !status.is_some_and(|s| s.hub.running) => {
+                let id = status
+                    .and_then(|s| s.hub.last_event.as_ref())
+                    .and_then(|e| e.get("hub_id")?.as_str()?.parse().ok());
+                Empty::LocalStopped(settings.name.clone(), id)
+            }
+            _ if !local_admin
+                && status.is_some_and(|s| {
+                    s.profiles
+                        .iter()
+                        .any(|p| p.credential == self.credential && !p.pending)
+                }) =>
+            {
+                Empty::Unreachable(
+                    self.remote_room
+                        .clone()
+                        .unwrap_or_else(|| text_live_paired_room.as_str().into()),
+                )
+            }
+            _ => Empty::Nothing,
+        };
+        let (name, id, state) = match &situation {
+            Empty::LocalStopped(name, id) => (
+                name.clone(),
+                *id,
+                text_live_not_sharing_start_sharing_to_let_devices_connect
+                    .as_str()
+                    .to_owned(),
+            ),
+            Empty::Unreachable(name) => (
+                name.clone(),
+                None,
+                text_live_cannot_connect_right_now_make_sure_the_hub
+                    .as_str()
+                    .to_owned(),
+            ),
+            Empty::Nothing => (
+                text_live_no_room_connected_yet.as_str().to_owned(),
+                None,
+                text_live_create_a_room_or_join_one_on_your
+                    .as_str()
+                    .to_owned(),
+            ),
+        };
         let model = flow::Model {
             sources: vec![],
             offline: 0,
             hub: flow::Hub {
-                name: "尚未连接房间".into(),
-                id: None,
-                state: "创建一个房间，或加入局域网里的房间".into(),
+                name,
+                id,
+                state,
                 state_color: theme::TEXT_3,
                 active: false,
                 rms: None,
@@ -276,7 +388,7 @@ impl Desktop {
         widgets::surface(ui, None, Margin::symmetric(18, 14), |ui| {
             ui.set_min_width(ui.available_width());
             ui.label(
-                RichText::new("信号汇流")
+                RichText::new(text_live_signal_flow.as_str())
                     .font(theme::heading(theme::SECTION))
                     .color(theme::TEXT),
             );
@@ -284,23 +396,62 @@ impl Desktop {
             ui.vertical_centered(|ui| {
                 widgets::note(
                     ui,
-                    "NeonMix 把局域网里多台设备的声音汇入一个房间，混音后从一个实体输出播放。",
+                    text_live_neonmix_brings_audio_from_devices_on_your_local.as_str(),
                 );
             });
             ui.horizontal(|ui| {
                 let pad = ((ui.available_width() - 300.0) / 2.0).max(0.0);
                 ui.add_space(pad);
-                if widgets::button(ui, "创建房间", Kind::Primary)
-                    .on_hover_text("在 Hub 设置中让这台电脑成为房间")
-                    .clicked()
-                {
-                    self.navigate(Page::Hub);
-                }
-                if widgets::button(ui, "加入房间", Kind::Secondary)
-                    .on_hover_text("在 Sender 中发现并配对局域网里的房间")
-                    .clicked()
-                {
-                    self.navigate(Page::Sender);
+                match situation {
+                    Empty::LocalStopped(..) => {
+                        if widgets::button_busy(
+                            ui,
+                            true,
+                            self.pending("hub-start"),
+                            text_live_start_sharing.as_str(),
+                            Kind::Primary,
+                        )
+                        .on_hover_text(
+                            text_live_let_devices_on_the_local_network_send_audio.as_str(),
+                        )
+                        .clicked()
+                        {
+                            self.request(Request::HubStart);
+                        }
+                        if widgets::button(ui, text_live_hub_settings.as_str(), Kind::Secondary)
+                            .clicked()
+                        {
+                            self.navigate(Page::Hub);
+                        }
+                    }
+                    Empty::Unreachable(_) => {
+                        if widgets::button(ui, text_live_view_sender.as_str(), Kind::Primary)
+                            .clicked()
+                        {
+                            self.navigate(Page::Sender);
+                        }
+                        if widgets::button(ui, text_live_diagnostics.as_str(), Kind::Secondary)
+                            .clicked()
+                        {
+                            self.navigate(Page::Diagnostics);
+                        }
+                    }
+                    Empty::Nothing => {
+                        if widgets::button(ui, text_live_create_room.as_str(), Kind::Primary)
+                            .on_hover_text(text_live_set_up_this_computer_as_a_room_in.as_str())
+                            .clicked()
+                        {
+                            self.navigate(Page::Hub);
+                        }
+                        if widgets::button(ui, text_live_join_room.as_str(), Kind::Secondary)
+                            .on_hover_text(
+                                text_live_discover_and_pair_with_rooms_on_your_local.as_str(),
+                            )
+                            .clicked()
+                        {
+                            self.navigate(Page::Sender);
+                        }
+                    }
                 }
             });
         });
@@ -317,15 +468,41 @@ impl Desktop {
             |ui| {
                 ui.set_min_width(ui.available_width());
                 ui.spacing_mut().item_spacing.y = 10.0;
-                match lane {
-                    Some(lane) => self.inspect_lane(ui, lane),
-                    None => self.inspect_room(ui, state, lanes),
+                // Under the graph the card is wide: facts left, controls
+                // right, instead of one tall column with a very long fader.
+                let split = ui.available_width() >= 560.0;
+                let info = |this: &mut Self, ui: &mut egui::Ui| match lane {
+                    Some(lane) => this.lane_info(ui, lane),
+                    None => this.room_info(ui, lanes),
+                };
+                let controls = |this: &mut Self, ui: &mut egui::Ui| match lane {
+                    Some(lane) => this.lane_controls(ui, lane),
+                    None => this.room_controls(ui, state),
+                };
+                if split {
+                    ui.columns(2, |c| {
+                        for column in c.iter_mut() {
+                            column.spacing_mut().item_spacing.y = 10.0;
+                        }
+                        let (l, r) = c.split_at_mut(1);
+                        l[0].with_layout(Layout::top_down(Align::Min), |ui| info(self, ui));
+                        r[0].with_layout(Layout::top_down(Align::Min), |ui| controls(self, ui));
+                    });
+                } else {
+                    info(self, ui);
+                    controls(self, ui);
                 }
             },
         );
     }
 
-    fn inspect_lane(&mut self, ui: &mut egui::Ui, lane: &Lane) {
+    fn lane_info(&mut self, ui: &mut egui::Ui, lane: &Lane) {
+        let text_live_mixer_queue_estimate = self.tr(&Message::LiveMixerQueueEstimate);
+        let text_live_unavailable = self.tr(&Message::LiveUnavailable);
+        let text_live_clock_drift = self.tr(&Message::LiveClockDrift);
+        let text_live_media_network = self.tr(&Message::LiveMediaNetwork);
+        let text_live_open_in_mixer = self.tr(&Message::LiveOpenInMixer);
+        let text_live_deselect = self.tr(&Message::LiveDeselect);
         ui.horizontal(|ui| {
             if lane.is_airplay() {
                 let (rect, _) =
@@ -355,9 +532,12 @@ impl Desktop {
                     .truncate(),
                 );
                 ui.label(
-                    RichText::new(match lane.role {
-                        Some(role) => format!("{role} · {}", lane.status),
-                        None => lane.status.into(),
+                    RichText::new(match lane.role.as_ref() {
+                        Some(role) => self.tr(&Message::MixerRoleStatus {
+                            role: self.tr(role),
+                            status: self.tr(&lane.status),
+                        }),
+                        None => self.tr(&lane.status),
                     })
                     .size(theme::SMALL)
                     .color(lane.tone.color()),
@@ -365,20 +545,58 @@ impl Desktop {
             });
         });
         widgets::meter(ui, ("inspect", lane.key), lane.peak, lane.rms);
+        widgets::kv_grid(
+            ui,
+            "inspect-facts",
+            &[
+                (
+                    text_live_mixer_queue_estimate.as_str(),
+                    lane.queue_ms
+                        .map_or(text_live_unavailable.as_str().into(), |ms| {
+                            format!("{ms:.1} ms")
+                        }),
+                ),
+                (
+                    text_live_clock_drift.as_str(),
+                    lane.drift_ppm
+                        .map_or(text_live_unavailable.as_str().into(), |p| {
+                            format!("{p:+.1} ppm")
+                        }),
+                ),
+                (text_live_media_network.as_str(), self.tr(&lane.network.0)),
+            ],
+        );
+        ui.horizontal_wrapped(|ui| {
+            if widgets::button(ui, text_live_open_in_mixer.as_str(), Kind::Secondary).clicked() {
+                self.lane_details.insert(lane.key);
+                self.navigate(Page::Mixer);
+            }
+            if widgets::button(ui, text_live_deselect.as_str(), Kind::Secondary).clicked() {
+                self.selected_lane = None;
+            }
+        });
+    }
+
+    fn lane_controls(&mut self, ui: &mut egui::Ui, lane: &Lane) {
+        let text_live_volume = self.tr(&Message::LiveVolume);
+        let text_live_mute = self.tr(&Message::LiveMute);
         let mut commit = None;
         ui.add_enabled_ui(self.writable() && lane.can_mix, |ui| {
-            let caption = widgets::caption(ui, "音量");
+            let caption = widgets::caption(ui, text_live_volume.as_str());
             let (c, response) = self.gain_control(
                 ui,
                 lane.key,
                 lane.gain,
-                &format!("「{}」音量", lane.name),
+                &self.tr(&Message::MixerChannelVolume {
+                    name: (lane.name).to_string(),
+                }),
                 FaderSize::Row,
             );
             response.labelled_by(caption.id);
             commit = c;
         });
         let mut toggles = (None, None);
+        self.command_note(ui, lane.key);
         ui.horizontal(|ui| {
             let shown = self
                 .gain_drafts
@@ -397,7 +615,14 @@ impl Desktop {
             );
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 if lane.can_solo
-                    && widgets::toggle(ui, self.writable(), lane.solo, "Solo", Tone::Solo).clicked()
+                    && widgets::toggle(
+                        ui,
+                        self.writable(),
+                        lane.solo,
+                        &self.tr(&Message::MixerSolo),
+                        Tone::Solo,
+                    )
+                    .clicked()
                 {
                     toggles.1 = Some(!lane.solo);
                 }
@@ -405,7 +630,7 @@ impl Desktop {
                     ui,
                     self.writable() && lane.can_mix,
                     lane.muted,
-                    "静音",
+                    text_live_mute.as_str(),
                     Tone::Warning,
                 )
                 .clicked()
@@ -413,32 +638,6 @@ impl Desktop {
                     toggles.0 = Some(!lane.muted);
                 }
             });
-        });
-        widgets::kv_grid(
-            ui,
-            "inspect-facts",
-            &[
-                (
-                    "Mixer 队列估计",
-                    lane.queue_ms
-                        .map_or("未取得".into(), |ms| format!("{ms:.1} ms")),
-                ),
-                (
-                    "时钟漂移",
-                    lane.drift_ppm
-                        .map_or("未取得".into(), |p| format!("{p:+.1} ppm")),
-                ),
-                ("媒体网络", lane.network.0.into()),
-            ],
-        );
-        ui.horizontal_wrapped(|ui| {
-            if widgets::button(ui, "在 Mixer 中打开", Kind::Secondary).clicked() {
-                self.lane_details.insert(lane.key);
-                self.navigate(Page::Mixer);
-            }
-            if widgets::button(ui, "取消选择", Kind::Secondary).clicked() {
-                self.selected_lane = None;
-            }
         });
         if let Some(gain) = commit {
             self.lane_gain(lane, gain);
@@ -448,9 +647,17 @@ impl Desktop {
         }
     }
 
-    fn inspect_room(&mut self, ui: &mut egui::Ui, state: &Snapshot, lanes: &[Lane]) {
+    fn room_info(&mut self, ui: &mut egui::Ui, lanes: &[Lane]) {
+        let text_live_room_overview = self.tr(&Message::LiveRoomOverview);
+        let text_live_native_sender = self.tr(&Message::LiveNativeSender);
+        let text_live_largest_queue_estimate = self.tr(&Message::LiveLargestQueueEstimate);
+        let text_live_unavailable = self.tr(&Message::LiveUnavailable);
+        let text_live_after_sources_connect_select_one_on_the_left =
+            self.tr(&Message::LiveAfterSourcesConnectSelectOneOnTheLeft);
+        let text_live_select_a_source_on_the_left_to_view =
+            self.tr(&Message::LiveSelectASourceOnTheLeftToView);
         ui.label(
-            RichText::new("房间概况")
+            RichText::new(text_live_room_overview.as_str())
                 .font(theme::heading(theme::SECTION))
                 .color(theme::TEXT),
         );
@@ -462,24 +669,55 @@ impl Desktop {
             .fold(None, |m: Option<f64>, q| Some(m.map_or(q, |m| m.max(q))));
         ui.horizontal_wrapped(|ui| {
             ui.spacing_mut().item_spacing.x = 22.0;
-            widgets::metric(ui, "原生 Sender", &native.to_string(), None);
+            widgets::metric(
+                ui,
+                text_live_native_sender.as_str(),
+                &native.to_string(),
+                None,
+            );
             widgets::metric(ui, "AirPlay", &airplay.to_string(), None);
             widgets::metric(
                 ui,
-                "最大队列估计",
-                &queue.map_or("未取得".into(), |q| format!("{q:.1} ms")),
+                text_live_largest_queue_estimate.as_str(),
+                &queue.map_or(text_live_unavailable.as_str().into(), |q| {
+                    format!("{q:.1} ms")
+                }),
                 None,
             );
         });
+        widgets::note(
+            ui,
+            if lanes.is_empty() {
+                text_live_after_sources_connect_select_one_on_the_left.as_str()
+            } else {
+                text_live_select_a_source_on_the_left_to_view.as_str()
+            },
+        );
+    }
+
+    fn room_controls(&mut self, ui: &mut egui::Ui, state: &Snapshot) {
+        let text_live_room_master_volume = self.tr(&Message::LiveRoomMasterVolume);
+        let text_live_master_volume = self.tr(&Message::LiveMasterVolume);
+        let text_live_unmute_master = self.tr(&Message::LiveUnmuteMaster);
+        let text_live_mute_master = self.tr(&Message::LiveMuteMaster);
+        let text_live_master_controls_require_a_room_controller_or_administrator =
+            self.tr(&Message::LiveMasterControlsRequireARoomControllerOrAdministrator);
         if self.controls_room() {
             let current = state.output.gain_db;
             let mut commit = None;
             ui.add_enabled_ui(self.writable(), |ui| {
-                let caption = widgets::caption(ui, "房间总音量");
-                let (c, response) = self.gain_control(ui, 0, current, "总音量", FaderSize::Row);
+                let caption = widgets::caption(ui, text_live_room_master_volume.as_str());
+                let (c, response) = self.gain_control(
+                    ui,
+                    0,
+                    current,
+                    text_live_master_volume.as_str(),
+                    FaderSize::Row,
+                );
                 response.labelled_by(caption.id);
                 commit = c;
             });
+            self.command_note(ui, 0);
             ui.horizontal(|ui| {
                 let shown = self.gain_drafts.get(&0).copied().unwrap_or(current);
                 ui.label(
@@ -499,9 +737,9 @@ impl Desktop {
                         self.writable(),
                         muted,
                         if muted {
-                            "取消总静音"
+                            text_live_unmute_master.as_str()
                         } else {
-                            "总静音"
+                            text_live_mute_master.as_str()
                         },
                         Tone::Warning,
                     )
@@ -515,39 +753,45 @@ impl Desktop {
                 self.master_gain(current, gain);
             }
         }
-        widgets::note(
-            ui,
-            if lanes.is_empty() {
-                "来源接入后，点击左侧来源可在这里调节。"
-            } else {
-                "点击左侧来源查看并调节该路；点击房间核心打开 Mixer。"
-            },
-        );
+        if !self.controls_room() {
+            widgets::note(
+                ui,
+                text_live_master_controls_require_a_room_controller_or_administrator.as_str(),
+            );
+        }
     }
 
     fn events_card(&mut self, ui: &mut egui::Ui) {
+        let text_live_room_activity = self.tr(&Message::LiveRoomActivity);
+        let text_live_since_this_window_opened = self.tr(&Message::LiveSinceThisWindowOpened);
+        let text_live_no_changes_yet_source_connections_disconnections_muting_and =
+            self.tr(&Message::LiveNoChangesYetSourceConnectionsDisconnectionsMutingAnd);
         widgets::surface(ui, None, Margin::symmetric(16, 12), |ui| {
             ui.set_min_width(ui.available_width());
             ui.horizontal(|ui| {
                 ui.label(
-                    RichText::new("房间动态")
+                    RichText::new(text_live_room_activity.as_str())
                         .font(theme::heading(theme::SECTION))
                         .color(theme::TEXT),
                 );
-                widgets::note(ui, "本窗口打开以来");
+                widgets::note(ui, text_live_since_this_window_opened.as_str());
             });
             if self.events.is_empty() {
                 widgets::note(
                     ui,
-                    "暂无变化。来源接入、离开、静音或网络状态变化会记录在这里。",
+                    text_live_no_changes_yet_source_connections_disconnections_muting_and.as_str(),
                 );
                 return;
             }
             for event in self.events.iter().take(8) {
                 ui.horizontal(|ui| {
-                    widgets::dot(ui, &event.text, event.tone);
+                    widgets::dot(
+                        ui,
+                        &event.text.render(&self.localization.renderer),
+                        event.tone,
+                    );
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        widgets::note(ui, crate::events::ago(event.at));
+                        widgets::note(ui, self.relative_time(event.at));
                     });
                 });
             }

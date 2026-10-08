@@ -1,0 +1,9 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+error[E0433]: cannot find type `Authority` in this scope
+    --> apps/desktop/src/main.rs:2867:25
+     |
+2867 |         let authority = Authority::new(
+     |                         ^^^^^^^^^ use of undeclared type `Authority`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 1 previous error

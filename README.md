@@ -135,6 +135,14 @@ E06 已补齐 HAL 并发与异常客户端生命周期、Linux 原生名称/绑�
 
 ## 桌面产品（E07）
 
-通过 `tools/dev cargo build --workspace --release --locked` 构建后，运行 `tools/dev target/release/neonmix-desktop --state-dir .local/desktop`。同目录须有 `neonmix-background`、`neonmix-hub`、`neonmix-audio`。关闭窗口保持音频，托盘可恢复界面；停止发送与退出后台分别有明确入口。Hub 设置、发现配对、输出绑定、Mixer、权限管理及脱敏诊断见 [E07 使用与验收](docs/E07.md)，进程与权限边界见 [IPC 合约](docs/DESKTOP-IPC-CONTRACT.md)。macOS 已有运行交互验证；Windows x64 构建、测试及软件探针见 [Actions 报告](docs/WINDOWS-ACTIONS-20261001.md)，托管 runner 的 GUI 启动未通过。三端实体与发布门槛另行验收。
+通过 `tools/dev cargo build --workspace --release --locked` 构建后，运行 `tools/dev target/release/neonmix-desktop --state-dir .local/desktop`。同目录须有 `neonmix-background`、`neonmix-hub`、`neonmix-audio`；macOS/Linux 还须有 `neonmix-guardian`（workspace 构建会生成）。关闭窗口保持音频，托盘可恢复界面；停止发送与退出后台分别有明确入口。Hub 设置、发现配对、输出绑定、Mixer、权限管理及脱敏诊断见 [E07 使用与验收](docs/E07.md)，进程与权限边界见 [IPC 合约](docs/DESKTOP-IPC-CONTRACT.md)。macOS 已有运行交互验证；Windows x64 构建、测试及软件探针见 [Actions 报告](docs/WINDOWS-ACTIONS-20261001.md)，托管 runner 的 GUI 启动未通过。三端实体与发布门槛另行验收。
 
 文件凭证的格式、备份、目录搬迁、显式迁移与回退见 [文件凭证使用与升级](docs/CREDENTIAL-STORAGE.md)；存储决策以 [ADR-014](docs/adr/ADR-014-file-credentials.md) 为准。系统凭证测试记录保留为历史证据，不能计作新文件方案的验收。
+
+## 界面语言
+
+在「关于 → 显示」的 **语言 / Language** 选择 Auto、简体中文或 English；快速操作可搜索 `language` / `语言设置`。默认 Auto 按系统语言偏好匹配，不支持时使用英文。切换即时生效并保存为本机偏好，音频、房间/设备名称和表单草稿保持。旧版没有语言字段的偏好升级后也采用 Auto，所以英文系统上的旧安装可能首次显示英文；减少动态效果选择仍保留。
+
+双语资源离线嵌入二进制；开发检查使用 `tools/dev python3 tools/check_i18n.py --strict`，已接入 `tools/check.py`。截图可传末尾语言参数，如 `tools/dev sh tools/ui_preview_shots.sh artifacts/i18n/en 600 440 docs/evidence/ui-rebuild-20261004/fixtures/full.json en`。新增语言与翻译维护见 [贡献流程](docs/I18N-CONTRIBUTING.md)，验收范围见 [开发checklist](docs/UI-I18N-DEVELOPMENT-PLAN-20261007.md)。
+
+桌面Sender持续运行到用户停止或故障；CLI实验入口默认10秒，可显式选择--seconds 1..86400或--until-stopped（两者互斥）。同机同端点采集在开始前拒绝；Linux不同后台实例不共享固定虚拟输出，需先退出当前owner实例。协议与验收边界见桌面IPC、输出绑定合约及稳定性计划P09。

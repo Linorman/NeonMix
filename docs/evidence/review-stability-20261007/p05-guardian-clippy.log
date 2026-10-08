@@ -1,0 +1,20 @@
+    Blocking waiting for file lock on build directory
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+    Checking neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error: called `expect` on `deadline` after checking its variant with `is_none`
+   --> crates/desktop-service/src/guardian.rs:264:49
+    |
+251 |             if deadline.is_none() {
+    |             --------------------- help: try: `if let Some(<item>) = deadline`
+...
+264 |                 if tokio::time::Instant::now()>=deadline.expect("stop deadline") {
+    |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.95.0/index.html#unnecessary_unwrap
+    = note: `-D clippy::unnecessary-unwrap` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_unwrap)]`
+
+error: could not compile `neonmix-desktop-service` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-desktop-service` (lib test) due to 1 previous error

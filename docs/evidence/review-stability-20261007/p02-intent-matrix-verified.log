@@ -1,0 +1,16 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.97s
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-5052d7cba9beba85)
+
+running 8 tests
+test commands_tests::delayed_first_write_preserves_b_gain_c_mute_b_solo_and_fair_order ... ok
+test commands_tests::airplay_mute_then_gain_and_solo_then_gain_emit_independent_patches ... ok
+test commands_tests::undo_rechecks_field_after_a_wait_and_preserves_other_fields ... ok
+test commands_tests::unknown_reconciles_the_same_envelope_and_only_acknowledgement_creates_undo ... ok
+test commands_tests::context_change_cancels_queued_fields_and_does_not_retarget_inflight_reply_or_undo ... ok
+test commands_tests::terminal_target_is_a_barrier_and_capacity_never_evicts_another_channel ... ok
+test commands_tests::legacy_resolution_freezes_one_fresh_payload_and_is_cancelled_on_context_change ... ok
+test commands_tests::undo_is_invalidated_in_acknowledgement_and_restore_windows_and_on_session_reuse ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 54 filtered out; finished in 0.01s
+

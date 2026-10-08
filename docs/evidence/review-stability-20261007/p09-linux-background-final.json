@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "scope": "real Linux IPC/background/guardian/node; fixture Sender CLI, no PCM",
+  "binaries": {
+    "neonmix-background": "ae8f4ad96991ed5ee6c24f45926a74cde5536eec7053e209b6d11c7e14e4377a",
+    "neonmix-guardian": "7790f204482e5249efd8145c281b2cd6599561066ebbf53fe1b4d5b844915e26",
+    "neonmix-audio": "4d40c643312d7f48d2d8c71e64d23132218b3968a07dc574dcac25b0f1996f09"
+  },
+  "second_background_rejected_and_its_shutdown_preserved_first": true,
+  "restart_acquires_owner_after_first_shutdown": true,
+  "kernel_owner_released_after_background_exit": true,
+  "all_backgrounds_exited": true,
+  "fixture_removed": true
+}

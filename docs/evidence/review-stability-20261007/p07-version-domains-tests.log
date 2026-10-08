@@ -1,0 +1,25 @@
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+warning: unused variable: `p`
+   --> crates/control/tests/version_domains.rs:246:17
+    |
+246 |     let (mut a, p) = model();
+    |                 ^ help: if this is intentional, prefix it with an underscore: `_p`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `neonmix-control` (test "version_domains") generated 1 warning (run `cargo fix --test "version_domains" -p neonmix-control` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.91s
+     Running tests/version_domains.rs (target/debug/deps/version_domains-6d09962d1c1b3101)
+
+running 8 tests
+test restored_runtime_rejects_old_epoch_even_if_config_version_matches ... ok
+test staged_config_version_stays_fixed_while_commit_receipt_uses_latest_event_sequence ... ok
+test runtime_cas_remains_required_even_when_config_has_not_changed ... ok
+test stream_preferences_use_both_conditions_and_solo_uses_only_runtime ... ok
+test replica_rejects_mixed_sequence_protocol_or_impossible_config_jump_atomically ... ok
+test health_and_runtime_do_not_advance_config_and_config_cas_ignores_unrelated_health ... ok
+test old_state_import_preserves_identity_and_config_counter_exhaustion_does_not_freeze_runtime ... ok
+test protocols_cannot_mix_or_omit_cas_context ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

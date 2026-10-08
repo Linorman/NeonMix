@@ -14,6 +14,7 @@ fn lane(stream_id: u64, epoch: u64) -> LaneMix {
     LaneMix {
         stream_id,
         epoch,
+        playback_kind: neonmix_core::mixer::PlaybackKind::Timed,
         ..LaneMix::default()
     }
 }

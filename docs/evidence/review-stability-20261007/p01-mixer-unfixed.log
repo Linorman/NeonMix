@@ -1,0 +1,23 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.35s
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-ab7b9d7918bc97f7)
+
+running 1 test
+test tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts ... FAILED
+
+failures:
+
+---- tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts stdout ----
+
+thread 'tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts' (47211524) panicked at apps/desktop/src/pages/mixer.rs:178:39:
+index out of bounds: the len is 0 but the index is 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 37 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p neonmix-desktop --bin neonmix-desktop`

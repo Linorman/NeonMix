@@ -1,0 +1,7 @@
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Checking neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+    Checking neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.74s

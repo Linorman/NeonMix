@@ -1,0 +1,150 @@
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+warning: methods `reconcile_intent` and `command_status` are never used
+   --> apps/desktop/src/commands.rs:507:19
+    |
+  7 | impl Desktop {
+    | ------------ methods in this implementation
+...
+507 |     pub(crate) fn reconcile_intent(&mut self) {
+    |                   ^^^^^^^^^^^^^^^^
+...
+521 |     pub(crate) fn command_status(&self, key: u64) -> Option<Message> {
+    |                   ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `status` is never used
+   --> apps/desktop/src/intent.rs:261:12
+    |
+ 93 | impl IntentScheduler {
+    | -------------------- method in this implementation
+...
+261 |     pub fn status(&self, target: &TargetKey, selected_field: Option<Field>) -> Option<Phase> {
+    |            ^^^^^^
+
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 2 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.74s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_control-b8162c1f487215dd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/authority.rs (target/debug/deps/authority-53a639ef7ee880c0)
+
+running 11 tests
+test revision_idempotency_and_full_dsp_queue_do_not_publish_success ... ok
+test stopped_sender_is_not_reactivated_by_status_updates ... ok
+test member_cannot_solo_or_change_others_and_master ... ok
+test disconnect_allow_and_revoke_have_distinct_reconnect_rules ... ok
+test wire_commands_roundtrip_and_reject_self_reported_role ... ok
+test durable_failure_does_not_commit_and_event_deltas_rebuild_snapshot ... ok
+test replica_rejects_gaps_and_foreign_hubs_without_partial_updates ... ok
+test exhausted_revision_rejects_runtime_changes_without_unversioned_mutation ... ok
+test provision_and_restore_preserve_trust_revocation_and_mix_but_clear_media ... ok
+test snapshot_event_cursors_and_version_negotiation ... ok
+test terminal_session_history_is_bounded_without_blocking_new_sessions ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/transactions.rs (target/debug/deps/transactions-18f6431ce493824e)
+
+running 4 tests
+test staged_command_excludes_durable_writers_and_preserves_live_output_loss ... ok
+test failed_preparation_aborts_only_the_candidate_and_keeps_health_updates ... ok
+test completed_replay_precedes_unrelated_pending_transaction_and_checks_fingerprint ... ok
+test cached_receipt_does_not_bypass_current_principal_validation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_desktop-2bef26eb60eff9c1)
+
+running 54 tests
+test emblem::tests::same_room_same_emblem_and_rooms_differ ... ok
+test events::tests::list_keeps_the_newest_events ... ok
+test events::tests::diff_names_joins_changes_leaves_and_output_in_order ... ok
+test history::tests::series_keeps_only_the_window_and_dropped_keys ... ok
+test flow::tests::nodes_never_overlap_or_leave_the_canvas ... ok
+test flow::localization_tests::source_accessible_name_follows_locale_and_preserves_user_content ... ok
+test events::tests::switching_locale_rerenders_existing_history_without_new_events ... ok
+test animation::tests::live_motion_repaints_only_while_active_and_not_reduced ... ok
+test flow::localization_tests::particle_at_mute_gate_endpoint_keeps_opacity_nonnegative ... ok
+test animation::tests::one_shot_plays_on_change_not_on_first_sight ... ok
+test pages::airplay::name_tests::alias_display_never_changes_session_control_identity ... ok
+test pages::airplay::name_tests::names_use_utf8_byte_bounds_and_success_does_not_erase_newer_drafts ... ok
+test pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes ... ok
+test i18n_tests::field_focus_selection_disclosure_and_scroll_persist_across_rendered_language_frames ... ok
+test i18n_tests::current_frame_accessibility_names_change_while_source_node_ids_stay_stable ... ok
+test preferences::tests::newer_version_is_never_overwritten_and_memory_choice_survives_failure ... ok
+test i18n_tests::palette_preserves_query_and_selected_command_identity_across_language_switch ... ok
+test i18n_tests::language_popup_opens_with_keyboard_and_escape_returns_focus_to_same_selector ... ok
+test localization::tests::locale_commit_waits_for_ime_and_retains_generation_when_unchanged ... ok
+test localization::tests::detection_empty_failure_manual_override_and_auto_return_are_distinct ... ok
+test tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked ... FAILED
+test tests::cancel_modal_keeps_accesskit_focus_in_the_published_tree ... ok
+test i18n_tests::actions_started_in_chinese_finish_in_the_current_english_locale ... ok
+test tests::chinese_composition_preserves_draft_without_enter_submission ... ok
+test tests::english_header_and_long_room_badge_keep_about_content_inside_the_central_panel ... ok
+test tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later ... FAILED
+test tests::long_error_at_minimum_width_keeps_page_content_on_screen ... ok
+test tests::fader_click_never_jumps_gain_and_double_click_resets_to_unity ... ok
+test tests::live_graph_names_every_node_for_assistive_tech ... ok
+test tests::airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions ... ok
+test preferences::tests::old_plain_writer_mode_is_migrated_without_relaxing_new_files_or_links ... ok
+test tests::one_failed_airplay_or_diagnostics_read_keeps_the_room_on_screen ... ok
+test preferences::tests::legacy_unknown_language_and_interleaved_updates_preserve_fields ... ok
+test tests::polling_does_not_lock_forms_and_stop_has_priority_over_pending_start ... ok
+test tests::restore_sends_the_inverse_change_against_a_fresh_revision ... FAILED
+test tests::stop_after_an_inflight_start_runs_last_and_keeps_the_stop_pending_until_ack ... ok
+test preferences::tests::malformed_and_oversized_files_do_not_get_overwritten_on_load ... ok
+test tests::named_fields_publish_accessible_labels_without_exposing_password_text ... ok
+test tests::mixer_arrows_follow_the_fader_direction_of_the_layout ... ok
+test tests::stopped_local_hub_is_not_polled_for_room_state ... ok
+test tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts ... ok
+test theme::tests::cached_font_bytes_are_read_once_and_reused ... ok
+test tests::sidebar_fits_seven_pages_and_actions_in_the_minimum_window ... ok
+test theme::tests::fluent_direction_isolates_are_invisible_egui_glyphs ... ok
+test widgets::localization_tests::identical_display_labels_do_not_alias_business_field_ids ... ok
+test tests::palette_enter_during_ime_composition_does_not_run_an_action ... ok
+test widgets::localization_tests::translated_inline_title_keeps_identity_and_focus ... ok
+test widgets::localization_tests::keyboard_combo_selection_closes_popup_and_returns_focus ... ok
+test widgets::localization_tests::translated_field_labels_keep_focus_draft_and_identity ... ok
+test i18n_tests::fifty_language_switches_preserve_drafts_targets_timers_and_backend_sessions ... ok
+test tests::live_graph_moves_only_while_signal_flows ... ok
+test tests::pages_handle_missing_loading_failed_and_stale_states ... ok
+test i18n_tests::dual_language_eight_surfaces_cover_empty_full_busy_and_stale_states ... ok
+test i18n_tests::long_user_names_and_double_scale_keep_actions_and_page_names_reachable ... ok
+
+failures:
+
+---- tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked stdout ----
+
+thread 'tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked' (47672997) panicked at apps/desktop/src/main.rs:1760:18:
+unexpected work
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later stdout ----
+
+thread 'tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later' (47673000) panicked at apps/desktop/src/main.rs:1959:9:
+assertion failed: matches!(rx.try_recv(), Ok(Work::Action(Request::Control { .. })))
+
+---- tests::restore_sends_the_inverse_change_against_a_fresh_revision stdout ----
+
+thread 'tests::restore_sends_the_inverse_change_against_a_fresh_revision' (47673011) panicked at apps/desktop/src/main.rs:2169:9:
+assertion failed: matches!(rx.try_recv(), Ok(Work::Action(Request::Control { .. })))
+
+
+failures:
+    tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked
+    tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later
+    tests::restore_sends_the_inverse_change_against_a_fresh_revision
+
+test result: FAILED. 51 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s
+
+error: test failed, to rerun pass `-p neonmix-desktop --bin neonmix-desktop`

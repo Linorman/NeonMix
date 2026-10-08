@@ -1,0 +1,9 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.52s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 1 test
+test server::airplay::api::tests::terminal_airplay_actions_cut_actual_timed_fifo_with_full_queue_and_preserve_native_lane ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 84 filtered out; finished in 0.10s
+

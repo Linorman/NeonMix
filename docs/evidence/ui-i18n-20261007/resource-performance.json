@@ -1,0 +1,1 @@
+{"resource_parse_ms":0.44525000000000003,"locales":[{"locale":"zh-CN","representative_messages":1144,"first_render_ms":0.307458,"warm_render_us_per_message":0.12333369755244755},{"locale":"en","representative_messages":1144,"first_render_ms":0.257,"warm_render_us_per_message":0.1350597465034965}],"fifty_switches_and_full_renders_ms":9.888792,"fallback_diagnostics":0}

@@ -1,0 +1,109 @@
+{
+  "created_at": "2026-10-07T23:06:19.245186+00:00",
+  "scope": "P06 AirPlay/Native/Pairing macOS local software and file regression; no native Windows/Linux/power-loss/installer claims",
+  "gate": {
+    "format": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.561
+    },
+    "packaging": {
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.193
+    },
+    "clippy": {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "seconds": 8.836
+    },
+    "tests": {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "neonmix-core",
+        "-p",
+        "neonmix-control",
+        "-p",
+        "neonmix-airplay-adapter",
+        "-p",
+        "neonmix-airplay-ipc",
+        "-p",
+        "neonmix-output-binding",
+        "-p",
+        "neonmix-i18n",
+        "-p",
+        "neonmix-desktop-service",
+        "-p",
+        "neonmix-lifecycle",
+        "-p",
+        "neonmix-hub",
+        "-p",
+        "neonmix-desktop",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "seconds": 82.477
+    }
+  },
+  "sha256": {
+    "apps/hub/src/airplay_api.rs": "c331329db255599ebf44f800e1a8659021e16b11037444d5fc90b121c8b46468",
+    "apps/hub/src/airplay.rs": "eda8c35fafad20246d5884bc2a89a7551d507f4656fed2eff5591e3897e6ed8d",
+    "apps/hub/src/server.rs": "c839378bd9b6041e87245b62b3085f856f8ba6946d00b7a754c0b2aa613e73c0",
+    "apps/hub/src/pairing_api.rs": "150d9658655d38d178a6bc014557e016019792cafd8d73ed06fccfd98d3a12b5",
+    "crates/control/src/lib.rs": "30d9123a3d5002c82bb225f1110ec008159b971e65354e6b8af74a5cc5e2f018",
+    "crates/identity/src/files.rs": "2b0eabb045598dc299d9f9058a56556a5d4f48489d830cb607b11a3371555f0c",
+    "crates/identity/src/airplay_profile.rs": "a885aeba569c12dc88fcc9f8cda225db0cdac9d8e78765dcf2275cd8db8cde0a",
+    "docs/REVIEW-IMPROVEMENT-DESIGN-PLAN-20261007.md": "7386615c3f28de0e5db8b14340f1a4d4eeef8d2eb689afbc9f8e02d618c3f268",
+    "docs/AIRPLAY-CONTRACT.md": "caecda0241958c0204b9e4196d82fb65fb56ac16657baa6f0f54077022136a6d",
+    "docs/MEDIA-CONTROL-CONTRACT.md": "3d791d3b2a8b4b646622bba162b7e9e338321e67b5150d0b283b0aeb0552216f",
+    "target/release/neonmix-hub": "a5d832737a5194dd0b3e7f18a86bfcb13d2adb6f63d11ea5e8800e43b2f92baf",
+    "target/release/neonmix-desktop": "66062cccfce8ae11947ca9e32e3afe95be398f73c64e4422c4f47a8de00462c1",
+    "target/release/neonmix-background": "d086119889cf70bfe910e28d99c3f791d21633451a6465797271c73d1570d6e8",
+    "target/release/neonmix-guardian": "57321e48ece11d27daf668bdd970e2d7c471dae2b952083dec0550c13e250f48"
+  }
+}

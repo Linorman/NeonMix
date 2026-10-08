@@ -1,0 +1,115 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+   --> apps/hub/src/airplay.rs:401:23
+    |
+252 | pub(super) struct State {
+    | ----------------------- method `advance_event` not found for this struct
+...
+401 |             e.airplay.advance_event();
+    |                       ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+   --> apps/hub/src/airplay_api.rs:238:19
+    |
+238 |         e.airplay.advance_event();
+    |                   ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+    |
+   ::: apps/hub/src/airplay.rs:252:1
+    |
+252 | pub(super) struct State {
+    | ----------------------- method `advance_event` not found for this struct
+
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+   --> apps/hub/src/airplay_api.rs:992:15
+    |
+992 |     e.airplay.advance_event();
+    |               ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+    |
+   ::: apps/hub/src/airplay.rs:252:1
+    |
+252 | pub(super) struct State {
+    | ----------------------- method `advance_event` not found for this struct
+
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+    --> apps/hub/src/airplay_api.rs:1058:23
+     |
+1058 |             e.airplay.advance_event();
+     |                       ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+     |
+    ::: apps/hub/src/airplay.rs:252:1
+     |
+ 252 | pub(super) struct State {
+     | ----------------------- method `advance_event` not found for this struct
+
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+    --> apps/hub/src/airplay_api.rs:1261:15
+     |
+1261 |     e.airplay.advance_event();
+     |               ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+     |
+    ::: apps/hub/src/airplay.rs:252:1
+     |
+ 252 | pub(super) struct State {
+     | ----------------------- method `advance_event` not found for this struct
+
+error[E0609]: no field `revision` on type `&mut server::airplay::EndpointState`
+   --> apps/hub/src/airplay.rs:191:38
+    |
+191 |         if let Some(sequence) = self.revision.checked_add(1) {
+    |                                      ^^^^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+191 |         if let Some(sequence) = self.status.revision.checked_add(1) {
+    |                                      +++++++
+
+error[E0609]: no field `revision` on type `&mut server::airplay::EndpointState`
+   --> apps/hub/src/airplay.rs:192:18
+    |
+192 |             self.revision = sequence;
+    |                  ^^^^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+192 |             self.status.revision = sequence;
+    |                  +++++++
+
+error[E0609]: no field `sequence_exhausted` on type `&mut server::airplay::EndpointState`
+   --> apps/hub/src/airplay.rs:194:18
+    |
+194 |             self.sequence_exhausted = true;
+    |                  ^^^^^^^^^^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `receiver_id`, `receiver_uuid`, `name`, `generation`, `lane` ... and 14 others
+
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+   --> apps/hub/src/airplay.rs:604:28
+    |
+252 | pub(super) struct State {
+    | ----------------------- method `advance_event` not found for this struct
+...
+604 |             engine.airplay.advance_event();
+    |                            ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+    --> apps/hub/src/airplay.rs:1923:62
+     |
+ 252 | pub(super) struct State {
+     | ----------------------- method `advance_event` not found for this struct
+...
+1923 |                                 update(shared, |e| e.airplay.advance_event());
+     |                                                              ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+
+error[E0599]: no method named `advance_event` found for struct `server::airplay::State` in the current scope
+    --> apps/hub/src/airplay.rs:2084:43
+     |
+ 252 | pub(super) struct State {
+     | ----------------------- method `advance_event` not found for this struct
+...
+2084 |                                 e.airplay.advance_event();
+     |                                           ^^^^^^^^^^^^^ method not found in `server::airplay::State`
+
+Some errors have detailed explanations: E0599, E0609.
+For more information about an error, try `rustc --explain E0599`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 11 previous errors

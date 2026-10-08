@@ -2,7 +2,11 @@ use eframe::egui::{
     self, Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, Margin, Stroke,
     TextStyle,
 };
-use std::sync::Arc;
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+    sync::{Arc, Mutex, OnceLock},
+};
 
 // Surfaces, darkest to lightest. "Neon Console": near-black blue so the
 // source colours and live signal carry the page.
@@ -233,9 +237,29 @@ fn candidates() -> Vec<(Face, Option<Face>)> {
 /// Fonts live for the whole process; one leaked copy serves both faces of a
 /// collection instead of duplicating a large system file.
 fn load(path: &std::path::Path) -> Option<&'static [u8]> {
-    std::fs::read(path)
-        .ok()
-        .map(|b| &*Box::leak(b.into_boxed_slice()))
+    static FONT_FILES: OnceLock<Mutex<HashMap<PathBuf, &'static [u8]>>> = OnceLock::new();
+    let mut cache = FONT_FILES
+        .get_or_init(|| Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    load_cached(path, &mut cache)
+}
+
+// The candidate list is fixed for the process (system fonts plus one optional
+// override). Keep an explicit cap as well, so repeated installation or changed
+// overrides cannot accumulate unbounded process-lifetime font copies.
+const MAX_CACHED_FONT_FILES: usize = 8;
+fn load_cached(path: &Path, cache: &mut HashMap<PathBuf, &'static [u8]>) -> Option<&'static [u8]> {
+    let path = std::fs::canonicalize(path).ok()?;
+    if let Some(bytes) = cache.get(&path) {
+        return Some(*bytes);
+    }
+    if cache.len() >= MAX_CACHED_FONT_FILES {
+        return None;
+    }
+    let bytes: &'static [u8] = Box::leak(std::fs::read(&path).ok()?.into_boxed_slice());
+    cache.insert(path, bytes);
+    Some(bytes)
 }
 
 fn install_fonts(ctx: &egui::Context) -> bool {
@@ -298,4 +322,54 @@ pub fn fallback_fonts(ctx: &egui::Context) -> bool {
 
 fn strong_family_name() -> FontFamily {
     FontFamily::Name("strong".into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn fluent_direction_isolates_are_invisible_egui_glyphs() {
+        let context = egui::Context::default();
+        let _ = context.run(egui::RawInput::default(), |context| {
+            context.fonts(|fonts| {
+                let plain = fonts.layout_no_wrap(
+                    "Device name".into(),
+                    FontId::proportional(14.0),
+                    Color32::WHITE,
+                );
+                let isolated = fonts.layout_no_wrap(
+                    "Device \u{2068}name\u{2069}".into(),
+                    FontId::proportional(14.0),
+                    Color32::WHITE,
+                );
+                // Invisible boundaries can affect adjacent kerning slightly.
+                assert_eq!(plain.size().y, isolated.size().y);
+                assert!((plain.size().x - isolated.size().x).abs() < 0.5);
+                for glyph in isolated
+                    .rows
+                    .iter()
+                    .flat_map(|row| &row.glyphs)
+                    .filter(|glyph| matches!(glyph.chr, '\u{2068}' | '\u{2069}'))
+                {
+                    assert_eq!(glyph.advance_width, 0.0);
+                    assert!(glyph.uv_rect.is_nothing());
+                }
+            });
+        });
+    }
+    #[test]
+    fn cached_font_bytes_are_read_once_and_reused() {
+        let directory = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../.local/tmp");
+        std::fs::create_dir_all(&directory).unwrap();
+        let path = directory.join(format!("font-cache-test-{}", std::process::id()));
+        std::fs::write(&path, b"initial font bytes").unwrap();
+        let mut cache = HashMap::new();
+        let first = load_cached(&path, &mut cache).unwrap();
+        std::fs::write(&path, b"changed bytes that must not be reread").unwrap();
+        let second = load_cached(&path, &mut cache).unwrap();
+        assert!(std::ptr::eq(first, second));
+        assert_eq!(second, b"initial font bytes");
+        assert_eq!(cache.len(), 1);
+        std::fs::remove_file(path).unwrap();
+    }
 }

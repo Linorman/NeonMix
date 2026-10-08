@@ -1,0 +1,27 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.82s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 19 tests
+test server::airplay::api::tests::configuration_reserves_four_source_capacity_before_disk_write_and_clears_on_failure ... ok
+test server::airplay::api::tests::failed_pair_window_queue_does_not_reset_attempts_or_generation ... ok
+test server::airplay::api::tests::explicit_pair_window_rotates_running_idle_receiver_and_replay_does_not_reopen ... ok
+test server::airplay::api::tests::command_ids_require_canonical_uuid_spelling_before_deduplication ... ok
+test server::airplay::api::tests::member_snapshot_of_uninitialized_airplay_is_read_only ... ok
+test server::airplay::api::tests::committed_revoke_has_receipt_when_session_ends_and_mixer_queue_fills_during_save ... ok
+test server::airplay::api::tests::published_revoke_retains_denial_with_full_mixer_queue_and_one_business_commit ... ok
+test server::airplay::api::tests::metadata_edits_keep_receiver_identity_and_redact_cached_pairing_pins ... ok
+test server::airplay::api::tests::repair_running_idle_receiver_discards_old_binding_and_opens_explicit_window ... ok
+test server::airplay::api::tests::partial_identity_preparation_reconciles_original_request_with_same_identities ... ok
+test server::airplay::api::tests::live_configuration_stops_only_removed_idle_entries_and_preserves_retained_claim ... ok
+test server::airplay::api::tests::solo_only_source_patch_has_no_persistent_side_effect ... ok
+test server::airplay::api::tests::snapshot_rechecks_role_after_waiting_for_profile_transaction ... ok
+test server::airplay::api::tests::source_patch_rejects_empty_invalid_and_replaced_session_before_save ... ok
+test server::airplay::api::tests::stale_session_is_rejected_before_any_durable_change ... ok
+test server::airplay::api::tests::source_field_patch_preserves_other_client_mute_and_session_solo ... ok
+test server::airplay::api::tests::individual_disable_is_persistent_and_global_disable_preserves_configuration ... ok
+test server::airplay::api::tests::unknown_configuration_retry_never_allocates_second_receiver_identity ... ok
+test server::airplay::api::tests::unknown_allow_or_repair_never_grants_or_opens_pairing_and_freezes_payload ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 54 filtered out; finished in 0.25s
+

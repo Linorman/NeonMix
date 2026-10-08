@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "owned_children": 2,
+  "parent_abnormal_exit": true,
+  "children_exit_verified_by_handle": true,
+  "probe_sha256": "99a7abe5d9ed96edcd4885fdeb511f6a2c419038244218033aa1e0e5c6297177"
+}

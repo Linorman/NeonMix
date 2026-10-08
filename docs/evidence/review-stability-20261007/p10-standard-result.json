@@ -1,0 +1,196 @@
+{
+  "i18n": {
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "/Volumes/projects-mac/NeonMix/tools/check_i18n.py",
+      "--strict"
+    ],
+    "exit_code": 0,
+    "seconds": 0.831
+  },
+  "format": {
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.597
+  },
+  "credential-dependencies": {
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "/Volumes/projects-mac/NeonMix/tools/credential_dependency_check.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.649
+  },
+  "clippy": {
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 18.733
+  },
+  "tests": {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--no-fail-fast"
+    ],
+    "exit_code": 0,
+    "seconds": 116.025
+  },
+  "release": {
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "seconds": 65.823
+  },
+  "credential-store": {
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "/Volumes/projects-mac/NeonMix/tools/credential_store_probe.py",
+      "--release"
+    ],
+    "exit_code": 0,
+    "seconds": 0.793
+  },
+  "simulate": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-audio",
+      "simulate"
+    ],
+    "exit_code": 0,
+    "seconds": 0.343
+  },
+  "hal-sdk-abi": {
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "/Volumes/projects-mac/NeonMix/tools/macos_hal_abi.py"
+    ],
+    "exit_code": 0,
+    "seconds": 2.441
+  },
+  "hal-bundle": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/tools/build_macos_hal.sh"
+    ],
+    "exit_code": 0,
+    "seconds": 0.478
+  },
+  "hal-bundle-host": {
+    "command": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "/Volumes/projects-mac/NeonMix/tools/macos_hal_bundle_probe.py"
+    ],
+    "exit_code": 0,
+    "seconds": 0.45
+  },
+  "hal-vendor-format": {
+    "command": [
+      "cargo",
+      "fmt",
+      "--manifest-path",
+      "vendor/tympan-aspl/Cargo.toml",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.087
+  },
+  "hal-vendor-tests": {
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "vendor/tympan-aspl/Cargo.toml",
+      "--locked",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "seconds": 2.737
+  },
+  "media-runtime": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "runtime"
+    ],
+    "exit_code": 0,
+    "seconds": 0.025
+  },
+  "media-dual": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "2"
+    ],
+    "exit_code": 0,
+    "seconds": 5.145
+  },
+  "media-loss-replay": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "5",
+      "--streams",
+      "1",
+      "--drop-every",
+      "17",
+      "--replay"
+    ],
+    "exit_code": 0,
+    "seconds": 5.048
+  },
+  "media-reject": {
+    "command": [
+      "/Volumes/projects-mac/NeonMix/target/release/neonmix-hub",
+      "probe",
+      "--seconds",
+      "2",
+      "--streams",
+      "1",
+      "--wrong-fingerprint"
+    ],
+    "exit_code": 0,
+    "seconds": 2.043
+  },
+  "drift": {
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "-p",
+      "neonmix-core",
+      "--test",
+      "drift_stability",
+      "--",
+      "--ignored",
+      "--nocapture"
+    ],
+    "exit_code": 0,
+    "seconds": 19.938
+  }
+}

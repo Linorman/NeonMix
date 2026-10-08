@@ -1,0 +1,214 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.82s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_core-a4c660c902a1b661)
+
+running 2 tests
+test position::tests::preserves_clock_anchor_and_negative_native_coordinates ... ok
+test position::tests::concurrent_reader_never_combines_two_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/audio_contract.rs (target/debug/deps/audio_contract-2d24eb1e3945d116)
+
+running 18 tests
+test a_zero_length_callback_does_not_count_as_received_audio ... ok
+test callback_budget_excess_is_distinct_from_a_native_xrun ... ok
+test channel_test_patterns_expose_mono_mapping_errors ... ok
+test epoch_exhaustion_stops_capture_instead_of_replaying_an_identity ... ok
+test format_rejects_invalid_rate_and_layout ... ok
+test malicious_pcm_is_sanitized ... ok
+test mute_advances_signal_position ... ok
+test raw_device_clock_is_independent_of_submitted_audio_and_resets ... ok
+test output_clock_rate_conversion_and_reopen ... ok
+test overflow_and_age_never_replay_backlog ... ok
+test reopening_cannot_reuse_the_epoch_of_a_reset_clock ... ok
+test no_activity_gap_skips_time_and_invalidates_pending_audio ... ok
+test resume_drops_old_generation_but_preserves_first_new_block ... ok
+test silence_is_data_but_idle_is_not ... ok
+test reset_and_format_change_replace_epoch_and_flush ... ok
+test a_complete_large_native_callback_is_not_invalidated_by_its_own_tail ... ok
+test timestamp_respects_source_rate_and_arbitrary_periods ... ok
+test resampling_preserves_tone_at_44100_48000_96000 ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.21s
+
+     Running tests/drift_stability.rs (target/debug/deps/drift_stability-fc302e48f6ce067b)
+
+running 3 tests
+test injected_clocks_keep_pcm_bounded_and_preserve_tone ... ignored, Run with --release --ignored: four accelerated 600-second drift cases
+test sixty_ms_delivery_stall_preserves_both_timelines_without_pcm_concealment ... ignored, Release-only accelerated 300-second delivery-stall regression
+test unsupported_clocks_degrade_with_bounded_memory_and_finite_output ... ignored, Release-only accelerated over-limit drift degradation
+
+test result: ok. 0 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lane_binding.rs (target/debug/deps/lane_binding-2c3d7a08dca5e11d)
+
+running 6 tests
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+test old_queue_binding_is_rejected_without_erasing_new_binding_and_mode ... ok
+test revocation_cuts_off_buffered_pcm_even_when_config_queue_is_full_and_same_ids_are_reused ... ok
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/mixer.rs (target/debug/deps/mixer-b17f0e35e4b721e5)
+
+running 8 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s
+
+     Running tests/mixer_measurements.rs (target/debug/deps/mixer_measurements-30463753bcac22d2)
+
+running 3 tests
+test valid_silent_muted_pcm_is_counted_as_running_instead_of_starved ... ok
+test active_timed_starvation_counts_one_second_and_stops_on_remove ... ok
+test active_native_starvation_counts_every_internal_frame_after_dsp_reset ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/mixer_realtime.rs (target/debug/deps/mixer_realtime-5d119172e06f8b87)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.60s
+
+     Running tests/presentation_resample.rs (target/debug/deps/presentation_resample-5f790d6ec8c1ba80)
+
+running 2 tests
+test callback_hooks_include_pending_frames_and_retained_sinc_lookahead ... ok
+test converter_impulse_tracks_source_time_without_adding_output_delay_twice ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/realtime.rs (target/debug/deps/realtime-ae05a12cea4debd3)
+
+running 1 test
+test steady_state_capture_and_sinc_output_do_not_allocate_or_free ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.61s
+
+     Running tests/timed_mixer.rs (target/debug/deps/timed_mixer-277a0af1544ae912)
+
+running 11 tests
+test negative_callback_start_jitter_does_not_delay_buffered_pcm ... ok
+test callback_mid_block_selects_source_offset_and_epoch_flush_rejects_stale ... ok
+test late_deadlines_are_attributed_to_stream_epochs_across_lane_reuse ... ok
+test single_block_waits_until_target_without_native_start_water ... ok
+test muted_and_solo_lanes_consume_elapsed_audio_without_replay ... ok
+test solo_exclusion_consumes_timed_input_instead_of_replaying_it_later ... ok
+test new_epoch_flushes_a_future_head_already_held_by_output ... ok
+test genuinely_late_first_pcm_and_large_clock_jumps_still_skip_elapsed_samples ... ok
+test timed_audio_recovers_after_a_track_gap_without_an_epoch_change ... ok
+test starvation_recovery_waits_for_future_pts_and_skips_elapsed_audio ... ok
+test an_early_first_packet_keeps_its_samples_across_callback_start_jitter ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.99s
+
+     Running tests/timed_multi_source.rs (target/debug/deps/timed_multi_source-e4d956fd9624be14)
+
+running 3 tests
+test reusing_a_solo_lane_rejects_old_stream_and_keeps_other_stream_at_current_time ... ok
+test four_distinct_streams_mix_with_independent_gain_mute_and_solo ... ok
+test flushing_a_held_future_head_and_stale_packets_does_not_restart_other_lane ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/timed_quality.rs (target/debug/deps/timed_quality-c012fb638b9abc65)
+
+running 3 tests
+test timed_source_clock_error_keeps_long_term_presentation_phase_bounded ... ignored, Run release ignored: accelerated two-minute absolute phase tracking
+test fractional_src_preserves_upper_music_passband_after_clock_lock ... ok
+test callback_jitter_and_source_clock_error_do_not_create_pcm_spikes ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 8.98s
+
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 62 tests
+test connection::tests::unavailable_control_address_does_not_fall_back_to_another_interface ... ok
+test identity::tests::setup_crash_helper ... ok
+test connection::tests::media_uses_control_local_address_instead_of_default_route ... ok
+test server::admission::tests::paused_active_claim_does_not_expire ... ok
+test media_wait::tests::continuous_datagrams_cannot_bypass_cooldown_with_native_wakes ... ok
+test media_wait::tests::brief_empty_socket_intervals_do_not_reset_the_receive_window ... ok
+test server::admission::tests::reservations_exclude_duplicates_and_native_overcommit ... ok
+test media_wait::tests::socket_and_preexisting_native_notifications_wake_without_timer_polling ... ok
+test server::admission::tests::last_slot_competition_is_atomic_for_one_hundred_rounds ... ok
+test identity::tests::failed_pending_commit_preserves_secret_request_and_recovery_metadata ... ok
+test identity::tests::legacy_and_mixed_formats_never_enter_laboratory_branch ... ok
+test identity::tests::setup_move_missing_state_and_missing_secret_do_not_rebuild_identity ... ok
+test identity::tests::forget_is_resumable_and_protects_admin_kind_and_device_aliases ... ok
+test server::airplay::api::tests::explicit_pair_window_rotates_running_idle_receiver_and_replay_does_not_reopen ... ok
+test server::airplay::api::tests::command_ids_require_canonical_uuid_spelling_before_deduplication ... ok
+test server::airplay::api::tests::failed_pair_window_queue_does_not_reset_attempts_or_generation ... ok
+test server::airplay::api::tests::configuration_reserves_four_source_capacity_before_disk_write_and_clears_on_failure ... ok
+test server::airplay::api::tests::committed_revoke_has_receipt_when_session_ends_and_mixer_queue_fills_during_save ... ok
+test server::airplay::api::tests::member_snapshot_of_uninitialized_airplay_is_read_only ... ok
+test server::airplay::api::tests::live_configuration_stops_only_removed_idle_entries_and_preserves_retained_claim ... ok
+test server::airplay::api::tests::metadata_edits_keep_receiver_identity_and_redact_cached_pairing_pins ... ok
+test server::airplay::tests::admission_retries_profile_contention_without_blocking_media_or_extending_deadline ... ok
+test media_worker::tests::terminal_report_survives_a_busy_diagnostic_reader ... ok
+test identity::tests::setup_force_exit_preserves_incomplete_identity_and_refuses_retry ... ok
+test server::airplay::api::tests::snapshot_rechecks_role_after_waiting_for_profile_transaction ... ok
+test server::airplay::tests::deferred_grant_is_discarded_after_disconnect_before_reacquiring_profile ... ok
+test server::airplay::tests::existing_receiver_profiles_default_to_low_latency_and_keep_trust ... ok
+test server::airplay::tests::expired_or_disabled_pairing_window_never_returns_a_stale_pin ... ok
+test server::airplay::tests::fifth_pairing_challenge_can_finish_but_retry_does_not_renew_attempt_budget ... ok
+test server::airplay::tests::full_grant_preserves_all_hub_identity_fields ... ok
+test server::airplay::tests::idle_coreaudio_epoch_change_keeps_pin_window_but_active_media_is_revoked ... ok
+test server::airplay::api::tests::source_field_patch_preserves_other_client_mute_and_session_solo ... ok
+test server::airplay::tests::media_transport_rejects_authenticated_truncation_and_oversized_frame ... ok
+test server::airplay::tests::pregrant_terminal_event_requires_exact_owner_and_active_zero_context_is_rejected ... ok
+test server::airplay::api::tests::repair_running_idle_receiver_discards_old_binding_and_opens_explicit_window ... ok
+test server::airplay::tests::stop_and_disconnect_fail_closed_even_when_control_consumer_stalls ... ok
+test server::airplay::tests::worker_queue_failures_keep_the_failed_stage_without_raw_messages ... ok
+test server::airplay::tests::worker_transport_failure_preserves_specific_reader_cause_without_masking_decoder ... ok
+test server::airplay::api::tests::rename_success_followed_by_sync_error_is_acknowledged_as_committed ... ok
+test server::airplay::api::tests::solo_only_source_patch_has_no_persistent_side_effect ... ok
+test server::airplay::api::tests::individual_disable_is_persistent_and_global_disable_preserves_configuration ... ok
+test server::airplay::api::tests::partial_identity_preparation_retains_disabled_recoverable_entries ... ok
+test server::airplay::api::tests::source_patch_rejects_empty_invalid_and_replaced_session_before_save ... ok
+test server::pairing_tests::cancelled_http_redemption_still_finishes_book_and_durable_authority ... ok
+test server::airplay::tests::bounded_media_backpressure_preserves_burst_packets_and_stop_remains_independent ... ok
+test server::pairing_tests::administrator_revocation_invalidates_unredeemed_grants_and_attempts_are_bounded ... ok
+test server::pairing_tests::durable_registration_retry_revocation_and_member_permissions ... ok
+test server::airplay::api::tests::stale_session_is_rejected_before_any_durable_change ... ok
+test server::transaction_tests::disk_failure_closes_prepared_thread_and_retains_producer ... ok
+test server::pairing_tests::pairing_save_releases_engine_and_keeps_book_until_concurrent_retry_and_cancel ... ok
+test virtual_output::tests::binding_requires_exact_provider_uid_and_both_sides ... ok
+test server::transaction_tests::in_flight_native_start_owns_the_last_multi_source_slot ... ok
+test server::pairing_tests::persistence_failure_leaves_grant_retryable_and_identity_unregistered ... ok
+test server::airplay::tests::cancelling_a_real_claim_returns_lane_and_fences_late_start_grant_without_affecting_other_claim ... ok
+test server::transaction_tests::native_external_preparation_failure_returns_the_reserved_lane_without_writing ... ok
+test server::transaction_tests::native_ids_cannot_collide_with_reserved_airplay_context_before_prepare ... ok
+test server::transaction_tests::native_failed_disk_write_aborts_candidate_and_returns_lane ... ok
+test server::transaction_tests::native_thread_preparation_failure_precedes_disk_and_audio_commit ... ok
+test server::transaction_tests::native_http_replay_keeps_original_media_parameters_after_session_ends_and_during_pending ... ok
+test server::transaction_tests::native_start_releases_engine_during_preparation_and_persistence ... ok
+test server::transaction_tests::native_http_replay_returns_original_response_without_external_work ... ok
+test server::subscription_tests::revoked_slow_subscription_releases_its_slot_after_error_send_deadline ... ok
+
+test result: ok. 62 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.41s
+
+   Doc-tests neonmix_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

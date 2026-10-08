@@ -1,0 +1,14 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+warning: method `last_received` is never used
+  --> apps/desktop/src/measurement.rs:84:12
+   |
+50 | impl ObservationClock {
+   | --------------------- method in this implementation
+...
+84 |     pub fn last_received(&self) -> Option<Instant> {
+   |            ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `neonmix-desktop` (bin "neonmix-desktop") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.75s

@@ -1,0 +1,145 @@
+[[message]]
+id = "live-after-sources-connect-select-one-on-the-left"
+
+[[message]]
+id = "live-cannot-connect-right-now-make-sure-the-hub"
+
+[[message]]
+id = "live-clock-drift"
+
+[[message]]
+id = "live-connected"
+
+[[message]]
+id = "live-create-a-room-or-join-one-on-your"
+
+[[message]]
+id = "live-create-room"
+
+[[message]]
+id = "live-deselect"
+
+[[message]]
+id = "live-diagnostics"
+
+[[message]]
+id = "live-discover-and-pair-with-rooms-on-your-local"
+
+[[message]]
+id = "live-hub-limiter-state"
+args = { state = "string", value = "string" }
+
+[[message]]
+id = "live-hub-settings"
+
+[[message]]
+id = "live-input-count"
+args = { count = "u64" }
+
+[[message]]
+id = "live-join-room"
+
+[[message]]
+id = "live-largest-queue-estimate"
+
+[[message]]
+id = "live-let-devices-on-the-local-network-send-audio"
+
+[[message]]
+id = "live-master-controls-require-a-room-controller-or-administrator"
+
+[[message]]
+id = "live-master-volume"
+
+[[message]]
+id = "live-media-network"
+
+[[message]]
+id = "live-mixer-queue-estimate"
+
+[[message]]
+id = "live-mute"
+
+[[message]]
+id = "live-mute-master"
+
+[[message]]
+id = "live-native-sender"
+
+[[message]]
+id = "live-neonmix-brings-audio-from-devices-on-your-local"
+
+[[message]]
+id = "live-no-changes-yet-source-connections-disconnections-muting-and"
+
+[[message]]
+id = "live-no-inputs"
+
+[[message]]
+id = "live-no-room-connected-yet"
+
+[[message]]
+id = "live-not-sharing-start-sharing-to-let-devices-connect"
+
+[[message]]
+id = "live-open-in-mixer"
+
+[[message]]
+id = "live-output-unavailable-waiting-for-device-recovery"
+
+[[message]]
+id = "live-paired-room"
+
+[[message]]
+id = "live-room"
+
+[[message]]
+id = "live-room-activity"
+
+[[message]]
+id = "live-room-master-volume"
+
+[[message]]
+id = "live-room-overview"
+
+[[message]]
+id = "live-select-a-source-on-the-left-to-view"
+
+[[message]]
+id = "live-set-up-this-computer-as-a-room-in"
+
+[[message]]
+id = "live-sharing"
+
+[[message]]
+id = "live-signal-flow"
+
+[[message]]
+id = "live-since-this-window-opened"
+
+[[message]]
+id = "live-sources-appear-on-the-left-and-join-the"
+
+[[message]]
+id = "live-start-sharing"
+
+[[message]]
+id = "live-status"
+
+[[message]]
+id = "live-status-is-stale"
+
+[[message]]
+id = "live-type"
+
+[[message]]
+id = "live-unavailable"
+
+[[message]]
+id = "live-unmute-master"
+
+[[message]]
+id = "live-view-sender"
+
+[[message]]
+id = "live-volume"

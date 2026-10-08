@@ -1,0 +1,71 @@
+{
+  "captured_at": "2026-10-07T14:57:32.902793+08:00",
+  "head": "aefb8690320cb114c974be2477b2ebb64dfadf1e",
+  "diff_sha256": "4d53c3d64fa73e24dd705e7048342cfe3b90e0e83b5b4f89d0c70fe86e6399f2",
+  "scope": "P01; P02 server patch; P03 playback mode/measurement/clock fixture; source remains in development",
+  "source_sha256": {
+    "apps/desktop/src/main.rs": "130e3c3bc886b1a6bfcef7b02cf2a267ed6e9d0cc8a69da714058d6104b88be2",
+    "apps/desktop/src/pages/mixer.rs": "26396eb024db809817a65fa57c8604d3c852e10236a02020efdf5910374330db",
+    "apps/hub/src/server.rs": "b060da4e01869acfb2ada408b6e55a5acb3c22a4b1a1b0b7205adf3b8b2cd640",
+    "apps/hub/src/airplay_api.rs": "3a9a789d671696f77d455a3cf64c3079c0b54028b1b66ec5651fc6a386bc756f",
+    "apps/hub/src/pairing_api.rs": "2facdd238f986b28f0c202e7685e0d668ac6c08ad0e0d9f915ef01fe970144bf",
+    "crates/control/src/lib.rs": "83cc0961e96c36fb9db7e3cf58ab7fe030ed46f90cfdf4b1feeb92717ff14181",
+    "crates/control/tests/transactions.rs": "3b87c2f2cf08fd3c9b7f09209864e2dae07aaed1c46410abe8e43338406bc38d",
+    "crates/audio-core/src/mixer.rs": "c96a677da2e2a7df321f8b23fa6638ec0f00055d256c8f0e03aae969b55aeb8c",
+    "crates/audio-core/src/queue.rs": "34b570fc6d770e6a00429a3611b42e8c8f8176d4ac3ba1acd38b11e7e2ea33aa",
+    "crates/audio-core/tests/lane_binding.rs": "96b55587c1e578710d53e5f6d4a5bdf6f8c19eaa2b5dd160fe4cb389ce4c4cd0",
+    "crates/audio-core/tests/mixer_measurements.rs": "2538301400aa66bb471a39a814e8d942daedee401e68191e5a86f7b57702c347",
+    "crates/audio-core/tests/mixer_realtime.rs": "e725d540737fd4a51893666f26e1f476e3e7c3a7adbe159c7a4e6cab6126c258",
+    "crates/airplay-adapter/src/control.rs": "8c1d231bdbc31d7c5cc6eaf1e349e84aff0993c1cda3bcb01a5d714e16d6bc81",
+    "crates/airplay-adapter/tests/ingress.rs": "56340cc172c135b387309c2f3c95d038bb7c0ae35a79f84f79ed4b794ec81a09",
+    "crates/desktop-service/src/daemon.rs": "4b2609ca78cceb18526926347b622dbebc0a9cd23f8dfe5fcd757bd110b455dc",
+    "tools/package_macos.py": "e7f620a5077de5d7b47545310dca38a15b9a88a7ee3c5350729d143e3f2e7f1a",
+    "tools/macho_references.py": "dffc0fe0ff3110bb9c0ac53b2156a33bea88840ccea504bdff34b9686f07c66c",
+    "tools/review_check.py": "b83f3dd3405612f2df5b87f513656c1f26e9d1347895d5a3c50ba58f6caca282",
+    "Cargo.lock": "85a2646018393e78d92ea6f505e9a7c677a50c389ec961706513ea5ea8cae7ef"
+  },
+  "artifact_sha256": {
+    "target/debug/deps/neonmix_desktop-ab7b9d7918bc97f7": "75e81d8f5340bfc102305a0919d98a011b84c48769c9f80b5f55abcdba9a3e00",
+    "target/debug/deps/neonmix_control-8d4cb683bae373d4": "1d37720fe29c3dfbfa0544589537295c6c623ec89210779768a25d203fef15b2",
+    "target/debug/deps/authority-bc0d659ceb631516": "87f4276e25a80b13d141b81dc057bb4ce6741ff167d11d5e9b6d6cada4dcdb64",
+    "target/debug/deps/transactions-72fdce8a0b533075": "bb80897f0d954e22ee9bb8c60f8ea23627295c9fdcf168095d8f0f1ce78de516",
+    "target/debug/deps/neonmix_desktop_service-84cafd9ecca8911a": "faab838ce545e579f892842c66a20053cf6ce0fe7b6959d22bae13d350814739",
+    "target/debug/deps/neonmix_background-7d48ba5ac1b8e6ca": "5e2b251353c403f454f4d983ab1fda72983915631ecf18adbd0a21345c62281c",
+    "target/debug/deps/fault_contract-d728b03adddf7c41": "6274badb61436ffd89383584ddcfa017e40f7215e319ece65af024047a9b21c2",
+    "target/debug/deps/lifecycle-62742f1454d98a28": "4c304012b6e0a49c3fa1b0cf39fb2a60ac9cb78db0d027a77356ff75ec5513d9",
+    "target/debug/deps/redaction-efcf7e445ca66f1c": "51bd4fc5463e07fc2372f989272448689464c679fda2a27ba51705d783f7e29a",
+    "target/debug/deps/windows_native_ipc-9448d5ac6a0549a5": "ab0622ed5e851801c42b94e4f4cf95d49ff3c0b2ebb1907951cd5d0dfad72076",
+    "target/debug/deps/neonmix_hub-39c8181f5b034673": "f384d7b87a6d4bd496ed203b756596530568e5e7a6fe1ef50f2527483874abce",
+    "target/release/deps/neonmix_airplay_adapter-b2f5a26426b962d1": "d5ce2137c6c2a75d5fcac072b62dbc6c29387317e13eb30007cc703c451e9eb1",
+    "target/release/deps/ingress-cab16c354a158e2d": "5f4a94f00013621819577bf777036b9b7ceb2a87ef5d555d33d03b106b8599d6",
+    "target/release/deps/neonmix_core-fbfe73882bf6178d": "3d0ca95c052ac6f11cee7c43f12cd2cddac1b0be959d9f6fb6f2800d5731644f",
+    "target/release/deps/audio_contract-80d0b7369cda0c01": "86697fbaf5c4531d086f32783f1b2b379d136b0921d3bc01d9829aeeb092c915",
+    "target/release/deps/drift_stability-430423d6f86df5b9": "abce049f266c3e336912af2e1e027713da019c1e2a51a46a1b1c7f6ecc23cb14",
+    "target/release/deps/lane_binding-6403e5312cf0e02b": "0737e83b03bfe4b3499ff5b1576a6ad89460b35a77f66f4becb54832534d62e2",
+    "target/release/deps/mixer-2d07b83b42a1d39c": "3079f9cf2c23d6168e12b7d9efce59c71167557f74009ea514f19b43dfd4d467",
+    "target/release/deps/mixer_measurements-950f6a8e9f0ead28": "6a275d387f78c0370a02411b9a072f56c98756845b5408b11d29d48eaabf616c",
+    "target/release/deps/mixer_realtime-7f4717961b9e6dc3": "fef4860b73a092d3156d0f58268b7d59be93d61a85903687cd5fe96b3f9c636b",
+    "target/release/deps/presentation_resample-d3ad8c58f8df03b1": "0e06feb95e68dd4309380ed242285566e1509508fbf6216ec2f33702f3cad68a",
+    "target/release/deps/realtime-ce344d056604b419": "fed07bd6da0f3709c34ffe2dddd59b7a1893702b65085b2f43ba9efb4bef3295",
+    "target/release/deps/timed_mixer-c05fa9d00d714e0e": "51194ce040120f49da9d1f968778c53230b67f760c0cb70ce68ca43a0f9af87c",
+    "target/release/deps/timed_multi_source-3adb26a8a43d7753": "474cc8284aafa6e33d8009a804923f6eee5679d58ff77abc5c0594b1be7e324e",
+    "target/release/deps/timed_quality-8b11e353ccf74f0e": "2d4d3fb6095e9c2fc797e046382182e85c1ce1abbef39d82f6f7b03c857cfb30",
+    "target/release/neonmix-desktop": "761acab3bc55ecb9647f7bb9391d6e1183cff9836570a109c8c8531779330cf1",
+    "target/release/neonmix-hub": "cab8a8dbd84bde2142c17c4a973e719e53aa8283cd39506ab4ad1042a85f0f55",
+    "target/release/neonmix-background": "3298950cb6e67f072ea283b407a0b0face016f10a735abfc144e87d54eeac180"
+  },
+  "limitations": [
+    "No installer/hardware/Apple/Windows/Ubuntu acceptance",
+    "Workspace UI/i18n changed concurrently; later changes need their own verification",
+    "Test executable paths can be replaced by subsequent builds; this manifest pins this checkpoint"
+  ],
+  "validated_gate": {
+    "path": "checkpoint-result.json",
+    "scope": "macOS deterministic packages + Hub/Desktop; formatter, 7 packaging regressions, strict Clippy and cargo tests",
+    "test_counts": {
+      "passed": 231,
+      "ignored": 4
+    }
+  },
+  "validation_note": "Checkpoint gate passed 231 Rust tests and 7 Python regressions; 4 Rust tests ignored. Concurrent UI/worker edits outside this scope remain separately owned. Whitespace-only cargo fmt applied after the gate."
+}

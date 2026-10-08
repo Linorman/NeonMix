@@ -1,0 +1,9 @@
+flow-native-sender = 原生 Sender
+flow-source-accessible = { $name }，{ $kind }，{ $detail }，{ $gain } dB
+flow-hub-accessible = 房间「{ $name }」，{ $state }，打开 Mixer
+flow-open-mixer = 打开 Mixer
+flow-offline-count = 另有 { $count } 台已配对设备未在发送
+flow-you = 你
+flow-output-unavailable = 输出丢失
+flow-master-muted = 总静音
+flow-output-accessible = 实体输出「{ $name }」，{ $state }

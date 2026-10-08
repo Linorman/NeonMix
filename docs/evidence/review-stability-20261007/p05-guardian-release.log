@@ -1,0 +1,9 @@
+   Compiling neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+   Compiling neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+   Compiling mdns-sd v0.21.4 (/Volumes/projects-mac/NeonMix/vendor/mdns-sd-scoped)
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `release` profile [optimized + debuginfo] target(s) in 23.35s

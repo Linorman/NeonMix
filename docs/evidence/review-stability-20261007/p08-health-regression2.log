@@ -1,0 +1,21 @@
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+error: expected one of `.`, `;`, `?`, `}`, or an operator, found `,`
+   --> apps/desktop/src/pages/diagnostics.rs:126:22
+    |
+126 |                     },
+    |                      ^ expected one of `.`, `;`, `?`, `}`, or an operator
+
+error: expected pattern, found `;`
+   --> apps/desktop/src/pages/diagnostics.rs:129:10
+    |
+129 |         };
+    |          ^ expected pattern
+
+error[E0425]: cannot find value `buffer` in this scope
+   --> apps/desktop/src/pages/diagnostics.rs:169:27
+    |
+169 |         [output, network, buffer, self.capture_health()]
+    |                           ^^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `neonmix-desktop` (bin "neonmix-desktop" test) due to 3 previous errors

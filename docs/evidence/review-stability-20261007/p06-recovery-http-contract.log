@@ -1,0 +1,24 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.70s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 1 test
+test server::transaction_tests::recovery_endpoint_requires_admin_and_runtime_and_preserves_original_response ... FAILED
+
+failures:
+
+---- server::transaction_tests::recovery_endpoint_requires_admin_and_runtime_and_preserves_original_response stdout ----
+
+thread 'server::transaction_tests::recovery_endpoint_requires_admin_and_runtime_and_preserves_original_response' (50477100) panicked at apps/hub/src/server.rs:1709:9:
+assertion `left == right` failed
+  left: Null
+ right: String("9f6ef35b-fdf4-4559-a20f-40bd7451fd93")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    server::transaction_tests::recovery_endpoint_requires_admin_and_runtime_and_preserves_original_response
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 69 filtered out; finished in 0.07s
+
+error: test failed, to rerun pass `-p neonmix-hub --bin neonmix-hub`

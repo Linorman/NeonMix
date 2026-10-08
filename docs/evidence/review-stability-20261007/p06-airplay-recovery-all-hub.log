@@ -1,0 +1,69 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0603]: function `pending_request` is private
+   --> apps/hub/src/server.rs:363:39
+    |
+363 |             .or_else(|| airplay::api::pending_request(&engine))
+    |                                       ^^^^^^^^^^^^^^^ private function
+    |
+note: the function `pending_request` is defined here
+   --> apps/hub/src/airplay_api.rs:755:1
+    |
+755 | pub(super) fn pending_request(e: &Engine) -> Option<Uuid> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `pending` is private
+   --> apps/hub/src/server.rs:368:307
+    |
+368 | ...ne.authority.transaction_pending() || airplay::api::pending(&engine),"pending_request_id":pending}),
+    |                                                        ^^^^^^^ private function
+    |
+note: the function `pending` is defined here
+   --> apps/hub/src/airplay_api.rs:769:1
+    |
+769 | pub(super) fn pending(e: &Engine) -> bool {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `recover` is private
+   --> apps/hub/src/server.rs:524:27
+    |
+524 |             airplay::api::recover(&shared, &headers, request.request_id, request.runtime_epoch)?
+    |                           ^^^^^^^ private function
+    |
+note: the function `recover` is defined here
+   --> apps/hub/src/airplay_api.rs:775:1
+    |
+775 | / pub(super) fn recover(
+776 | |     shared: &Shared,
+777 | |     headers: &HeaderMap,
+778 | |     request: Uuid,
+...   |
+847 | |     Ok(Some(response))
+848 | | }
+    | |_^
+
+error[E0603]: function `pending` is private
+    --> apps/hub/src/server.rs:1037:2746
+     |
+1037 | ...e.authority.transaction_pending() || airplay::api::pending(&engine),"durable":!(engine.authority.transaction_pending() || airpl...
+     |                                                       ^^^^^^^ private function
+     |
+note: the function `pending` is defined here
+    --> apps/hub/src/airplay_api.rs:769:1
+     |
+ 769 | pub(super) fn pending(e: &Engine) -> bool {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function `pending` is private
+    --> apps/hub/src/server.rs:1037:2831
+     |
+1037 | ...e.authority.transaction_pending() || airplay::api::pending(&engine))},"errors":engine.errors}),
+     |                                                       ^^^^^^^ private function
+     |
+note: the function `pending` is defined here
+    --> apps/hub/src/airplay_api.rs:769:1
+     |
+ 769 | pub(super) fn pending(e: &Engine) -> bool {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 5 previous errors

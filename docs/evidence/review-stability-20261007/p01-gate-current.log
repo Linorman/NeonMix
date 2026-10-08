@@ -1,0 +1,73 @@
+format: 0
+packaging: 0
+clippy: 0
+tests: 101
+output_in_order ... ok
+test history::tests::series_keeps_only_the_window_and_dropped_keys ... ok
+test flow::tests::nodes_never_overlap_or_leave_the_canvas ... ok
+test events::tests::switching_locale_rerenders_existing_history_without_new_events ... ok
+test flow::localization_tests::source_accessible_name_follows_locale_and_preserves_user_content ... ok
+test animation::tests::one_shot_plays_on_change_not_on_first_sight ... ok
+test flow::localization_tests::particle_at_mute_gate_endpoint_keeps_opacity_nonnegative ... ok
+test animation::tests::live_motion_repaints_only_while_active_and_not_reduced ... ok
+test pages::airplay::name_tests::alias_display_never_changes_session_control_identity ... ok
+test pages::airplay::name_tests::names_use_utf8_byte_bounds_and_success_does_not_erase_newer_drafts ... ok
+test pages::mixer::multi_airplay_tests::meters_and_mix_follow_stream_ids_when_receiver_order_changes ... ok
+test i18n_tests::field_focus_selection_disclosure_and_scroll_persist_across_rendered_language_frames ... ok
+test i18n_tests::current_frame_accessibility_names_change_while_source_node_ids_stay_stable ... ok
+test i18n_tests::palette_preserves_query_and_selected_command_identity_across_language_switch ... ok
+test localization::tests::locale_commit_waits_for_ime_and_retains_generation_when_unchanged ... ok
+test tests::chinese_composition_preserves_draft_without_enter_submission ... ok
+test tests::commands_use_authoritative_revision_and_duplicate_submission_is_blocked ... ok
+test i18n_tests::language_popup_opens_with_keyboard_and_escape_returns_focus_to_same_selector ... ok
+test tests::cancel_modal_keeps_accesskit_focus_in_the_published_tree ... ok
+test i18n_tests::actions_started_in_chinese_finish_in_the_current_english_locale ... ok
+test localization::tests::detection_empty_failure_manual_override_and_auto_return_are_distinct ... ok
+test tests::inflight_write_keeps_controls_enabled_and_sends_latest_intent_later ... ok
+test tests::long_error_at_minimum_width_keeps_page_content_on_screen ... ok
+test tests::english_header_and_long_room_badge_keep_about_content_inside_the_central_panel ... ok
+test tests::fader_click_never_jumps_gain_and_double_click_resets_to_unity ... ok
+test tests::live_graph_names_every_node_for_assistive_tech ... ok
+test tests::named_fields_publish_accessible_labels_without_exposing_password_text ... ok
+test tests::one_failed_airplay_or_diagnostics_read_keeps_the_room_on_screen ... ok
+test tests::airplay_source_is_visible_searchable_and_admin_controls_follow_room_permissions ... ok
+test tests::polling_does_not_lock_forms_and_stop_has_priority_over_pending_start ... ok
+test tests::mixer_keyboard_handles_empty_removed_and_stale_selection_in_both_layouts ... ok
+test tests::restore_sends_the_inverse_change_against_a_fresh_revision ... ok
+test tests::stop_after_an_inflight_start_runs_last_and_keeps_the_stop_pending_until_ack ... ok
+test tests::stopped_local_hub_is_not_polled_for_room_state ... ok
+test tests::mixer_arrows_follow_the_fader_direction_of_the_layout ... ok
+test tests::sidebar_fits_seven_pages_and_actions_in_the_minimum_window ... ok
+test theme::tests::fluent_direction_isolates_do_not_draw_or_add_width_in_egui ... FAILED
+test tests::palette_enter_during_ime_composition_does_not_run_an_action ... ok
+test tests::pages_handle_missing_loading_failed_and_stale_states ... ok
+test widgets::localization_tests::translated_field_labels_keep_focus_draft_and_identity ... ok
+test widgets::localization_tests::translated_inline_title_keeps_identity_and_focus ... ok
+test widgets::localization_tests::identical_display_labels_do_not_alias_business_field_ids ... ok
+test theme::tests::cached_font_bytes_are_read_once_and_reused ... ok
+test preferences::tests::newer_version_is_never_overwritten_and_memory_choice_survives_failure ... ok
+test tests::live_graph_moves_only_while_signal_flows ... ok
+test i18n_tests::fifty_language_switches_preserve_drafts_targets_timers_and_backend_sessions ... ok
+test preferences::tests::legacy_unknown_language_and_interleaved_updates_preserve_fields ... ok
+test i18n_tests::dual_language_eight_surfaces_cover_empty_full_busy_and_stale_states ... ok
+test preferences::tests::malformed_and_oversized_files_do_not_get_overwritten_on_load ... ok
+test i18n_tests::long_user_names_and_double_scale_keep_actions_and_page_names_reachable ... ok
+
+failures:
+
+---- theme::tests::fluent_direction_isolates_do_not_draw_or_add_width_in_egui stdout ----
+
+thread 'theme::tests::fluent_direction_isolates_do_not_draw_or_add_width_in_egui' (47400111) panicked at apps/desktop/src/theme.rs:345:17:
+assertion `left == right` failed
+  left: [80.8 16.0]
+ right: [81.0 16.0]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    theme::tests::fluent_direction_isolates_do_not_draw_or_add_width_in_egui
+
+test result: FAILED. 51 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+
+error: test failed, to rerun pass `-p neonmix-desktop --bin neonmix-desktop`
+

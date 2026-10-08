@@ -1,5 +1,39 @@
 # NeonMix 实现状态
 
+## UI 多语言开发交付（2026-10-07）
+
+已完成默认Auto、简体中文和English；首期七页/AirPlay、动态语义反馈/事件、tooltip/AX、原生菜单、偏好兼容与英文回退，724条消息/20双语模块严格检查通过。当前desktop/service/i18n联合113测试、严格Clippy与格式通过；macOS固定release54次实际语言/菜单/焦点/隐藏恢复回归通过，Windows固定源原生功能测试/构建通过，Linux仅离线交叉检查。
+
+完整macOS开发DMG的嵌入资源、签名/依赖、非ASCII搬移与离线检查通过；仅ad-hoc，未notarized、未安装。包与源码快照有独立哈希，后续共享操作意图改动及最新工作区验证不冒称为同一包。真实IME、各端读屏、LinuxGUI、Windows实际菜单和中文用户目录升级、真实音频中20次切换、完整三端安装/升级/发布仍未验收。见 [实施结果](UI-I18N-IMPLEMENTATION-20261007.md)、[checklist](UI-I18N-DEVELOPMENT-PLAN-20261007.md)与[汇总证据](evidence/ui-i18n-20261007/summary.json)。
+
+## 稳定性计划实施（2026-10-08，开发中）
+
+P07软件范围已完成：Native/AP版本域与真实epoch重启、幂等回执、满队列终态gate/FIFO/lane重绑、desired/applied callback进度和Desktop行内/底栏反馈通过。最新DSP目标在queue满时仍记录，callback确认前不显示已应用；两秒stalled、未知/跨runtime读数、旧字段被覆盖和房间切换均正确处理。实际Native Stop/未知Revoke、AP三种终态与另一来源保持、retirement lease及实时零分配回归通过；BlackHole实际callback desired=applied=3，733条双语与68项Desktop检查及600×440/1100预览通过。三端完整媒体、真实Apple/读屏/长期和最终包验收仍由P05/P06/P08/P10/P11分项。
+
+P07 AirPlay命令v3已分开持久cfg与事件条件，旧v2保留原CAS；profile/journal版本支持旧资料导入，同一未知候选同步不重复递增。业务state明确确认配置与即时限制，遥测不推进业务游标，未版本化discovery变化会在读取/新CAS前对账；确认框保留原条件。28项API、Desktop66、identity32及真实HTTPS的初始化兼容/重放/重启身份保留/旧epoch拒绝通过。完整门禁随后绑定；P07 FIFO/应用进度已在上述最终软件阶段完成。
+
+P07 Native控制v2已分开config_revision/event_sequence，旧revision保持原事件CAS，v2条件混用/缺失明确拒绝；Desktop/Sender接入绑定命令，订阅强绑定原epoch。8项新域回归、原有集成回归及严格Clippy通过；固定release在BlackHole上完成真实Hub进程GET→重启→TLS/WSS、旧Start拒绝和实际watch两次重取/订阅，无旧会话。AirPlay版本域已由新阶段补齐，desired/applied/FIFO联合验收已由上述最终软件阶段补齐。
+
+P07 pending期间输出/会话健康已即时发布；Prepared只保留配置候选及原对象基线，commit合并到最新runtime，abort不还原旧健康。真实Snapshot事件副本、保存barrier/GET handler、会话结束时保留trim/mute而不复活旧流/Solo、事件历史淘汰及u64提交序号保留回归通过。该早期阶段Hub77项、control21项及严格Clippy通过；Native版本域/WSS重启已由上述新阶段补齐，AirPlay版本域已补齐，desired/applied/FIFO联合验收已由上述最终软件阶段补齐。
+
+P06 Native HTTP和配对已按publication处理未知结果，删除字节相同即成功；原候选/session/device/预备SDK冻结重试，durable前不授予，published revoke立即拒绝认证/关闭gate且DSP队列满不阻止。受Admin/epoch约束的原事务恢复及完成回执查询接入，Hub76项回归通过。AirPlay配置与worker信任发布未知已保留原candidate/request，确认前不授予，published revoke/disable独立关闭gate；配置部分准备复用UUID，Admin/epoch恢复不重启停止中的owner。三端原生/掉电语义、资料迁移与最终制品联合验收仍待完成；R02和P06整体尚未关闭。
+
+P06 UUID管理条件已贯穿输出绑定Store、五个CLI管理动作、IPC/Desktop、Local Forget、保存回执native sync与Sender启动同步。替换后复用revision仍拒绝A的旧UUID；native effect全程持管理锁。Store、CLI parser/实际dispatch和真实IPC保存/重建/名称同步交错通过；绑定资料schema保持，缺UUID旧客户端明确拒绝。真实平台setter/权限和最终包仍需分项验证；R02整体未关闭。
+
+P06 已完成发布阶段原语与双文件设置日志：Prepared保旧、CommitDecided向前恢复，43个真实写入进程中断/重启恢复点、身份/ACL/偏好保持及重试不增revision通过。Hub产品配置读取及后台启动/HubSettings真实IPC均接入恢复，错误固定为结果待确认/需要恢复，日志排除在工件外。HTTP/AirPlay授予与限制边界及B13 UUID CAS已分别完成本地代码回归；资料迁移及三端原生持久边界仍未完成，P06主项保留未勾选。证据见本轮开发记录。
+
+P05 已接入独立 lifecycle endpoint、Stop operation、冻结实例/停止代次和 Ready；20 秒远端变更、普通连接配额满、客户端断开、迟到 Start/Ready 和 UI 未确认结果回归通过。macOS/Linux 新增同目录 guardian，在后台被强杀后仍持有媒体组，5 秒升级并在未 reap leader 的 PID 保留下确认全树退出；Windows 延续现有 Job。macOS 真后台/合成媒体树验证约 5.07 秒退出、假运行密钥清理、另一实例与持久资料保留；满日志消费者回收也通过。Linux 为交叉类型检查，非原生运行；真实产品媒体、三端、可见 UI 与完整包仍分项，不关闭 P05 主门槛。见 [P05 证据](evidence/review-stability-20261007/README.md)。
+
+P04 已完成阶段取消和 session 协议 gain：精确 generation/connection/request 关联、未 grant 取消、独立 cleanup、取消记录/迟到 grant 隔离及 Hub 关闭确认期限。Worker 五阶段 barrier、Hub 实际资源 barrier、六项签名发送端/加密 UDP/PCM IPC、既有七项 SETUP 边界、PCM/ALAC/AAC decoder seam 均通过；两路 macOS 数字恢复完成四次故障/恢复，另一来源连续性通过。新 owner 初始 gain=1；合法重复 stream SETUP 与 FLUSH/恢复保留音量。能力 `session_control_version=1` 在 startup/ready 匹配，该批 PCM v1 不变，后续 P03 已升级为显式协商的 v2/120-byte。详见 [P04 证据](evidence/review-stability-20261007/README.md)。其他平台和真实 Apple 未验收，P03/P07 FIFO 授权隔离仍未闭环。
+
+按 [开发计划](REVIEW-IMPROVEMENT-DESIGN-PLAN-20261007.md) 开始实施：P00 已冻结源码/未提交差异并建立 B01–B20/R01–R03 记录；P01 已修复共享 Mixer 空态键盘、完整 RPATH 解析/错误处理、独立 Mach-O 验证及原生 HTTP Replay。P02 已接入 Desktop 字段调度、完整 context/target 绑定、确认后字段 Undo、Unknown 原请求对账和 AirPlay patch/全量兼容；身份/runtime 在 IPC 与两种 API 上校验，冻结凭证元数据防止路径替换误写。9 项新增交错、原生 IPC 转发及现有状态回归通过；本地门禁 243 项 Rust 测试通过、4 项按原条件忽略，7 项打包回归、严格 Clippy 和 release 构建通过。600×440 八页 macOS 预览已归档，真实 IME/VoiceOver 与跨平台另验。P03 已由控制面明确 timed/native 模式并分离 DSP/计量，修复旧 timed 队列头造成新原生流持续无声、持续断流漏计，以及中途输出重开未先应用配置。真实组件 release 回归及实时零分配通过；一秒断流精确计 48000 内部帧，有效静音 PCM 仍计 Running。
+
+P03 现已完成 generation/独立授权原子、Ingress 显式源坐标、分段预取及 FIR 隔离；真实组件波形/变分块/拒包与零分配通过，PCM/ALAC/AAC SRC 及 RTP 回绕通过。完整 worker/门禁结果见证据。Hub 全撤销事务接线、生命周期、存储恢复、事件游标、诊断 freshness、本地边界和发布联合验收仍在后续批次。新增 PR/main 轻量门禁定义，未执行 GitHub PR/required checks 验证。macOS 的组件结果不关闭 Windows/Ubuntu、真实 Apple、实体声卡和最终包门槛；当前桌面 i18n 工作区的扩大验收结果另记。记录和已完成的 checklist 见 [本轮证据](evidence/review-stability-20261007/README.md)。
+
+## Windows AirPlay 起播调查（2026-10-07）
+
+已用原配对资料私有副本复现 iOS27/Spotify“只响一声”：配对/ALAC格式正确，208接收块中184块过期，最终pcm_output_queue；声卡输出errors0。Windows MediaPipe的PIPE_NOWAIT+5ms轮询实际将写端限制到约64包/秒，低于所需125包/秒。改用单个overlapped写与完成事件，保留250ms预算及队列上限；600包原生对照从9.35秒降至21.4ms，吞吐/超时/停止/对端关闭回归通过；同身份iOS27/Spotify实听用户确认正常，76个active样本约41.1秒、4712块接收，late和worker/output错误0，正常TEARDOWN。起播85块malformed计数及停播前后75943 Mixer欠载保留，不算全程零异常。另修复缺省spf、整数缩窄、UDP异常包三项缺陷，两端七项边界及协议回归通过。新身份PIN-start日志不代表原配对失败。原安装未覆盖；完整修复、潜在问题与证据见 [调查报告](WINDOWS-AIRPLAY-INVESTIGATION-20261007.md)。
+
 ## 桌面 UI 重构「Neon Console」（2026-10-04，仅 macOS 预览）
 
 按 [设计方案](../09_NeonMix_UI重构_设计方案.md) 与 [开发计划](../10_NeonMix_UI重构_开发计划.md) 重构桌面界面，突出“多源汇入一个房间”：新增默认首页「现场」，以信号汇流图显示来源 → 房间核心 → 实体输出，线型对应会话/静音/Solo/断线状态，光点亮度对应该路真实 RMS；Mixer 宽窗改为竖向通道条控制台并加最近 60 秒电平历史；Hub 增加房间徽记、共享开关与一次性波纹、邀请倒计时环、共享输入容量槽；Sender 以五段发送链路管线兼做步骤并加发现雷达；设备改为卡片网格；诊断磁贴加 2 分钟趋势。视觉改为 v3 深色霓虹 token，来源类型色（原生青、AirPlay 紫）与交互色、状态色分开。动效原则改为“只有真实信号变化时才动”：连续动效上限 20 fps，无信号、隐藏或开启减少动态效果时不连续重绘。desktop 27 项测试、严格 Clippy、格式与截图构建通过；4 路流动时 CPU 5.9%（1100×760）/6.4%（1600×1000）单核，空闲页与基线相当。导航改为七页（⌘1–⌘6），Mixer 控制台布局下方向键为 ←/→ 选通道、↑/↓ 调音量。仅预览模式与单元测试验证；真实多设备运行、VoiceOver、真实输入法与 Windows/Linux 未验收。见 [证据](evidence/ui-rebuild-20261004/README.md)。
@@ -301,3 +335,18 @@ CPAL 0.18.2采用仓库内扩展（native I/O revision 3），公开WASAPI IAudi
 ## Ubuntu ARM64 节点补验（2026-09-30）
 
 用户追加的Ubuntu 24.04.3 ARM64/Parallels节点已完成E00/E01原生验证：release CLI与GUI构建、30项自动测试、格式/Clippy/离线模拟、9组PipeWire场景均通过；仿真HDA输出和Wayland GUI启动通过。测试绑定到固定工作区快照，不覆盖期间继续修改的E02–E04内容，也不等同于物理声卡或Linux x86_64验收。详情见[Ubuntu ARM64 E00/E01验证](UBUNTU-ARM64-E00-E01.md)。
+
+
+## Windows AirPlay 可靠性补充（2026-10-07）
+
+已实施 Unicode 同句柄密钥读取、后台→Hub/Sender→worker 协作式停止、Windows Job 音频树兜底，以及每用户安装的独立提升防火墙 helper 和按安装实例维护入口。原身份与配对格式保持；旧组件能力不足时明确拒绝。macOS/Windows 身份、50 次 owner 恢复、Windows Job 异常回收及规则双实例维护通过；macOS 1–4 路活动停止、相同资料/端口重开及 EOF 清理通过，正常约 0.67–0.97s、forced=false、无运行 PEM 遗留。Windows 完整未签名候选包及包内身份/7 项加密 PCM 回归已构建验证。Windows 双窗口维护测试通过：目标实例正常退出，其他目录实例持续运行。
+
+Public 防火墙开启、非 ASCII Windows 账户、真实 iPhone 30 分钟、跨用户 UAC、策略/双栈与活动升级卸载仍待联合验收，不记作发布放行；额外 mix 质量回归中的 media_frame_timeout / timed_late_frames 失败保留，不能合并为 pass。工作区含其他并行改动，构建以源码/组件哈希快照为准。详见 [可靠性改进](WINDOWS-AIRPLAY-RELIABILITY-IMPLEMENTATION-20261007.md)。
+
+## 稳定性P08诊断状态（2026-10-08）
+
+独立控制/诊断/AirPlay/采集时钟、必要字段和可用性校验、近期增量与累计错误、有效静音/无新采样、共享Mixer Starved、Sender认证目标锁存已接入。顶栏/总控不再绘制过期缓存；电平通过binding/stream/output代次和当前session校验，未观察或旧代为未知。源码/测试/原生preview与四份release哈希见[本轮证据](evidence/review-stability-20261007/README.md)。软件门禁、release实时零分配及macOS600×440中文/宽窗英文通过；真实IME/VoiceOver、Windows/UbuntuGUI及三端媒体/长测/最终包仍未验收，不作为发布放行。
+
+## 稳定性P09与本地候选（2026-10-08）
+
+桌面Sender显式UntilStopped；CLI期限/终止原因、实际peer+接口的采集前防反馈、Linux UID owner版本/后台代次/binding UUID握手已完成。macOS真实TLS限时/停止及loopback/LAN/IPv6同端点拒绝，Linux真实节点/双后台/正常退出隔离通过；Linux后台场景远端Sender是夹具，未测其媒体质量。最终macOS标准18项、workspace 433项及release实时回归通过。macOS中文/空格候选包独立Mach-O、重定位payload启动和包内双路媒体通过，ad-hoc DMG保存在项目artifacts，未安装或发布。用户已明确暂缓真实Apple、Windows/Ubuntu可见桌面与8/24小时长测，相关checklist继续未勾选；CI和软件组合的最终结果见[实施证据](evidence/review-stability-20261007/README.md)。

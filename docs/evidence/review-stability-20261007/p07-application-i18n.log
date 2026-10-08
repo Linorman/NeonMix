@@ -1,0 +1,2 @@
+i18n validation failed: stale/invalid UI hardcoding exception at apps/desktop/src/pages/airplay.rs:430
+i18n AST/schema validation passed: 733 messages, 2 shipped locales

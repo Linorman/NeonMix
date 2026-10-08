@@ -1,0 +1,57 @@
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Checking neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+error[E0061]: this method takes 2 arguments but 1 argument was supplied
+    --> crates/desktop-service/src/daemon.rs:1064:44
+     |
+1064 |                   let result = Box::pin(self.execute(Request::Pair {
+     |  ____________________________________________^^^^^^^-
+1065 | |                     invite: relative,
+1066 | |                     credential: "profiles/sender.json".into(),
+1067 | |                     name,
+1068 | |                     hub,
+1069 | |                 }))
+     | |__________________- argument #2 of type `std::option::Option<StartTicket>` is missing
+     |
+note: method defined here
+    --> crates/desktop-service/src/daemon.rs:820:14
+     |
+ 820 |     async fn execute(
+     |              ^^^^^^^
+...
+ 823 |         start_ticket: Option<StartTicket>,
+     |         ---------------------------------
+help: provide the argument
+     |
+1064 |                 let result = Box::pin(self.execute(Request::Pair {
+ ...
+1068 |                     hub,
+1069 ~                 }, /* std::option::Option<StartTicket> */))
+     |
+
+error[E0061]: this method takes 2 arguments but 1 argument was supplied
+    --> crates/desktop-service/src/daemon.rs:1259:26
+     |
+1259 |                     self.execute(Request::Diagnostics { credential, hub }),
+     |                          ^^^^^^^------------------------------------------ argument #2 of type `std::option::Option<StartTicket>` is missing
+     |
+note: method defined here
+    --> crates/desktop-service/src/daemon.rs:820:14
+     |
+ 820 |     async fn execute(
+     |              ^^^^^^^
+...
+ 823 |         start_ticket: Option<StartTicket>,
+     |         ---------------------------------
+help: provide the argument
+     |
+1259 |                     self.execute(Request::Diagnostics { credential, hub }, /* std::option::Option<StartTicket> */),
+     |                                                                          ++++++++++++++++++++++++++++++++++++++++
+
+For more information about this error, try `rustc --explain E0061`.
+error: could not compile `neonmix-desktop-service` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-desktop-service` (lib test) due to 2 previous errors

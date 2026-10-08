@@ -2,6 +2,7 @@
 pub mod airplay_profile;
 pub mod discovery;
 pub mod files;
+pub mod hub_settings;
 pub mod pairing;
 pub mod profiles;
 pub mod speaker;

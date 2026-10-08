@@ -36,10 +36,10 @@ target.parent.mkdir(parents=True, exist_ok=True)
 if not target.exists():
     target.symlink_to(source, target_is_directory=True)
 
-wanted = {'libpipewire-0.3-dev', 'libspa-0.2-dev', 'libasound2-dev', 'libc6-dev', 'linux-libc-dev'}
+wanted = {'libpipewire-0.3-dev', 'libspa-0.2-dev', 'libasound2-dev', 'libc6-dev', 'linux-libc-dev', 'libdbus-1-dev'}
 build_audio = '--build-audio' in sys.argv
 if build_audio:
-    wanted |= {'libpipewire-0.3-0t64', 'libasound2t64', 'libc6', 'libgcc-s1', 'libgcc-13-dev'}
+    wanted |= {'libpipewire-0.3-0t64', 'libasound2t64', 'libc6', 'libgcc-s1', 'libgcc-13-dev', 'libdbus-1-3'}
 packages = {}
 base = 'https://archive.ubuntu.com/ubuntu/'
 for component in ['main', 'universe']:

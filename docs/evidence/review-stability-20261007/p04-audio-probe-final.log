@@ -1,0 +1,9 @@
+{"type":"grant_applied","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6,"stream_id":5,"format_epoch":7,"mapping_id":8}
+{"type":"flush","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":6,"reason":"protocol"}
+{"type":"grant_applied","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":7,"stream_id":5,"format_epoch":7,"mapping_id":9}
+{"type":"session_ended","worker_generation":7,"connection_id":2,"request_id":3,"session_id":4,"stream_epoch":7}
+{"type":"pairing_request","worker_generation":7,"trust_generation":1,"connection_id":20,"pairing_request_id":1}
+{"type":"pairing_attempt","worker_generation":7,"attempts":1}
+{"type":"pairing_ended","worker_generation":7,"trust_generation":1,"connection_id":20,"pairing_request_id":1}
+{"type":"session_ended","worker_generation":7,"connection_id":20,"request_id":1,"session_id":0,"stream_epoch":0}
+old SRP phase survived trust change

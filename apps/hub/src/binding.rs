@@ -12,9 +12,19 @@ use std::{
 
 pub async fn execute(command: OutputCommand) -> Result<()> {
     match command {
-        OutputCommand::SyncName { directory } => {
-            let binding = Store::new(directory).load()?;
-            sync_native_name(&binding)?;
+        OutputCommand::SyncName {
+            directory,
+            expected_output_id,
+            expected_revision,
+        } => {
+            let binding = Store::new(directory).with_expected(
+                expected_output_id,
+                expected_revision,
+                |binding| -> Result<_> {
+                    sync_native_name(binding)?;
+                    Ok(binding.clone())
+                },
+            )?;
             crate::emit(binding)
         }
         OutputCommand::Add {
@@ -50,20 +60,36 @@ pub async fn execute(command: OutputCommand) -> Result<()> {
         OutputCommand::Rename {
             directory,
             expected_revision,
+            expected_output_id,
             name,
-        } => crate::emit(Store::new(directory).rename(expected_revision, name)?),
+        } => crate::emit(Store::new(directory).rename(
+            expected_output_id,
+            expected_revision,
+            name,
+        )?),
         OutputCommand::Enable {
             directory,
             expected_revision,
-        } => crate::emit(Store::new(directory).set_enabled(expected_revision, true)?),
+            expected_output_id,
+        } => crate::emit(Store::new(directory).set_enabled(
+            expected_output_id,
+            expected_revision,
+            true,
+        )?),
         OutputCommand::Disable {
             directory,
             expected_revision,
-        } => crate::emit(Store::new(directory).set_enabled(expected_revision, false)?),
+            expected_output_id,
+        } => crate::emit(Store::new(directory).set_enabled(
+            expected_output_id,
+            expected_revision,
+            false,
+        )?),
         OutputCommand::Remove {
             directory,
             expected_revision,
-        } => crate::emit(Store::new(directory).remove(expected_revision)?),
+            expected_output_id,
+        } => crate::emit(Store::new(directory).remove(expected_output_id, expected_revision)?),
     }
 }
 
@@ -156,5 +182,67 @@ impl Drop for Guard {
                 let _ = worker.join();
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod cas_tests {
+    use super::*;
+    #[tokio::test]
+    async fn dispatch_rejects_old_object_for_every_mutation_before_native_effects() {
+        let project = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap();
+        let directory = project
+            .join(".local/tmp")
+            .join(format!("binding-dispatch-{}", uuid::Uuid::new_v4()));
+        let store = Store::new(&directory);
+        let a = store
+            .add(
+                uuid::Uuid::new_v4(),
+                neonmix_output_binding::Provider::Blackhole,
+                "coreaudio:BlackHole2ch_UID".into(),
+                "A".into(),
+            )
+            .unwrap();
+        store.remove(a.output_id, a.revision).unwrap();
+        let b = store
+            .add(a.hub_id, a.provider, a.device_id, "B".into())
+            .unwrap();
+        for command in [
+            OutputCommand::Rename {
+                directory: directory.clone(),
+                expected_output_id: a.output_id,
+                expected_revision: a.revision,
+                name: "old".into(),
+            },
+            OutputCommand::Enable {
+                directory: directory.clone(),
+                expected_output_id: a.output_id,
+                expected_revision: a.revision,
+            },
+            OutputCommand::Disable {
+                directory: directory.clone(),
+                expected_output_id: a.output_id,
+                expected_revision: a.revision,
+            },
+            OutputCommand::Remove {
+                directory: directory.clone(),
+                expected_output_id: a.output_id,
+                expected_revision: a.revision,
+            },
+            OutputCommand::SyncName {
+                directory: directory.clone(),
+                expected_output_id: a.output_id,
+                expected_revision: a.revision,
+            },
+        ] {
+            let rejected = execute(command).await.unwrap_err();
+            assert_eq!(rejected.to_string(), "output_object_replaced");
+            assert_eq!(store.load().unwrap(), b);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
     }
 }

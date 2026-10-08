@@ -1,0 +1,11 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0433]: cannot find type `Role` in this scope
+   --> apps/hub/src/server.rs:432:54
+    |
+432 |                 .is_some_and(|device| device.role == Role::Admin);
+    |                                                      ^^^^ use of undeclared type `Role`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 1 previous error

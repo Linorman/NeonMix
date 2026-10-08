@@ -9,6 +9,8 @@ def excluded(path):
         part == '.credentials'
         or part.endswith('.pending')
         or part.startswith('runtime-key-')
+        or part.endswith('.neonmix-transaction.json')
+        or part.startswith('.neonmix-config-')
         or part.startswith('credential-store-')
         or part.startswith('credential-migration-')
         or part.startswith('.neonmix-migration-')

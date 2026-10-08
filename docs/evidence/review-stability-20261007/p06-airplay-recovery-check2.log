@@ -1,0 +1,89 @@
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0507]: cannot move out of `e.airplay.receivers` which is behind a mutable reference
+   --> apps/hub/src/airplay_api.rs:850:21
+    |
+850 |     for receiver in e.airplay.receivers {
+    |                     ^^^^^^^^^^^^^^^^^^^
+    |                     |
+    |                     `e.airplay.receivers` moved due to this implicit call to `.into_iter()`
+    |                     move occurs because `e.airplay.receivers` has type `Vec<airplay::EndpointState>`, which does not implement the `Copy` trait
+    |
+note: `into_iter` takes ownership of the receiver `self`, which moves `e.airplay.receivers`
+   --> /Users/linorman/.rustup/toolchains/1.95.0-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/iter/traits/collect.rs:312:18
+    |
+312 |     fn into_iter(self) -> Self::IntoIter;
+    |                  ^^^^
+note: if `airplay::EndpointState` implemented `Clone`, you could clone the value
+   --> apps/hub/src/airplay.rs:117:1
+    |
+117 | pub(super) struct EndpointState {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ consider implementing `Clone` for this type
+    |
+   ::: apps/hub/src/airplay_api.rs:850:21
+    |
+850 |     for receiver in e.airplay.receivers {
+    |                     ------------------- you could clone this value
+help: consider iterating over a slice of the `Vec<airplay::EndpointState>`'s content to avoid moving into the `for` loop
+    |
+850 |     for receiver in &e.airplay.receivers {
+    |                     +
+
+error[E0596]: cannot borrow `receiver.name` as mutable, as `receiver` is not declared as mutable
+   --> apps/hub/src/airplay_api.rs:856:13
+    |
+856 |             receiver.name.clone_from(&saved.name);
+    |             ^^^^^^^^^^^^^ cannot borrow as mutable
+    |
+help: consider changing this to be mutable
+    |
+850 |     for mut receiver in e.airplay.receivers {
+    |         +++
+
+error[E0507]: cannot move out of `e.airplay.receivers` which is behind a mutable reference
+   --> apps/hub/src/airplay_api.rs:866:25
+    |
+866 |         for receiver in e.airplay.receivers {
+    |                         ^^^^^^^^^^^^^^^^^^^
+    |                         |
+    |                         `e.airplay.receivers` moved due to this implicit call to `.into_iter()`
+    |                         move occurs because `e.airplay.receivers` has type `Vec<airplay::EndpointState>`, which does not implement the `Copy` trait
+    |
+note: if `airplay::EndpointState` implemented `Clone`, you could clone the value
+   --> apps/hub/src/airplay.rs:117:1
+    |
+117 | pub(super) struct EndpointState {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ consider implementing `Clone` for this type
+    |
+   ::: apps/hub/src/airplay_api.rs:866:25
+    |
+866 |         for receiver in e.airplay.receivers {
+    |                         ------------------- you could clone this value
+help: consider iterating over a slice of the `Vec<airplay::EndpointState>`'s content to avoid moving into the `for` loop
+    |
+866 |         for receiver in &e.airplay.receivers {
+    |                         +
+
+error[E0594]: cannot assign to `receiver.trust_generation`, as `receiver` is not declared as mutable
+   --> apps/hub/src/airplay_api.rs:867:13
+    |
+867 |             receiver.trust_generation += 1;
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot assign
+    |
+help: consider changing this to be mutable
+    |
+866 |         for mut receiver in e.airplay.receivers {
+    |             +++
+
+warning: unused variable: `receiver`
+   --> apps/hub/src/airplay_api.rs:866:13
+    |
+866 |         for receiver in e.airplay.receivers {
+    |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_receiver`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+Some errors have detailed explanations: E0507, E0594, E0596.
+For more information about an error, try `rustc --explain E0507`.
+warning: `neonmix-hub` (bin "neonmix-hub") generated 1 warning
+error: could not compile `neonmix-hub` (bin "neonmix-hub") due to 4 previous errors; 1 warning emitted

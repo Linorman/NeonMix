@@ -1,0 +1,45 @@
+   Compiling neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.76s
+     Running unittests src/main.rs (target/debug/deps/neonmix_hub-39c8181f5b034673)
+
+running 17 tests
+test server::airplay::api::tests::configuration_reserves_four_source_capacity_before_disk_write_and_clears_on_failure ... ok
+test server::airplay::api::tests::explicit_pair_window_rotates_running_idle_receiver_and_replay_does_not_reopen ... ok
+test server::airplay::api::tests::command_ids_require_canonical_uuid_spelling_before_deduplication ... ok
+test server::airplay::api::tests::member_snapshot_of_uninitialized_airplay_is_read_only ... ok
+test server::airplay::api::tests::committed_revoke_has_receipt_when_session_ends_and_mixer_queue_fills_during_save ... ok
+test server::airplay::api::tests::failed_pair_window_queue_does_not_reset_attempts_or_generation ... ok
+test server::airplay::api::tests::rename_success_followed_by_sync_error_is_acknowledged_as_committed ... FAILED
+test server::airplay::api::tests::repair_running_idle_receiver_discards_old_binding_and_opens_explicit_window ... ok
+test server::airplay::api::tests::metadata_edits_keep_receiver_identity_and_redact_cached_pairing_pins ... ok
+test server::airplay::api::tests::partial_identity_preparation_retains_disabled_recoverable_entries ... FAILED
+test server::airplay::api::tests::live_configuration_stops_only_removed_idle_entries_and_preserves_retained_claim ... ok
+test server::airplay::api::tests::snapshot_rechecks_role_after_waiting_for_profile_transaction ... ok
+test server::airplay::api::tests::solo_only_source_patch_has_no_persistent_side_effect ... ok
+test server::airplay::api::tests::individual_disable_is_persistent_and_global_disable_preserves_configuration ... ok
+test server::airplay::api::tests::source_patch_rejects_empty_invalid_and_replaced_session_before_save ... ok
+test server::airplay::api::tests::stale_session_is_rejected_before_any_durable_change ... ok
+test server::airplay::api::tests::source_field_patch_preserves_other_client_mute_and_session_solo ... ok
+
+failures:
+
+---- server::airplay::api::tests::rename_success_followed_by_sync_error_is_acknowledged_as_committed stdout ----
+
+thread 'server::airplay::api::tests::rename_success_followed_by_sync_error_is_acknowledged_as_committed' (50691970) panicked at apps/hub/src/airplay_api.rs:1494:10:
+called `Result::unwrap()` on an `Err` value: Error("profile_durability_unconfirmed")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- server::airplay::api::tests::partial_identity_preparation_retains_disabled_recoverable_entries stdout ----
+
+thread 'server::airplay::api::tests::partial_identity_preparation_retains_disabled_recoverable_entries' (50691969) panicked at apps/hub/src/airplay_api.rs:1441:10:
+called `Result::unwrap()` on an `Err` value: Error("profile_durability_unconfirmed")
+
+
+failures:
+    server::airplay::api::tests::partial_identity_preparation_retains_disabled_recoverable_entries
+    server::airplay::api::tests::rename_success_followed_by_sync_error_is_acknowledged_as_committed
+
+test result: FAILED. 15 passed; 2 failed; 0 ignored; 0 measured; 54 filtered out; finished in 0.29s
+
+error: test failed, to rerun pass `-p neonmix-hub --bin neonmix-hub`

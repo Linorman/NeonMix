@@ -1,0 +1,24 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.09s
+     Running tests/lifecycle.rs (target/debug/deps/lifecycle-8795ec3e8e8c8c9e)
+
+running 16 tests
+test private_transport_rejects_unknown_commands_versions_oversize_paths_and_double_daemon ... ok
+test bound_intent_rejects_identity_swap_and_preserves_id_and_frozen_credential_metadata ... ok
+test invitations_are_ephemeral_repeatable_and_export_contains_no_untrusted_strings ... ok
+test metadata_versions_and_admin_aliases_fail_closed_without_loading_secrets ... ok
+test ipc_settings_and_background_restart_use_the_same_recoverable_config_owner ... ok
+test output_ipc_forwards_frozen_id_and_native_sync_uses_the_acknowledged_object ... ok
+test ready_followed_by_stats_is_immediately_ready_through_real_ipc ... ok
+test forgetting_a_sender_stops_media_disables_persisted_binding_and_removes_profile ... ok
+test status_stays_available_during_a_hung_ordinary_query_and_stop_interrupts_it ... ok
+test disconnected_stop_client_still_reaps_and_late_ready_cannot_restart_media ... ok
+test structured_faults_take_priority_and_unknown_stderr_is_never_a_ui_message ... ok
+test urgent_stop_interrupts_a_hung_read_only_query_and_reaps_its_process ... ok
+test ui_disconnect_reopen_stop_shutdown_and_failed_media_are_authoritative ... ok
+test stalled_partial_request_times_out_without_blocking_authoritative_status ... ok
+test frozen_lifecycle_identity_and_stop_generation_reject_late_start_and_wrong_instance_stop ... ok
+test slow_remote_mutation_and_full_ordinary_quota_do_not_block_status_or_stop ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 24.08s
+

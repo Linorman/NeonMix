@@ -1,0 +1,20 @@
+{
+  "captured_at": "2026-10-07T20:01:00.676582+08:00",
+  "source_sha256": {
+    "apps/airplay-worker/main.cpp": "a3f7d40969008ee2ffbbcc9707c902b6e96a4255ece04fef1df57a9ab58d7dc5",
+    "apps/airplay-worker/session_probe.cpp": "16b79dc2ea8f69ddd93527308c1ac8a6401b064b8216046fe49faca80b048de9",
+    "apps/airplay-worker/audio_probe.cpp": "d8bc774ea1007d1440d9054914e2efd1c3f7dbd86cd50ef3e696b7a71e7a6f81",
+    "apps/hub/src/airplay.rs": "80836503c99460fa8ccb10d930319432433a3f6e07a6e962dab2bc09f486272d",
+    "crates/airplay-ipc/src/lib.rs": "fbebf1df49244ed46288e74ab3c8e3d4c222cc3e062a2c6e324f777246b2c58f",
+    "tools/airplay_session_probe.py": "ad726756c6b3433468b7eb469fa8c47546046f0b4ca100ab23858593011247c1"
+  },
+  "artifact_sha256": {
+    ".local/airplay/build/neonmix-airplay-worker": "98663874bc79bd73a48f53bd6d70911909a1f3ff61e6610b95333fc593611dc1",
+    "target/release/neonmix-hub": "469593d316af74d18ec96355dc9f0640d1bd027ca9394f00e5d51546eba56f77"
+  },
+  "gate": {
+    "passed": 244,
+    "ignored": 4
+  },
+  "scope": "macOS deterministic Worker/Hub barriers, signed synthetic client + encrypted UDP PCM IPC, two-source native digital recovery; Apple and Windows/Linux runtime not executed"
+}

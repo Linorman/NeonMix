@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "scope": "real background, synthetic Hub/probe tree; no audio or Apple devices",
+  "binary_sha256": {
+    "neonmix-background": "20bdc4de9e167a664447e50bf75cb109c51b1a6b80d1004205e2949607be3a8a",
+    "neonmix-lifecycle-probe": "e3ded55816073e27576d9bf8380eda8b98fae4c8c582cd3e66a6d39b5a15a09e",
+    "neonmix-guardian": "637d242f990edcc101abf95e320a08c9892c3545bb93ef07a31a13048131e0d8"
+  },
+  "owned_tree_pids": [
+    99671,
+    99672
+  ],
+  "owned_tree_remaining": [],
+  "elapsed_ms": 5073,
+  "other_instance_pid": 99674,
+  "other_instance_tree_alive": true,
+  "owned_runtime_keys_removed": true,
+  "other_runtime_key_preserved": true,
+  "profiles_preserved": true,
+  "guardians_exited": true,
+  "supervisor_receipts": [
+    {
+      "event": "guardian_stopped",
+      "result": {
+        "child_exit_code": null,
+        "cleanup_complete": true,
+        "cleanup_failures": [],
+        "error_code": null,
+        "failure_stage": null,
+        "forced": true,
+        "runtime_keys_observed": 1,
+        "version": 1
+      }
+    },
+    {
+      "event": "guardian_stopped",
+      "result": {
+        "child_exit_code": null,
+        "cleanup_complete": true,
+        "cleanup_failures": [],
+        "error_code": null,
+        "failure_stage": null,
+        "forced": false,
+        "runtime_keys_observed": 1,
+        "version": 1
+      }
+    }
+  ],
+  "fixtures_removed": true
+}

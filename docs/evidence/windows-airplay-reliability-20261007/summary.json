@@ -1,0 +1,15 @@
+{
+  "implementation": "A/B/C source and candidate build complete; D joint physical acceptance pending",
+  "installer_sha256": "f2afd7bb2a124e35914adbe54c38b42b9621615f18a137e1a3f2cdbb37efdbc6",
+  "signing": "unsigned",
+  "no_subagents": true,
+  "public_firewall_iphone_30min": "not_run",
+  "cross_user_uac": "not_run",
+  "native_account_non_ascii": "not_run",
+  "quality_failures_retained": [
+    "debug_media_frame_timeout",
+    "release_timed_late_frames_431"
+  ],
+  "windows_firewall_enablement_changed": false,
+  "original_windows_install_replaced": false
+}

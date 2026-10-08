@@ -1,0 +1,103 @@
+{
+  "worker_sha256": "e4b74c57ac5582f2129f5e6f70f9ca77a1c03e66b785ae10c00c2e46720429b2",
+  "results": [
+    {
+      "codec": 2,
+      "spf": 352,
+      "udp_noise": false,
+      "invalid_control_port": false,
+      "setup_status": 200,
+      "ports_nonzero": true,
+      "source_frame_count": 352,
+      "pcm_bytes": 95024,
+      "alive": true,
+      "resets": [],
+      "fatal": [],
+      "exit_before_stop": null,
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "codec": 2,
+      "spf": null,
+      "udp_noise": false,
+      "invalid_control_port": false,
+      "setup_status": 200,
+      "ports_nonzero": true,
+      "source_frame_count": 352,
+      "pcm_bytes": 3494456,
+      "alive": true,
+      "resets": [],
+      "fatal": [],
+      "exit_before_stop": null,
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "codec": 2,
+      "spf": 65538,
+      "udp_noise": false,
+      "invalid_control_port": false,
+      "setup_status": 400,
+      "resets": [],
+      "fatal": [],
+      "exit_before_stop": null,
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "codec": 1,
+      "spf": 352,
+      "udp_noise": true,
+      "invalid_control_port": false,
+      "setup_status": 200,
+      "ports_nonzero": true,
+      "source_frame_count": 352,
+      "pcm_bytes": 95024,
+      "alive": true,
+      "resets": [],
+      "fatal": [],
+      "exit_before_stop": null,
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "codec": 2,
+      "spf": "352",
+      "udp_noise": false,
+      "invalid_control_port": false,
+      "setup_status": 400,
+      "resets": [],
+      "fatal": [],
+      "exit_before_stop": null,
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "codec": 2,
+      "spf": 8193,
+      "udp_noise": false,
+      "invalid_control_port": false,
+      "setup_status": 400,
+      "resets": [],
+      "fatal": [],
+      "exit_before_stop": null,
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "codec": 2,
+      "spf": 352,
+      "udp_noise": false,
+      "invalid_control_port": true,
+      "setup_status": 400,
+      "resets": [],
+      "fatal": [],
+      "exit_before_stop": null,
+      "stderr": "",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "scope": "synthetic authenticated encrypted audio; not Apple interoperability"
+}

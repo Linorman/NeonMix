@@ -1,0 +1,108 @@
+{
+  "passed": true,
+  "binary_sha256": "89964be3191ed24707ab9dc501fbc5529a2ce34cf6c662ccbee09a4be9a9dda3",
+  "checks": {
+    "airplay_v3": {
+      "bootstrap_legacy_then_explicit_v3": true,
+      "config_increment_once": true,
+      "same_response_replay": true,
+      "mixed_conditions_rejected": true,
+      "config_and_receiver_identity_preserved_after_restart": true,
+      "old_epoch_rejected": true
+    },
+    "same_runtime_start_replay_same_response": true,
+    "old_start_replay": {
+      "status": 400,
+      "error": "snapshot_required",
+      "no_media_recreated": true
+    },
+    "old_epoch_get_to_wss": {
+      "status": 400,
+      "error": "snapshot_required"
+    },
+    "legacy_subscription": {
+      "status": 426,
+      "error": "upgrade_required"
+    },
+    "real_control_client_resnapshot": {
+      "snapshots": 2,
+      "subscriptions": 2,
+      "old_session_removed": true
+    },
+    "new_epoch_subscription": 101,
+    "real_process_restart": true,
+    "persistent_config_preserved": true,
+    "no_old_sessions_or_streams": true,
+    "runtime_start_left_config_unchanged": true,
+    "v2_config_event_receipt": true
+  },
+  "client_observations": [
+    {
+      "connected": false,
+      "snapshots": 1,
+      "subscriptions": 0,
+      "applied_events": 0,
+      "runtime_epoch": "8eece1c6-5331-41a3-a113-1ebd5eaf1d63",
+      "event_sequence": 4,
+      "config_revision": 3,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": true,
+      "snapshots": 1,
+      "subscriptions": 1,
+      "applied_events": 0,
+      "runtime_epoch": "8eece1c6-5331-41a3-a113-1ebd5eaf1d63",
+      "event_sequence": 4,
+      "config_revision": 3,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": true,
+      "snapshots": 1,
+      "subscriptions": 1,
+      "applied_events": 1,
+      "runtime_epoch": "8eece1c6-5331-41a3-a113-1ebd5eaf1d63",
+      "event_sequence": 5,
+      "config_revision": 4,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": false,
+      "snapshots": 1,
+      "subscriptions": 1,
+      "applied_events": 1,
+      "runtime_epoch": "8eece1c6-5331-41a3-a113-1ebd5eaf1d63",
+      "event_sequence": 5,
+      "config_revision": 4,
+      "session_count": 1,
+      "active_session_count": 1
+    },
+    {
+      "connected": false,
+      "snapshots": 2,
+      "subscriptions": 1,
+      "applied_events": 1,
+      "runtime_epoch": "116e1cfd-f6d1-469b-b8ed-3188864bce13",
+      "event_sequence": 6,
+      "config_revision": 4,
+      "session_count": 0,
+      "active_session_count": 0
+    },
+    {
+      "connected": true,
+      "snapshots": 2,
+      "subscriptions": 2,
+      "applied_events": 1,
+      "runtime_epoch": "116e1cfd-f6d1-469b-b8ed-3188864bce13",
+      "event_sequence": 6,
+      "config_revision": 4,
+      "session_count": 0,
+      "active_session_count": 0
+    }
+  ],
+  "private_fixture_removed": true
+}

@@ -1,0 +1,8 @@
+{
+  "packaged_hub_runtime": true,
+  "idle_maintenance": true,
+  "shutdown_does_not_start_owner": true,
+  "owned_windows_ready": true,
+  "target_ui_exit": true,
+  "other_directory_ui_survived": true
+}

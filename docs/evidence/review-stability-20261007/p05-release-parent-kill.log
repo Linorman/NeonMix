@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "scope": "real background, synthetic Hub/probe tree; no audio or Apple devices",
+  "binary_sha256": {
+    "neonmix-background": "1104cdced8c451b535a7f0fe2089fa54baafa0891a2945b720ee2fa83beeeedf",
+    "neonmix-lifecycle-probe": "e8d1db9c3b9eec440cd49012c7f71b023147557b7e9f4b7f23254872b6f8a6ab",
+    "neonmix-guardian": "06dca97db25e8bdb485b4e6b0060d38b6c5b265310393669ba82280cea4578ca"
+  },
+  "owned_tree_pids": [
+    32103,
+    32175
+  ],
+  "owned_tree_remaining": [],
+  "elapsed_ms": 5055,
+  "other_instance_pid": 32177,
+  "other_instance_tree_alive": true,
+  "owned_runtime_keys_removed": true,
+  "other_runtime_key_preserved": true,
+  "profiles_preserved": true,
+  "guardians_exited": true,
+  "supervisor_receipts": [],
+  "fixtures_removed": true
+}

@@ -1,0 +1,67 @@
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.09s
+     Running tests/lane_binding.rs (target/release/deps/lane_binding-6403e5312cf0e02b)
+
+running 4 tests
+test native_head_is_rejected_before_new_timed_stream_plays ... ok
+test stale_timed_queue_head_cannot_choose_playback_for_new_native_binding ... ok
+test same_stream_wrong_kind_is_rejected_and_kind_change_resets_dsp ... ok
+test output_reopen_discards_old_timed_fifo_and_waits_for_new_deadline ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mixer.rs (target/release/deps/mixer-2d07b83b42a1d39c)
+
+running 8 tests
+test drift_estimator_filters_jitter_limits_slew_and_resets ... ok
+test every_gain_change_finishes_in_five_ms_including_low_and_high_levels ... ok
+test buffering_silence_does_not_consume_the_resume_fade ... ok
+test inactive_identity_epoch_and_nan_never_leak_old_audio ... ok
+test volume_zero_and_stream_removal_end_at_silence_with_a_short_tail ... ok
+test gain_mute_multisolo_advance_all_lanes_and_limiter_reports_overload ... ok
+test live_meters_follow_post_fader_samples_and_clear_after_mute_missing_pcm_and_reuse ... ok
+test live_output_meter_and_limiter_gain_recover_after_overload ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mixer_measurements.rs (target/release/deps/mixer_measurements-950f6a8e9f0ead28)
+
+running 3 tests
+test valid_silent_muted_pcm_is_counted_as_running_instead_of_starved ... ok
+test active_timed_starvation_counts_one_second_and_stops_on_remove ... ok
+test active_native_starvation_counts_every_internal_frame_after_dsp_reset ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/mixer_realtime.rs (target/release/deps/mixer_realtime-7f4717961b9e6dc3)
+
+running 1 test
+test dynamic_ratio_commands_and_stream_reuse_allocate_nothing_in_output ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/timed_mixer.rs (target/release/deps/timed_mixer-c05fa9d00d714e0e)
+
+running 11 tests
+test negative_callback_start_jitter_does_not_delay_buffered_pcm ... ok
+test solo_exclusion_consumes_timed_input_instead_of_replaying_it_later ... ok
+test callback_mid_block_selects_source_offset_and_epoch_flush_rejects_stale ... ok
+test single_block_waits_until_target_without_native_start_water ... ok
+test late_deadlines_are_attributed_to_stream_epochs_across_lane_reuse ... ok
+test genuinely_late_first_pcm_and_large_clock_jumps_still_skip_elapsed_samples ... ok
+test muted_and_solo_lanes_consume_elapsed_audio_without_replay ... ok
+test new_epoch_flushes_a_future_head_already_held_by_output ... ok
+test timed_audio_recovers_after_a_track_gap_without_an_epoch_change ... ok
+test starvation_recovery_waits_for_future_pts_and_skips_elapsed_audio ... ok
+test an_early_first_packet_keeps_its_samples_across_callback_start_jitter ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/timed_quality.rs (target/release/deps/timed_quality-8b11e353ccf74f0e)
+
+running 3 tests
+test timed_source_clock_error_keeps_long_term_presentation_phase_bounded ... ignored, Run release ignored: accelerated two-minute absolute phase tracking
+test fractional_src_preserves_upper_music_passband_after_clock_lock ... ok
+test callback_jitter_and_source_clock_error_do_not_create_pcm_spikes ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.47s
+

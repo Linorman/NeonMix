@@ -1,0 +1,11 @@
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.76s
+     Running unittests src/lib.rs (target/debug/deps/neonmix_desktop_service-8e242ebd364cd6dd)
+
+running 3 tests
+test managed::tests::hung_process_is_forced_with_a_bounded_wait ... ok
+test managed::tests::failed_runtime_drop_keeps_guardian_alive_until_its_hung_media_exits ... ok
+test managed::tests::cancelled_stop_completes_and_fifty_restarts_are_graceful ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 12.32s
+

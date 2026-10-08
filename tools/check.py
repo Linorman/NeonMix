@@ -20,6 +20,7 @@ args = parser.parse_args()
 if sys.platform != 'darwin' and not args.native_media:
     scope += ['--exclude', 'neonmix-media', '--exclude', 'neonmix-hub']
 commands = {
+    'i18n': [sys.executable, str(ROOT / 'tools/check_i18n.py'), '--strict'],
     'format': ['cargo', 'fmt', '--all', '--', '--check'],
     'credential-dependencies': [sys.executable, str(ROOT / 'tools/credential_dependency_check.py')],
     'clippy': ['cargo', 'clippy', *scope, '--all-targets', '--locked', '--', '-D', 'warnings'],
@@ -46,7 +47,7 @@ if args.only:
     unknown = set(args.only) - commands.keys()
     if unknown:
         parser.error(f'Unknown checks: {sorted(unknown)}')
-    commands = {name: commands[name] for name in args.only}
+    commands = {'i18n': commands['i18n'], **{name: commands[name] for name in args.only}}
 results = {}
 for name, command in commands.items():
     started = time.monotonic()

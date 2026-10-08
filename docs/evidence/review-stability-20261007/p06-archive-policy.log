@@ -1,0 +1,13 @@
+.......E
+======================================================================
+ERROR: test_private_journal_and_scoped_staging_never_enter_archives (test_package_macos.TransactionArchiveTests.test_private_journal_and_scoped_staging_never_enter_archives)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Volumes/projects-mac/NeonMix/tools/tests/test_package_macos.py", line 52, in test_private_journal_and_scoped_staging_never_enter_archives
+    from archive_policy import excluded
+ModuleNotFoundError: No module named 'archive_policy'
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.111s
+
+FAILED (errors=1)

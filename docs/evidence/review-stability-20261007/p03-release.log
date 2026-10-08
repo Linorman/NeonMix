@@ -1,0 +1,9 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+   Compiling neonmix-airplay-ipc v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-ipc)
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+   Compiling neonmix-io v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-io)
+   Compiling neonmix-media v0.1.0 (/Volumes/projects-mac/NeonMix/crates/media)
+   Compiling neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+   Compiling neonmix-macos v0.1.0 (/Volumes/projects-mac/NeonMix/adapters/macos)
+   Compiling neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+    Finished `release` profile [optimized + debuginfo] target(s) in 1m 03s

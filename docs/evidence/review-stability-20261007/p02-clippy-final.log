@@ -1,0 +1,5 @@
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+    Checking neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.03s

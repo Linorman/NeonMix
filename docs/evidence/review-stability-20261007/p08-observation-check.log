@@ -1,0 +1,96 @@
+    Checking neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Checking neonmix-identity v0.1.0 (/Volumes/projects-mac/NeonMix/crates/identity)
+   Compiling neonmix-i18n v0.1.0 (/Volumes/projects-mac/NeonMix/crates/i18n)
+    Checking neonmix-lifecycle v0.1.0 (/Volumes/projects-mac/NeonMix/crates/lifecycle)
+    Checking neonmix-control v0.1.0 (/Volumes/projects-mac/NeonMix/crates/control)
+   Compiling neonmix-desktop v0.1.0 (/Volumes/projects-mac/NeonMix/apps/desktop)
+    Checking neonmix-airplay-adapter v0.1.0 (/Volumes/projects-mac/NeonMix/crates/airplay-adapter)
+    Checking neonmix-desktop-service v0.1.0 (/Volumes/projects-mac/NeonMix/crates/desktop-service)
+warning: variants `NotObserved` and `RuntimeChanged` are never constructed
+  --> apps/desktop/src/measurement.rs:7:5
+   |
+ 6 | pub enum UnavailableReason {
+   |          ----------------- variants in this enum
+ 7 |     NotObserved,
+   |     ^^^^^^^^^^^
+...
+10 |     RuntimeChanged,
+   |     ^^^^^^^^^^^^^^
+   |
+   = note: `UnavailableReason` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `Sample` is never constructed
+  --> apps/desktop/src/measurement.rs:13:12
+   |
+13 | pub struct Sample<T> {
+   |            ^^^^^^
+
+warning: enum `Measurement` is never used
+  --> apps/desktop/src/measurement.rs:20:10
+   |
+20 | pub enum Measurement<T> {
+   |          ^^^^^^^^^^^
+
+warning: method `current` is never used
+  --> apps/desktop/src/measurement.rs:32:12
+   |
+31 | impl<T> Measurement<T> {
+   | ---------------------- method in this implementation
+32 |     pub fn current(self) -> Option<T> {
+   |            ^^^^^^^
+
+warning: fields `received_at`, `sample_age`, and `runtime_epoch` are never read
+  --> apps/desktop/src/measurement.rs:41:5
+   |
+40 | struct Stamp {
+   |        ----- fields in this struct
+41 |     received_at: Instant,
+   |     ^^^^^^^^^^^
+42 |     sample_age: Duration,
+   |     ^^^^^^^^^^
+43 |     runtime_epoch: Option<Uuid>,
+   |     ^^^^^^^^^^^^^
+   |
+   = note: `Stamp` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: methods `last_received` and `inspect` are never used
+  --> apps/desktop/src/measurement.rs:72:12
+   |
+50 | impl ObservationClock {
+   | --------------------- methods in this implementation
+...
+72 |     pub fn last_received(&self) -> Option<Instant> {
+   |            ^^^^^^^^^^^^^
+...
+75 |     pub fn inspect<'a>(
+   |            ^^^^^^^
+
+warning: `neonmix-desktop` (bin "neonmix-desktop") generated 6 warnings
+warning: fields `reason` and `last_good` are never read
+  --> apps/desktop/src/measurement.rs:23:9
+   |
+22 |     Unavailable {
+   |     ----------- fields in this variant
+23 |         reason: UnavailableReason,
+   |         ^^^^^^
+24 |         last_good: Option<Sample<T>>,
+   |         ^^^^^^^^^
+   |
+   = note: `Measurement` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `last_good` and `age` are never read
+  --> apps/desktop/src/measurement.rs:27:9
+   |
+26 |     Stale {
+   |     ----- fields in this variant
+27 |         last_good: Sample<T>,
+   |         ^^^^^^^^^
+28 |         age: Duration,
+   |         ^^^
+   |
+   = note: `Measurement` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `neonmix-desktop` (bin "neonmix-desktop" test) generated 2 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.24s

@@ -85,6 +85,7 @@ def main():
     if patched.exists(): shutil.rmtree(patched)
     shutil.copytree(pristine,patched)
     subprocess.run(['patch','-p1','--input',str(ROOT/'patches/airplay-audio-only.patch')],cwd=patched,check=True)
+    subprocess.run(['patch','-p1','--input',str(ROOT/'patches/libplist-json-unicode.patch')],cwd=BASE/'src/libplist-2.6.0',check=True)
     if args.sources_only:
         print(patched)
         return

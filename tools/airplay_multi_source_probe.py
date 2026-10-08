@@ -213,16 +213,18 @@ class DigitalSource:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--scenario', choices=['mix', 'management', 'mix-control'], default='mix', help='Management and mix-control run focused two-source checks without repeating the mix/fault matrix')
+    parser.add_argument('--scenario', choices=['mix', 'management', 'mix-control', 'shutdown'], default='mix', help='Management and mix-control run focused two-source checks without repeating the mix/fault matrix')
     parser.add_argument('--profile', choices=['debug', 'release'], default='release')
     parser.add_argument('--sources', type=int, choices=range(5), default=2)
     parser.add_argument('--native-sources', type=int, choices=range(5), default=0, help='Independent native tone Senders; total inputs must be 1..4')
     parser.add_argument('--output', required=True, help='Explicit CoreAudio UID, for example coreaudio:BlackHole2ch_UID')
     parser.add_argument('--fault-cycles', type=int, choices=range(1, 21), default=1, help='Repeat every AirPlay disconnect/crash/recovery sequence this many times')
+    parser.add_argument('--shutdown-active', action='store_true', help='Stop the managed Hub while all synthetic sources remain active and verify worker/key cleanup')
     parser.add_argument('--steady-seconds', type=float, default=3)
     parser.add_argument('--status-readers', type=int, choices=range(9), default=0, help='Concurrent status readers exercising admission during profile-lock contention')
     parser.add_argument('--report', type=Path, help='Project-local JSON report; defaults to artifacts/airplay/multi-source/<unique-run>/result.json')
     args = parser.parse_args()
+    args.shutdown_active = args.shutdown_active or args.scenario == "shutdown"
     assert args.scenario not in ['management', 'mix-control'] or (args.sources == 2 and args.native_sources == 0 and args.fault_cycles == 1), 'management/mix-control requires --sources 2 --native-sources 0 --fault-cycles 1'
     assert platform.system() == 'Darwin', 'macOS-only probe'
     assert 1 <= args.sources + args.native_sources <= 4, 'combined source count must be 1..4'
@@ -289,8 +291,8 @@ def main():
         log = base / 'hub.log'
         log_handle = log.open('w')
         env = dict(os.environ, NEONMIX_AIRPLAY_RUNTIME=str(ROOT / '.local/airplay'))
-        hub = subprocess.Popen([str(DEV), str(binary), 'serve', '--config', str(state / 'server.json'), '--listen', '127.0.0.1:0'],
-                               stdout=log_handle, stderr=log_handle, cwd=ROOT, env=env)
+        hub = subprocess.Popen([str(DEV), str(binary), 'serve', '--config', str(state / 'server.json'), '--listen', '127.0.0.1:0'] + (['--managed-control-stdin'] if args.shutdown_active else []),
+                               stdin=subprocess.PIPE if args.shutdown_active else subprocess.DEVNULL, stdout=log_handle, stderr=log_handle, cwd=ROOT, env=env)
 
         def started():
             assert hub.poll() is None, 'fixture Hub exited during startup'
@@ -412,7 +414,7 @@ def main():
                 output_rms=d['meters']['output']['rms'], output_stats=d['output_stats'])
             for stream_id in native_streams:
                 lane = next((lane for lane in d['meters']['lanes'] if lane['stream_id'] == stream_id), None)
-                if not lane or lane['rms'] < .0002:
+                if not lane or lane['rms'] is None or lane['rms'] < .0002:
                     return None
             for index in expected_indices:
                 session = sessions.get(receiver_ids[index])
@@ -420,9 +422,9 @@ def main():
                     return None
                 assert session['ingress']['identity_rejections'] == 0, 'media identity mismatch'
                 assert session['ingress']['last_source_rate'] == 44100, 'source clock rate lost'
-                if d['meters']['lanes'][session['lane']]['rms'] < .001:
+                if d['meters']['lanes'][session['lane']]['rms'] is None or d['meters']['lanes'][session['lane']]['rms'] < .001:
                     return None
-            if d['meters']['output']['rms'] < .0001:
+            if d['meters']['output']['rms'] is None or d['meters']['output']['rms'] < .0001:
                 return None
             return snapshot, d
 
@@ -519,7 +521,12 @@ def main():
         assert len(set(source_ids.values())) == args.sources, 'independent sources collapsed into one identity'
         assert len({s['lane'] for s in first['sessions']}) == args.sources, 'concurrent sources share a Mixer lane'
         assert first['capacity']['active'] == args.sources + args.native_sources and first['capacity']['reserved'] == 0, 'capacity counters disagree'
-        if args.scenario == 'management':
+        if args.scenario == 'shutdown':
+            report['scope']='managed stop and resource cleanup with synthetic PCM; audio timing quality is reported separately'
+            report['quality_evaluated']=False
+            report['observed_quality_before_stop']=dict(timed_late_frames=first_d['timed_late_frames'],output_stats=first_d['output_stats'],
+                ingress=[session['ingress'] for session in first['sessions']])
+        elif args.scenario == 'management':
             phase = 'management baseline'
             initial_sessions = {session['receiver_id']: session for session in first['sessions']}
             a_session, b_session = initial_sessions[receiver_ids[0]], initial_sessions[receiver_ids[1]]
@@ -807,7 +814,15 @@ def main():
                                 return None
                             if d['output_frames'] < before_d['output_frames'] + 4800:
                                 return None
-                            if d['meters']['lanes'][target['lane']]['rms'] > 1e-6:
+                            victim_meter = d['meters']['lanes'][target['lane']]
+                            if victim_meter['rms'] is None:
+                                # An inactive binding has no attributable PCM measurement.
+                                # Confirm actual callback retirement, rather than inventing zero.
+                                if (victim_meter.get('available') is not False
+                                    or victim_meter['stream_id'] != 0
+                                    or d['render_state_by_lane'][target['lane']] not in [0, 4]):
+                                    return None
+                            elif victim_meter['rms'] > 1e-6:
                                 return None
                             for session in snapshot['sessions']:
                                 old = previous[session['receiver_id']]
@@ -847,19 +862,60 @@ def main():
                 report['scenarios']['each_source_disconnect_preserves_other_sources'] = True
                 report['scenarios']['each_worker_crash_preserves_other_sources'] = True
                 report['scenarios']['paired_recovery_preserves_source_and_receiver_identity'] = True
-        phase = 'final global disable withdraws discovery and releases reservations'
-        command('disable')
-        for source in sources + extra_sources:
-            source.close()
-        def globally_disabled():
-            snapshot = airplay()
-            return snapshot if (all(not row['enabled'] and not row['ready'] and not row['active']
-                and row['discovery_state'] == 'hidden' for row in snapshot['receivers'])
-                and snapshot['capacity']['reserved'] == 0 and not child_workers(hub)) else None
-        stopped = wait_for('global disable fully stops and hides receivers', globally_disabled, seconds=15)
-        report['global_disable'] = dict(receivers=[{key: row[key] for key in ['enabled', 'ready', 'active', 'discovery_state']}
-            for row in stopped['receivers']], reserved=stopped['capacity']['reserved'], owned_worker_count=0)
-        report['scenarios']['global_disable_stops_workers_hides_discovery_and_releases_reservations'] = True
+        if args.shutdown_active:
+            phase='managed shutdown with active encrypted sources'
+            running_workers=set(child_workers(hub))
+            runtime_keys=list(state.rglob('runtime-key-*'))
+            assert len(running_workers)==args.sources and len(runtime_keys)==args.sources
+            identity_hashes={str(path.relative_to(state)):hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in state.rglob('*.json') if '.credentials' in path.parts}
+            assert identity_hashes, 'identity fixture missing'
+            before=time.monotonic()
+            hub.stdin.write(b'{"version":1,"type":"stop"}\n');hub.stdin.flush();hub.stdin.close()
+            code=hub.wait(timeout=7)
+            events=[json.loads(line) for line in log.read_text().splitlines() if line.startswith('{')]
+            complete=[event for event in events if event.get('event')=='shutdown_complete']
+            worker_stops=[event for event in events if event.get('event')=='airplay_worker_stopped'][-args.sources:]
+            assert code==0 and complete and complete[-1]['forced'] is False
+            assert not list(state.rglob('runtime-key-*'))
+            assert len(worker_stops)==args.sources and all(not event['forced'] and event['exit_code']==0 and event['cleanup_complete'] for event in worker_stops)
+            for pid in running_workers:
+                assert subprocess.run(['/bin/kill','-0',str(pid)],capture_output=True).returncode!=0
+            report['managed_shutdown']=dict(elapsed_ms=round((time.monotonic()-before)*1000),workers=args.sources,
+                exit_code=code,forced=False,runtime_keys_before=len(runtime_keys),runtime_keys_after=0,processes_exited=True)
+            for source in sources+extra_sources:source.close()
+            report['scenarios']['managed_active_shutdown_releases_workers_and_runtime_keys']=True
+            if args.scenario=='shutdown':
+                phase='same profile and port reopen, owner EOF cleanup'
+                hub=subprocess.Popen([str(DEV),str(binary),'serve','--config',str(state/'server.json'),
+                    '--listen',url.removeprefix('https://'),'--managed-control-stdin'],stdin=subprocess.PIPE,
+                    stdout=log_handle,stderr=log_handle,cwd=ROOT,env=env)
+                wait_for('same port and profile reopen',lambda:len(airplay()['receivers'])==args.sources,seconds=20)
+                for receiver_id in receiver_ids:enable(receiver_id)
+                assert len(child_workers(hub))==args.sources
+                eof_started=time.monotonic();hub.stdin.close()
+                assert hub.wait(timeout=7)==0
+                assert not list(state.rglob('runtime-key-*'))
+                after_hashes={str(path.relative_to(state)):hashlib.sha256(path.read_bytes()).hexdigest()
+                    for path in state.rglob('*.json') if '.credentials' in path.parts}
+                assert identity_hashes==after_hashes, 'persisted receiver identity changed'
+                report['reopen_and_owner_eof']=dict(same_profile_and_port=True,identity_unchanged=True,
+                    elapsed_ms=round((time.monotonic()-eof_started)*1000),workers=args.sources,runtime_keys_after=0)
+
+        else:
+            phase = 'final global disable withdraws discovery and releases reservations'
+            command('disable')
+            for source in sources + extra_sources:
+                source.close()
+            def globally_disabled():
+                snapshot = airplay()
+                return snapshot if (all(not row['enabled'] and not row['ready'] and not row['active']
+                    and row['discovery_state'] == 'hidden' for row in snapshot['receivers'])
+                    and snapshot['capacity']['reserved'] == 0 and not child_workers(hub)) else None
+            stopped = wait_for('global disable fully stops and hides receivers', globally_disabled, seconds=15)
+            report['global_disable'] = dict(receivers=[{key: row[key] for key in ['enabled', 'ready', 'active', 'discovery_state']}
+                for row in stopped['receivers']], reserved=stopped['capacity']['reserved'], owned_worker_count=0)
+            report['scenarios']['global_disable_stops_workers_hides_discovery_and_releases_reservations'] = True
         report['passed'] = True
     except Exception as error:
         report['failure_phase'] = phase

@@ -1,0 +1,99 @@
+# Precise presentation-literal exceptions. Changes in location/value must be reviewed.
+
+[[exception]]
+file = "apps/desktop/src/flow.rs"
+line = 605
+value = "M"
+category = "technical"
+reason = "Invariant Mute marker on the signal-flow gate; accessible state is rendered separately."
+
+[[exception]]
+file = "apps/desktop/src/pages/about.rs"
+line = 34
+value = "NeonMix"
+category = "brand"
+reason = "Stable product name used by the UI and window discovery."
+
+[[exception]]
+file = "apps/desktop/src/pages/airplay.rs"
+line = 428
+value = "ID {id}"
+category = "technical"
+reason = "Machine identifier prefix; value is copied from original data."
+
+[[exception]]
+file = "apps/desktop/src/pages/console.rs"
+line = 404
+value = "{} dB"
+category = "technical"
+reason = "Measured gain with invariant SI unit symbol."
+
+[[exception]]
+file = "apps/desktop/src/pages/devices.rs"
+line = 283
+value = "ID {}"
+category = "technical"
+reason = "Machine identifier prefix; value is copied from original data."
+
+[[exception]]
+file = "apps/desktop/src/pages/live.rs"
+line = 607
+value = "{} dB"
+category = "technical"
+reason = "Measured gain with invariant SI unit symbol."
+
+[[exception]]
+file = "apps/desktop/src/pages/live.rs"
+line = 724
+value = "{} dB"
+category = "technical"
+reason = "Measured gain with invariant SI unit symbol."
+
+[[exception]]
+file = "apps/desktop/src/pages/mixer.rs"
+line = 273
+value = "{} dB"
+category = "technical"
+reason = "Measured gain with invariant SI unit symbol."
+
+[[exception]]
+file = "apps/desktop/src/pages/sender.rs"
+line = 623
+value = "Hub {}"
+category = "technical"
+reason = "Stable Hub protocol component name followed by original identifier."
+
+[[exception]]
+file = "apps/desktop/src/shell.rs"
+line = 228
+value = "NeonMix"
+category = "brand"
+reason = "Stable product name used by the UI and window discovery."
+
+[[exception]]
+file = "apps/desktop/src/shell.rs"
+line = 664
+value = "{} dB"
+category = "technical"
+reason = "Measured gain with invariant SI unit symbol."
+
+[[exception]]
+file = "apps/desktop/src/tray.rs"
+line = 295
+value = "NeonMix"
+category = "brand"
+reason = "Stable native application-menu product name."
+
+[[exception]]
+file = "apps/desktop/src/widgets.rs"
+line = 1053
+value = "RMS"
+category = "technical"
+reason = "Audio meter technical acronym."
+
+[[exception]]
+file = "apps/desktop/src/widgets.rs"
+line = 1062
+value = "dBFS"
+category = "technical"
+reason = "Invariant audio-level unit symbol."

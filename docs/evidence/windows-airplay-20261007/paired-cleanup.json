@@ -1,0 +1,17 @@
+{
+  "original_profile_byte_identical": true,
+  "original_profile_file_count": 12,
+  "removed_owned_paths": [
+    "paired-state",
+    "manual-state",
+    "clone_paired.py",
+    "manual_hub.py",
+    "paired_hub.py",
+    "paired_hub_fixed.py",
+    "baseline-installed.json",
+    "fixed-boundaries.json"
+  ],
+  "scope": "E:\\Desktop\\NeonMix-test\\investigation-20261007",
+  "retained": "tested binaries, runtime copy, source, build and redacted evidence",
+  "deleted_outside_test_root": false
+}

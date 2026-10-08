@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checker": "Rust fluent-syntax AST + schema + representative rendering",
+  "catalog": "/Volumes/projects-mac/NeonMix/crates/i18n",
+  "stdout": "i18n AST/schema validation passed: 724 messages, 2 shipped locales\nGenerated 20 pseudo modules: /Volumes/projects-mac/NeonMix/artifacts/i18n/pseudo/en\nRust presentation-call AST validation passed\n",
+  "stderr": "",
+  "pseudo": {
+    "passed": true,
+    "path": "/Volumes/projects-mac/NeonMix/artifacts/i18n/pseudo/en",
+    "method": "Fluent AST text-node expansion (~50%); selectors and arguments preserved"
+  }
+}

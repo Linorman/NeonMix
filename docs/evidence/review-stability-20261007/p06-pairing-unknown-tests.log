@@ -1,0 +1,25 @@
+   Compiling neonmix-hub v0.1.0 (/Volumes/projects-mac/NeonMix/apps/hub)
+error[E0369]: binary operation `==` cannot be applied to type `Completion`
+    --> apps/hub/src/server.rs:2172:9
+     |
+2172 |         assert_eq!(done, replayed);
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |         |
+     |         Completion
+     |         Completion
+     |
+note: `Completion` does not implement `PartialEq`
+    --> crates/identity/src/pairing.rs:45:1
+     |
+  45 | pub struct Completion {
+     | ^^^^^^^^^^^^^^^^^^^^^ `Completion` is defined in another crate
+
+error[E0277]: `Completion` doesn't implement `Debug`
+    --> apps/hub/src/server.rs:2172:9
+     |
+2172 |         assert_eq!(done, replayed);
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Debug` is not implemented for `Completion`
+
+Some errors have detailed explanations: E0277, E0369.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `neonmix-hub` (bin "neonmix-hub" test) due to 3 previous errors
