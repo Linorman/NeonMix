@@ -305,6 +305,38 @@ inline bool valid_utf8(const std::string &value) {
     }
     return true;
 }
+#ifdef _WIN32
+// MinGW's filesystem parser treats \\? as a UNC server, so parent_path()
+// eventually tries to open the device namespace itself. Rust canonical paths
+// use this prefix even for short names. Walk the Win32 volume/share root
+// explicitly, retaining the prefix (and long-path support) on every handle.
+inline std::vector<std::wstring> private_key_parents(const std::wstring &path) {
+    size_t root=0,server=std::wstring::npos;
+    auto drive=[&](size_t at) {
+        return path.size()>=at+3 &&
+            ((path[at]>=L'A'&&path[at]<=L'Z')||(path[at]>=L'a'&&path[at]<=L'z')) &&
+            path[at+1]==L':' && path[at+2]==L'\\';
+    };
+    if(path.compare(0,4,L"\\\\?\\")==0) {
+        if(drive(4))root=7;
+        else if(path.size()>=8 && _wcsnicmp(path.c_str()+4,L"UNC\\",4)==0)server=8;
+    } else if(drive(0))root=3;
+    else if(path.compare(0,2,L"\\\\")==0)server=2;
+    if(server!=std::wstring::npos) {
+        auto share=path.find(L'\\',server);
+        if(share!=std::wstring::npos && share>server) {
+            auto end=path.find(L'\\',share+1);
+            if(end!=std::wstring::npos && end>share+1)root=end+1;
+        }
+    }
+    if(!root)throw std::runtime_error("identity_path_invalid");
+    std::vector<std::wstring> parents{path.substr(0,root)};
+    for(auto end=path.find(L'\\',root);end!=std::wstring::npos;end=path.find(L'\\',end+1)) {
+        if(end>root && path[end-1]!=L'\\')parents.push_back(path.substr(0,end));
+    }
+    return parents;
+}
+#endif
 inline std::unique_ptr<PrivateKey> read_private_key(const std::string &path
 #ifdef NEONMIX_IDENTITY_PROBE
     , void (*validated_hook)(const std::string&)=nullptr
@@ -328,15 +360,10 @@ inline std::unique_ptr<PrivateKey> read_private_key(const std::string &path
     if(!GetFullPathNameW(wide.data(),count,full.data(),nullptr))throw std::runtime_error("identity_path_invalid");
     // Pin ancestors top down without delete-sharing, matching identity/files_windows.
     // OPEN_REPARSE_POINT on the final file alone does not check junction parents.
-    auto absolute=std::filesystem::path(full.data());
-    std::vector<std::filesystem::path> parents;
-    for(auto parent=absolute.parent_path();!parent.empty();){
-        parents.push_back(parent);
-        auto next=parent.parent_path();if(next==parent)break;parent=next;
-    }
+    auto parents=private_key_parents(full.data());
     std::vector<std::unique_ptr<NativeHandle>> pinned;
-    for(auto it=parents.rbegin();it!=parents.rend();++it){
-        auto handle=std::make_unique<NativeHandle>(CreateFileW(it->c_str(),FILE_READ_ATTRIBUTES,
+    for(const auto &parent:parents){
+        auto handle=std::make_unique<NativeHandle>(CreateFileW(parent.c_str(),FILE_READ_ATTRIBUTES,
             FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,
             FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS,nullptr));
         BY_HANDLE_FILE_INFORMATION info{};

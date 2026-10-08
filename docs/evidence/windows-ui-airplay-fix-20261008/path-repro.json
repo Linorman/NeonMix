@@ -1,0 +1,26 @@
+{
+  "before": {
+    "normal": {
+      "exit_code": 0,
+      "error": "",
+      "public_test_vector_matched": true
+    },
+    "extended": {
+      "exit_code": 1,
+      "error": "identity_permission_denied",
+      "public_test_vector_matched": false
+    }
+  },
+  "after": {
+    "normal": {
+      "exit_code": 0,
+      "error": "",
+      "public_test_vector_matched": true
+    },
+    "extended": {
+      "exit_code": 0,
+      "error": "",
+      "public_test_vector_matched": true
+    }
+  }
+}

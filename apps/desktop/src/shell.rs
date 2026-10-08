@@ -83,10 +83,9 @@ impl Desktop {
                         ui.set_max_width(ui.available_width().min(CONTENT_MAX_WIDTH));
                         self.top_bar(ui)
                     });
-                // Settle from partial opacity: a page switch never blanks the
-                // window for a frame, it only eases the new content in.
-                let enter = animation::fade_in(ctx, self.page_since.elapsed(), 0.18);
-                let fade = 0.6 + 0.4 * enter;
+                // Navigation replaces the content at full opacity and its final
+                // position. Fading/sliding the whole page reads as a flash on
+                // every navigation click, even when all controls stay enabled.
                 egui::ScrollArea::vertical()
                     .id_salt(self.page)
                     .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
@@ -100,9 +99,6 @@ impl Desktop {
                                 bottom: 24,
                             })
                             .show(ui, |ui| {
-                                ui.set_opacity(fade);
-                                // New page settles up from 6 px below.
-                                ui.add_space(6.0 * (1.0 - enter));
                                 ui.set_max_width(ui.available_width().min(CONTENT_MAX_WIDTH));
                                 ui.spacing_mut().item_spacing.y = 14.0;
                                 // No page-wide disable while an action runs: egui
@@ -139,7 +135,6 @@ impl Desktop {
                     &localization::NativeLocaleProvider,
                 );
             }
-            self.page_since = Instant::now();
             // Mixer meters poll faster; refresh right away instead of after 1 s.
             if page == Page::Mixer {
                 self.last_poll = Instant::now() - Duration::from_secs(5);
