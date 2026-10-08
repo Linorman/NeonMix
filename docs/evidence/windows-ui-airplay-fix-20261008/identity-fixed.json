@@ -1,0 +1,215 @@
+{
+  "platform": "win32",
+  "checks": {
+    "windows_path_roots": "drive, extended drive, UNC, extended UNC; invalid roots rejected",
+    "v1": "same identity and signature",
+    "ring_v2": "same identity and signature",
+    "legacy_ring_v2": "same identity and signature",
+    "crlf_v2": "same identity and signature",
+    "missing": "clean rejection",
+    "empty": "clean rejection",
+    "truncated_pem": "clean rejection",
+    "truncated_der": "clean rejection",
+    "wrong_algorithm": "clean rejection",
+    "wrong_v2_public": "clean rejection",
+    "wrong_v2_seed": "clean rejection",
+    "wrong_version": "clean rejection",
+    "wrong_public_tag": "clean rejection",
+    "trailing_der": "clean rejection",
+    "trailing_pem": "clean rejection",
+    "encrypted_label": "clean rejection",
+    "boundary_4095": "same identity and signature",
+    "boundary_4096": "clean rejection",
+    "trailing_garbage": "clean rejection",
+    "oversized": "clean rejection",
+    "\u4e2d\u6587 \u00e9 \ud834\udd1e with spaces": "same identity and signature",
+    "windows_acp": 936,
+    "alternate_data_stream": "clean rejection",
+    "extended_paths": "same identity/signature and worker startup when requested",
+    "directory": "clean rejection",
+    "same_validated_handle": "replacement denied"
+  },
+  "worker_startup": true,
+  "fixtures": "RFC 8032 section 7.1 test 1",
+  "probe_sha256": "06ddf2f7a8acd83335e314e4e80989d0edeee60521c57802f0daf8b12dc124aa",
+  "worker_sha256": "f3e464c0c29e98a775d05b374a2ce19cb7759c139af128df17ddd217cb4e3038",
+  "startup": {
+    "extended_v1": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "v1": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "extended_ring_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "ring_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "extended_legacy_ring_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "legacy_ring_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "extended_crlf_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "crlf_v2": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "missing": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_not_found"
+      ]
+    },
+    "empty": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "truncated_pem": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "truncated_der": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "wrong_algorithm": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "wrong_v2_public": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "wrong_v2_seed": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "wrong_version": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "wrong_public_tag": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "trailing_der": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "trailing_pem": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "encrypted_label": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "extended_boundary_4095": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "boundary_4095": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "boundary_4096": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "trailing_garbage": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "oversized": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_format_invalid"
+      ]
+    },
+    "extended_\u4e2d\u6587 \u00e9 \ud834\udd1e with spaces": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "\u4e2d\u6587 \u00e9 \ud834\udd1e with spaces": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "owner_eof": {
+      "exit_code": 0,
+      "ready": true,
+      "errors": []
+    },
+    "embedded_nul": {
+      "exit_code": 1,
+      "ready": false,
+      "errors": [
+        "identity_path_invalid"
+      ]
+    }
+  }
+}

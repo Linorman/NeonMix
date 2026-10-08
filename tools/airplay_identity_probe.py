@@ -149,6 +149,11 @@ def main():
     assert Path(os.environ.get('TMPDIR', os.environ.get('TEMP', '/'))).resolve().is_relative_to(ROOT), 'run through tools/dev'
     checks = {}
     startup = {}
+    if os.name == 'nt':
+        result = subprocess.run([str(args.probe.resolve()), '--path-roots'],
+                                capture_output=True, text=True, timeout=10)
+        assert result.returncode == 0 and result.stdout.strip() == 'windows_path_roots_ok'
+        checks['windows_path_roots'] = 'drive, extended drive, UNC, extended UNC; invalid roots rejected'
     with tempfile.TemporaryDirectory(prefix='airplay-identity-', dir=ROOT / '.local/tmp') as temporary:
         directory = Path(temporary)
         for name, (content, valid) in fixtures().items():
@@ -164,6 +169,17 @@ def main():
             assert result.returncode == (0 if valid else 1), f'{name}: unexpected exit {result.returncode}: {result.stderr}'
             if valid:
                 assert result.stdout.splitlines() == [PUBLIC, SIGNATURE], f'{name}: identity/signature changed'
+                if os.name == 'nt':
+                    # Background IPC canonicalizes paths with this prefix.
+                    # Testing only ordinary paths missed the product startup failure.
+                    extended = '\\\\?\\' + str(path.resolve())
+                    result = subprocess.run([str(args.probe.resolve()), extended],
+                                            capture_output=True, text=True, timeout=10)
+                    assert result.returncode == 0, f'{name}: extended path rejected: {result.stderr}'
+                    assert result.stdout.splitlines() == [PUBLIC, SIGNATURE]
+                    if args.worker:
+                        startup['extended_' + name] = worker_start(
+                            args.worker.resolve(), extended, True, directory, args.plugins)
             if args.worker:
                 startup[name] = worker_start(args.worker.resolve(), path, valid, directory, args.plugins)
             assert (path.read_bytes() if path.exists() else None) == content, f'{name}: persisted identity changed'
@@ -180,6 +196,7 @@ def main():
             result = subprocess.run([str(args.probe.resolve()), str(path)+':secret'], capture_output=True, timeout=10)
             assert result.returncode == 1
             checks['alternate_data_stream'] = 'clean rejection'
+            checks['extended_paths'] = 'same identity/signature and worker startup when requested'
         else:
             path.chmod(0o644)
             result = subprocess.run([str(args.probe.resolve()), str(path)], capture_output=True, timeout=10)

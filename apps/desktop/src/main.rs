@@ -367,7 +367,6 @@ struct Desktop {
     preferences: preferences::Preferences,
     localization: localization::Localization,
     page: Page,
-    page_since: Instant,
     shown_message: Option<Message>,
     /// Whether the message on screen is an error (repeated errors swap text
     /// without re-running the fade-in).
@@ -684,7 +683,6 @@ impl Desktop {
                 Some(vec!["zh-CN".into()]),
             ),
             page: Page::Live,
-            page_since: Instant::now() - Duration::from_secs(5),
             shown_message: None,
             shown_error: false,
             message_since: Instant::now() - Duration::from_secs(5),
@@ -2861,6 +2859,52 @@ mod tests {
             },
             |ctx| app.show(ctx),
         )
+    }
+
+    #[test]
+    fn navigation_renders_body_text_at_full_opacity_without_sliding() {
+        fn body_label(shape: &egui::Shape) -> Option<(egui::Pos2, u8)> {
+            match shape {
+                egui::Shape::Text(text) if text.galley.job.text == "房间名称" => {
+                    let alpha = text
+                        .galley
+                        .rows
+                        .iter()
+                        .flat_map(|row| &row.visuals.mesh.vertices)
+                        .map(|vertex| vertex.color.a())
+                        .max()
+                        .unwrap();
+                    Some((text.pos, alpha))
+                }
+                egui::Shape::Vec(shapes) => shapes.iter().find_map(body_label),
+                _ => None,
+            }
+        }
+        let ctx = themed();
+        let mut app = fixture("full");
+        app.navigate(Page::Hub);
+        // Let egui determine the panel geometry, then revisit the same page
+        // exactly as a navigation click would. Its first frame must be final.
+        for _ in 0..3 {
+            frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        }
+        let settled = frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        let expected = settled
+            .shapes
+            .iter()
+            .find_map(|s| body_label(&s.shape))
+            .unwrap();
+        app.navigate(Page::Live);
+        frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        app.navigate(Page::Hub);
+        let first = frame(&ctx, &mut app, egui::vec2(1100.0, 760.0));
+        let actual = first
+            .shapes
+            .iter()
+            .find_map(|s| body_label(&s.shape))
+            .unwrap();
+        assert_eq!(actual.1, 255, "navigation dimmed the entire page body");
+        assert_eq!(actual.0, expected.0, "navigation displaced the page body");
     }
 
     #[test]

@@ -37,18 +37,18 @@ def protect_fixture(path):
         raise RuntimeError('fixture account SID unavailable')
     access = '(OI)(CI)F' if path.is_dir() else 'F'
     result = subprocess.run(['icacls', str(path), '/setowner', '*' + sid],
-                            capture_output=True, text=True)
+                            capture_output=True)
     if result.returncode:
         raise RuntimeError('private fixture owner setup failed')
     # Python 3.13's Windows mkdir(mode=0o700) adds explicit SYSTEM and
     # Administrators ACEs, which disabling inheritance alone does not remove.
     result = subprocess.run(['icacls', str(path), '/remove:g',
                              '*S-1-5-18', '*S-1-5-32-544'],
-                            capture_output=True, text=True)
+                            capture_output=True)
     if result.returncode:
         raise RuntimeError('private fixture extra ACE cleanup failed')
     result = subprocess.run(['icacls', str(path), '/inheritance:r', '/grant:r', '*' + sid + ':' + access],
-                            capture_output=True, text=True)
+                            capture_output=True)
     if result.returncode:
         raise RuntimeError('private fixture ACL setup failed')
 

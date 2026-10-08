@@ -1,0 +1,104 @@
+{
+  "passed": true,
+  "cycles": [
+    {
+      "receivers": 1,
+      "cycle": 1,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435"
+      ]
+    },
+    {
+      "receivers": 1,
+      "cycle": 2,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435"
+      ]
+    },
+    {
+      "receivers": 1,
+      "cycle": 3,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435"
+      ]
+    },
+    {
+      "receivers": 2,
+      "cycle": 1,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435",
+        "efeb3685-4fad-475d-91a3-d06a2f3d4f83"
+      ]
+    },
+    {
+      "receivers": 2,
+      "cycle": 2,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435",
+        "efeb3685-4fad-475d-91a3-d06a2f3d4f83"
+      ]
+    },
+    {
+      "receivers": 2,
+      "cycle": 3,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435",
+        "efeb3685-4fad-475d-91a3-d06a2f3d4f83"
+      ]
+    },
+    {
+      "receivers": 4,
+      "cycle": 1,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435",
+        "efeb3685-4fad-475d-91a3-d06a2f3d4f83",
+        "151f18a5-f0ac-47ee-b9ba-ca370db640ce",
+        "b00d3691-f88d-4bc3-b17e-9b926e6f1f42"
+      ]
+    },
+    {
+      "receivers": 4,
+      "cycle": 2,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435",
+        "efeb3685-4fad-475d-91a3-d06a2f3d4f83",
+        "151f18a5-f0ac-47ee-b9ba-ca370db640ce",
+        "b00d3691-f88d-4bc3-b17e-9b926e6f1f42"
+      ]
+    },
+    {
+      "receivers": 4,
+      "cycle": 3,
+      "ready": true,
+      "published": true,
+      "receiver_ids": [
+        "fb73b56b-e427-4896-91a7-0f33c42c7435",
+        "efeb3685-4fad-475d-91a3-d06a2f3d4f83",
+        "151f18a5-f0ac-47ee-b9ba-ca370db640ce",
+        "b00d3691-f88d-4bc3-b17e-9b926e6f1f42"
+      ]
+    }
+  ],
+  "binary_sha256": {
+    "desktop": "b27e079add8be2ad6ad910e9c8e395cf486624ce95730a01634d870cd2f57afe",
+    "hub": "bb3046a294aa35dbcc8f86f4acf0ab5123ac8c58a2952feecd4e89d66b0cd555",
+    "worker": "f3e464c0c29e98a775d05b374a2ce19cb7759c139af128df17ddd217cb4e3038"
+  },
+  "runtime_keys_remaining": 0
+}

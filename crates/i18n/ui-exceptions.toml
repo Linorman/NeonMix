@@ -65,14 +65,14 @@ reason = "Stable Hub protocol component name followed by original identifier."
 
 [[exception]]
 file = "apps/desktop/src/shell.rs"
-line = 228
+line = 223
 value = "NeonMix"
 category = "brand"
 reason = "Stable product name used by the UI and window discovery."
 
 [[exception]]
 file = "apps/desktop/src/shell.rs"
-line = 708
+line = 703
 value = "{} dB"
 category = "technical"
 reason = "Measured gain with invariant SI unit symbol."
