@@ -1761,6 +1761,7 @@ pub async fn serve_with_binaries(
     let slots = Arc::new(Semaphore::new(8));
     let cancellation = Arc::new(ReadCancellation::default());
     let lifecycle_slots = Arc::new(Semaphore::new(8));
+    let mut lifecycle_connections = tokio::task::JoinSet::new();
     let terminated = termination_signal();
     tokio::pin!(terminated);
     loop {
@@ -1768,12 +1769,13 @@ pub async fn serve_with_binaries(
             _=requested.recv()=>break,
             _=&mut terminated=>break,
             _=tokio::signal::ctrl_c()=>break,
+            _=lifecycle_connections.join_next(),if !lifecycle_connections.is_empty()=>{},
             accepted=lifecycle_listener.accept()=>{
                 let stream=accepted?;
                 if !crate::transport::same_user(&stream){continue;}
                 let Ok(permit)=lifecycle_slots.clone().try_acquire_owned() else{continue;};
                 let state=state.clone();let shutdown=shutdown.clone();let cancellation=cancellation.clone();let lifecycle=lifecycle.clone();
-                tokio::spawn(async move {let _permit=permit;let _=connection(stream,state,shutdown,cancellation,lifecycle,true).await;});
+                lifecycle_connections.spawn(async move {let _permit=permit;let _=connection(stream,state,shutdown,cancellation,lifecycle,true).await;});
             }
             accepted=listener.accept()=>{
                 let stream=accepted?;
@@ -1783,6 +1785,20 @@ pub async fn serve_with_binaries(
                 tokio::spawn(async move {let _permit=permit;let _=connection(stream,state,shutdown,cancellation,lifecycle,false).await;});
             }
         }
+    }
+    drop(lifecycle_listener);
+    drop(listener);
+    // Completed stop replies get a short drain; unfinished metadata clients
+    // cannot retain a named-pipe instance after this owner releases its lock.
+    // Stop operations themselves belong to Manager and survive client closure.
+    if tokio::time::timeout(Duration::from_millis(250), async {
+        while lifecycle_connections.join_next().await.is_some() {}
+    })
+    .await
+    .is_err()
+    {
+        lifecycle_connections.abort_all();
+        while lifecycle_connections.join_next().await.is_some() {}
     }
     // Signal-owned children can exit while an unrelated remote transaction is
     // still holding Runtime. Background exit never waits for that lock.
