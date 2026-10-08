@@ -384,7 +384,12 @@ fn create_pipe(name: &str, first: bool) -> Result<NamedPipeServer> {
             (&mut attributes as *mut SECURITY_ATTRIBUTES).cast(),
         )
     }
-    .map_err(|_| "无法建立当前用户的本地管道".into())
+    .map_err(|error| {
+        format!(
+            "ipc_pipe_create_failed:{}",
+            error.raw_os_error().unwrap_or(-1)
+        )
+    })
 }
 pub type Stream = NamedPipeServer;
 pub struct Listener {

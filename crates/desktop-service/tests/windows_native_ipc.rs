@@ -31,7 +31,7 @@ async fn current_user_pipe_rejects_duplicate_owner_and_reopens_after_shutdown() 
             .join(format!("windows-ipc-{}", uuid::Uuid::new_v4())),
     );
     let client = Client::new(&fixture.0);
-    for _ in 0..2 {
+    for generation in 0..2 {
         let server = tokio::spawn(daemon::serve_with_binaries(
             fixture.0.clone(),
             fixture.0.join("unused-hub.exe"),
@@ -47,7 +47,7 @@ async fn current_user_pipe_rejects_duplicate_owner_and_reopens_after_shutdown() 
             }
             if server.is_finished() {
                 panic!(
-                    "native IPC server stopped before binding: {:?}",
+                    "native IPC generation {generation} stopped before binding: {:?}",
                     server.await.unwrap()
                 );
             }
