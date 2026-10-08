@@ -859,20 +859,17 @@ impl Runtime {
         #[cfg(windows)]
         {
             let helper = self.hub_bin.with_file_name("neonmix-network-helper.exe");
-            if helper.is_file() {
-                if let Ok(value) = self
+            if helper.is_file()
+                && let Ok(value) = self
                     .run(
                         &helper,
                         vec!["inspect".into(), "--port".into(), "7443".into()],
                     )
                     .await
-                {
-                    if value["configuration_code"].is_number()
-                        && value["effective_policy_code"].is_number()
-                    {
-                        return value;
-                    }
-                }
+                && value["configuration_code"].is_number()
+                && value["effective_policy_code"].is_number()
+            {
+                return value;
             }
         }
         json!({"configuration_code":4,"effective_policy_code":4,"network_ready":false})
