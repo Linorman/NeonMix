@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "commit": "571cceaa3083f3a9a48b5b841fc3fb3bcc22f1f5",
+  "background_ipc": true,
+  "hub_started": true,
+  "airplay_ready": true,
+  "airplay_published": true,
+  "background_exit_code": 0,
+  "runtime_keys_remaining": 0
+}

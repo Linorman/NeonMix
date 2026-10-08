@@ -1,0 +1,28 @@
+{
+  "dmg_payload_files": 55,
+  "signature_verified": true,
+  "desktop_version": "neonmix-desktop 0.2.0 (571cceaa3)",
+  "relocation": {
+    "passed": true,
+    "scope": "finished app relocation/payload startup/bundled DTLS media; GUI/installation deferred",
+    "checks": {
+      "neonmix-desktop_payload_starts": true,
+      "neonmix-background_payload_starts": true,
+      "neonmix-hub_payload_starts": true,
+      "neonmix-audio_payload_starts": true,
+      "neonmix-guardian_payload_starts": true,
+      "runtime_bundled_runtime_only": true,
+      "media_bundled_runtime_only": true
+    },
+    "payload_sha256": {
+      "neonmix-audio": "7b5f39b469503f7e5e7093f1afb0b35b560ec3ddfcdc011f2e150b837577df1c",
+      "neonmix-desktop": "091c549640c9c051bfb1a6d5553966b5bc79cbe77b7c478401f9a2b2a2f0ea0d",
+      "neonmix-hub": "555db3fc3e4e816e55742dba52950606f916704bd4ee37e31c8bea8832cfdd4a",
+      "neonmix-guardian": "27bc4eef2c4311e164786fd8b3ef18740ad78ff6f915d37175cf11101cdc3d21",
+      "neonmix-airplay-worker": "c1812db0941f427b5c08ee916aa54683fb97ac1a710a9a589d7a908647326608",
+      "neonmix-airplay-profile": "37fb80263bd6f250096e56847115c08f5170f73d3d873ed84ac0a4901f6969ea",
+      "neonmix-background": "453708eb49975373dde4f430b7f4634671cadb4b4f8c3d40b10ba403066bc058"
+    },
+    "temporary_bundle_removed": true
+  }
+}

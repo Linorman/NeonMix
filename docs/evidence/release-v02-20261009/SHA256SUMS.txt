@@ -1,0 +1,2 @@
+7f1b2464aa2fc31a165a2d4592c1edf1aa99da6dbddb4efcb9ff2e456b6ba8c0  NeonMix-0.2.0-macos-arm64.dmg
+123a150efb636c8f7695edffeb04bd45b5f515e08aed5dc3ad349e2ff734562b  NeonMix-0.2.0-windows-x64-setup.exe
