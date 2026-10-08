@@ -310,3 +310,16 @@ P10前最终补验发现GET可以读取冻结音频callback的旧电平。现沿
 同一最终Hub制品五组合4+0/3+1/2+2/1+3/0+4通过；每组合按startup/steady/fault/recovery/stopped记录，AirPlay20次定向disconnect/worker crash恢复、未受影响Native/AP会话连续性及既有严格质量计数条件通过。配对身份保留、容量拒绝不泄露reservation、全禁用关闭worker/运行key通过。p11-matrix.json及各组合原始result记录制品与场景；不是Apple硬件、独立模拟端延迟或资源长测。首轮3+1在disconnect阶段TypeError：新契约inactive meter为null，旧探针直接做数值比较；保留artifacts/review-checks/p11-digital首败，改为核对available=false/stream_id=0和实际callback render_state=Inactive/Stopped，不伪造零值，活动来源等待有效值。没有降低连续性或计数阈值。
 
 最终p10-final-wire.json再次验证真实Native/AirPlay版本组合、旧条件拒绝、完整响应重放、Hub重启GET→WSS重取与callback desired/applied；和上述五组合使用相同Hub制品。所有数字probe私有资料和owned进程已回收。
+
+
+## P10 真实PR基础门禁（进行中）
+
+私有仓库草稿PR #1已创建并附在当前chat，工作区源快照包括既有UI/i18n/Windows可靠性输入与本轮审查修复；未合并。三平台稳定检查实际自动触发，名称分别Stability deterministic (macos-15/ubuntu-24.04/windows-2025)。第一轮Mac/Ubuntu检查通过，但artifact配额已满；Windows还发现专属network inspection双重嵌套if的严格Clippy，已保持相同短路条件合并。第二轮Mac/Ubuntu成功，Windowsdebug大计量夹具48k帧数组栈溢出；只把测试大缓冲移到Vec，未提高栈或减弱断言。定向3项回归通过，第三轮正在跑完整Windows测试。
+
+归档改为单独optional step，不掩盖任一fmt/clippy/test失败；原始step保留配额失败注释，四项结果写入job summary。没有删除用户旧artifact或修改账号配额。报告和失败首样本保留在p10-ci-first-result.json/p10-ci-final-result.json及artifacts/review-checks的原日志。主分支当前无保护，required checks须在实际完整三端通过后按稳定名称设置或明确记录权限/套餐限制。
+
+最终CI run 37747908758 / source c850777b11cec4b396868fcce8b020945ab58a2d 三平台success，四项检查均实际执行；Windows全部计量回归及增强25次本地管道启动/关闭/重开通过。仅诊断信息变化曾使下一轮偶然通过，未据此关闭间歇问题；现将生命周期连接纳入JoinSet，在释放监听器/owner锁前有界250ms drain，超时只取消闭合metadata连接，Manager的停止operation继续独立完成，普通持久事务不强行取消。macOS完整服务16项和严格Clippy也通过。原窗口失败与Win32诊断记录保留。
+
+main已按真实三端名称设required status checks，strict=true，无新增review人数要求；草稿PR仍未合并。p10-ci-passed.json/p10-required-checks.json给出实际结果。GitHubartifact配额已满，optional归档仍有明确失败注释，日志从Actions接口取回项目内，job summary保留各检查结果；没有删旧artifact或增加费用。最终macOSapp/DMG已基于带drain的生产源码重新构建并复验，p10-macos-package-final.json/p10-relocation-final.json和final-source-checkpoint.json绑定制品。
+
+本轮无subagent，依赖/缓存/编译/临时数据全部在项目目录；临时profile、测试媒体/背景进程、重定位app以及本轮QEMU VM均清理。保留本次失败证据和可复用缓存。真实Apple、可见桌面、长测/完整安装升级及三端原生发布条件继续明确未验收。

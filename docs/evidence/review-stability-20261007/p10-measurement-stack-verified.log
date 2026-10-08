@@ -1,0 +1,11 @@
+   Compiling neonmix-core v0.1.0 (/Volumes/projects-mac/NeonMix/crates/audio-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.24s
+     Running tests/mixer_measurements.rs (target/debug/deps/mixer_measurements-404d302d59aa7feb)
+
+running 3 tests
+test valid_silent_muted_pcm_is_counted_as_running_instead_of_starved ... ok
+test active_timed_starvation_counts_one_second_and_stops_on_remove ... ok
+test active_native_starvation_counts_every_internal_frame_after_dsp_reset ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+

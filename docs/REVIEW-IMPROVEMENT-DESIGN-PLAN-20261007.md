@@ -512,9 +512,9 @@ RPATH 按 `LC_RPATH` load-command 结构识别，提取完整 `path … (offset 
 - [x] RPATH 解析覆盖普通路径、空格、Unicode、相对 loader 路径和多个 load commands。P01：文本回归及真实 Mach-O 夹具通过，见 `p01-rpath-after.log`。
 - [x] `install_name_tool` 失败导致打包明确失败；独立验证能捕获修改器故意留下的错误。P01：独立二进制读取覆盖薄/通用、32/64 位、两种端序及损坏头；最终包重定位仍待 P10。
 - [ ] 最终包在无开发依赖的重定位环境完成启动、媒体和停止。
-- [ ] 基础 CI 自动触发、缺失/跳过 job 处理、required check 名称经过实际 PR 验证。
+- [x] 基础 CI 自动触发、缺失/跳过 job 处理、required check 名称经过实际 PR 验证。P10：私有草稿PR #1真实macOS/Ubuntu/Windows三端通过，main按实际稳定名称配置required checks；归档配额失败独立可见，不掩盖检查失败。
 - [ ] Windows 发布同时满足现有专项计划的防火墙开启、非 ASCII 路径、完整包升级及正常退出条件。
-- [ ] 每平台单独报告通过范围，macOS 通过不关闭 Ubuntu/Windows 历史失败。
+- [x] 每平台单独报告通过范围，macOS 通过不关闭 Ubuntu/Windows 历史失败。P10：三端基础CI、Linux owner、macOS软件/候选包分别记录；原始平台媒体/实机/长测待验项目未勾选。
 
 ## 十二 开发批次与依赖
 
@@ -591,7 +591,7 @@ P06 先提供日志恢复和三态存储结果，再改绑定 CAS；去掉 profi
   - [x] P09 共享CLI/后台owner校验、macOS回归/Linux严格类型与ELF、实际双后台及制品绑定；Windows类型/真实资源长测另验。
 - [ ] **P10**：最终包在目标环境验证，协议组合有明确兼容结果；基础门禁确实运行。
   - [x] P10 macOS含空格/Unicode候选包与独立Mach-O检查；重定位后的五个payload启动、包内GStreamer与双路DTLS媒体通过。最终源码制品另做固定复验，GUI/安装升级独立保留。
-  - [ ] P10 最终版本本地/远端基础门禁及源码、安装包哈希绑定。
+  - [x] P10 最终版本本地/远端基础门禁及源码、安装包哈希绑定。18项本地标准检查/433项workspace、真实三端CI、main required checks、最终包重定位通过；Windows额外25次NamedPipe代次重开通过。
 - [ ] **P11**：平台质量矩阵、首败、长测和可见 GUI 结果归档，全部发布阻断项有处置结论。
   - [x] P11 macOS软件五组合、20次AP定向断开/worker崩溃恢复与存活来源连续性，通过固定同一Hub制品；首败/阶段/严格计数/临时资料清理归档。
   - [ ] P11 真实Apple、Windows/Ubuntu可见桌面和8/24h长测按用户2026-10-08答复暂缓，平台发布门槛不外推。
@@ -721,3 +721,6 @@ lane/gate/session 永远是运行期状态，不在回退后恢复旧媒体会�
 - [ ] Windows/Ubuntu 历史失败按原工况关闭或明确阻断，不借其他平台和短时成功替代。
 - [ ] 最终包、升级、协议组合、资料回退边界和每平台可见 GUI 均有独立结果。
 - [ ] 更新 STATUS、合同与发布说明，清理本轮无后续用途的临时进程、文件和 fixture，保留失败证据。
+
+
+2026-10-08 本轮收尾：开发代码及软件门禁已交付到草稿PR #1（未合并）；用户明确暂缓真实Apple、Windows/Ubuntu可见桌面及8/24小时长测。主P05/P06/P10/P11以及发布checklist仍包含这些独立平台/安装/掉电/资料迁移条件，未将软件通过外推为发布放行。当前证据见p10-ci-passed.json、final-source-checkpoint.json和p11-matrix.json。

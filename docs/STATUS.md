@@ -350,3 +350,5 @@ Public 防火墙开启、非 ASCII Windows 账户、真实 iPhone 30 分钟、�
 ## 稳定性P09与本地候选（2026-10-08）
 
 桌面Sender显式UntilStopped；CLI期限/终止原因、实际peer+接口的采集前防反馈、Linux UID owner版本/后台代次/binding UUID握手已完成。macOS真实TLS限时/停止及loopback/LAN/IPv6同端点拒绝，Linux真实节点/双后台/正常退出隔离通过；Linux后台场景远端Sender是夹具，未测其媒体质量。最终macOS标准18项、workspace 433项及release实时回归通过。macOS中文/空格候选包独立Mach-O、重定位payload启动和包内双路媒体通过，ad-hoc DMG保存在项目artifacts，未安装或发布。用户已明确暂缓真实Apple、Windows/Ubuntu可见桌面与8/24小时长测，相关checklist继续未勾选；CI和软件组合的最终结果见[实施证据](evidence/review-stability-20261007/README.md)。
+
+三端基础CI已在[草稿PR #1](https://github.com/Linorman/NeonMix/pull/1)实际通过，main required checks按macos-15/ubuntu-24.04/windows-2025稳定名称设置；Windows补齐大计量夹具堆缓冲和生命周期连接有界收尾，25次NamedPipe代次重开通过。最终候选重新构建并通过重定位payload/包内媒体，制品与源码绑定见本轮证据。Actions归档配额已满，optional归档失败单独保留，检查日志已取回项目；实机/GUI/长测/安装升级条件依旧未放行。
