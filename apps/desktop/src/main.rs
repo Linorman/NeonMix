@@ -177,6 +177,8 @@ fn call(client: &Client, request: &Request) -> Result<Value, UiError> {
                 _ => &["hub", "sender"],
             };
             if identity.is_none()
+                || matches!(request, Request::LifecycleStop { instance_generation, .. }
+                    if identity != Some(*instance_generation))
                 || operation.is_none()
                 || targets
                     .iter()
@@ -215,7 +217,8 @@ fn worker(
                         .map_err(UiError::from)
                         .and_then(|()| call(&client, &request));
                     let original = match request {
-                        Request::LifecycleStart { request, .. } => *request,
+                        Request::LifecycleStart { request, .. }
+                        | Request::LifecycleStop { request, .. } => *request,
                         other => other,
                     };
                     result.map(|data| Outcome::Action(Box::new(original), data))
@@ -850,6 +853,10 @@ impl Desktop {
         (self.busy && !self.polling) || self.pending_action.is_some() || self.pending_stop
     }
     fn request(&mut self, request: Request) {
+        if self.exiting || (self.pending_stop && matches!(self.urgent_target, LocalStop::Shutdown))
+        {
+            return;
+        }
         // A stop cancels a start which has not reached the worker yet. The
         // frozen generation is still required for starts already in flight.
         if let Some(queued) = &self.pending_action {
@@ -877,12 +884,10 @@ impl Desktop {
             }
             _ => {}
         }
-        if self.busy
-            && matches!(
-                &request,
-                Request::Shutdown | Request::HubStop | Request::SenderStop
-            )
-        {
+        if matches!(
+            &request,
+            Request::Shutdown | Request::HubStop | Request::SenderStop
+        ) {
             self.begin_urgent(request);
             return;
         }
@@ -932,11 +937,16 @@ impl Desktop {
         }
     }
     fn begin_urgent(&mut self, request: Request) {
-        if self.preview || self.pending_stop {
+        // Quit supersedes a local Hub/Sender stop. Its owner continues even
+        // when we replace the UI subscription; only the quit reply may close UI.
+        if self.preview
+            || (self.pending_stop
+                && (!matches!(request, Request::Shutdown)
+                    || matches!(self.urgent_target, LocalStop::Shutdown)))
+        {
             return;
         }
-        self.pending_stop = true;
-        self.urgent_target = match &request {
+        let target = match &request {
             Request::Shutdown => LocalStop::Shutdown,
             Request::HubStop => LocalStop::Hub,
             _ => LocalStop::Sender,
@@ -944,12 +954,14 @@ impl Desktop {
         let request = match self.freeze_lifecycle(request) {
             Ok(request) => request,
             Err(error) => {
-                self.pending_stop = false;
                 self.message = stop_error(error);
                 self.error = true;
                 return;
             }
         };
+        self.pending_stop = true;
+        self.urgent_target = target;
+        self.error = false;
         self.message = if matches!(self.urgent_target, LocalStop::Shutdown) {
             Message::ShellQuitting
         } else {
@@ -957,12 +969,20 @@ impl Desktop {
         };
         let client = self.client.clone();
         let repaint = self.repaint.clone();
+        let window = self.native_window;
+        let quitting = matches!(target, LocalStop::Shutdown);
         let (tx, rx) = mpsc::sync_channel(1);
         self.urgent_action = Some(rx);
         std::thread::spawn(move || {
             let result = call(&client, &request);
-            let _ = tx.send(result);
-            repaint.request_repaint();
+            if tx.send(result).is_ok() {
+                // A user may hide/minimize while waiting. Windows does not
+                // render hidden windows: wake it to consume success or retry.
+                if quitting {
+                    window.show();
+                }
+                repaint.request_repaint();
+            }
         });
     }
     fn freeze_lifecycle(&self, request: Request) -> Result<Request, UiError> {
@@ -1003,6 +1023,13 @@ impl Desktop {
             })
         }
     }
+    fn close_if_exiting(&self, ctx: &egui::Context) -> bool {
+        if self.exiting {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            ctx.request_repaint();
+        }
+        self.exiting
+    }
     fn manual_hub(&self) -> Option<String> {
         (!self.hub_address.trim().is_empty()).then(|| self.hub_address.trim().to_string())
     }
@@ -1025,44 +1052,6 @@ impl Desktop {
     }
     fn process(&mut self) {
         self.sync_command_context();
-        if let Some(result) = self
-            .urgent_action
-            .as_ref()
-            .and_then(|rx| rx.try_recv().ok())
-        {
-            self.urgent_action = None;
-            self.pending_stop = false;
-            match result {
-                Ok(data) => {
-                    if matches!(self.urgent_target, LocalStop::Shutdown) {
-                        self.exiting = true;
-                    }
-                    self.message = if matches!(self.urgent_target, LocalStop::Hub) {
-                        Message::ShellSharingStopped
-                    } else {
-                        Message::ShellStopped
-                    };
-                    self.error = false;
-                    self.last_poll = Instant::now() - Duration::from_secs(5);
-                    if let Some(status) = &mut self.status {
-                        let process = match self.urgent_target {
-                            LocalStop::Hub => &mut status.hub,
-                            _ => &mut status.sender,
-                        };
-                        process.running = false;
-                        process.ready = false;
-                        process.pid = None;
-                        if let Ok(view) = serde_json::from_value(data["lifecycle"].clone()) {
-                            status.lifecycle = Some(view);
-                        }
-                    }
-                }
-                Err(error) => {
-                    self.message = stop_error(error);
-                    self.error = true;
-                }
-            }
-        }
         let outcome = self.results.as_ref().and_then(|rx| rx.try_recv().ok());
         if let Some(outcome) = outcome {
             let completed_stop = self.inflight_stop;
@@ -1411,6 +1400,59 @@ impl Desktop {
                     }
                 }
             }
+        }
+        if let Some(result) = self
+            .urgent_action
+            .as_ref()
+            .and_then(|rx| match rx.try_recv() {
+                Ok(result) => Some(result),
+                Err(mpsc::TryRecvError::Empty) => None,
+                Err(mpsc::TryRecvError::Disconnected) => Some(Err("lifecycle_owner_lost".into())),
+            })
+        {
+            self.urgent_action = None;
+            self.pending_stop = false;
+            match result {
+                Ok(data) => {
+                    if matches!(self.urgent_target, LocalStop::Shutdown) {
+                        self.exiting = true;
+                        self.pending_action = None;
+                        return;
+                    }
+                    self.message = if matches!(self.urgent_target, LocalStop::Hub) {
+                        Message::ShellSharingStopped
+                    } else {
+                        Message::ShellStopped
+                    };
+                    self.error = false;
+                    self.last_poll = Instant::now() - Duration::from_secs(5);
+                    if let Some(status) = &mut self.status {
+                        let process = match self.urgent_target {
+                            LocalStop::Hub => &mut status.hub,
+                            _ => &mut status.sender,
+                        };
+                        process.running = false;
+                        process.ready = false;
+                        process.pid = None;
+                        if let Ok(view) = serde_json::from_value(data["lifecycle"].clone()) {
+                            status.lifecycle = Some(view);
+                        }
+                    }
+                }
+                Err(error) => {
+                    self.message = stop_error(error);
+                    self.error = true;
+                }
+            }
+        }
+        if self.pending_stop {
+            self.message = if matches!(self.urgent_target, LocalStop::Shutdown) {
+                Message::ShellQuitting
+            } else {
+                Message::ShellStopping
+            };
+            self.error = false;
+            return;
         }
         if !self.busy
             && !self.pending_stop
@@ -1832,11 +1874,7 @@ impl eframe::App for Desktop {
         if tray::maintenance_exit_requested() {
             self.exiting = true;
         }
-        if self.exiting {
-            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-            // eframe consumes the Close command, then closes the root on the
-            // next frame; keep that frame scheduled even for a hidden window.
-            ctx.request_repaint();
+        if self.close_if_exiting(ctx) {
             return;
         }
         if ctx.input(|i| i.viewport().close_requested()) && !self.preview {
@@ -2337,7 +2375,11 @@ mod tests {
         done.send(Err("连接中断".into())).unwrap();
         urgent_done.send(Ok(Value::Null)).unwrap();
         app.process();
-        assert!(app.last_poll.elapsed() < Duration::from_secs(1));
+        assert_eq!(app.message, Message::ShellStopped);
+        assert!(
+            !app.error,
+            "an older poll error overwrote the confirmed stop"
+        );
         assert!(rx.try_recv().is_err());
         assert!(!app.pending_stop);
     }
@@ -2479,6 +2521,139 @@ mod tests {
         assert!(app.error);
         assert_eq!(app.message, Message::ShellStopUnconfirmed);
         assert!(!app.exiting);
+    }
+    #[cfg(unix)]
+    #[test]
+    fn quit_closes_idle_busy_and_locally_stopping_ui_after_real_ipc_confirmation() {
+        use neonmix_desktop_service::{Envelope, Reply};
+        use std::io::{Read, Write};
+        use std::os::unix::{fs::PermissionsExt, net::UnixListener};
+        for (busy, stopping) in [(false, false), (true, false), (false, true), (true, true)] {
+            let project = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .parent()
+                .unwrap()
+                .parent()
+                .unwrap();
+            let directory = project
+                .join(".local/tmp")
+                .join(format!("quit-{}", &uuid::Uuid::new_v4().to_string()[..8]));
+            neonmix_desktop_service::transport::prepare(&directory).unwrap();
+            let socket = directory.join("lifecycle.sock");
+            let listener = UnixListener::bind(&socket).unwrap();
+            std::fs::set_permissions(&socket, std::fs::Permissions::from_mode(0o600)).unwrap();
+            listener.set_nonblocking(true).unwrap();
+            let status = lifecycle_fixture();
+            let instance = status.lifecycle.as_ref().unwrap().instance_generation;
+            let server = std::thread::spawn(move || {
+                let operation = uuid::Uuid::new_v4();
+                for query in [false, true] {
+                    let deadline = Instant::now() + Duration::from_secs(5);
+                    let mut stream = loop {
+                        match listener.accept() {
+                            Ok((stream, _)) => break stream,
+                            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                                assert!(
+                                    Instant::now() < deadline,
+                                    "quit never reached lifecycle IPC"
+                                );
+                                std::thread::sleep(Duration::from_millis(5));
+                            }
+                            Err(error) => panic!("{error}"),
+                        }
+                    };
+                    stream
+                        .set_read_timeout(Some(Duration::from_secs(3)))
+                        .unwrap();
+                    let mut size = [0; 4];
+                    stream.read_exact(&mut size).unwrap();
+                    let mut body = vec![0; u32::from_be_bytes(size) as usize];
+                    stream.read_exact(&mut body).unwrap();
+                    let envelope: Envelope = serde_json::from_slice(&body).unwrap();
+                    if query {
+                        assert!(matches!(envelope.request, Request::LifecycleOperation {
+                            operation_id, instance_generation
+                        } if operation_id == operation && instance_generation == instance));
+                    } else {
+                        assert!(matches!(envelope.request, Request::LifecycleStop {
+                            instance_generation, request
+                        } if instance_generation == instance && matches!(*request, Request::Shutdown)));
+                    }
+                    let reply = Reply::success(serde_json::json!({
+                        "operation_id": operation, "instance_generation": instance,
+                        "state": if query { "completed" } else { "accepted" }, "ok": true,
+                        "data": {"hub": {"cleanup_complete": true}, "sender": {"cleanup_complete": true}}
+                    }));
+                    let bytes = serde_json::to_vec(&reply).unwrap();
+                    stream
+                        .write_all(&(bytes.len() as u32).to_be_bytes())
+                        .unwrap();
+                    stream.write_all(&bytes).unwrap();
+                }
+            });
+            let mut app = Desktop::empty(Client::new(&directory), true, false);
+            app.status = Some(status);
+            app.busy = busy;
+            app.pending_stop = stopping;
+            app.urgent_target = LocalStop::Sender;
+            let (old_done, old_result) = mpsc::sync_channel(1);
+            if stopping {
+                app.urgent_action = Some(old_result);
+            }
+            let (tx, jobs) = mpsc::sync_channel(1);
+            app.worker = Some(tx);
+            app.pending_action = Some(Request::HubStart);
+            app.request(Request::Shutdown);
+            assert!(app.pending_stop);
+            assert!(matches!(app.urgent_target, LocalStop::Shutdown));
+            assert!(app.pending_action.is_none());
+            assert!(jobs.try_recv().is_err(), "quit entered the ordinary queue");
+            if stopping {
+                assert!(
+                    old_done.send(Ok(Value::Null)).is_err(),
+                    "old stop still owns UI completion"
+                );
+            }
+            app.request(Request::HubStart);
+            assert!(jobs.try_recv().is_err(), "start was dispatched during quit");
+            let deadline = Instant::now() + Duration::from_secs(5);
+            while !app.exiting && Instant::now() < deadline {
+                let ctx = themed();
+                let output = ctx.run(egui::RawInput::default(), |ctx| app.show(ctx));
+                if app.exiting {
+                    assert!(
+                        output.viewport_output[&egui::ViewportId::ROOT]
+                            .commands
+                            .iter()
+                            .any(|command| matches!(command, egui::ViewportCommand::Close))
+                    );
+                }
+                std::thread::sleep(Duration::from_millis(5));
+            }
+            server.join().unwrap();
+            std::fs::remove_dir_all(directory).unwrap();
+            assert!(app.exiting, "confirmed quit did not close the UI");
+            assert!(!app.pending_stop);
+        }
+    }
+    #[test]
+    fn lost_stop_worker_clears_pending_and_preserves_retry_after_an_ordinary_reply() {
+        let mut app = Desktop::empty(Client::new(".local/test-desktop"), true, false);
+        app.status = Some(lifecycle_fixture());
+        app.pending_stop = true;
+        app.urgent_target = LocalStop::Shutdown;
+        let (done, result) = mpsc::sync_channel(1);
+        app.urgent_action = Some(result);
+        drop(done);
+        let (done, result) = mpsc::sync_channel(1);
+        app.results = Some(result);
+        done.send(Ok(Outcome::Action(Box::new(Request::Devices), Value::Null)))
+            .unwrap();
+        app.process();
+        assert!(!app.pending_stop);
+        assert!(app.urgent_action.is_none());
+        assert!(!app.exiting);
+        assert!(app.error);
+        assert_eq!(app.message, Message::ShellStopUnconfirmed);
     }
     #[test]
     fn two_failed_ipc_calls_do_not_prove_that_background_audio_stopped() {

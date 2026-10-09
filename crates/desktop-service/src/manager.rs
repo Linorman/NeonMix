@@ -169,16 +169,7 @@ impl Manager {
             .iter()
             .find(|op| op.id == id)
             .ok_or("invalid_argument")?;
-        let mut value = operation_value(op, state.instance);
-        if op.result.as_ref().is_some_and(|r| r.is_ok()) {
-            value["data"]["lifecycle"] = json!(crate::LifecycleView {
-                version: 1,
-                instance_generation: state.instance,
-                hub_stop_generation: state.stop_generation[0],
-                sender_stop_generation: state.stop_generation[1]
-            });
-        }
-        Ok(value)
+        Ok(operation_value(op, state.instance, state.stop_generation))
     }
     pub(crate) fn stop(
         &self,
@@ -186,12 +177,12 @@ impl Manager {
         shutdown: tokio::sync::mpsc::Sender<()>,
     ) -> Result<Value> {
         let mut state = self.state.lock().unwrap_or_else(|p| p.into_inner());
-        if let Some(op) = state
-            .operations
-            .iter()
-            .find(|op| op.kind == kind && op.result.is_none())
-        {
-            return Ok(operation_value(op, state.instance));
+        if let Some(op) = state.operations.iter().find(|op| {
+            op.kind == kind
+                && (op.result.is_none()
+                    || (kind == Kind::Shutdown && op.result.as_ref().is_some_and(Result::is_ok)))
+        }) {
+            return Ok(operation_value(op, state.instance, state.stop_generation));
         }
         if state.operations.len() == 32 {
             let index = state
@@ -226,6 +217,7 @@ impl Manager {
         let reply = operation_value(
             state.operations.back().expect("inserted operation"),
             state.instance,
+            state.stop_generation,
         );
         let manager = self.clone();
         tokio::spawn(async move {
@@ -270,13 +262,19 @@ impl Manager {
         Ok(reply)
     }
 }
-fn operation_value(op: &Operation, instance: Uuid) -> Value {
+fn operation_value(op: &Operation, instance: Uuid, stop_generation: [u64; 2]) -> Value {
     let mut value = json!({"operation_id":op.id,"instance_generation":instance,"state":if op.result.is_none(){"accepted"}else{"completed"}});
     if let Some(result) = &op.result {
         match result {
             Ok(data) => {
                 value["ok"] = json!(true);
                 value["data"] = data.clone();
+                value["data"]["lifecycle"] = json!(crate::LifecycleView {
+                    version: 1,
+                    instance_generation: instance,
+                    hub_stop_generation: stop_generation[0],
+                    sender_stop_generation: stop_generation[1],
+                });
             }
             Err(error) => {
                 value["ok"] = json!(false);
@@ -310,6 +308,23 @@ pub(crate) fn is_lifecycle(request: &Request) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
+    async fn completed_shutdown_is_reused_without_advancing_stop_generations_again() {
+        let manager = Manager::new();
+        let (shutdown, mut requested) = tokio::sync::mpsc::channel(1);
+        let accepted = manager.stop(Kind::Shutdown, shutdown.clone()).unwrap();
+        tokio::task::yield_now().await;
+        let repeated = manager.stop(Kind::Shutdown, shutdown).unwrap();
+        assert_eq!(accepted["operation_id"], repeated["operation_id"]);
+        assert_eq!(repeated["state"], "completed");
+        assert_eq!(manager.state.lock().unwrap().stop_generation, [1, 1]);
+        assert!(manager.ticket(Kind::Hub).is_err());
+        assert!(manager.ticket(Kind::Sender).is_err());
+        tokio::time::timeout(std::time::Duration::from_secs(2), requested.recv())
+            .await
+            .unwrap()
+            .unwrap();
+    }
     #[tokio::test]
     async fn accepted_stop_fences_queued_start_and_duplicate_stop_reuses_the_operation() {
         let manager = Manager::new();

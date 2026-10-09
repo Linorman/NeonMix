@@ -231,6 +231,25 @@ fn pump(
         }
     })
 }
+/// A pipe can remain open even after the owned process group is empty (for
+/// example an inherited descriptor). Logs must not hold the guardian alive or
+/// prevent its final cleanup receipt. The binary exits after run returns.
+async fn finish_pumps(
+    output: std::thread::JoinHandle<io::Result<()>>,
+    errors: std::thread::JoinHandle<io::Result<()>>,
+) {
+    let deadline = tokio::time::Instant::now() + Duration::from_millis(250);
+    while !(output.is_finished() && errors.is_finished()) && tokio::time::Instant::now() < deadline
+    {
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    for reader in [output, errors] {
+        if reader.is_finished() {
+            let _ = reader.join();
+        }
+    }
+}
+
 pub async fn run(executable: &Path, args: &[OsString], pipe_child: bool) -> io::Result<i32> {
     prepare_output()?;
     let stop = StopSignal::new(true)?;
@@ -352,8 +371,7 @@ pub async fn run(executable: &Path, args: &[OsString], pipe_child: bool) -> io::
     // On error a remaining process could retain stdout. Do not join its reader;
     // terminating the supervisor ends those readers after the group kill.
     if result.is_ok() {
-        let _ = output.join();
-        let _ = errors.join();
+        finish_pumps(output, errors).await;
     }
     let runtime_keys_observed = cleanup.as_ref().map_or(0, |scope| scope.keys.len() as u32);
     let mut cleanup_failures = if result.is_ok() {
@@ -444,6 +462,18 @@ mod cleanup_tests {
             cleanup.capture();
             cleanup
         }
+    }
+    #[tokio::test]
+    async fn inherited_log_writer_cannot_hold_final_cleanup_forever() {
+        let (reader, writer) = std::os::unix::net::UnixStream::pair().unwrap();
+        let output = pump(reader, false, Arc::new(AtomicBool::new(false)), None);
+        let errors = std::thread::spawn(|| Ok(()));
+        let started = std::time::Instant::now();
+        tokio::time::timeout(Duration::from_secs(2), finish_pumps(output, errors))
+            .await
+            .unwrap();
+        assert!(started.elapsed() < Duration::from_secs(1));
+        drop(writer);
     }
     #[test]
     fn cleanup_keeps_persistent_identity_and_removes_only_captured_temporary_keys() {

@@ -36,6 +36,9 @@ impl Desktop {
         theme::sync(ctx);
         localization::install(ctx, self.localization.renderer.clone());
         self.process();
+        if self.close_if_exiting(ctx) {
+            return;
+        }
         self.track_events();
         if self.shown_message.as_ref() != Some(&self.message) {
             // A new error replacing an error (polls alternate between causes

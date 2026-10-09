@@ -339,7 +339,7 @@ impl Client {
             let reply = transport::request(&self.state_dir, request)?;
             if crate::manager::kind(request).is_none()
                 || !reply.ok
-                || reply.data["state"] != "accepted"
+                || !matches!(reply.data["state"].as_str(), Some("accepted" | "completed"))
             {
                 return Ok(reply);
             }
@@ -349,16 +349,25 @@ impl Client {
                 serde_json::from_value(reply.data["instance_generation"].clone())
                     .map_err(|_| "invalid_backend_response")?;
             let started = std::time::Instant::now();
+            let mut observed = reply;
             loop {
-                let observed = transport::request(
-                    &self.state_dir,
-                    &Request::LifecycleOperation {
-                        operation_id,
-                        instance_generation,
-                    },
-                )?;
+                if observed.data["state"] != "completed" {
+                    observed = transport::request(
+                        &self.state_dir,
+                        &Request::LifecycleOperation {
+                            operation_id,
+                            instance_generation,
+                        },
+                    )?;
+                }
                 if !observed.ok {
                     return Ok(observed);
+                }
+                if observed.data["operation_id"] != serde_json::json!(operation_id)
+                    || observed.data["instance_generation"]
+                        != serde_json::json!(instance_generation)
+                {
+                    return Err("invalid_backend_response".into());
                 }
                 if observed.data["state"] == "completed" {
                     if observed.data["ok"] == true {

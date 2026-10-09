@@ -41,13 +41,13 @@ impl NativeWindow {
         }
     }
     #[cfg(windows)]
-    fn show(self) {
+    pub(crate) fn show(self) {
         if let Some(hwnd) = self.0 {
             show_native(hwnd as windows_sys::Win32::Foundation::HWND);
         }
     }
     #[cfg(not(windows))]
-    fn show(self) {}
+    pub(crate) fn show(self) {}
 }
 #[cfg(windows)]
 #[allow(unsafe_code)]

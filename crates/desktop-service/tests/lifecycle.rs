@@ -1398,3 +1398,78 @@ else:print(json.dumps(current))
     assert!(request(&client, Request::Shutdown).await.ok);
     server.await.unwrap().unwrap();
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn shutdown_releases_inflight_mutation_and_partial_ordinary_connections_before_owner_lock() {
+    let fixture = Fixture::new();
+    let binary = fixture.child();
+    fixture.write("hub/admin.json", json!({"secret_ref":"fixture-admin"}));
+    let script = std::fs::read_to_string(&binary).unwrap().replace(
+        "snapshot)",
+        r#"control) printf '%s' "$$" > "$0.mutation-pid"; exec /bin/sleep 30;;
+snapshot)"#,
+    );
+    std::fs::write(&binary, script).unwrap();
+    let server = tokio::spawn(daemon::serve_with_binaries(
+        fixture.0.clone(),
+        binary.clone(),
+        binary.clone(),
+    ));
+    let client = Client::new(&fixture.0);
+    wait(&client).await;
+    let remote = client.clone();
+    let mutation = tokio::task::spawn_blocking(move || {
+        remote.request(&Request::Control {
+            credential: "hub/admin.json".into(),
+            hub: None,
+            expected_revision: 1,
+            operation: neonmix_control::Operation::OutputMix {
+                gain_db: Some(-9.),
+                muted: None,
+            },
+        })
+    });
+    let marker = fixture.0.join("fixture-child.mutation-pid");
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    while !marker.exists() {
+        assert!(tokio::time::Instant::now() < deadline);
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    let pid: i32 = std::fs::read_to_string(marker).unwrap().parse().unwrap();
+    let mut partial = UnixStream::connect(fixture.0.join("ipc.sock")).unwrap();
+    partial
+        .set_read_timeout(Some(Duration::from_secs(1)))
+        .unwrap();
+    partial.write_all(&128u32.to_be_bytes()).unwrap();
+    partial.write_all(b"{").unwrap();
+    // Ensure the listener has accepted the partial frame before asking to quit.
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    let stopped = request(&client, Request::Shutdown).await;
+    assert!(stopped.ok);
+    let repeated = request(&client, Request::Shutdown).await;
+    assert!(repeated.ok);
+    assert_eq!(stopped.data["operation_id"], repeated.data["operation_id"]);
+    assert_eq!(stopped.data["lifecycle"], repeated.data["lifecycle"]);
+    tokio::time::timeout(Duration::from_secs(2), server)
+        .await
+        .unwrap()
+        .unwrap()
+        .unwrap();
+    assert!(mutation.await.unwrap().is_err());
+    assert_eq!(partial.read(&mut [0]).unwrap(), 0);
+    let _lock = transport::lock(&fixture.0).expect("old daemon retained its owner lock");
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
+    loop {
+        #[allow(unsafe_code)]
+        // SAFETY: only checks the PID created by this fixture's helper.
+        let gone = unsafe { libc::kill(pid, 0) } == -1;
+        if gone {
+            break;
+        }
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "ordinary helper survived shutdown"
+        );
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+}

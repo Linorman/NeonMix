@@ -1765,6 +1765,7 @@ pub async fn serve_with_binaries(
     let cancellation = Arc::new(ReadCancellation::default());
     let lifecycle_slots = Arc::new(Semaphore::new(8));
     let mut lifecycle_connections = tokio::task::JoinSet::new();
+    let mut connections = tokio::task::JoinSet::new();
     let terminated = termination_signal();
     tokio::pin!(terminated);
     loop {
@@ -1773,6 +1774,7 @@ pub async fn serve_with_binaries(
             _=&mut terminated=>break,
             _=tokio::signal::ctrl_c()=>break,
             _=lifecycle_connections.join_next(),if !lifecycle_connections.is_empty()=>{},
+            _=connections.join_next(),if !connections.is_empty()=>{},
             accepted=lifecycle_listener.accept()=>{
                 let stream=accepted?;
                 if !crate::transport::same_user(&stream){continue;}
@@ -1785,7 +1787,7 @@ pub async fn serve_with_binaries(
                 if !crate::transport::same_user(&stream){continue;}
                 let Ok(permit)=slots.clone().try_acquire_owned() else{continue;};
                 let state=state.clone();let shutdown=shutdown.clone();let cancellation=cancellation.clone();let lifecycle=lifecycle.clone();
-                tokio::spawn(async move {let _permit=permit;let _=connection(stream,state,shutdown,cancellation,lifecycle,false).await;});
+                connections.spawn(async move {let _permit=permit;let _=connection(stream,state,shutdown,cancellation,lifecycle,false).await;});
             }
         }
     }
@@ -1813,6 +1815,11 @@ pub async fn serve_with_binaries(
     loop {
         let operation = lifecycle.lookup(id, instance)?;
         if operation["state"] == "completed" {
+            // Release ordinary IPC streams, Runtime and kill-on-drop command
+            // children before relinquishing the daemon lock. Detached handlers
+            // otherwise survive serve(), retaining named pipes and old owners.
+            connections.abort_all();
+            while connections.join_next().await.is_some() {}
             return if operation["ok"] == true {
                 Ok(())
             } else {
