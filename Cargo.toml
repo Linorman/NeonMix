@@ -5,14 +5,14 @@ members = ["crates/*", "adapters/*", "apps/*", "drivers/macos/hal"]
 default-members = ["apps/audio"]
 
 [workspace.package]
-version = "0.3.0"
+version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
 license = "LicenseRef-Proprietary"
 repository = "https://github.com/Linorman/NeonMix"
 
 [workspace.metadata.neonmix]
-macos-build-version = "3"
+macos-build-version = "4"
 
 [workspace.dependencies]
 neonmix-core = { path = "crates/audio-core" }
