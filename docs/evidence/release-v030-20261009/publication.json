@@ -1,0 +1,38 @@
+{
+  "url": "https://github.com/Linorman/NeonMix/releases/tag/v0.3.0",
+  "tag": "v0.3.0",
+  "commit": "5c2f26e497bd4f077011a9e513eee306b1bfdad7",
+  "assets": [
+    {
+      "name": "NeonMix-0.3.0-macos-arm64.dmg",
+      "bytes": 31503951,
+      "sha256": "d60e1fb59adaac1f62791ae4410049db83fac39a10401ac3cb8b3b9c2401ea7a",
+      "verified": true
+    },
+    {
+      "name": "NeonMix-0.3.0-macos-arm64.json",
+      "bytes": 323,
+      "sha256": "2a12feb9ffd5f1cc99618fc61aa6771c1e59b45f38a5bb7ff899f82d9ef25961",
+      "verified": true
+    },
+    {
+      "name": "NeonMix-0.3.0-windows-x64-setup.exe",
+      "bytes": 22612943,
+      "sha256": "616b003097542a3e3bca6555895de4ecef8237369307aa3468b67efb3ee46a89",
+      "verified": true
+    },
+    {
+      "name": "NeonMix-0.3.0-windows-x64.json",
+      "bytes": 8498,
+      "sha256": "6864586a7cefa6d9528679da9b2a38eb3708603121a21d8a218564e911ba8bfc",
+      "verified": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 392,
+      "sha256": "9105e70b66cd5598a330b2f191eb2ab1cdb00fd111c1e1658c5be5070da306a6",
+      "verified": true
+    }
+  ],
+  "published": true
+}

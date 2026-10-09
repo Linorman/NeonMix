@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "desktop_version": "neonmix-desktop 0.3.0 (5c2f26e49)",
+  "bundled_runtime": true,
+  "two_stream_media": true,
+  "worker_started": true,
+  "scope": "packaged CLI/media and worker startup; no installation or real device playback",
+  "installer_payload_files": 81
+}
