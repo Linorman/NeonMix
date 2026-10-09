@@ -126,7 +126,7 @@ shutil.copytree(ROOT / 'docs', OUT / 'docs', dirs_exist_ok=True, ignore=copy_ign
 shutil.copy2(ROOT / 'vendor/cpal/LICENSE', OUT / 'CPAL-LICENSE')
 shutil.copy2(ROOT / 'vendor/tympan-aspl/LICENSE-MIT', OUT / 'TYMPAN-LICENSE-MIT')
 shutil.copy2(ROOT / 'vendor/tympan-aspl/LICENSE-APACHE', OUT / 'TYMPAN-LICENSE-APACHE')
-for name in ['Cargo.lock', 'rust-toolchain.toml', 'README.md', 'native-dependencies.toml']:
+for name in ['Cargo.lock', 'rust-toolchain.toml', 'README.md', 'README.zh-CN.md', 'native-dependencies.toml']:
     shutil.copy2(ROOT / name, OUT / name)
 (OUT / 'build.json').write_text(json.dumps(report, indent=2) + '\n')
 assert_clean(OUT)

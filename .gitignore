@@ -18,6 +18,7 @@
 /node-*
 /.ssh-node-known-hosts
 
-# Keep working notes local; publish only the root project introduction.
+# Keep working notes local; publish only the two root project introductions.
 *.[mM][dD]
 !/README.md
+!/README.zh-CN.md
