@@ -322,7 +322,7 @@ impl Desktop {
                             egui::pos2(r.right() - 14.0, r.top() + 50.0),
                         );
                         let color = match health[i].tone {
-                            Tone::Success | Tone::Neutral => theme::ACCENT,
+                            Tone::Success | Tone::Neutral => theme::accent(),
                             tone => tone.color(),
                         };
                         crate::history::paint_spark(

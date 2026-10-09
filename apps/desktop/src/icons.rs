@@ -10,10 +10,15 @@ pub enum Icon {
     Sender,
     Devices,
     Pulse,
-    Info,
     Search,
     Check,
     AirPlay,
+    Settings,
+    More,
+    Stop,
+    Speaker,
+    Hide,
+    Power,
 }
 
 pub fn paint(painter: &Painter, rect: Rect, icon: Icon, color: Color32) {
@@ -77,11 +82,6 @@ pub fn paint(painter: &Painter, rect: Rect, icon: Icon, color: Color32) {
             ];
             painter.add(eframe::egui::Shape::line(points.to_vec(), stroke));
         }
-        Icon::Info => {
-            painter.circle_stroke(p(8.0, 8.0), 6.4 * u, stroke);
-            painter.line_segment([p(8.0, 7.2), p(8.0, 11.4)], stroke);
-            painter.circle_filled(p(8.0, 4.9), 0.95 * u, color);
-        }
         Icon::Search => {
             painter.circle_stroke(p(7.0, 7.0), 4.4 * u, stroke);
             painter.line_segment([p(10.4, 10.4), p(14.0, 14.0)], stroke);
@@ -104,6 +104,70 @@ pub fn paint(painter: &Painter, rect: Rect, icon: Icon, color: Color32) {
                 color,
                 Stroke::NONE,
             ));
+        }
+        Icon::Settings => {
+            // Gear: hub ring and eight teeth.
+            painter.circle_stroke(p(8.0, 8.0), 2.3 * u, stroke);
+            painter.circle_stroke(p(8.0, 8.0), 5.0 * u, stroke);
+            for i in 0..8 {
+                let a = i as f32 * std::f32::consts::FRAC_PI_4;
+                let d = vec2(a.cos(), a.sin());
+                painter.line_segment([c + d * 5.0 * u, c + d * 7.2 * u], stroke);
+            }
+        }
+        Icon::More => {
+            for x in [3.5, 8.0, 12.5] {
+                painter.circle_filled(p(x, 8.0), 1.35 * u, color);
+            }
+        }
+        Icon::Stop => {
+            painter.rect_filled(
+                Rect::from_min_max(p(4.5, 4.5), p(11.5, 11.5)),
+                1.6 * u,
+                color,
+            );
+        }
+        Icon::Speaker => {
+            painter.add(eframe::egui::Shape::convex_polygon(
+                vec![
+                    p(2.0, 6.0),
+                    p(5.0, 6.0),
+                    p(9.0, 2.5),
+                    p(9.0, 13.5),
+                    p(5.0, 10.0),
+                    p(2.0, 10.0),
+                ],
+                Color32::TRANSPARENT,
+                stroke,
+            ));
+            let points: Vec<Pos2> = (0..=10)
+                .map(|i| {
+                    let a = -0.9 + 1.8 * i as f32 / 10.0;
+                    p(9.0, 8.0) + vec2(a.cos(), a.sin()) * 4.2 * u
+                })
+                .collect();
+            painter.add(eframe::egui::Shape::line(points, stroke));
+        }
+        Icon::Hide => {
+            painter.rect_stroke(
+                Rect::from_min_max(p(1.5, 2.5), p(14.5, 13.5)),
+                2.0 * u,
+                stroke,
+                eframe::egui::StrokeKind::Middle,
+            );
+            painter.line_segment([p(5.0, 10.0), p(11.0, 10.0)], stroke);
+        }
+        Icon::Power => {
+            let points: Vec<Pos2> = (0..=16)
+                .map(|i| {
+                    let a = -std::f32::consts::FRAC_PI_2
+                        + 0.55
+                        + (std::f32::consts::TAU - 1.1) * i as f32 / 16.0;
+                    c + vec2(a.cos(), a.sin()) * 5.6 * u
+                })
+                .collect();
+            painter.add(eframe::egui::Shape::line(points, stroke));
+            painter.line_segment([p(8.0, 1.2), p(8.0, 7.5)], stroke);
         }
     }
 }

@@ -1,5 +1,6 @@
 //! Room-owned AirPlay reservations. All calls occur in the Engine transaction.
 use neonmix_airplay_adapter::Context;
+use neonmix_core::mixer::LANES;
 use std::{
     collections::BTreeMap,
     time::{Duration, Instant},
@@ -49,8 +50,8 @@ impl Admissions {
         if self.claims.values().any(|c| c.owner.source == owner.source) {
             return Err("source_already_active");
         }
-        if (multi && native_count + self.claims.len() >= MULTI_CAPACITY)
-            || (!multi && (native_count > 1 || !self.claims.is_empty()))
+        if self.claims.len() >= if multi { MULTI_CAPACITY } else { 1 }
+            || native_count + self.claims.len() >= LANES
         {
             return Err("room_capacity_full");
         }
@@ -116,12 +117,9 @@ impl Admissions {
             None
         }
     }
-    pub fn native_capacity(&self, native: usize, multi: bool) -> bool {
-        if multi {
-            native + self.claims.len() <= MULTI_CAPACITY
-        } else {
-            self.claims.is_empty() || native <= 1
-        }
+    /// Only the physical Mixer bound is shared with native Senders.
+    pub fn native_capacity(&self, native: usize) -> bool {
+        native + self.claims.len() <= LANES
     }
 }
 
@@ -138,7 +136,7 @@ mod tests {
         }
     }
     #[test]
-    fn reservations_exclude_duplicates_and_native_overcommit() {
+    fn reservations_exclude_duplicates_and_mixer_overcommit() {
         let mut a = Admissions::default();
         let now = Instant::now();
         let one = owner(Uuid::new_v4(), "a");
@@ -146,10 +144,18 @@ mod tests {
             .reserve(one.clone(), 3, true, Some(7), &[1, 2], now)
             .unwrap();
         assert!(claim.context.session_id > 2);
-        assert!(!a.native_capacity(4, true));
+        assert!(a.native_capacity(4));
+        assert!(!a.native_capacity(LANES));
         assert_eq!(
-            a.reserve(owner(Uuid::new_v4(), "b"), 3, true, Some(8), &[], now)
-                .err(),
+            a.reserve(
+                owner(Uuid::new_v4(), "b"),
+                LANES - 1,
+                true,
+                Some(8),
+                &[],
+                now
+            )
+            .err(),
             Some("room_capacity_full")
         );
         assert_eq!(
@@ -165,6 +171,38 @@ mod tests {
         assert!(a.release(&one).is_none());
     }
     #[test]
+    fn native_senders_do_not_consume_single_or_multi_airplay_quota() {
+        for (multi, limit) in [(false, 1), (true, MULTI_CAPACITY)] {
+            let mut admissions = Admissions::default();
+            for i in 0..limit {
+                admissions
+                    .reserve(
+                        owner(Uuid::new_v4(), &i.to_string()),
+                        5,
+                        multi,
+                        Some(i + 5),
+                        &[],
+                        Instant::now(),
+                    )
+                    .unwrap();
+            }
+            assert!(admissions.native_capacity(6));
+            assert_eq!(
+                admissions
+                    .reserve(
+                        owner(Uuid::new_v4(), "extra"),
+                        0,
+                        multi,
+                        Some(10),
+                        &[],
+                        Instant::now()
+                    )
+                    .err(),
+                Some("room_capacity_full")
+            );
+        }
+    }
+    #[test]
     fn paused_active_claim_does_not_expire() {
         let mut a = Admissions::default();
         let now = Instant::now();
@@ -177,7 +215,20 @@ mod tests {
     fn last_slot_competition_is_atomic_for_one_hundred_rounds() {
         use std::sync::{Arc, Barrier, Mutex};
         for _ in 0..100 {
-            let a = Arc::new(Mutex::new(Admissions::default()));
+            let mut admissions = Admissions::default();
+            for i in 0..3 {
+                admissions
+                    .reserve(
+                        owner(Uuid::new_v4(), &format!("existing-{i}")),
+                        0,
+                        true,
+                        Some(i + 2),
+                        &[],
+                        Instant::now(),
+                    )
+                    .unwrap();
+            }
+            let a = Arc::new(Mutex::new(admissions));
             let barrier = Arc::new(Barrier::new(2));
             let threads: Vec<_> = (0..2)
                 .map(|i| {

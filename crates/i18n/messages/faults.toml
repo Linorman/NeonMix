@@ -317,3 +317,9 @@ id = "fault-local-feedback-loop"
 
 [[message]]
 id = "fault-local-feedback-check-unavailable"
+
+[[message]]
+id = "fault-capture-permission-denied"
+
+[[message]]
+id = "fault-capture-permission-pending"

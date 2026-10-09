@@ -1,0 +1,67 @@
+{
+  "passed": true,
+  "sources": 4,
+  "native_sources": 2,
+  "codec": "alac",
+  "omit_spf": true,
+  "platform": "Windows",
+  "stages": [
+    {
+      "source": 1,
+      "stage": "sending",
+      "response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      }
+    },
+    {
+      "source": 2,
+      "stage": "sending",
+      "response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      }
+    },
+    {
+      "source": 3,
+      "stage": "sending",
+      "response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      }
+    },
+    {
+      "source": 4,
+      "stage": "sending",
+      "response": {
+        "method": "SETUP",
+        "route": "rtsp://receiver/audio",
+        "status": 200,
+        "response_bytes": 104
+      }
+    }
+  ],
+  "scope": "isolated encrypted digital sources; no Apple interoperability or long-duration claim",
+  "binary_sha256": {
+    "neonmix-hub.exe": "a5302ab30fe5615210df5ca2f7ccd78ac6bc9f33773d29919446606682411043",
+    "neonmix-airplay-worker.exe": "f3e464c0c29e98a775d05b374a2ce19cb7759c139af128df17ddd217cb4e3038"
+  },
+  "capacity": {
+    "active": 4,
+    "available": 0,
+    "limit": 4,
+    "reserved": 0
+  },
+  "released_blocks": [
+    1309,
+    1076,
+    871,
+    653
+  ]
+}

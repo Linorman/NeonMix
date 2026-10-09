@@ -3,7 +3,7 @@
 //! current identity may perform are listed; dangerous ones still confirm.
 use super::*;
 use crate::widgets::Tone;
-use egui::{Align2, CornerRadius, Margin, Stroke};
+use egui::{Align2, CornerRadius, Margin};
 
 #[derive(Default)]
 pub struct Palette {
@@ -331,14 +331,8 @@ impl Desktop {
                 egui::Modal::default_area(egui::Id::new("palette-area"))
                     .anchor(Align2::CENTER_TOP, egui::vec2(0.0, top)),
             )
-            .backdrop_color(egui::Color32::from_black_alpha(130))
-            .frame(
-                egui::Frame::popup(&ctx.style())
-                    .fill(theme::SURFACE)
-                    .stroke(Stroke::new(1.0, theme::BORDER_STRONG))
-                    .inner_margin(Margin::same(10))
-                    .corner_radius(CornerRadius::same(14)),
-            )
+            .backdrop_color(theme::shadow(0.45))
+            .frame(crate::shell::overlay_frame(ctx).inner_margin(Margin::same(10)))
             .show(ctx, |ui| {
                 ui.set_opacity(0.4 + 0.6 * appear);
                 ui.set_width(width);
@@ -349,7 +343,7 @@ impl Desktop {
                         ui.painter(),
                         icons::square(icon.center(), 16.0),
                         icons::Icon::Search,
-                        theme::TEXT_3,
+                        theme::text_3(),
                     );
                     let search_width = (ui.available_width()
                         - if palette.query.is_empty() { 0.0 } else { 32.0 })
@@ -397,7 +391,9 @@ impl Desktop {
                                 last_group = entry.group.as_str();
                                 ui.add_space(4.0);
                                 ui.label(
-                                    RichText::new(&entry.group).size(11.0).color(theme::TEXT_3),
+                                    RichText::new(&entry.group)
+                                        .size(11.0)
+                                        .color(theme::text_3()),
                                 );
                             }
                             let selected = i == palette.selected;
@@ -426,7 +422,15 @@ impl Desktop {
                                 ui.painter().rect_filled(
                                     rect,
                                     CornerRadius::same(8),
-                                    theme::ACCENT.gamma_multiply(0.16),
+                                    theme::text().gamma_multiply(0.08),
+                                );
+                                ui.painter().rect_filled(
+                                    egui::Rect::from_min_size(
+                                        rect.left_top() + egui::vec2(0.0, 8.0),
+                                        egui::vec2(2.5, rect.height() - 16.0),
+                                    ),
+                                    CornerRadius::same(2),
+                                    theme::accent(),
                                 );
                                 ui.scroll_to_rect(rect, None);
                             }
@@ -440,7 +444,11 @@ impl Desktop {
                                 Align2::LEFT_CENTER,
                                 &entry.title,
                                 egui::FontId::proportional(theme::BODY),
-                                if selected { theme::TEXT } else { theme::TEXT_2 },
+                                if selected {
+                                    theme::text()
+                                } else {
+                                    theme::text_2()
+                                },
                             );
                             if let Some(hint) = &entry.hint {
                                 ui.painter().text(
@@ -448,7 +456,7 @@ impl Desktop {
                                     Align2::RIGHT_CENTER,
                                     hint,
                                     egui::FontId::monospace(11.0),
-                                    theme::TEXT_3,
+                                    theme::text_3(),
                                 );
                             }
                             if row.clicked() {

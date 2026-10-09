@@ -25,9 +25,9 @@ pub(crate) fn role_name(role: Role) -> Message {
 
 pub(crate) fn role_color(role: Role) -> egui::Color32 {
     match role {
-        Role::Admin => theme::ACCENT,
-        Role::Controller => theme::SUCCESS,
-        Role::Member => theme::TEXT_2,
+        Role::Admin => theme::accent(),
+        Role::Controller => theme::success(),
+        Role::Member => theme::text_2(),
     }
 }
 
@@ -142,7 +142,7 @@ impl Desktop {
         egui::CollapsingHeader::new(
             RichText::new(self.tr(&Message::DiagnosticsConnectionOverride))
                 .size(theme::SMALL + 0.5)
-                .color(theme::TEXT_2),
+                .color(theme::text_2()),
         )
         .id_salt("connection-override")
         .show(ui, |ui| {

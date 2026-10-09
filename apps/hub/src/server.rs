@@ -49,7 +49,6 @@ struct Resources {
     airplay_mix: [Option<(usize, LaneMix)>; 4],
     admissions: admission::Admissions,
     multi_receiver: bool,
-    pending_multi_capacity: bool,
     native_reservation: Option<(Uuid, usize, Uuid, u64)>,
     retiring: Vec<(usize, crate::media_worker::MediaWorker)>,
 }
@@ -205,10 +204,7 @@ impl Resources {
             .filter(|s| s.status.active())
             .count()
             + usize::from(self.native_reservation.is_some());
-        if !self
-            .admissions
-            .native_capacity(native, self.multi_receiver || self.pending_multi_capacity)
-        {
+        if !self.admissions.native_capacity(native) {
             return Err(ControlError::QuotaExceeded);
         }
         for (lane, mix) in self.airplay_mix.iter().flatten() {
@@ -691,10 +687,7 @@ fn execute_native(
                 .values()
                 .filter(|s| s.status.active())
                 .count();
-            if !e.resources.admissions.native_capacity(
-                count,
-                e.resources.multi_receiver || e.resources.pending_multi_capacity,
-            ) {
+            if !e.resources.admissions.native_capacity(count) {
                 return Err(ControlError::QuotaExceeded);
             }
             if e.resources.admissions.claims.values().any(|claim| {
@@ -1323,7 +1316,6 @@ pub async fn serve(
             airplay_mix: [None; 4],
             admissions: Default::default(),
             multi_receiver: false,
-            pending_multi_capacity: false,
             native_reservation: None,
             retiring: Vec::new(),
         },
@@ -1544,7 +1536,6 @@ mod transaction_tests {
             airplay_mix: [None; 4],
             admissions: Default::default(),
             multi_receiver: false,
-            pending_multi_capacity: false,
             native_reservation: None,
             retiring: Vec::new(),
         };
@@ -2383,7 +2374,7 @@ mod transaction_tests {
         untouched(&mut e.resources);
     }
     #[test]
-    fn in_flight_native_start_owns_the_last_multi_source_slot() {
+    fn in_flight_native_start_does_not_consume_airplay_quota() {
         let (shared, headers, command, _mixer) = shared_fixture();
         {
             let mut e = shared.lock().unwrap();
@@ -2432,12 +2423,11 @@ mod transaction_tests {
                     request: 2,
                     source: "racing-airplay".into(),
                 };
-                assert_eq!(
+                assert!(
                     e.resources
                         .admissions
                         .reserve(owner, pending, true, Some(8), &[], Instant::now())
-                        .err(),
-                    Some("room_capacity_full")
+                        .is_ok()
                 );
             }
             barrier.wait();
@@ -2445,7 +2435,7 @@ mod transaction_tests {
         });
         let e = shared.lock().unwrap();
         assert!(e.resources.native_reservation.is_none());
-        assert_eq!(e.resources.admissions.claims.len(), 3);
+        assert_eq!(e.resources.admissions.claims.len(), 4);
     }
     #[test]
     fn native_failed_disk_write_aborts_candidate_and_returns_lane() {
@@ -2699,7 +2689,6 @@ mod pairing_tests {
                     airplay_mix: [None; 4],
                     admissions: Default::default(),
                     multi_receiver: false,
-                    pending_multi_capacity: false,
                     native_reservation: None,
                     retiring: Vec::new(),
                 },

@@ -1,5 +1,6 @@
-//! 关于: product version, the commit it was built from and where the source
-//! lives. Everything here is compile-time data, so the page never waits.
+//! 设置: this window's appearance, language and motion, then the product
+//! version, the commit it was built from and where the source lives.
+//! Everything here is local or compile-time data, so the page never waits.
 use super::*;
 use crate::widgets::Kind;
 use egui::{Align, Layout, Margin};
@@ -33,14 +34,14 @@ impl Desktop {
             ui.label(
                 RichText::new("NeonMix")
                     .font(theme::heading(26.0))
-                    .color(theme::TEXT),
+                    .color(theme::text()),
             );
             ui.label(
                 RichText::new(
                     text_about_audio_mixing_across_devices_on_your_local_network.as_str(),
                 )
                 .size(theme::BODY)
-                .color(theme::TEXT_2),
+                .color(theme::text_2()),
             );
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
@@ -61,6 +62,27 @@ impl Desktop {
             None,
             |_| {},
             |ui| {
+                let choices = [
+                    preferences::ThemeChoice::System,
+                    preferences::ThemeChoice::Dark,
+                    preferences::ThemeChoice::Light,
+                ];
+                let labels = [
+                    self.tr(&Message::AboutThemeSystem),
+                    self.tr(&Message::AboutThemeDark),
+                    self.tr(&Message::AboutThemeLight),
+                ];
+                let current = choices
+                    .iter()
+                    .position(|c| *c == self.preferences.value.theme);
+                ui.horizontal(|ui| {
+                    widgets::caption(ui, &self.tr(&Message::AboutAppearance));
+                    let labels: Vec<&str> = labels.iter().map(String::as_str).collect();
+                    if let Some(i) = widgets::segments(ui, true, &labels, current) {
+                        self.set_theme_choice(ui.ctx(), choices[i]);
+                    }
+                });
+                widgets::note(ui, self.tr(&Message::AboutThemeNote));
                 self.language_settings(ui);
                 let reduce = animation::reduce_motion();
                 ui.horizontal(|ui| {

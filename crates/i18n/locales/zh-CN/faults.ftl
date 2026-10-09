@@ -109,3 +109,6 @@ fault-resource-owned-by-other-instance = 虚拟输出由另一个后台实例持
 fault-local-feedback-loop = 采集与本机房间输出使用同一端点，请选择不同的设备。
 
 fault-local-feedback-check-unavailable = 无法确认本机音频路径，请刷新网络与设备后重试。
+
+fault-capture-permission-denied = macOS 未允许音频采集。请在系统设置 → 隐私与安全性 → 麦克风中允许 NeonMix，然后重新开始发送。
+fault-capture-permission-pending = 麦克风授权尚未完成。请处理系统授权窗口，然后重新开始发送。

@@ -379,28 +379,37 @@ const SURFACES: [(Page, bool); 8] = [
 
 fn assert_accessible_window_actions(output: &egui::FullOutput, app: &Desktop, size: egui::Vec2) {
     let tree = output.platform_output.accesskit_update.as_ref().unwrap();
-    let quit = app.tr(&Message::ShellQuit);
-    let node = tree
-        .nodes
-        .iter()
-        .find(|(_, node)| node.label() == Some(quit.as_str()))
-        .expect("sidebar quit action missing from current accessibility tree")
-        .1
-        .clone();
-    let bounds = node.bounds().expect("quit action bounds");
-    let sidebar = if size.x < 820.0 { 164.0 } else { 212.0 };
-    assert!(
-        bounds.x0 >= 0.0 && bounds.x1 <= sidebar + 1.0,
-        "{:?} {:?}: quit action extends outside sidebar: {bounds:?}",
-        app.localization.locale,
-        size
-    );
-    assert!(
-        bounds.y0 >= 0.0 && bounds.y1 <= f64::from(size.y),
-        "{:?} {:?}: quit action extends outside window: {bounds:?}",
-        app.localization.locale,
-        size
-    );
+    // Hide and quit live in the identity menu; the identity row that opens
+    // it (and stop sending, while sending) must stay inside the sidebar.
+    let identity = app.tr(&Message::ShellIdentity);
+    let stop = app.tr(&Message::ShellStopSending);
+    let sidebar = f64::from(crate::shell::sidebar_width(size.x));
+    for (label, required) in [(&identity, true), (&stop, false)] {
+        let node = tree
+            .nodes
+            .iter()
+            .find(|(_, node)| node.label() == Some(label.as_str()));
+        let Some((_, node)) = node else {
+            assert!(
+                !required,
+                "sidebar action {label} missing from accessibility tree"
+            );
+            continue;
+        };
+        let bounds = node.bounds().expect("sidebar action bounds");
+        assert!(
+            bounds.x0 >= 0.0 && bounds.x1 <= sidebar + 1.0,
+            "{:?} {:?}: {label} extends outside sidebar: {bounds:?}",
+            app.localization.locale,
+            size
+        );
+        assert!(
+            bounds.y0 >= 0.0 && bounds.y1 <= f64::from(size.y),
+            "{:?} {:?}: {label} extends outside window: {bounds:?}",
+            app.localization.locale,
+            size
+        );
+    }
     let title = app.tr(&app.page.title());
     assert!(
         tree.nodes
@@ -433,7 +442,7 @@ fn shell_actions_fit_with_long_room_names_in_both_languages() {
                 app.page = page;
                 let output = frame_at_scale(&ctx, &mut app, size, Vec::new(), scale);
                 let tree = output.platform_output.accesskit_update.unwrap();
-                let sidebar = if size.x < 820.0 { 164.0 } else { 212.0 };
+                let sidebar = f64::from(crate::shell::sidebar_width(size.x));
                 let quick = app.tr(&Message::ShellQuickActions {
                     shortcut: widgets::command_hint("K"),
                 });
@@ -523,7 +532,7 @@ fn shell_identity_and_undo_stay_inside_their_panels() {
             assert!(app.undo_available());
             let output = frame_with_input(&ctx, &mut app, size, Vec::new());
             let tree = output.platform_output.accesskit_update.unwrap();
-            let sidebar = if size.x < 820.0 { 164.0 } else { 212.0 };
+            let sidebar = f64::from(crate::shell::sidebar_width(size.x));
             let identity = app.tr(&Message::ShellIdentity);
             let restore = app.tr(&Message::ShellRestoreButton {
                 shortcut: widgets::command_hint("Z"),
@@ -531,7 +540,10 @@ fn shell_identity_and_undo_stay_inside_their_panels() {
             let undo_label = app.tr(&Message::ShellAdjusted {
                 change: app.tr(&app.undo.as_ref().unwrap().label),
             });
-            for label in [&identity, &restore, &undo_label] {
+            // Identity stays in the sidebar; 还原 floats over the page, above
+            // the status strip.
+            for (label, in_sidebar) in [(&identity, true), (&restore, false), (&undo_label, false)]
+            {
                 let nodes: Vec<_> = tree
                     .nodes
                     .iter()
@@ -542,13 +554,13 @@ fn shell_identity_and_undo_stay_inside_their_panels() {
                 assert!(!nodes.is_empty(), "missing {label}");
                 for node in nodes {
                     let b = node.1.bounds().unwrap();
-                    let (left, right) = if b.y0 >= f64::from(size.y - 36.0) {
-                        (sidebar, f64::from(size.x))
+                    let (left, right, bottom) = if in_sidebar {
+                        (0.0, sidebar, f64::from(size.y))
                     } else {
-                        (0.0, sidebar)
+                        (sidebar, f64::from(size.x), f64::from(size.y - 36.0))
                     };
                     assert!(
-                        b.x0 >= left && b.x1 <= right && b.y1 <= f64::from(size.y),
+                        b.x0 >= left && b.x1 <= right && b.y1 <= bottom,
                         "{locale:?} {size:?}: {label} outside panel: {b:?}"
                     );
                 }

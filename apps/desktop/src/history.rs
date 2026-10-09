@@ -75,7 +75,7 @@ pub fn paint_levels(
     color: Color32,
 ) {
     let now = Instant::now();
-    painter.rect_filled(rect, CornerRadius::same(4), theme::METER_TRACK);
+    painter.rect_filled(rect, CornerRadius::same(4), theme::meter_track());
     let y = |db: f32| {
         let t = ((db - widgets::METER_FLOOR_DB) / -widgets::METER_FLOOR_DB).clamp(0.0, 1.0);
         rect.bottom() - rect.height() * t
@@ -110,7 +110,7 @@ pub fn paint_levels(
                 fx::hatch(
                     painter,
                     Rect::from_x_y_ranges(from..=x, rect.y_range()),
-                    theme::WARNING.gamma_multiply(0.25),
+                    theme::warning().gamma_multiply(0.25),
                     5.0,
                 );
                 silenced_from = None;
@@ -127,7 +127,7 @@ pub fn paint_levels(
         fx::hatch(
             painter,
             Rect::from_x_y_ranges(from..=rect.right(), rect.y_range()),
-            theme::WARNING.gamma_multiply(0.25),
+            theme::warning().gamma_multiply(0.25),
             5.0,
         );
     }
@@ -170,7 +170,7 @@ pub fn paint_spark(
         .collect();
     painter.line_segment(
         [rect.left_bottom(), rect.right_bottom()],
-        Stroke::new(1.0, theme::BORDER),
+        Stroke::new(1.0, theme::border()),
     );
     if points.len() >= 2 {
         painter.add(egui::Shape::line(points, Stroke::new(1.4, color)));

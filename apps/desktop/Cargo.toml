@@ -29,6 +29,9 @@ libc = "0.2"
 raw-window-handle = "0.6"
 windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Security", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell"] }
 [target.'cfg(target_os = "macos")'.dependencies]
+block2 = "=0.6.2"
+objc2 = "=0.6.4"
+objc2-avf-audio = { version = "=0.3.2", default-features = false, features = ["std", "AVAudioApplication", "block2"] }
 objc2-app-kit = { version = "=0.3.2", default-features = false, features = ["std", "NSMenu", "NSStatusItem"] }
 [lints]
 workspace = true

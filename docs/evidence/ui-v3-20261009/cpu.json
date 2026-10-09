@@ -1,0 +1,10 @@
+{
+  "machine": "Apple M4 Pro, macOS",
+  "build": "tools/dev cargo build -p neonmix-desktop --release --features screenshot (baseline: same command on a detached worktree of a95f730)",
+  "method": "preview mode, window not focused (10 fps live budget), 5 s warm-up, process CPU time over 30 s / wall time; baseline and new binaries alternated twice in one session; fixtures in ../ui-rebuild-20261004/fixtures",
+  "samples_percent_of_one_core": {
+    "live_playing_1100x760": {"baseline": [1.77, 2.17], "v3": [2.03, 2.43]},
+    "hub_full_1100x760": {"baseline": [1.83, 2.17], "v3": [2.40, 2.17]}
+  },
+  "finding": "Shadows, wells and gradients add 0 to 0.6 points of one core; run-to-run spread of the same binary is about 0.4. Continuous-repaint rules (20/10 fps live budget, none when idle or reduced motion) are unchanged."
+}

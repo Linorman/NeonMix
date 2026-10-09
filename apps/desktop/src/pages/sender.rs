@@ -2,7 +2,7 @@
 //! action that changes it; setup steps; pairing and virtual output panels.
 use super::*;
 use crate::widgets::{Kind, Tone};
-use egui::{Align, CornerRadius, Layout, Margin};
+use egui::{Align, Layout, Margin};
 
 impl Desktop {
     fn sender_room_name(&self) -> String {
@@ -398,9 +398,9 @@ impl Desktop {
                         ui.label(
                             RichText::new(&headline)
                                 .font(theme::heading(19.0))
-                                .color(theme::TEXT),
+                                .color(theme::text()),
                         );
-                        ui.label(RichText::new(&detail).color(theme::TEXT_2));
+                        ui.label(RichText::new(&detail).color(theme::text_2()));
                     });
                 };
                 let action = |this: &mut Self, ui: &mut egui::Ui| {
@@ -500,13 +500,8 @@ impl Desktop {
                 }
             },
         );
-        let rect = shown.response.rect;
-        let bar = egui::Rect::from_min_size(
-            egui::pos2(rect.left() + 1.0, rect.top() + 16.0),
-            egui::vec2(3.0, (rect.height() - 32.0).max(8.0)),
-        );
         let color = animation::color(ui.ctx(), ui.id().with("send-rail"), tone.color());
-        ui.painter().rect_filled(bar, CornerRadius::same(2), color);
+        widgets::lead_cap(ui, shown.response.rect, color);
     }
 
     fn pair_panel(&mut self, ui: &mut egui::Ui, paired: bool) {
@@ -608,7 +603,7 @@ impl Desktop {
                                         .unwrap_or(text_sender_unnamed_room.as_str()),
                                 )
                                 .font(theme::heading(theme::BODY))
-                                .color(theme::TEXT),
+                                .color(theme::text()),
                             );
                             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                                 let _ = widgets::pill(ui, text_sender_untrusted_identity.as_str(), Tone::Warning)
@@ -857,7 +852,7 @@ impl Desktop {
                                 .unwrap_or(text_sender_virtual_output.as_str()),
                         )
                         .font(theme::heading(theme::BODY))
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                     );
                     widgets::mono(
                         ui,

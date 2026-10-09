@@ -59,9 +59,9 @@ pub struct Source {
 impl Source {
     fn color(&self) -> Color32 {
         if self.airplay {
-            theme::SRC_AIRPLAY
+            theme::src_airplay()
         } else {
-            theme::SRC_NATIVE
+            theme::src_native()
         }
     }
 
@@ -377,17 +377,13 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
     let phase = animation::live_phase(&ctx, id.with("phase"), moving);
 
     // The graph sits in a recessed well, darker than the card around it.
-    painter.rect_filled(
-        rect,
-        CornerRadius::same(12),
-        theme::BG_DEEP.gamma_multiply(0.55),
-    );
+    fx::well(&painter, rect, 12, theme::well());
     // Ambient pool of light under the core.
     fx::glow(
         &painter,
         geo.hub,
         geo.hub_r * 1.6,
-        theme::ACCENT.gamma_multiply(if model.hub.active {
+        theme::accent().gamma_multiply(if model.hub.active {
             0.05 + 0.08 * master.unwrap_or(0.0)
         } else {
             0.02
@@ -467,7 +463,7 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
             &painter,
             curve,
             edge,
-            theme::SRC_HUB,
+            theme::src_hub(),
             output.gain_db,
             master,
             phase,
@@ -537,7 +533,7 @@ pub fn show(ui: &mut egui::Ui, model: &Model) -> Option<Action> {
                 ui.label(
                     egui::RichText::new(&source.name)
                         .font(theme::heading(theme::BODY))
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                 );
                 widgets::kv_grid(ui, "flow-facts", &source.facts);
             });
@@ -561,12 +557,12 @@ fn paint_edge(
     let line = |t0: f32, t1: f32| fx::cubic_points(curve, t0, t1, 32);
     let (tint, dashed) = match edge {
         Edge::Live => (color, false),
-        Edge::Degraded => (theme::WARNING, false),
-        Edge::Buffering => (theme::ACCENT.gamma_multiply(0.6), true),
+        Edge::Degraded => (theme::warning(), false),
+        Edge::Buffering => (theme::accent().gamma_multiply(0.6), true),
         Edge::Muted => (color.gamma_multiply(0.7), false),
         Edge::SoloedOut => (color.gamma_multiply(0.28), false),
-        Edge::Broken => (theme::DANGER.gamma_multiply(0.75), false),
-        Edge::Unknown => (theme::TEXT_3.gamma_multiply(0.5), true),
+        Edge::Broken => (theme::danger().gamma_multiply(0.75), false),
+        Edge::Unknown => (theme::text_3().gamma_multiply(0.5), true),
     };
     let tint = tint.gamma_multiply(alpha);
     let gate = 0.8;
@@ -576,7 +572,7 @@ fn paint_edge(
             painter.add(egui::Shape::line(line(0.58, 1.0), Stroke::new(width, tint)));
             let c = fx::cubic_at(curve, 0.5);
             let s = 4.5;
-            let x = Stroke::new(2.0, theme::DANGER.gamma_multiply(alpha));
+            let x = Stroke::new(2.0, theme::danger().gamma_multiply(alpha));
             painter.line_segment([c + vec2(-s, -s), c + vec2(s, s)], x);
             painter.line_segment([c + vec2(-s, s), c + vec2(s, -s)], x);
         }
@@ -585,7 +581,7 @@ fn paint_edge(
             fx::dashed(
                 painter,
                 &line(gate, 1.0),
-                Stroke::new(1.2, theme::TEXT_3.gamma_multiply(0.5 * alpha)),
+                Stroke::new(1.2, theme::text_3().gamma_multiply(0.5 * alpha)),
                 4.0,
                 4.0,
             );
@@ -595,8 +591,8 @@ fn paint_edge(
             painter.rect(
                 r,
                 CornerRadius::same(4),
-                theme::SURFACE,
-                Stroke::new(1.2, theme::WARNING.gamma_multiply(alpha)),
+                theme::surface(),
+                Stroke::new(1.2, theme::warning().gamma_multiply(alpha)),
                 StrokeKind::Inside,
             );
             painter.text(
@@ -604,7 +600,7 @@ fn paint_edge(
                 Align2::CENTER_CENTER,
                 "M",
                 FontId::monospace(10.0),
-                theme::WARNING.gamma_multiply(alpha),
+                theme::warning().gamma_multiply(alpha),
             );
         }
         _ if dashed => fx::dashed(painter, &line(0.0, 1.0), Stroke::new(1.4, tint), 5.0, 5.0),
@@ -639,7 +635,7 @@ fn paint_edge(
         let p = fx::cubic_at(curve, t);
         let a = alpha * envelope * (0.35 + 0.65 * level);
         let core = if edge == Edge::Degraded {
-            theme::WARNING
+            theme::warning()
         } else {
             fx::lift(color, 0.35)
         };
@@ -667,7 +663,7 @@ fn paint_source(
         .layout_no_wrap(
             mine_label.clone(),
             FontId::proportional(10.0),
-            theme::ACCENT,
+            theme::accent(),
         )
         .size()
         .x
@@ -682,30 +678,50 @@ fn paint_source(
             painter,
             card.center(),
             card.height() * 0.9,
-            theme::SOLO.gamma_multiply(0.10 * dim),
+            theme::solo().gamma_multiply(0.10 * dim),
         );
     }
-    let fill = animation::lerp_color(theme::SURFACE, theme::RAISED, hover.max(sel));
-    let stroke = if source.solo {
-        theme::SOLO.gamma_multiply(0.8)
+    // Cards rise off the stage; the selected one rises further.
+    let fill = animation::lerp_color(theme::raised(), theme::hover(), hover.max(sel) * 0.7);
+    let elevation = if sel > 0.5 {
+        fx::Level::Raised
     } else {
-        animation::lerp_color(theme::BORDER_STRONG, theme::ACCENT, sel)
+        fx::Level::Card
     };
-    painter.rect(
-        card,
-        CornerRadius::same(12),
-        // Dimmed cards darken but stay opaque, so lines never show through.
-        animation::lerp_color(theme::BG_DEEP, fill, dim.max(0.7)),
-        Stroke::new(1.0 + sel * 0.5, stroke.gamma_multiply(dim)),
-        StrokeKind::Inside,
-    );
-    // Source-type cap: left edge on cards, top edge on chips.
+    // Dimmed cards darken but stay opaque, so lines never show through.
+    let fill = animation::lerp_color(theme::surface(), fill, dim.max(0.7));
+    painter.extend(fx::elevated(ctx, card, 12, fill, elevation, None));
+    let ring = if source.solo {
+        Some(theme::solo().gamma_multiply(0.85))
+    } else if sel > 0.0 {
+        Some(theme::accent().gamma_multiply(0.8 * sel))
+    } else {
+        None
+    };
+    if let Some(ring) = ring {
+        painter.rect_stroke(
+            card,
+            CornerRadius::same(12),
+            Stroke::new(1.5, ring.gamma_multiply(dim)),
+            StrokeKind::Inside,
+        );
+    }
+    // Source-type cap on the top edge.
     let cap = if wide {
-        Rect::from_min_size(card.min + vec2(0.0, 12.0), vec2(3.0, card.height() - 24.0))
+        Rect::from_min_size(card.min + vec2(14.0, 0.0), vec2(28.0, 3.0))
     } else {
         Rect::from_min_size(card.min + vec2(14.0, 0.0), vec2(card.width() - 28.0, 3.0))
     };
-    painter.rect_filled(cap, CornerRadius::same(2), color.gamma_multiply(dim));
+    painter.rect_filled(
+        cap,
+        CornerRadius {
+            nw: 0,
+            ne: 0,
+            sw: 2,
+            se: 2,
+        },
+        color.gamma_multiply(dim),
+    );
     // Avatar with a live level ring.
     let c = if wide {
         pos2(card.left() + 30.0, card.center().y)
@@ -739,7 +755,7 @@ fn paint_source(
     }
     match level {
         Some(l) => {
-            painter.circle_stroke(c, r + 4.0, Stroke::new(2.5, theme::METER_TRACK));
+            painter.circle_stroke(c, r + 4.0, Stroke::new(2.5, theme::meter_track()));
             if l > 0.0 {
                 let a0 = -std::f32::consts::FRAC_PI_2;
                 let db = widgets::METER_FLOOR_DB * (1.0 - l);
@@ -757,7 +773,7 @@ fn paint_source(
             painter.circle_stroke(
                 c,
                 r + 4.0,
-                Stroke::new(1.0, theme::TEXT_3.gamma_multiply(0.4)),
+                Stroke::new(1.0, theme::text_3().gamma_multiply(0.4)),
             );
         }
     }
@@ -771,7 +787,7 @@ fn paint_source(
         painter,
         &source.name,
         theme::heading(13.5),
-        theme::TEXT.gamma_multiply(dim),
+        theme::text().gamma_multiply(dim),
         width - if source.mine { badge_width + 5.0 } else { 0.0 },
     );
     let detail = text(
@@ -794,8 +810,8 @@ fn paint_source(
             pos2(card.center().x - detail.size().x / 2.0, card.top() + 65.0),
         )
     };
-    painter.galley(name_at, name, theme::TEXT);
-    painter.galley(detail_at, detail, theme::TEXT_2);
+    painter.galley(name_at, name, theme::text());
+    painter.galley(detail_at, detail, theme::text_2());
     if source.mine {
         let badge = Rect::from_min_size(
             pos2(name_at.x + name_w + 5.0, name_at.y + 2.0),
@@ -804,21 +820,21 @@ fn paint_source(
         painter.rect_filled(
             badge,
             CornerRadius::same(4),
-            theme::ACCENT.gamma_multiply(0.2),
+            theme::accent().gamma_multiply(0.2),
         );
         painter.text(
             badge.center(),
             Align2::CENTER_CENTER,
             mine_label,
             FontId::proportional(10.0),
-            theme::ACCENT,
+            theme::accent(),
         );
     }
     if response.has_focus() {
         painter.rect_stroke(
             card.expand(2.0),
             CornerRadius::same(14),
-            Stroke::new(2.0, theme::ACCENT.gamma_multiply(0.85)),
+            Stroke::new(2.0, theme::accent().gamma_multiply(0.85)),
             StrokeKind::Outside,
         );
     }
@@ -836,7 +852,22 @@ fn paint_hub(
     let r = geo.hub_r;
     let lit = if hub.active { 1.0 } else { 0.0 };
     let lit = ctx.animate_value_with_time(egui::Id::new("flow-hub-lit"), lit, 0.3);
-    painter.circle_filled(c, r, theme::SURFACE);
+    // The core is the highest object on the stage.
+    painter.circle_filled(c + vec2(0.0, 10.0), r + 2.0, theme::shadow(0.25));
+    painter.add(egui::Shape::Rect(
+        egui::epaint::RectShape::filled(
+            Rect::from_center_size(c + vec2(0.0, 12.0), vec2(r * 2.0, r * 2.0)),
+            CornerRadius::same(255),
+            theme::shadow(0.55),
+        )
+        .with_blur_width(r * 0.8),
+    ));
+    painter.circle_filled(c, r, theme::raised());
+    painter.circle_filled(
+        c - vec2(0.0, r * 0.12),
+        r * 0.86,
+        fx::lift(theme::raised(), 0.025),
+    );
     let segments = 28;
     let on = master.unwrap_or(0.0) * segments as f32;
     fx::led_ring(painter, c, r - 4.0, 5.0, segments, on * lit, |i| {
@@ -848,8 +879,8 @@ fn paint_hub(
         Stroke::new(
             1.0 + hovered as u8 as f32,
             animation::lerp_color(
-                theme::BORDER_STRONG,
-                theme::ACCENT,
+                theme::border_strong(),
+                theme::accent(),
                 0.3 * lit + 0.5 * hovered as u8 as f32,
             ),
         ),
@@ -857,12 +888,12 @@ fn paint_hub(
     match hub.id {
         Some(id) => emblem::paint(painter, c, r - 14.0, Emblem::from_id(id), lit),
         None => {
-            painter.circle_stroke(c, r - 14.0, Stroke::new(1.0, theme::BORDER_STRONG));
+            painter.circle_stroke(c, r - 14.0, Stroke::new(1.0, theme::border_strong()));
             icons::paint(
                 painter,
                 icons::square(c, r * 0.6),
                 icons::Icon::Room,
-                theme::TEXT_3,
+                theme::text_3(),
             );
         }
     }
@@ -876,7 +907,7 @@ fn paint_hub(
             r + 6.0,
             top - span,
             top + span,
-            Stroke::new(3.0, theme::WARNING),
+            Stroke::new(3.0, theme::warning()),
         );
     }
     let below = pos2(c.x, c.y + r + 10.0);
@@ -884,7 +915,7 @@ fn paint_hub(
         painter,
         &hub.name,
         theme::heading(14.0),
-        theme::TEXT,
+        theme::text(),
         if geo.horizontal { 170.0 } else { 130.0 },
     );
     let state = text(
@@ -896,13 +927,13 @@ fn paint_hub(
     );
     let (nw, sw) = (name.size().x, state.size().x);
     if geo.horizontal {
-        painter.galley(pos2(c.x - nw / 2.0, below.y), name, theme::TEXT);
-        painter.galley(pos2(c.x - sw / 2.0, below.y + 20.0), state, theme::TEXT_2);
+        painter.galley(pos2(c.x - nw / 2.0, below.y), name, theme::text());
+        painter.galley(pos2(c.x - sw / 2.0, below.y + 20.0), state, theme::text_2());
     } else {
         // Stacked: labels beside the core keep the line to the output clear.
         let x = c.x + r + 14.0;
-        painter.galley(pos2(x, c.y - 19.0), name, theme::TEXT);
-        painter.galley(pos2(x, c.y + 2.0), state, theme::TEXT_2);
+        painter.galley(pos2(x, c.y - 19.0), name, theme::text());
+        painter.galley(pos2(x, c.y + 2.0), state, theme::text_2());
     }
 }
 
@@ -910,37 +941,46 @@ fn paint_output(painter: &egui::Painter, geo: &Geometry, output: &Output, locali
     let c = geo.output;
     let rect = Rect::from_center_size(c, vec2(OUTPUT_HALF * 2.0, OUTPUT_HALF * 2.0));
     let tone = if !output.available {
-        theme::WARNING
+        theme::warning()
     } else {
-        theme::SRC_OUTPUT
+        theme::src_output()
     };
     if output.available && !output.muted {
         fx::glow(
             painter,
             c,
             OUTPUT_HALF * 1.3,
-            theme::SRC_OUTPUT.gamma_multiply(0.05),
+            theme::src_output().gamma_multiply(0.05),
         );
     }
-    painter.rect(
+    painter.extend(fx::elevated(
+        painter.ctx(),
         rect,
-        CornerRadius::same(12),
-        theme::RAISED,
-        Stroke::new(1.0, tone.gamma_multiply(0.5)),
-        StrokeKind::Inside,
-    );
+        12,
+        theme::raised(),
+        fx::Level::Raised,
+        None,
+    ));
+    if !output.available {
+        painter.rect_stroke(
+            rect,
+            CornerRadius::same(12),
+            Stroke::new(1.0, tone.gamma_multiply(0.6)),
+            StrokeKind::Inside,
+        );
+    }
     icons::paint(painter, icons::square(c, 24.0), icons::Icon::Room, tone);
     let status = output_status(output, localizer);
     let status_color = if !output.available || output.muted {
-        theme::WARNING
+        theme::warning()
     } else {
-        theme::TEXT_2
+        theme::text_2()
     };
     let name = text(
         painter,
         &output.name,
         theme::heading(13.0),
-        theme::TEXT,
+        theme::text(),
         OUTPUT_COLUMN - 12.0,
     );
     let status = text(
@@ -952,16 +992,16 @@ fn paint_output(painter: &egui::Painter, geo: &Geometry, output: &Output, locali
     );
     if geo.horizontal {
         let y = rect.bottom() + 10.0;
-        painter.galley(pos2(c.x - name.size().x / 2.0, y), name, theme::TEXT);
+        painter.galley(pos2(c.x - name.size().x / 2.0, y), name, theme::text());
         painter.galley(
             pos2(c.x - status.size().x / 2.0, y + 20.0),
             status,
-            theme::TEXT_2,
+            theme::text_2(),
         );
     } else {
         let x = rect.right() + 14.0;
-        painter.galley(pos2(x, c.y - 19.0), name, theme::TEXT);
-        painter.galley(pos2(x, c.y + 2.0), status, theme::TEXT_2);
+        painter.galley(pos2(x, c.y - 19.0), name, theme::text());
+        painter.galley(pos2(x, c.y + 2.0), status, theme::text_2());
     }
 }
 
@@ -969,22 +1009,18 @@ fn paint_offline(painter: &egui::Painter, rect: Rect, label: &str, hovered: bool
     painter.rect(
         rect,
         CornerRadius::same(255),
-        if hovered {
-            theme::HOVER
-        } else {
-            theme::SURFACE
-        },
-        Stroke::new(1.0, theme::BORDER_STRONG),
+        theme::text().gamma_multiply(if hovered { 0.08 } else { 0.04 }),
+        Stroke::new(1.0, theme::border()),
         StrokeKind::Inside,
     );
     let galley = text(
         painter,
         label,
         FontId::proportional(theme::SMALL),
-        theme::TEXT_3,
+        theme::text_3(),
         rect.width() - 16.0,
     );
-    painter.galley(rect.center() - galley.size() / 2.0, galley, theme::TEXT_3);
+    painter.galley(rect.center() - galley.size() / 2.0, galley, theme::text_3());
 }
 
 #[cfg(test)]
@@ -1063,7 +1099,7 @@ mod localization_tests {
                         pos2(60.0, 0.0),
                     ],
                     Edge::Muted,
-                    theme::SRC_NATIVE,
+                    theme::src_native(),
                     0.0,
                     Some(1.0),
                     phase,
@@ -1080,7 +1116,7 @@ mod localization_tests {
             name: "设备 { $name }".into(),
             detail: "Ready".into(),
             status: "Ready".into(),
-            detail_color: theme::TEXT,
+            detail_color: theme::text(),
             airplay: false,
             mine: false,
             solo: false,

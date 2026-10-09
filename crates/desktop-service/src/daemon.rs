@@ -64,31 +64,34 @@ fn classify_error(message: &str) -> String {
         return fault.code.as_str().into();
     }
     let m = message.to_lowercase();
-    let code = if m.contains("unsupported audio format") {
-        FaultCode::UnsupportedAudioFormat
-    } else if m.contains("address already in use")
-        || m.contains("os error 48)")
-        || m.contains("os error 98)")
-        || m.contains("os error 10048)")
-    {
-        FaultCode::HubPortInUse
-    } else if m.contains("revok")
-        || m.contains("unauthoriz")
-        || m.contains("permission")
-        || m.contains("rejected")
-    {
-        FaultCode::PermissionDenied
-    } else if m.contains("capture") {
-        FaultCode::CaptureUnavailable
-    } else if m.contains("output") || m.contains("device") {
-        FaultCode::OutputUnavailable
-    } else if m.contains("timeout") {
-        FaultCode::BackgroundTimeout
-    } else if m.contains("connect") || m.contains("offline") || m.contains("network") {
-        FaultCode::ConnectionUnavailable
-    } else {
-        FaultCode::GenericFailure
-    };
+    let code =
+        if m.contains("macos microphone access") || m.contains("audio capture permission denied") {
+            FaultCode::CapturePermissionDenied
+        } else if m.contains("unsupported audio format") {
+            FaultCode::UnsupportedAudioFormat
+        } else if m.contains("address already in use")
+            || m.contains("os error 48)")
+            || m.contains("os error 98)")
+            || m.contains("os error 10048)")
+        {
+            FaultCode::HubPortInUse
+        } else if m.contains("revok")
+            || m.contains("unauthoriz")
+            || m.contains("permission")
+            || m.contains("rejected")
+        {
+            FaultCode::PermissionDenied
+        } else if m.contains("capture") {
+            FaultCode::CaptureUnavailable
+        } else if m.contains("output") || m.contains("device") {
+            FaultCode::OutputUnavailable
+        } else if m.contains("timeout") {
+            FaultCode::BackgroundTimeout
+        } else if m.contains("connect") || m.contains("offline") || m.contains("network") {
+            FaultCode::ConnectionUnavailable
+        } else {
+            FaultCode::GenericFailure
+        };
     code.as_str().into()
 }
 pub(crate) async fn drain(
@@ -2130,6 +2133,21 @@ mod discovery_tests {
             assert!(!safe.to_string().contains(private));
         }
     }
+    #[test]
+    fn capture_permission_is_not_room_permission() {
+        for message in [
+            "audio capture permission denied: macOS Microphone access is not yet granted.",
+            "audio capture permission denied: macOS Microphone access is denied.",
+        ] {
+            assert_eq!(classify_error(message), "capture_permission_denied");
+        }
+        assert_eq!(classify_error("permission_denied"), "permission_denied");
+        assert_eq!(
+            classify_error("credential_permission_denied"),
+            "credential_permission_denied"
+        );
+    }
+
     #[test]
     fn unsupported_device_format_has_a_specific_redacted_error() {
         let error =

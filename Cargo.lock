@@ -2978,7 +2978,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-airplay-adapter"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "neonmix-airplay-ipc",
  "neonmix-core",
@@ -2988,7 +2988,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-airplay-ipc"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "libc",
  "serde",
@@ -2999,7 +2999,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-audio"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "libc",
@@ -3016,7 +3016,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-control"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3027,7 +3027,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "rtrb",
  "rubato",
@@ -3038,8 +3038,9 @@ dependencies = [
 
 [[package]]
 name = "neonmix-desktop"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
+ "block2 0.6.2",
  "clap",
  "eframe",
  "image",
@@ -3050,7 +3051,9 @@ dependencies = [
  "neonmix-desktop-service",
  "neonmix-i18n",
  "neonmix-identity",
+ "objc2 0.6.4",
  "objc2-app-kit 0.3.2",
+ "objc2-avf-audio",
  "raw-window-handle",
  "serde",
  "serde_json",
@@ -3062,7 +3065,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-desktop-service"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "libc",
@@ -3081,7 +3084,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-hal"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "stats_alloc",
  "tympan-aspl",
@@ -3089,7 +3092,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-hub"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "axum",
  "axum-server",
@@ -3128,7 +3131,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-i18n"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "fluent-bundle",
  "fluent-syntax",
@@ -3143,7 +3146,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-identity"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "base64 0.22.1",
  "libc",
@@ -3164,7 +3167,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-io"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cpal",
  "neonmix-core",
@@ -3172,7 +3175,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-lifecycle"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "libc",
  "serde",
@@ -3183,7 +3186,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-linux"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cpal",
  "neonmix-core",
@@ -3193,7 +3196,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-macos"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cpal",
  "neonmix-core",
@@ -3203,7 +3206,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-media"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "dbus 0.9.12",
  "gstreamer",
@@ -3222,7 +3225,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-output-binding"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "libc",
  "serde",
@@ -3233,7 +3236,7 @@ dependencies = [
 
 [[package]]
 name = "neonmix-windows"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cpal",
  "neonmix-core",
@@ -3441,6 +3444,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13a380031deed8e99db00065c45937da434ca987c034e13b87e4441f9e4090be"
 dependencies = [
  "bitflags 2.13.2",
+ "block2 0.6.2",
  "objc2 0.6.4",
  "objc2-foundation 0.3.2",
 ]

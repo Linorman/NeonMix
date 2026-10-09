@@ -178,19 +178,27 @@ impl Desktop {
                     let limit = state
                         .pointer("/capacity/limit")
                         .and_then(Value::as_u64)
-                        .unwrap_or(4) as usize;
-                    let used: Vec<crate::viz::Slot> = self
-                        .snapshot
-                        .clone()
-                        .map(|s| self.lanes(&s))
-                        .unwrap_or_default()
+                        .unwrap_or(count as u64) as usize;
+                    let used: Vec<crate::viz::Slot> = state["sessions"]
+                        .as_array()
                         .into_iter()
-                        .map(|l| crate::viz::Slot {
-                            airplay: l.is_airplay(),
-                            name: l.name,
+                        .flatten()
+                        .map(|session| crate::viz::Slot {
+                            airplay: true,
+                            name: session["source_name"].as_str().unwrap_or("").to_owned(),
                         })
+                        .chain(
+                            (0..state["capacity"]["reserved"].as_u64().unwrap_or(0)).map(|_| {
+                                crate::viz::Slot {
+                                    airplay: true,
+                                    name: text_hub_preparing.clone(),
+                                }
+                            }),
+                        )
                         .collect();
                     widgets::caption(ui, text_hub_room_input_capacity.as_str());
+                    let active = state["capacity"]["active"].as_u64().unwrap_or(0);
+                    widgets::mono(ui, format!("{active} / {limit}"));
                     crate::viz::capacity_slots(ui, limit, &used);
                     if self.admin()
                         && widgets::button_enabled(
@@ -201,7 +209,11 @@ impl Desktop {
                             } else {
                                 text_hub_turn_on_airplay_reception.as_str()
                             },
-                            Kind::Primary,
+                            if enabled {
+                                Kind::Secondary
+                            } else {
+                                Kind::Primary
+                            },
                         )
                         .clicked()
                     {
@@ -215,17 +227,13 @@ impl Desktop {
                 if self.admin() {
                     ui.horizontal_wrapped(|ui| {
                         widgets::caption(ui, text_hub_receiver_entry_count.as_str());
-                        for n in 1..=4 {
-                            if widgets::toggle(
-                                ui,
-                                self.writable(),
-                                n == count,
-                                &n.to_string(),
-                                Tone::Accent,
-                            )
-                            .clicked()
-                                && (n != count || !multi)
-                            {
+                        let labels = ["1", "2", "3", "4"];
+                        let current = (1..=4).contains(&count).then(|| count - 1);
+                        if let Some(i) =
+                            widgets::segments_clicked(ui, self.writable(), &labels, current)
+                        {
+                            let n = i + 1;
+                            if n != count || !multi {
                                 self.airplay_operation(AirplayAction::Configure {
                                     receiver_count: n,
                                     multi_receiver: true,
@@ -257,7 +265,7 @@ impl Desktop {
                                             .as_str()
                                             .unwrap_or(text_hub_airplay_entry.as_str()),
                                     )
-                                    .color(theme::TEXT),
+                                    .color(theme::text()),
                                 );
                                 let (label, tone) = if receiver["error"].is_string() {
                                     (text_hub_entry_fault.as_str(), Tone::Danger)
@@ -401,7 +409,7 @@ impl Desktop {
             ui.label(
                 RichText::new(name)
                     .font(theme::heading(theme::BODY))
-                    .color(theme::TEXT),
+                    .color(theme::text()),
             );
             widgets::pill(ui, "AirPlay", Tone::Neutral);
             let (label, tone) = if revoked {

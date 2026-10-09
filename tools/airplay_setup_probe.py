@@ -20,7 +20,7 @@ state=root/'.local/tmp'/('setup-'+uuid.uuid4().hex);state.mkdir(parents=True)
 key=state/'identity.pem'
 def ntp(ns):return (((ns//1000000000)+2208988800)<<32)|((ns%1000000000)*(1<<32)//1000000000)
 # 352 stereo sine frames encoded by FFmpeg ALAC; synthetic public test data.
-ALAC=bytes.fromhex('200010000002c000020d0c010fff97ffca000dffec001a0f0801000000000000000ff8022ffe008cff80233d1f47d100418620428c188631080a2201054044a8644007600f4eddbb76ec762a5290aad00804e48020061c9288447723b44154952a54a9529201c02a0e0e3838e03693556548000003579469a4d915408d32509c71340954a952a54a5323b551c23881dc4087710053072ed4b908ee58a5220f4471c71c1c713409c1c1db52a308ca8937742007fc057f80')
+from airplay_probe_fixtures import ALAC
 def run_case(ct,spf,noise=False,control_port=None):
  sockets=[];proc=None;done=threading.Event();events=[];media_bytes=[0]
  result={'codec':ct,'spf':spf,'udp_noise':noise,'invalid_control_port':control_port is not None}

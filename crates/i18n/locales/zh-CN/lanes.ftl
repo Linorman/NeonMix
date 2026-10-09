@@ -34,3 +34,5 @@ device-sending = 发送中
 device-idle = 空闲
 
 lane-audio-supply-interrupted = 音频供给中断
+
+lane-waiting-for-audio = 已连接 · 等待音频

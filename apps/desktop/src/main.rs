@@ -1,4 +1,5 @@
 mod animation;
+mod capture_permission;
 mod commands;
 #[cfg(test)]
 mod commands_tests;
@@ -55,6 +56,10 @@ struct Args {
     preview_language: Option<String>,
     #[arg(long, requires = "preview_page")]
     preview_system_locale: Vec<String>,
+    /// Appearance for preview verification; previews default to dark so
+    /// captures do not depend on the OS appearance.
+    #[arg(long, requires = "preview_page", value_parser = ["system", "dark", "light"])]
+    preview_theme: Option<String>,
     #[arg(long, default_value = ".local/desktop")]
     state_dir: PathBuf,
     #[arg(long, default_value_t = 1100.0)]
@@ -87,7 +92,7 @@ impl Page {
             Self::Mixer => icons::Icon::Mixer,
             Self::Devices => icons::Icon::Devices,
             Self::Diagnostics => icons::Icon::Pulse,
-            Self::About => icons::Icon::Info,
+            Self::About => icons::Icon::Settings,
         }
     }
     const ALL: [(Self, Message); 7] = [
@@ -206,7 +211,9 @@ fn worker(
                     .map(|()| Outcome::Boot)
                     .map_err(UiError::from),
                 Work::Action(request) => {
-                    let result = call(&client, &request);
+                    let result = capture_permission::before_action(&request)
+                        .map_err(UiError::from)
+                        .and_then(|()| call(&client, &request));
                     let original = match request {
                         Request::LifecycleStart { request, .. } => *request,
                         other => other,
@@ -480,6 +487,13 @@ impl Desktop {
                 LanguagePreference::Explicit(language.into())
             };
         }
+        if preview {
+            preferences.value.theme = match args.preview_theme.as_deref() {
+                Some("system") => preferences::ThemeChoice::System,
+                Some("light") => preferences::ThemeChoice::Light,
+                _ => preferences::ThemeChoice::Dark,
+            };
+        }
         let candidates = if preview {
             Some(args.preview_system_locale)
         } else {
@@ -487,6 +501,7 @@ impl Desktop {
         };
         let localization = localization::Localization::new(&preferences.value.language, candidates);
         let cjk = theme::install(&cc.egui_ctx);
+        cc.egui_ctx.set_theme(preferences.value.theme.preference());
         let mut app = Self::empty(client, cjk, preview);
         app.preferences = preferences;
         app.localization = localization;
@@ -520,6 +535,22 @@ impl Desktop {
             app.worker = Some(tx);
             app.results = Some(rx);
             app.queue(Work::Boot);
+        }
+        // Preview data first: screenshot states (还原) build on its snapshot.
+        if app.preview {
+            app.message = Message::ShellPreview;
+            if let Some(path) = args.preview_data {
+                match std::fs::read(path)
+                    .ok()
+                    .and_then(|b| serde_json::from_slice::<Value>(&b).ok())
+                {
+                    Some(data) => app.load_preview(&data),
+                    None => {
+                        app.error = true;
+                        app.message = Message::ShellPreviewReadFailed;
+                    }
+                }
+            }
         }
         #[cfg(feature = "screenshot")]
         if app.preview {
@@ -557,6 +588,23 @@ impl Desktop {
                         }),
                         at: Instant::now() + Duration::from_secs(30),
                     });
+                    // 还原 is offered only for an acknowledged write.
+                    let undo = app.undo.as_ref().unwrap();
+                    app.intents.history.push_back(intent::Intent {
+                        id: undo.request_id,
+                        context: undo.context.clone(),
+                        route: intent::Route {
+                            credential: app.credential.clone(),
+                            hub: app.hub(),
+                        },
+                        target: undo.target.clone(),
+                        write: undo.after.clone(),
+                        label: Some(undo.label.clone()),
+                        guard: None,
+                        frozen: None,
+                        created_at: Instant::now(),
+                        phase: intent::Phase::Acknowledged,
+                    });
                 }
             }
             if std::env::var_os("NEONMIX_SCREENSHOT_CONFIRM").is_some() {
@@ -568,22 +616,19 @@ impl Desktop {
                 );
             }
         }
-        if app.preview {
-            app.message = Message::ShellPreview;
-            if let Some(path) = args.preview_data {
-                match std::fs::read(path)
-                    .ok()
-                    .and_then(|b| serde_json::from_slice::<Value>(&b).ok())
-                {
-                    Some(data) => app.load_preview(&data),
-                    None => {
-                        app.error = true;
-                        app.message = Message::ShellPreviewReadFailed;
-                    }
-                }
-            }
-        }
         app
+    }
+    pub(crate) fn set_theme_choice(
+        &mut self,
+        ctx: &egui::Context,
+        choice: preferences::ThemeChoice,
+    ) {
+        ctx.set_theme(choice.preference());
+        self.preferences.theme(choice);
+        if self.preferences.save().is_err() {
+            self.message = Message::PreferencesSaveFailed;
+            self.error = true;
+        }
     }
     pub(crate) fn set_reduce_motion(&mut self, on: bool) {
         animation::set_reduce_motion(on);
@@ -1629,6 +1674,8 @@ fn user_error(error: UiError) -> Message {
         FaultCode::SetupIncomplete => Message::FaultSetupIncomplete,
         FaultCode::UnsupportedAudioFormat => Message::FaultUnsupportedAudioFormat,
         FaultCode::CaptureUnavailable => Message::FaultCaptureUnavailable,
+        FaultCode::CapturePermissionDenied => Message::FaultCapturePermissionDenied,
+        FaultCode::CapturePermissionPending => Message::FaultCapturePermissionPending,
         FaultCode::ConnectionUnavailable => Message::FaultConnectionUnavailable,
         FaultCode::BackgroundTimeout => Message::FaultBackgroundTimeout,
         FaultCode::BackgroundBusy => Message::FaultBackgroundBusy,
@@ -3052,14 +3099,24 @@ mod tests {
                 .and_then(|(_, n)| n.bounds())
                 .unwrap_or_else(|| panic!("{label} missing"))
         };
-        let last_page = bounds("关于");
+        let last_page = bounds("设置");
         let identity = bounds("控制身份");
-        let quit = bounds("退出后台");
         assert!(
             last_page.y1 <= identity.y0,
             "navigation {last_page:?} overlaps identity {identity:?}"
         );
-        assert!(quit.y1 <= 440.0, "quit button {quit:?} off screen");
+        assert!(identity.y1 <= 440.0, "identity row {identity:?} off screen");
+        if let Some(stop) = tree
+            .nodes
+            .iter()
+            .find(|(_, n)| n.label() == Some("停止发送"))
+            .and_then(|(_, n)| n.bounds())
+        {
+            assert!(
+                last_page.y1 <= stop.y0 && stop.y1 <= identity.y0,
+                "stop sending {stop:?} overlaps navigation or identity"
+            );
+        }
     }
 
     #[test]

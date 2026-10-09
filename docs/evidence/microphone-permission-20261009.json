@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-09",
+  "scope": "macOS installed app microphone permission repair and Mac-to-Windows native sender verification",
+  "root_cause": {
+    "previous_microphone_requirement_cdhash": "597eb18ea95daa2d99f3ea379069613a5a57b098",
+    "pre_fix_installed_requirement_cdhash": "cebe814aa24c1aa2e6062058a1b48c0cf5cf712f",
+    "tcc_before": "Microphone Unknown (None), old requirement validation status -67050, including after user toggled permission and relaunched",
+    "application_before": "macOS adapter queried recordPermission only; Undetermined returned PermissionDenied; background classified capture failure as room permission_denied",
+    "tcc_after": "2026-10-09 01:45:39 local: Microphone Allowed (User Consent)"
+  },
+  "change": {
+    "prompt": "Desktop worker requests only on explicit SenderStart, before dispatching frozen lifecycle ticket",
+    "timeout_seconds": 60,
+    "cancel": "Independent stop generation fences a start whose authorization completed late",
+    "faults": [
+      "capture_permission_denied",
+      "capture_permission_pending"
+    ],
+    "backend_capture_preflight_preserved": true
+  },
+  "verification": {
+    "desktop_unit_passed": 92,
+    "service_unit_passed": 16,
+    "service_unit_ignored": 3,
+    "fault_contract_passed": 6,
+    "lifecycle_integration_passed": 16,
+    "redaction_passed": 5,
+    "strict_clippy": "passed",
+    "release_build": "passed",
+    "fmt_and_diff_check": "passed",
+    "i18n_messages": 748,
+    "shipped_locales": 2,
+    "premium_audit_errors": 0,
+    "sender": {
+      "ready": true,
+      "running": true,
+      "fault": null,
+      "control_connected": true,
+      "sent_packets_samples": [
+        2799,
+        3199
+      ],
+      "capture_frames_samples": [
+        1382880,
+        1574880
+      ],
+      "capture_peak_samples": [
+        0.04565374553203583,
+        0.22911328077316284
+      ],
+      "capture_errors": 0,
+      "capture_dropped_frames_samples": [
+        23520,
+        23520
+      ],
+      "capture_stale_frames_samples": [
+        15360,
+        15360
+      ],
+      "feedback_receiving": true,
+      "feedback_loss_fraction": 0.0
+    },
+    "windows_receiver": {
+      "authenticated": true,
+      "received_packets": 4283,
+      "pcm_frames": 2055840,
+      "lost_packets": 0,
+      "late_packets": 0,
+      "queue_drops": 0,
+      "pcm_sink_dropped": 0,
+      "native_rendered_frames": 2049762
+    }
+  },
+  "deployment": {
+    "installed": "/Applications/NeonMix.app",
+    "replaced_binaries": [
+      "neonmix-desktop",
+      "neonmix-background"
+    ],
+    "preserved_profiles": 2,
+    "output_binding_preserved": true,
+    "original_backup": "artifacts/microphone-fix-20261009/NeonMix-before.app",
+    "signed_candidate": "artifacts/microphone-fix-20261009/NeonMix.app",
+    "github_release_changed": false,
+    "binary_sha256": {
+      "neonmix-desktop": "9d33607f7c21a5e2d0acc1a71404a53b26d6dd3d3b87cf8629ce602f819bf5c4",
+      "neonmix-background": "d8455e5b346e7ac196eb446595a7d8dfebfd631ca50653ae5a01f8063ce108a1"
+    }
+  },
+  "limitations": [
+    "Short live native-stream validation only; no long-duration or acoustic-output measurement.",
+    "Initial sender capture drop/stale counters were nonzero, unchanged between the recorded samples.",
+    "No Windows application binary changes; Windows is the live receiving peer."
+  ]
+}

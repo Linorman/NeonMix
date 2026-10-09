@@ -10,7 +10,7 @@ shell-page-devices = Devices
 
 shell-page-diagnostics = Diagnostics
 
-shell-page-about = About
+shell-page-about = Settings
 
 shell-processing = Working…
 
@@ -154,3 +154,16 @@ shell-media-applied = Settings saved and applied to the audio engine.
 shell-media-stalled = Settings saved. Audio is still waiting; check the output or restart sharing.
 shell-media-unknown = Settings saved. Audio application is not yet confirmed.
 shell-media-superseded = Settings saved, but the value has since changed.
+shell-group-monitor = Monitor
+shell-group-connect = Connect
+shell-group-system = System
+shell-search-placeholder = Search or run an action
+shell-sending-now = This device is sending
+shell-account-menu = Identity and background
+shell-switch-identity = Switch identity
+shell-open-room = Open room settings
+shell-room-state =
+    { $count ->
+        [one] { $state } · 1 input
+       *[other] { $state } · { $count } inputs
+    }

@@ -106,35 +106,22 @@ fn view(e: &mut Engine, p: &ReceiverProfile, admin: bool) -> serde_json::Value {
             Some(v)
         })
         .collect::<Vec<_>>();
-    let native = e
-        .authority
-        .current()
-        .sessions
+    let active = e
+        .resources
+        .admissions
+        .claims
         .values()
-        .filter(|s| s.status.active())
+        .filter(|c| c.active)
         .count();
-    let active = native
-        + e.resources
-            .admissions
-            .claims
-            .values()
-            .filter(|c| c.active)
-            .count();
-    let native_reserved = usize::from(e.resources.native_reservation.is_some());
-    let reserved = native_reserved
-        + e.resources
-            .admissions
-            .claims
-            .values()
-            .filter(|c| !c.active)
-            .count();
-    let limit = if e.airplay.multi_receiver || e.resources.pending_multi_capacity {
-        4
-    } else if e.resources.admissions.claims.is_empty() {
-        LANES
-    } else {
-        2
-    };
+    let reserved = e
+        .resources
+        .admissions
+        .claims
+        .values()
+        .filter(|c| !c.active)
+        .count();
+    // Configured AirPlay entries determine capacity, even while reception is off.
+    let limit = p.receivers.iter().filter(|r| r.enabled).count();
     let confirmed = e
         .airplay
         .recovery
@@ -281,18 +268,10 @@ fn snapshot_with(
     receiver["name"] = serde_json::json!(speaker_name(&e.room_name));
     receiver["configured_enabled"] = serde_json::json!(true);
     receiver.as_object_mut().unwrap().remove("pairing_pin");
-    let active = e
-        .authority
-        .current()
-        .sessions
-        .values()
-        .filter(|s| s.status.active())
-        .count();
-    let reserved = usize::from(e.resources.native_reservation.is_some());
     Ok(Json(
         serde_json::json!({"revision":e.airplay.revision,"enabled":false,"multi_receiver":false,
         "receivers":[receiver],"sources":[],"sessions":[],
-        "capacity":{"limit":LANES,"active":active,"reserved":reserved,"available":LANES.saturating_sub(active+reserved)}}),
+        "capacity":{"limit":1,"active":0,"reserved":0,"available":1}}),
     ))
 }
 fn receiver_index(e: &Engine, id: &str) -> std::result::Result<usize, Error> {
@@ -509,21 +488,6 @@ fn execute(
                 {
                     return Err(Error("receiver_busy"));
                 }
-            }
-            let native = e
-                .authority
-                .current()
-                .sessions
-                .values()
-                .filter(|s| s.status.active())
-                .count();
-            if *multi_receiver
-                && native
-                    + usize::from(e.resources.native_reservation.is_some())
-                    + e.resources.admissions.claims.len()
-                    > 4
-            {
-                return Err(Error("room_capacity_full"));
             }
             configure = Some((*receiver_count, *multi_receiver));
             save = true;
@@ -816,9 +780,8 @@ fn execute(
     {
         e.airplay.configuration_pending = true;
     }
-    if let Some((_, multi)) = configure {
+    if configure.is_some() {
         e.airplay.configuration_pending = true;
-        e.resources.pending_multi_capacity = e.resources.multi_receiver || multi;
     }
     let recovery = Recovery {
         path,
@@ -1009,7 +972,6 @@ fn settle(
         Ok(persisted) => persisted,
         Err(error) if !retry && error.0 != "configuration_recovery_required" => {
             e.airplay.configuration_pending = false;
-            e.resources.pending_multi_capacity = false;
             return Err(error);
         }
         Err(_) => {
@@ -1104,7 +1066,6 @@ fn settle(
         return Err(Error("profile_durability_unconfirmed"));
     }
     e.airplay.configuration_pending = false;
-    e.resources.pending_multi_capacity = false;
     let Recovery {
         path,
         configure,
@@ -1476,7 +1437,6 @@ mod tests {
                     airplay_mix: [None; 4],
                     admissions: Default::default(),
                     multi_receiver: false,
-                    pending_multi_capacity: false,
                     native_reservation: None,
                     retiring: Vec::new(),
                 },
@@ -1553,6 +1513,51 @@ mod tests {
     }
     fn read(f: &Fixture) -> serde_json::Value {
         snapshot_with(&f.shared, &f.headers, || {}).unwrap().0
+    }
+    #[test]
+    fn capacity_counts_configured_airplay_entries_and_claims_only() {
+        let f = Fixture::new();
+        let _ = execute(
+            &f.shared,
+            &f.headers,
+            f.command(Op::Configure {
+                receiver_count: 2,
+                multi_receiver: true,
+            }),
+            persist_change,
+        )
+        .unwrap();
+        f.shared.lock().unwrap().resources.native_reservation =
+            Some((Uuid::new_v4(), 8, Uuid::new_v4(), 900));
+        assert_eq!(
+            read(&f)["capacity"],
+            serde_json::json!({"limit":2,"active":0,"reserved":0,"available":2})
+        );
+        reserve_source(&f);
+        assert_eq!(
+            read(&f)["capacity"],
+            serde_json::json!({"limit":2,"active":0,"reserved":1,"available":1})
+        );
+        {
+            let mut e = f.shared.lock().unwrap();
+            let owner = e
+                .resources
+                .admissions
+                .claims
+                .values()
+                .next()
+                .unwrap()
+                .owner
+                .clone();
+            e.resources
+                .admissions
+                .commit(&owner, Instant::now())
+                .unwrap();
+        }
+        assert_eq!(
+            read(&f)["capacity"],
+            serde_json::json!({"limit":2,"active":1,"reserved":0,"available":1})
+        );
     }
     #[test]
     fn terminal_airplay_actions_cut_actual_timed_fifo_with_full_queue_and_preserve_native_lane() {
@@ -2159,7 +2164,7 @@ mod tests {
     }
 
     #[test]
-    fn configuration_reserves_four_source_capacity_before_disk_write_and_clears_on_failure() {
+    fn configuration_does_not_reduce_native_capacity_during_disk_write() {
         let f = Fixture::new();
         let command = f.command(Op::Configure {
             receiver_count: 2,
@@ -2168,18 +2173,13 @@ mod tests {
         let error = execute(&f.shared, &f.headers, command, |_, _, _, _| {
             let e = f.shared.try_lock().unwrap();
             assert!(e.airplay.configuration_pending);
-            assert!(e.resources.pending_multi_capacity);
-            assert!(!e.resources.admissions.native_capacity(
-                5,
-                e.resources.multi_receiver || e.resources.pending_multi_capacity
-            ));
+            assert!(e.resources.admissions.native_capacity(5));
             Err(Error("profile_write_failed"))
         })
         .unwrap_err();
         assert_eq!(error.0, "profile_write_failed");
         let e = f.shared.lock().unwrap();
         assert!(!e.airplay.configuration_pending);
-        assert!(!e.resources.pending_multi_capacity);
         assert!(!e.resources.multi_receiver);
         assert!(e.airplay.receipts.is_empty());
     }

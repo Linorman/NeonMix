@@ -238,3 +238,31 @@ id="shell-media-unknown"
 
 [[message]]
 id="shell-media-superseded"
+
+[[message]]
+id = "shell-group-monitor"
+
+[[message]]
+id = "shell-group-connect"
+
+[[message]]
+id = "shell-group-system"
+
+[[message]]
+id = "shell-search-placeholder"
+
+[[message]]
+id = "shell-sending-now"
+
+[[message]]
+id = "shell-account-menu"
+
+[[message]]
+id = "shell-switch-identity"
+
+[[message]]
+id = "shell-open-room"
+
+[[message]]
+id="shell-room-state"
+args={state="string", count="u64"}

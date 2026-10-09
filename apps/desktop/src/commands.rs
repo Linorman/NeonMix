@@ -1007,9 +1007,9 @@ impl Desktop {
             |ui| {
                 ui.add(
                     egui::Label::new(RichText::new(&text).size(11.).color(if failed {
-                        theme::WARNING
+                        theme::warning()
                     } else {
-                        theme::TEXT_3
+                        theme::text_3()
                     }))
                     .truncate(),
                 )

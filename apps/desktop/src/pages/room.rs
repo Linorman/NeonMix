@@ -217,13 +217,9 @@ impl Desktop {
                 }
             },
         );
-        let rect = shown.response.rect;
-        let bar = egui::Rect::from_min_size(
-            egui::pos2(rect.left() + 1.0, rect.top() + 16.0),
-            egui::vec2(3.0, (rect.height() - 32.0).max(8.0)),
-        );
+        // Room state as a short lit cap on the hero's top edge.
         let color = animation::color(ui.ctx(), ui.id().with("room-rail"), tone.color());
-        ui.painter().rect_filled(bar, CornerRadius::same(2), color);
+        widgets::lead_cap(ui, shown.response.rect, color);
     }
 
     /// The room's identity glyph; a one-shot ripple when sharing starts.
@@ -259,7 +255,7 @@ impl Desktop {
                 crate::fx::dashed(
                     painter,
                     &pts,
-                    Stroke::new(1.0, theme::BORDER_STRONG),
+                    Stroke::new(1.0, theme::border_strong()),
                     3.0,
                     3.0,
                 );
@@ -275,7 +271,7 @@ impl Desktop {
                 rect.center(),
                 26.0,
                 t,
-                theme::SUCCESS,
+                theme::success(),
             );
         }
     }
@@ -355,8 +351,8 @@ impl Desktop {
         let text_hub_save_settings = self.tr(&Message::HubSaveSettings);
         let text_hub_discard_changes = self.tr(&Message::HubDiscardChanges);
         egui::Frame::new()
-            .fill(theme::WARNING.gamma_multiply(0.08))
-            .stroke(Stroke::new(1.0, theme::WARNING.gamma_multiply(0.35)))
+            .fill(theme::warning().gamma_multiply(0.08))
+            .stroke(Stroke::new(1.0, theme::warning().gamma_multiply(0.35)))
             .corner_radius(CornerRadius::same(theme::CONTROL_RADIUS))
             .inner_margin(Margin::symmetric(12, 8))
             .show(ui, |ui| {
@@ -412,13 +408,16 @@ impl Desktop {
             ui.spacing_mut().item_spacing.x = -6.0;
             for device in devices.iter().take(6) {
                 let color = if device.revoked {
-                    theme::DANGER
+                    theme::danger()
                 } else {
                     role_color(device.role)
                 };
                 let r = widgets::avatar(ui, &device.name, color, 28.0);
-                ui.painter()
-                    .circle_stroke(r.rect.center(), 14.5, Stroke::new(2.0, theme::SURFACE));
+                ui.painter().circle_stroke(
+                    r.rect.center(),
+                    14.5,
+                    Stroke::new(2.0, theme::surface()),
+                );
                 r.on_hover_text(self.tr(&Message::HubMemberRole {
                     name: (device.name).to_string(),
                     role: self.tr(&role_name(device.role)),
@@ -428,7 +427,7 @@ impl Desktop {
                 widgets::avatar(
                     ui,
                     source["source_name"].as_str().unwrap_or("AirPlay"),
-                    theme::ACCENT,
+                    theme::accent(),
                     28.0,
                 );
             }
@@ -438,7 +437,7 @@ impl Desktop {
                 RichText::new(self.tr(&Message::HubPairingRecordCount {
                     count: (devices.len() + airplay.len()) as u64,
                 }))
-                .color(theme::TEXT),
+                .color(theme::text()),
             );
             if sending > 0 {
                 widgets::dot(
@@ -575,13 +574,13 @@ impl Desktop {
                     egui::Sense::hover(),
                 );
                 ui.painter()
-                    .rect_filled(rect, CornerRadius::same(2), theme::INPUT);
+                    .rect_filled(rect, CornerRadius::same(2), theme::well());
                 let mut fill = rect;
                 fill.set_width(rect.width() * (left as f32 / 120.0).clamp(0.0, 1.0));
                 let tone = if left <= 20 {
-                    theme::WARNING
+                    theme::warning()
                 } else {
-                    theme::ACCENT
+                    theme::accent()
                 };
                 ui.painter().rect_filled(fill, CornerRadius::same(2), tone);
                 ui.ctx().request_repaint_after(Duration::from_millis(500));

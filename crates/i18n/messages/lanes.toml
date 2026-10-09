@@ -26,6 +26,9 @@ id = "lane-network-unavailable"
 id = "lane-network-stopped"
 
 [[message]]
+id = "lane-waiting-for-audio"
+
+[[message]]
 id = "lane-receiving"
 
 [[message]]

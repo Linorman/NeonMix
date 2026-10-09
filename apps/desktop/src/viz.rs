@@ -28,10 +28,10 @@ pub struct Step<'a> {
 impl Stage {
     fn color(self) -> Color32 {
         match self {
-            Self::Done => theme::SUCCESS,
-            Self::Next => theme::ACCENT,
-            Self::Todo => theme::TEXT_3,
-            Self::Fault => theme::WARNING,
+            Self::Done => theme::success(),
+            Self::Next => theme::accent(),
+            Self::Todo => theme::text_3(),
+            Self::Fault => theme::warning(),
         }
     }
 
@@ -86,7 +86,7 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
             if ready {
                 painter.line_segment(
                     [a, b],
-                    Stroke::new(2.0, theme::SRC_NATIVE.gamma_multiply(0.7)),
+                    Stroke::new(2.0, theme::src_native().gamma_multiply(0.7)),
                 );
                 if let Some(l) = level.filter(|l| *l > 0.0) {
                     for k in 0..3 {
@@ -96,7 +96,7 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
                         painter.circle_filled(
                             p,
                             2.4,
-                            fx::lift(theme::SRC_NATIVE, 0.4).gamma_multiply(alpha),
+                            fx::lift(theme::src_native(), 0.4).gamma_multiply(alpha),
                         );
                     }
                 }
@@ -104,7 +104,7 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
                 fx::dashed(
                     painter,
                     &[a, b],
-                    Stroke::new(1.2, theme::BORDER_STRONG),
+                    Stroke::new(1.2, theme::border_strong()),
                     4.0,
                     4.0,
                 );
@@ -120,9 +120,9 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
                     tip - dir * 6.0 - side * 3.5,
                 ],
                 if ready {
-                    theme::SRC_NATIVE
+                    theme::src_native()
                 } else {
-                    theme::BORDER_STRONG
+                    theme::border_strong()
                 },
                 Stroke::NONE,
             ));
@@ -154,19 +154,19 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
                 painter,
                 r.center(),
                 r.height() * 0.8,
-                theme::ACCENT.gamma_multiply(0.10),
+                theme::accent().gamma_multiply(0.10),
             );
         }
         painter.rect(
             r,
             CornerRadius::same(12),
-            animation::lerp_color(theme::SURFACE, theme::RAISED, hover),
+            animation::lerp_color(theme::surface(), theme::raised(), hover),
             Stroke::new(
                 1.0,
                 if solid {
                     color.gamma_multiply(0.55)
                 } else {
-                    theme::BORDER_STRONG
+                    theme::border_strong()
                 },
             ),
             StrokeKind::Inside,
@@ -183,7 +183,7 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
             fx::dashed(
                 painter,
                 &pts,
-                Stroke::new(1.0, theme::BORDER_STRONG),
+                Stroke::new(1.0, theme::border_strong()),
                 3.0,
                 3.0,
             );
@@ -197,12 +197,18 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
         icons::paint(painter, icons::square(icon_c, 15.0), step.icon, color);
         let text_x = icon_c.x + 20.0;
         let max = r.right() - text_x - 8.0;
-        let title = label(painter, step.title, theme::heading(13.0), theme::TEXT, max);
+        let title = label(
+            painter,
+            step.title,
+            theme::heading(13.0),
+            theme::text(),
+            max,
+        );
         let detail = label(
             painter,
             &step.detail,
             FontId::proportional(theme::SMALL),
-            theme::TEXT_2,
+            theme::text_2(),
             if horizontal { r.width() - 20.0 } else { max },
         );
         let state = label(
@@ -216,9 +222,13 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
             painter.galley(
                 pos2(text_x, icon_c.y - title.size().y / 2.0),
                 title,
-                theme::TEXT,
+                theme::text(),
             );
-            painter.galley(pos2(r.left() + 10.0, r.top() + 42.0), detail, theme::TEXT_2);
+            painter.galley(
+                pos2(r.left() + 10.0, r.top() + 42.0),
+                detail,
+                theme::text_2(),
+            );
             painter.circle_filled(pos2(r.left() + 13.0, r.top() + 69.0), 3.0, color);
             painter.galley(
                 pos2(r.left() + 20.0, r.top() + 69.0 - state.size().y / 2.0),
@@ -226,8 +236,8 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
                 color,
             );
         } else {
-            painter.galley(pos2(text_x, r.top() + 8.0), title, theme::TEXT);
-            painter.galley(pos2(text_x, r.top() + 28.0), detail, theme::TEXT_2);
+            painter.galley(pos2(text_x, r.top() + 8.0), title, theme::text());
+            painter.galley(pos2(text_x, r.top() + 28.0), detail, theme::text_2());
             painter.galley(
                 pos2(r.right() - state.size().x - 10.0, r.top() + 8.0),
                 state,
@@ -238,7 +248,7 @@ pub fn pipeline(ui: &mut Ui, steps: &[Step<'_>], level: Option<f32>) -> Option<u
             painter.rect_stroke(
                 r.expand(2.0),
                 CornerRadius::same(14),
-                Stroke::new(2.0, theme::ACCENT),
+                Stroke::new(2.0, theme::accent()),
                 StrokeKind::Outside,
             );
         }
@@ -270,21 +280,21 @@ pub fn radar(ui: &mut Ui, scanning: bool, found: &[u64], size: f32) -> Response 
     let c = rect.center();
     let r = size / 2.0 - 2.0;
     let painter = ui.painter();
-    painter.circle_filled(c, r, theme::METER_TRACK);
+    painter.circle_filled(c, r, theme::meter_track());
     for k in [1.0, 0.66, 0.33] {
         painter.circle_stroke(
             c,
             r * k,
-            Stroke::new(1.0, theme::BORDER_STRONG.gamma_multiply(0.8)),
+            Stroke::new(1.0, theme::border_strong().gamma_multiply(0.8)),
         );
     }
     painter.line_segment(
         [c - vec2(r, 0.0), c + vec2(r, 0.0)],
-        Stroke::new(1.0, theme::BORDER),
+        Stroke::new(1.0, theme::border()),
     );
     painter.line_segment(
         [c - vec2(0.0, r), c + vec2(0.0, r)],
-        Stroke::new(1.0, theme::BORDER),
+        Stroke::new(1.0, theme::border()),
     );
     if scanning {
         let a = phase * 2.4;
@@ -294,7 +304,7 @@ pub fn radar(ui: &mut Ui, scanning: bool, found: &[u64], size: f32) -> Response 
                 [c, c + egui::Vec2::angled(back) * r],
                 Stroke::new(
                     2.0,
-                    theme::ACCENT.gamma_multiply(0.5 * (1.0 - k as f32 / 14.0)),
+                    theme::accent().gamma_multiply(0.5 * (1.0 - k as f32 / 14.0)),
                 ),
             );
         }
@@ -303,10 +313,10 @@ pub fn radar(ui: &mut Ui, scanning: bool, found: &[u64], size: f32) -> Response 
         let angle = (*hash % 360) as f32 / 360.0 * std::f32::consts::TAU;
         let dist = 0.35 + 0.5 * ((*hash / 360) % 100) as f32 / 100.0;
         let p = c + egui::Vec2::angled(angle) * r * dist;
-        fx::glow(painter, p, 8.0, theme::SUCCESS.gamma_multiply(0.4));
-        painter.circle_filled(p, 3.5, theme::SUCCESS);
+        fx::glow(painter, p, 8.0, theme::success().gamma_multiply(0.4));
+        painter.circle_filled(p, 3.5, theme::success());
     }
-    painter.circle_filled(c, 3.0, theme::ACCENT);
+    painter.circle_filled(c, 3.0, theme::accent());
     response
 }
 
@@ -334,43 +344,61 @@ pub fn switch(ui: &mut Ui, enabled: bool, on: bool, busy: bool, label: &str) -> 
     let hover =
         ui.ctx()
             .animate_bool_with_time(response.id.with("h"), response.hovered() && enabled, 0.12);
-    let track = animation::lerp_color(theme::RAISED, theme::SUCCESS.gamma_multiply(0.85), t);
+    let track = animation::lerp_color(theme::well(), theme::success().gamma_multiply(0.9), t);
     let painter = ui.painter();
     if t > 0.0 {
         fx::glow(
             painter,
             rect.center(),
             30.0,
-            theme::SUCCESS.gamma_multiply(0.18 * t),
+            theme::success().gamma_multiply(0.18 * t),
         );
     }
     painter.rect(
         rect,
         CornerRadius::same(255),
-        if enabled { track } else { theme::SURFACE },
+        if enabled { track } else { theme::surface() },
         Stroke::new(
             1.0,
-            animation::lerp_color(theme::BORDER_STRONG, theme::SUCCESS, t * 0.6 + hover * 0.3),
+            animation::lerp_color(
+                theme::border_strong(),
+                theme::success(),
+                t * 0.6 + hover * 0.3,
+            ),
         ),
         StrokeKind::Inside,
     );
     let x = rect.left() + 15.0 + (rect.width() - 30.0) * t;
     let knob = pos2(x, rect.center().y);
+    // Physical knob: light cap with a contact shadow on either track.
+    painter.circle_filled(knob + vec2(0.0, 1.5), 11.5, theme::shadow(0.45));
     painter.circle_filled(
         knob,
         11.0,
-        if enabled { theme::TEXT } else { theme::TEXT_3 },
+        if enabled {
+            theme::cap_top()
+        } else {
+            theme::text_3()
+        },
     );
+    painter.circle_stroke(knob, 11.0, Stroke::new(1.0, theme::shadow(0.25)));
     if busy {
         let a = animation::now(ui.ctx()) as f32 * 6.0;
-        fx::arc(painter, knob, 6.0, a, a + 4.2, Stroke::new(2.0, theme::BG));
+        fx::arc(
+            painter,
+            knob,
+            6.0,
+            a,
+            a + 4.2,
+            Stroke::new(2.0, theme::text_3()),
+        );
         ui.ctx().request_repaint();
     }
     if response.has_focus() {
         painter.rect_stroke(
             rect.expand(2.0),
             CornerRadius::same(255),
-            Stroke::new(2.0, theme::ACCENT),
+            Stroke::new(2.0, theme::accent()),
             StrokeKind::Outside,
         );
     }
@@ -400,12 +428,12 @@ pub fn countdown_ring(ui: &mut Ui, remaining: f32, total: f32, size: f32) -> Res
     let r = size / 2.0 - 3.0;
     let frac = (remaining / total).clamp(0.0, 1.0);
     let color = if frac > 0.25 {
-        theme::ACCENT
+        theme::accent()
     } else {
-        theme::WARNING
+        theme::warning()
     };
     let painter = ui.painter();
-    painter.circle_stroke(c, r, Stroke::new(4.0, theme::METER_TRACK));
+    painter.circle_stroke(c, r, Stroke::new(4.0, theme::meter_track()));
     if frac > 0.0 {
         let top = -std::f32::consts::FRAC_PI_2;
         fx::arc(
@@ -426,9 +454,9 @@ pub fn countdown_ring(ui: &mut Ui, remaining: f32, total: f32, size: f32) -> Res
         format!("{}", remaining.ceil().max(0.0) as u32),
         FontId::monospace(size * 0.26),
         if frac > 0.0 {
-            theme::TEXT
+            theme::text()
         } else {
-            theme::TEXT_3
+            theme::text_3()
         },
     );
     let access_label = text(
@@ -464,9 +492,9 @@ pub fn capacity_slots(ui: &mut Ui, limit: usize, used: &[Slot]) -> Response {
         match used.get(i) {
             Some(slot) => {
                 let color = if slot.airplay {
-                    theme::SRC_AIRPLAY
+                    theme::src_airplay()
                 } else {
-                    theme::SRC_NATIVE
+                    theme::src_native()
                 };
                 painter.rect(
                     r,
@@ -484,13 +512,13 @@ pub fn capacity_slots(ui: &mut Ui, limit: usize, used: &[Slot]) -> Response {
                     painter,
                     &slot.name,
                     FontId::proportional(theme::SMALL),
-                    theme::TEXT,
+                    theme::text(),
                     w - 24.0,
                 );
                 painter.galley(
                     pos2(r.left() + 18.0, r.center().y - g.size().y / 2.0),
                     g,
-                    theme::TEXT,
+                    theme::text(),
                 );
             }
             None => {
@@ -504,7 +532,7 @@ pub fn capacity_slots(ui: &mut Ui, limit: usize, used: &[Slot]) -> Response {
                 fx::dashed(
                     painter,
                     &pts,
-                    Stroke::new(1.0, theme::BORDER_STRONG),
+                    Stroke::new(1.0, theme::border_strong()),
                     3.0,
                     3.0,
                 );
@@ -513,7 +541,7 @@ pub fn capacity_slots(ui: &mut Ui, limit: usize, used: &[Slot]) -> Response {
                     Align2::CENTER_CENTER,
                     text(ui, &Message::VizCapacityIdle),
                     FontId::proportional(theme::SMALL),
-                    theme::TEXT_3,
+                    theme::text_3(),
                 );
             }
         }

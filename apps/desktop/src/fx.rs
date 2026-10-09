@@ -1,5 +1,5 @@
-//! Painting helpers for the Neon Console look: surface gradients, glows,
-//! hatching for silenced areas, curves and LED segments. Pure painting; no
+//! Painting helpers for the Studio Graphite look: elevation (shadows,
+//! surface gradients, wells), glows, hatching for silenced areas, curves and LED segments. Pure painting; no
 //! state, no repaint requests.
 use crate::theme;
 use eframe::egui::{
@@ -8,16 +8,18 @@ use eframe::egui::{
 };
 
 /// Vertical white→grey ramp; multiplied with a fill colour it gives raised
-/// surfaces a lit top edge without a second shape.
+/// surfaces a lit top edge without a second shape. Depth follows the mode:
+/// light surfaces only fall off slightly or they read as dirty.
 fn ramp(ctx: &egui::Context) -> TextureId {
-    let id = egui::Id::new("fx-ramp");
+    let depth = theme::palette().ramp_depth;
+    let id = egui::Id::new(("fx-ramp", depth));
     if let Some(handle) = ctx.data(|d| d.get_temp::<egui::TextureHandle>(id)) {
         return handle.id();
     }
     let pixels = (0..64)
         .map(|y| {
             let t = y as f32 / 63.0;
-            let v = (255.0 - 52.0 * t).round() as u8;
+            let v = (255.0 - depth as f32 * t).round() as u8;
             Color32::from_rgb(v, v, v)
         })
         .collect();
@@ -36,34 +38,75 @@ pub fn lift(color: Color32, t: f32) -> Color32 {
     crate::animation::lerp_color(color, Color32::WHITE, t)
 }
 
-/// Card background: lit gradient, hairline border, top highlight and an
-/// optional inner glow in the top-left corner that names the card's state.
-pub fn surface(
+/// Elevation of a raised shape. Each level is lighter and casts a longer,
+/// softer shadow; the layer order is the reading order.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Level {
+    /// Buttons and small caps resting on a card.
+    Control,
+    /// Cards, panels and channel strips.
+    Card,
+    /// Selected nodes, the master strip, fader caps and value bubbles.
+    /// Menus, the palette, the toast and dialogs use egui's own shadow.
+    Raised,
+}
+
+/// Contact shadow plus ambient shadow under `rect`. Blur is done by the
+/// tessellator, so each layer is one shape.
+pub fn shadow(rect: Rect, radius: u8, level: Level) -> [Shape; 2] {
+    // (offset y, blur, alpha) for the contact and the ambient layer.
+    let ((y1, b1, a1), (y2, b2, a2)) = match level {
+        Level::Control => ((1.0, 2.0, 0.45), (2.0, 6.0, 0.22)),
+        Level::Card => ((1.0, 3.0, 0.35), (8.0, 22.0, 0.48)),
+        Level::Raised => ((3.0, 8.0, 0.45), (14.0, 32.0, 0.62)),
+    };
+    let r = CornerRadius::same(radius);
+    let layer = |y: f32, blur: f32, alpha: f32| {
+        // Pull the ambient layer in so it shows below, not around, the shape.
+        let inset = (blur * 0.25).min(rect.width() / 4.0);
+        let rect = rect.translate(vec2(0.0, y)).shrink2(vec2(inset, 0.0));
+        Shape::Rect(RectShape::filled(rect, r, theme::shadow(alpha)).with_blur_width(blur))
+    };
+    [layer(y1, b1, a1), layer(y2, b2, a2)]
+}
+
+/// Raised background at `level`: shadow, lit gradient, hairline border, top
+/// highlight and an optional inner glow in the top-left corner that names
+/// the shape's state.
+pub fn elevated(
     ctx: &egui::Context,
     rect: Rect,
     radius: u8,
     base: Color32,
+    level: Level,
     glow: Option<Color32>,
 ) -> Vec<Shape> {
     let r = CornerRadius::same(radius);
-    let mut shapes = vec![Shape::Rect(
-        RectShape::filled(rect, r, lift(base, 0.04)).with_texture(
+    let mut shapes: Vec<Shape> = shadow(rect, radius, level).into();
+    let lift_by = if theme::is_light() { 0.0 } else { 0.035 };
+    shapes.push(Shape::Rect(
+        RectShape::filled(rect, r, lift(base, lift_by)).with_texture(
             ramp(ctx),
             Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)),
         ),
-    )];
+    ));
     if let Some(color) = glow {
         let size = (rect.height() * 0.9).clamp(60.0, 180.0);
         let spot = Rect::from_min_size(rect.min + vec2(18.0, 14.0), vec2(size * 1.6, size * 0.7));
+        let strength = if theme::is_light() { 0.06 } else { 0.08 };
         shapes.push(Shape::Rect(
-            RectShape::filled(spot, CornerRadius::same(255), color.gamma_multiply(0.07))
-                .with_blur_width(size * 0.55),
+            RectShape::filled(
+                spot,
+                CornerRadius::same(255),
+                color.gamma_multiply(strength),
+            )
+            .with_blur_width(size * 0.55),
         ));
     }
     shapes.push(Shape::Rect(RectShape::stroke(
         rect,
         r,
-        Stroke::new(1.0, theme::BORDER),
+        Stroke::new(1.0, theme::border()),
         StrokeKind::Inside,
     )));
     let inset = radius as f32;
@@ -72,9 +115,73 @@ pub fn surface(
             pos2(rect.left() + inset, rect.top() + 1.0),
             pos2(rect.right() - inset, rect.top() + 1.0),
         ],
-        Stroke::new(1.0, theme::EDGE_LIGHT),
+        Stroke::new(1.0, theme::edge_light()),
     ));
     shapes
+}
+
+/// Card background (level `Card`).
+pub fn surface(
+    ctx: &egui::Context,
+    rect: Rect,
+    radius: u8,
+    base: Color32,
+    glow: Option<Color32>,
+) -> Vec<Shape> {
+    elevated(ctx, rect, radius, base, Level::Card, glow)
+}
+
+/// Recessed well (meter and fader tracks, inputs, the signal stage): darker
+/// than its surroundings, with a shadow falling in from the top edge and a
+/// faint catch-light along the bottom. Paint through a painter clipped to
+/// `rect` (see `well`) so the inner shadow stays inside.
+pub fn well_shapes(rect: Rect, radius: u8, fill: Color32) -> Vec<Shape> {
+    let r = CornerRadius::same(radius);
+    let depth = (rect.height() * 0.35).clamp(2.0, 8.0);
+    let mut shapes = vec![
+        Shape::Rect(RectShape::filled(rect, r, fill)),
+        Shape::Rect(
+            RectShape::filled(
+                rect.translate(vec2(0.0, -rect.height() + depth * 0.45)),
+                r,
+                theme::shadow(0.7),
+            )
+            .with_blur_width(depth * 2.0),
+        ),
+        Shape::Rect(RectShape::stroke(
+            rect,
+            r,
+            Stroke::new(1.0, theme::shadow(0.3)),
+            StrokeKind::Inside,
+        )),
+    ];
+    if rect.width() > 2.0 * radius as f32 + 2.0 && rect.height() > 8.0 {
+        shapes.push(Shape::line_segment(
+            [
+                pos2(rect.left() + radius as f32, rect.bottom() - 0.5),
+                pos2(rect.right() - radius as f32, rect.bottom() - 0.5),
+            ],
+            Stroke::new(1.0, theme::edge_light().gamma_multiply(0.5)),
+        ));
+    }
+    shapes
+}
+
+pub fn well(painter: &Painter, rect: Rect, radius: u8, fill: Color32) {
+    painter
+        .with_clip_rect(rect.intersect(painter.clip_rect()))
+        .extend(well_shapes(rect, radius, fill));
+}
+
+/// Whole-texture UV for `ramp_texture`.
+pub const FULL_UV: Rect = Rect {
+    min: pos2(0.0, 0.0),
+    max: pos2(1.0, 1.0),
+};
+
+/// The mode's top-lit gradient for custom raised shapes.
+pub fn ramp_texture(ctx: &egui::Context) -> TextureId {
+    ramp(ctx)
 }
 
 /// Soft round glow. Blur is done by the tessellator, so this is one shape.
@@ -82,6 +189,12 @@ pub fn glow(painter: &Painter, center: Pos2, radius: f32, color: Color32) {
     if radius <= 0.5 || color.a() == 0 {
         return;
     }
+    // Light paper shows tints far more than a dark room shows light.
+    let color = if theme::is_light() {
+        color.gamma_multiply(0.55)
+    } else {
+        color
+    };
     // Blur close to the shape's own size folds back on itself and leaves a
     // seam; keep it to two thirds of the core.
     let size = radius * 1.2;
@@ -161,9 +274,9 @@ pub fn led_ring(
         let a1 = a0 + step * (1.0 - gap);
         let on = (lit - i as f32).clamp(0.0, 1.0);
         let color = if on > 0.0 {
-            crate::animation::lerp_color(theme::METER_TRACK, color_at(i), on)
+            crate::animation::lerp_color(theme::meter_track(), color_at(i), on)
         } else {
-            theme::BORDER
+            theme::border()
         };
         arc(painter, center, radius, a0, a1, Stroke::new(width, color));
     }
@@ -184,10 +297,10 @@ pub fn arc(painter: &Painter, center: Pos2, radius: f32, a0: f32, a1: f32, strok
 /// Meter zone colour for a level in dBFS.
 pub fn zone(db: f32) -> Color32 {
     if db > -6.0 {
-        theme::METER_HIGH
+        theme::meter_high()
     } else if db > -18.0 {
-        theme::METER_MID
+        theme::meter_mid()
     } else {
-        theme::METER_LOW
+        theme::meter_low()
     }
 }

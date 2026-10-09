@@ -261,7 +261,7 @@ impl Desktop {
                 ui.label(
                     RichText::new(text_live_signal_flow.as_str())
                         .font(theme::heading(theme::SECTION))
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                 );
                 widgets::pill(
                     ui,
@@ -275,8 +275,8 @@ impl Desktop {
                     Tone::Neutral,
                 );
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    legend(ui, theme::SRC_AIRPLAY, "AirPlay");
-                    legend(ui, theme::SRC_NATIVE, text_live_native_sender.as_str());
+                    legend(ui, theme::src_airplay(), "AirPlay");
+                    legend(ui, theme::src_native(), text_live_native_sender.as_str());
                 });
             });
             let action = flow::show(ui, model);
@@ -377,7 +377,7 @@ impl Desktop {
                 name,
                 id,
                 state,
-                state_color: theme::TEXT_3,
+                state_color: theme::text_3(),
                 active: false,
                 rms: None,
                 limiter: None,
@@ -390,7 +390,7 @@ impl Desktop {
             ui.label(
                 RichText::new(text_live_signal_flow.as_str())
                     .font(theme::heading(theme::SECTION))
-                    .color(theme::TEXT),
+                    .color(theme::text()),
             );
             flow::show(ui, &model);
             ui.vertical_centered(|ui| {
@@ -519,16 +519,16 @@ impl Desktop {
                 ui.painter().circle_filled(
                     rect.center(),
                     15.0,
-                    theme::SRC_AIRPLAY.gamma_multiply(0.18),
+                    theme::src_airplay().gamma_multiply(0.18),
                 );
                 icons::paint(
                     ui.painter(),
                     icons::square(rect.center(), 16.0),
                     icons::Icon::AirPlay,
-                    theme::SRC_AIRPLAY,
+                    theme::src_airplay(),
                 );
             } else {
-                widgets::avatar(ui, &lane.name, theme::SRC_NATIVE, 30.0);
+                widgets::avatar(ui, &lane.name, theme::src_native(), 30.0);
             }
             ui.vertical(|ui| {
                 ui.spacing_mut().item_spacing.y = 1.0;
@@ -536,7 +536,7 @@ impl Desktop {
                     egui::Label::new(
                         RichText::new(&lane.name)
                             .font(theme::heading(theme::SECTION))
-                            .color(theme::TEXT),
+                            .color(theme::text()),
                     )
                     .truncate(),
                 );
@@ -617,9 +617,9 @@ impl Desktop {
                     .monospace()
                     .size(15.0)
                     .color(if shown > 0.0 {
-                        theme::WARNING
+                        theme::warning()
                     } else {
-                        theme::TEXT
+                        theme::text()
                     }),
             );
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -668,7 +668,7 @@ impl Desktop {
         ui.label(
             RichText::new(text_live_room_overview.as_str())
                 .font(theme::heading(theme::SECTION))
-                .color(theme::TEXT),
+                .color(theme::text()),
         );
         let native = lanes.iter().filter(|l| !l.is_airplay()).count();
         let airplay = lanes.len() - native;
@@ -734,9 +734,9 @@ impl Desktop {
                         .monospace()
                         .size(15.0)
                         .color(if shown > 0.0 {
-                            theme::WARNING
+                            theme::warning()
                         } else {
-                            theme::TEXT
+                            theme::text()
                         }),
                 );
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -781,7 +781,7 @@ impl Desktop {
                 ui.label(
                     RichText::new(text_live_room_activity.as_str())
                         .font(theme::heading(theme::SECTION))
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                 );
                 widgets::note(ui, text_live_since_this_window_opened.as_str());
             });
@@ -809,7 +809,11 @@ impl Desktop {
 }
 
 fn legend(ui: &mut egui::Ui, color: egui::Color32, label: &str) {
-    ui.label(RichText::new(label).size(theme::SMALL).color(theme::TEXT_3));
+    ui.label(
+        RichText::new(label)
+            .size(theme::SMALL)
+            .color(theme::text_3()),
+    );
     let (rect, _) = ui.allocate_exact_size(egui::vec2(14.0, 10.0), egui::Sense::hover());
     ui.painter().line_segment(
         [rect.left_center(), rect.right_center()],

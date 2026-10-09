@@ -81,7 +81,7 @@ impl Desktop {
         ui.label(
             RichText::new(text_mixer_levels_and_faders.as_str())
                 .size(theme::SMALL)
-                .color(theme::TEXT_3)
+                .color(theme::text_3())
                 .underline(),
         )
         .on_hover_text(text_mixer_levels_use_the_latest_50_ms_stereo_window.as_str());
@@ -98,19 +98,22 @@ impl Desktop {
             ui.vertical_centered(|ui| {
                 let (rect, _) =
                     ui.allocate_exact_size(egui::vec2(40.0, 40.0), egui::Sense::hover());
-                ui.painter()
-                    .circle_filled(rect.center(), 20.0, theme::ACCENT.gamma_multiply(0.12));
+                ui.painter().circle_filled(
+                    rect.center(),
+                    20.0,
+                    theme::accent().gamma_multiply(0.12),
+                );
                 icons::paint(
                     ui.painter(),
                     icons::square(rect.center(), 20.0),
                     icons::Icon::Mixer,
-                    theme::ACCENT,
+                    theme::accent(),
                 );
                 ui.add_space(6.0);
                 ui.label(
                     RichText::new(text_mixer_no_room_connected_yet.as_str())
                         .font(theme::heading(17.0))
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                 );
                 widgets::note(
                     ui,
@@ -274,9 +277,9 @@ impl Desktop {
                                 .monospace()
                                 .size(theme::DISPLAY)
                                 .color(if shown > 0.0 {
-                                    theme::WARNING
+                                    theme::warning()
                                 } else {
-                                    theme::TEXT
+                                    theme::text()
                                 }),
                         );
                         caption
@@ -406,10 +409,15 @@ impl Desktop {
         let sel = ctx.animate_bool_with_time(id.with("sel"), selected, 0.14);
         let dim = ctx.animate_bool_with_time(id.with("dim"), !lane.audible, 0.2);
         let frame = egui::Frame::new()
-            .fill(animation::lerp_color(theme::SURFACE, theme::RAISED, sel))
+            .shadow(widgets::card_shadow())
+            .fill(animation::lerp_color(
+                theme::surface(),
+                theme::raised(),
+                sel,
+            ))
             .stroke(Stroke::new(
                 1.0,
-                animation::lerp_color(theme::BORDER, theme::ACCENT.gamma_multiply(0.55), sel),
+                animation::lerp_color(theme::border(), theme::accent().gamma_multiply(0.55), sel),
             ))
             .corner_radius(CornerRadius::same(theme::RADIUS))
             .inner_margin(Margin {
@@ -442,7 +450,7 @@ impl Desktop {
                             Layout::left_to_right(Align::Center),
                             |ui| {
                                 let color = if lane.airplay_target.is_some() {
-                                    theme::ACCENT
+                                    theme::accent()
                                 } else {
                                     lane.tone.color()
                                 };
@@ -474,7 +482,7 @@ impl Desktop {
                                         egui::Label::new(
                                             RichText::new(&lane.name)
                                                 .font(theme::heading(14.5))
-                                                .color(theme::TEXT),
+                                                .color(theme::text()),
                                         )
                                         .truncate(),
                                     );
@@ -487,7 +495,7 @@ impl Desktop {
                                                     renderer.render(role)
                                                 ))
                                                 .size(theme::SMALL)
-                                                .color(theme::TEXT_3),
+                                                .color(theme::text_3()),
                                             );
                                         }
                                         ui.label(
@@ -500,7 +508,7 @@ impl Desktop {
                                         egui::Label::new(
                                             RichText::new(&command_status)
                                                 .size(11.)
-                                                .color(theme::TEXT_3),
+                                                .color(theme::text_3()),
                                         )
                                         .truncate(),
                                     )
@@ -519,9 +527,9 @@ impl Desktop {
                                 .monospace()
                                 .size(15.0)
                                 .color(if draft > 0.0 {
-                                    theme::WARNING
+                                    theme::warning()
                                 } else {
-                                    theme::TEXT
+                                    theme::text()
                                 }),
                         ),
                     );
@@ -697,13 +705,8 @@ impl Desktop {
                     self.lane_toggle(lane.key, toggles.0, toggles.1);
                 }
             });
-        let rect = frame.response.rect;
-        let bar = egui::Rect::from_min_size(
-            egui::pos2(rect.left() + 1.0, rect.top() + 12.0),
-            egui::vec2(3.0, (rect.height() - 24.0).max(8.0)),
-        );
         let color = animation::color(&ctx, id.with("rail"), lane.tone.color());
-        ui.painter().rect_filled(bar, CornerRadius::same(2), color);
+        widgets::lead_cap(ui, frame.response.rect, color);
     }
 
     pub(crate) fn lane_detail_panel(&mut self, ui: &mut egui::Ui, lane: &Lane) {
@@ -858,20 +861,20 @@ pub(super) fn disclosure(ui: &mut egui::Ui, open: bool, name: &str) -> egui::Res
         ui.painter().rect_filled(
             rect,
             CornerRadius::same(theme::CONTROL_RADIUS),
-            theme::HOVER,
+            theme::hover(),
         );
     }
     icons::chevron(
         ui.painter(),
         icons::square(rect.center(), 16.0),
         t,
-        theme::TEXT_2,
+        theme::text_2(),
     );
     if response.has_focus() {
         ui.painter().rect_stroke(
             rect,
             CornerRadius::same(theme::CONTROL_RADIUS),
-            Stroke::new(1.5, theme::ACCENT),
+            Stroke::new(1.5, theme::accent()),
             egui::StrokeKind::Inside,
         );
     }

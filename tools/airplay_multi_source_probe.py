@@ -28,6 +28,7 @@ from urllib.request import Request, urlopen
 import uuid
 
 from airplay_hub_probe import child_workers, wait_for
+from airplay_probe_fixtures import ALAC
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,10 +52,12 @@ def ntp(ns):
 
 class DigitalSource:
     """One independent identity, RTSP socket, NTP clock and encrypted RTP source."""
-    def __init__(self, index):
+    def __init__(self, index, crypto_library=None, codec="pcm", omit_spf=False):
         self.index = index
+        self.codec = codec
+        self.omit_spf = omit_spf
         self.private = os.urandom(32)
-        self.crypto = Crypto()
+        self.crypto = Crypto(crypto_library)
         self.public = self.crypto.primitive('probe_ed_public', self.private)
         self.frequency = [317, 439, 563, 701][index]
         self.name = f'NeonMix isolated digital source {index + 1}'
@@ -158,8 +161,10 @@ class DigitalSource:
         assert timing_seen.wait(3), 'NTP exchange missing'
         audio = self.udp()
         self.protocol_stage = 'stream_setup'
-        code, body = self.rtsp('SETUP', 'rtsp://receiver/audio', root(dict(streams=[dict(
-            type=96, ct=1, spf=352, audioFormat=4, controlPort=audio.getsockname()[1])])))
+        stream = dict(type=96, ct=2 if self.codec == 'alac' else 1, audioFormat=262144 if self.codec == 'alac' else 4, controlPort=audio.getsockname()[1])
+        if not self.omit_spf:
+            stream['spf'] = 352
+        code, body = self.rtsp('SETUP', 'rtsp://receiver/audio', root(dict(streams=[stream])))
         assert code == 200, 'PCM stream setup rejected'
         ports = plistlib.loads(body)['streams'][0]
         key = sha(self.crypto.fairplay(bytes(fp), bytes(72)) + secret)[:16]
@@ -177,9 +182,10 @@ class DigitalSource:
             try:
                 while not self.stop.is_set():
                     position = index * 352
-                    pcm = b''.join(struct.pack('<hh', *([int(.08 * 32767 * math.sin(
+                    pcm = ALAC if self.codec == 'alac' else b''.join(struct.pack('<hh', *([int(.08 * 32767 * math.sin(
                         2 * math.pi * self.frequency * (position + frame) / 44100))] * 2)) for frame in range(352))
-                    encrypted = self.crypto.cipher('probe_cbc', pcm, key, bytes(16))
+                    block_bytes = len(pcm) // 16 * 16
+                    encrypted = self.crypto.cipher('probe_cbc', pcm[:block_bytes], key, bytes(16)) + pcm[block_bytes:]
                     sending_ns = time.monotonic_ns()
                     scheduled_ns = began_ns + index * 352 * 1_000_000_000 // 44100
                     self.max_schedule_lag_ns = max(self.max_schedule_lag_ns, sending_ns - scheduled_ns)
@@ -216,7 +222,7 @@ def main():
     parser.add_argument('--scenario', choices=['mix', 'management', 'mix-control', 'shutdown'], default='mix', help='Management and mix-control run focused two-source checks without repeating the mix/fault matrix')
     parser.add_argument('--profile', choices=['debug', 'release'], default='release')
     parser.add_argument('--sources', type=int, choices=range(5), default=2)
-    parser.add_argument('--native-sources', type=int, choices=range(5), default=0, help='Independent native tone Senders; total inputs must be 1..4')
+    parser.add_argument('--native-sources', type=int, choices=range(5), default=0, help='Independent native tone Senders; total inputs must be 1..8')
     parser.add_argument('--output', required=True, help='Explicit CoreAudio UID, for example coreaudio:BlackHole2ch_UID')
     parser.add_argument('--fault-cycles', type=int, choices=range(1, 21), default=1, help='Repeat every AirPlay disconnect/crash/recovery sequence this many times')
     parser.add_argument('--shutdown-active', action='store_true', help='Stop the managed Hub while all synthetic sources remain active and verify worker/key cleanup')
@@ -227,7 +233,7 @@ def main():
     args.shutdown_active = args.shutdown_active or args.scenario == "shutdown"
     assert args.scenario not in ['management', 'mix-control'] or (args.sources == 2 and args.native_sources == 0 and args.fault_cycles == 1), 'management/mix-control requires --sources 2 --native-sources 0 --fault-cycles 1'
     assert platform.system() == 'Darwin', 'macOS-only probe'
-    assert 1 <= args.sources + args.native_sources <= 4, 'combined source count must be 1..4'
+    assert 1 <= args.sources + args.native_sources <= 8, 'combined source count must be 1..8'
     assert .5 <= args.steady_seconds <= 60, 'steady duration must be 0.5..60 seconds'
     assert args.output.startswith('coreaudio:') and len(args.output) > len('coreaudio:'), 'explicit CoreAudio output required'
     source_binary = ROOT / 'target' / args.profile / 'neonmix-hub'
@@ -520,7 +526,7 @@ def main():
         source_ids = {session['receiver_id']: session['source_id'] for session in first['sessions']}
         assert len(set(source_ids.values())) == args.sources, 'independent sources collapsed into one identity'
         assert len({s['lane'] for s in first['sessions']}) == args.sources, 'concurrent sources share a Mixer lane'
-        assert first['capacity']['active'] == args.sources + args.native_sources and first['capacity']['reserved'] == 0, 'capacity counters disagree'
+        assert first['capacity']['active'] == args.sources and first['capacity']['reserved'] == 0, 'capacity counters disagree'
         if args.scenario == 'shutdown':
             report['scope']='managed stop and resource cleanup with synthetic PCM; audio timing quality is reported separately'
             report['quality_evaluated']=False
@@ -772,13 +778,13 @@ def main():
                 wait_for('sources survive invalid commands', lambda: live(range(args.sources)))
                 report['scenarios']['command_replay_idempotent_and_stale_session_rejected'] = True
             if args.sources + args.native_sources == 4:
-                phase = 'full room rejects another native Start'
+                phase = 'four inputs still permit another native Sender'
                 extra = subprocess.run([str(DEV), str(binary), 'send', '--credential', str(state / f'native-{args.native_sources + 1}.json'),
                     '--hub', url, '--seconds', '1', '--frequency', '1511'], capture_output=True, cwd=ROOT, env=env, timeout=10)
-                assert extra.returncode != 0 and b'429' in extra.stderr, 'full room failed to reject extra native Start with quota status'
-                wait_for('four sources continue after full-room rejection', lambda: live(range(args.sources)))
-                assert airplay()['capacity']['active'] == 4 and airplay()['capacity']['reserved'] == 0, 'failed native Start leaked room reservation'
-                report['scenarios']['full_room_native_start_rejected_without_reservation_leak'] = True
+                assert extra.returncode == 0, 'AirPlay quota incorrectly rejected a native Sender'
+                wait_for('four sources continue after additional native Sender', lambda: live(range(args.sources)))
+                assert airplay()['capacity']['active'] == args.sources and airplay()['capacity']['reserved'] == 0, 'native Sender changed AirPlay capacity'
+                report['scenarios']['native_start_independent_of_airplay_quota'] = True
             report['steady'] = dict(output_rms=steady_d['meters']['output']['rms'], active=steady['capacity']['active'],
                                     lane_rms=[steady_d['meters']['lanes'][s['lane']]['rms'] for s in steady['sessions']],
                                     native_lane_rms=[next(lane['rms'] for lane in steady_d['meters']['lanes'] if lane['stream_id'] == stream_id) for stream_id in native_streams])

@@ -46,7 +46,7 @@ impl Desktop {
                                 name: (lane.name).to_string(),
                             }))
                             .font(theme::heading(theme::SECTION))
-                            .color(theme::TEXT),
+                            .color(theme::text()),
                         );
                         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                             if widgets::small_button(ui, true, text_mixer_collapse.as_str())
@@ -98,7 +98,7 @@ impl Desktop {
         let mut toggles = (None, None);
         let mut toggle_details = false;
         let glow = if lane.solo {
-            Some(theme::SOLO)
+            Some(theme::solo())
         } else {
             Some(lane.source_color())
         };
@@ -106,183 +106,198 @@ impl Desktop {
         let height = ctx
             .data(|d| d.get_temp::<f32>(egui::Id::new(MASTER_HEIGHT)))
             .unwrap_or(0.0);
-        let shown = widgets::surface(ui, glow, Margin::symmetric(12, 14), |ui| {
-            let inner = STRIP_W - 24.0;
-            ui.set_width(inner);
-            ui.set_min_height((height - 28.0).max(0.0));
-            ui.set_opacity(1.0 - 0.32 * dim);
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.vertical_centered(|ui| {
-                let (rect, avatar) =
-                    ui.allocate_exact_size(egui::vec2(34.0, 34.0), egui::Sense::click());
-                let color = lane.source_color();
-                let painter = ui.painter();
-                painter.circle_filled(rect.center(), 17.0, color.gamma_multiply(0.16));
-                if lane.is_airplay() {
-                    icons::paint(
-                        painter,
-                        icons::square(rect.center(), 17.0),
-                        icons::Icon::AirPlay,
-                        color,
-                    );
-                } else {
-                    let initial: String = lane
-                        .name
-                        .trim()
-                        .chars()
-                        .next()
-                        .map(|c| c.to_uppercase().collect())
-                        .unwrap_or_else(|| "?".into());
-                    painter.text(
-                        rect.center(),
-                        egui::Align2::CENTER_CENTER,
-                        initial,
-                        theme::heading(14.0),
-                        color,
-                    );
-                }
-                if avatar.clicked() {
-                    picked = true;
-                }
-                ui.add(
-                    egui::Label::new(
-                        RichText::new(&lane.name)
-                            .font(theme::heading(13.5))
-                            .color(theme::TEXT),
-                    )
-                    .truncate(),
-                )
-                .on_hover_text(&lane.name);
-                ui.add(
-                    egui::Label::new(
-                        RichText::new(match lane.role.as_ref() {
-                            Some(role) => self.tr(&Message::MixerRoleStatus {
-                                role: self.tr(role),
-                                status: self.tr(&lane.status),
-                            }),
-                            None => self.tr(&lane.status),
-                        })
-                        .size(theme::SMALL)
-                        .color(lane.tone.color()),
-                    )
-                    .truncate(),
-                );
-                ui.add_space(4.0);
-                ui.horizontal(|ui| {
-                    ui.spacing_mut().item_spacing.x = 10.0;
-                    ui.add_space(((inner - 10.0 - 10.0 - 30.0) / 2.0).max(0.0));
-                    let (meter, _) =
-                        ui.allocate_exact_size(egui::vec2(10.0, TRAVEL), egui::Sense::hover());
-                    widgets::paint_level_vertical(ui, id.with("meter"), meter, lane.peak, lane.rms);
-                    if lane.muted {
-                        crate::fx::hatch(
-                            ui.painter(),
-                            meter,
-                            theme::WARNING.gamma_multiply(0.45),
-                            5.0,
+        let level = if selected {
+            crate::fx::Level::Raised
+        } else {
+            crate::fx::Level::Card
+        };
+        let shown = widgets::surface_at(
+            ui,
+            level,
+            theme::surface(),
+            glow,
+            Margin::symmetric(12, 14),
+            |ui| {
+                let inner = STRIP_W - 24.0;
+                ui.set_width(inner);
+                ui.set_min_height((height - 28.0).max(0.0));
+                ui.set_opacity(1.0 - 0.32 * dim);
+                ui.spacing_mut().item_spacing.y = 6.0;
+                ui.vertical_centered(|ui| {
+                    let (rect, avatar) =
+                        ui.allocate_exact_size(egui::vec2(34.0, 34.0), egui::Sense::click());
+                    let color = lane.source_color();
+                    let painter = ui.painter();
+                    painter.circle_filled(rect.center(), 17.0, color.gamma_multiply(0.16));
+                    if lane.is_airplay() {
+                        icons::paint(
+                            painter,
+                            icons::square(rect.center(), 17.0),
+                            icons::Icon::AirPlay,
+                            color,
+                        );
+                    } else {
+                        let initial: String = lane
+                            .name
+                            .trim()
+                            .chars()
+                            .next()
+                            .map(|c| c.to_uppercase().collect())
+                            .unwrap_or_else(|| "?".into());
+                        painter.text(
+                            rect.center(),
+                            egui::Align2::CENTER_CENTER,
+                            initial,
+                            theme::heading(14.0),
+                            color,
                         );
                     }
-                    ui.add_enabled_ui(writable && lane.can_mix, |ui| {
-                        let (c, response) = self.gain_control(
-                            ui,
-                            lane.key,
-                            lane.gain,
-                            &self.tr(&Message::MixerChannelVolume {
-                                name: (lane.name).to_string(),
-                            }),
-                            FaderSize::Strip(TRAVEL),
-                        );
-                        if focus_fader {
-                            response.request_focus();
-                        }
-                        if response.has_focus() || response.dragged() {
-                            picked = true;
-                        }
-                        commit = c;
-                    });
-                });
-                let shown = animation::ease_to(&ctx, id.with("readout"), draft, 0.12);
-                ui.label(
-                    RichText::new(widgets::gain_text(shown))
-                        .monospace()
-                        .size(15.0)
-                        .color(if draft > 0.0 {
-                            theme::WARNING
-                        } else {
-                            theme::TEXT
-                        }),
-                );
-                self.command_note(ui, lane.key);
-                ui.horizontal(|ui| {
-                    ui.spacing_mut().item_spacing.x = 6.0;
-                    let widths = if lane.can_solo { 98.0 } else { 45.0 };
-                    ui.add_space(((inner - widths) / 2.0).max(0.0));
-                    let mute = widgets::toggle_small(
-                        ui,
-                        writable && lane.can_mix,
-                        lane.muted,
-                        text_mixer_mute.as_str(),
-                        Tone::Warning,
-                    );
-                    mute.widget_info(|| {
-                        egui::WidgetInfo::selected(
-                            egui::WidgetType::Button,
-                            lane.can_mix,
-                            lane.muted,
-                            self.tr(&Message::MixerChannelMute {
-                                name: (lane.name).to_string(),
-                            }),
+                    if avatar.clicked() {
+                        picked = true;
+                    }
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(&lane.name)
+                                .font(theme::heading(13.5))
+                                .color(theme::text()),
                         )
-                    });
-                    if mute.clicked() {
-                        toggles.0 = Some(!lane.muted);
-                    }
-                    if lane.can_solo {
-                        let solo = widgets::toggle_small(
+                        .truncate(),
+                    )
+                    .on_hover_text(&lane.name);
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(match lane.role.as_ref() {
+                                Some(role) => self.tr(&Message::MixerRoleStatus {
+                                    role: self.tr(role),
+                                    status: self.tr(&lane.status),
+                                }),
+                                None => self.tr(&lane.status),
+                            })
+                            .size(theme::SMALL)
+                            .color(lane.tone.color()),
+                        )
+                        .truncate(),
+                    );
+                    ui.add_space(4.0);
+                    ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing.x = 10.0;
+                        ui.add_space(((inner - 10.0 - 10.0 - 30.0) / 2.0).max(0.0));
+                        let (meter, _) =
+                            ui.allocate_exact_size(egui::vec2(10.0, TRAVEL), egui::Sense::hover());
+                        widgets::paint_level_vertical(
                             ui,
-                            writable,
-                            lane.solo,
-                            &self.tr(&Message::MixerSolo),
-                            Tone::Solo,
+                            id.with("meter"),
+                            meter,
+                            lane.peak,
+                            lane.rms,
                         );
-                        solo.widget_info(|| {
+                        if lane.muted {
+                            crate::fx::hatch(
+                                ui.painter(),
+                                meter,
+                                theme::warning().gamma_multiply(0.45),
+                                5.0,
+                            );
+                        }
+                        ui.add_enabled_ui(writable && lane.can_mix, |ui| {
+                            let (c, response) = self.gain_control(
+                                ui,
+                                lane.key,
+                                lane.gain,
+                                &self.tr(&Message::MixerChannelVolume {
+                                    name: (lane.name).to_string(),
+                                }),
+                                FaderSize::Strip(TRAVEL),
+                            );
+                            if focus_fader {
+                                response.request_focus();
+                            }
+                            if response.has_focus() || response.dragged() {
+                                picked = true;
+                            }
+                            commit = c;
+                        });
+                    });
+                    let shown = animation::ease_to(&ctx, id.with("readout"), draft, 0.12);
+                    widgets::readout_well(
+                        ui,
+                        RichText::new(widgets::gain_text(shown))
+                            .monospace()
+                            .size(15.0)
+                            .color(if draft > 0.0 {
+                                theme::warning()
+                            } else {
+                                theme::text()
+                            }),
+                    );
+                    self.command_note(ui, lane.key);
+                    ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing.x = 6.0;
+                        let widths = if lane.can_solo { 98.0 } else { 45.0 };
+                        ui.add_space(((inner - widths) / 2.0).max(0.0));
+                        let mute = widgets::toggle_small(
+                            ui,
+                            writable && lane.can_mix,
+                            lane.muted,
+                            text_mixer_mute.as_str(),
+                            Tone::Warning,
+                        );
+                        mute.widget_info(|| {
                             egui::WidgetInfo::selected(
                                 egui::WidgetType::Button,
-                                true,
-                                lane.solo,
-                                self.tr(&Message::LaneSoloSource {
-                                    name: lane.name.clone(),
+                                lane.can_mix,
+                                lane.muted,
+                                self.tr(&Message::MixerChannelMute {
+                                    name: (lane.name).to_string(),
                                 }),
                             )
                         });
-                        if solo.clicked() {
-                            toggles.1 = Some(!lane.solo);
+                        if mute.clicked() {
+                            toggles.0 = Some(!lane.muted);
                         }
+                        if lane.can_solo {
+                            let solo = widgets::toggle_small(
+                                ui,
+                                writable,
+                                lane.solo,
+                                &self.tr(&Message::MixerSolo),
+                                Tone::Solo,
+                            );
+                            solo.widget_info(|| {
+                                egui::WidgetInfo::selected(
+                                    egui::WidgetType::Button,
+                                    true,
+                                    lane.solo,
+                                    self.tr(&Message::LaneSoloSource {
+                                        name: lane.name.clone(),
+                                    }),
+                                )
+                            });
+                            if solo.clicked() {
+                                toggles.1 = Some(!lane.solo);
+                            }
+                        }
+                    });
+                    if disclosure(ui, open, &lane.name).clicked() {
+                        toggle_details = true;
                     }
                 });
-                if disclosure(ui, open, &lane.name).clicked() {
-                    toggle_details = true;
-                }
-            });
-        });
+            },
+        );
         let rect = shown.response.rect;
         let cap = if lane.solo {
-            theme::SOLO
+            theme::solo()
         } else {
             lane.source_color()
         };
         let cap = animation::color(&ctx, id.with("cap"), cap);
+        widgets::top_cap(ui, rect, cap, 64.0);
         let painter = ui.painter();
-        let bar = egui::Rect::from_min_size(
-            rect.min + egui::vec2(18.0, 1.0),
-            egui::vec2(rect.width() - 36.0, 3.0),
-        );
-        painter.rect_filled(bar, CornerRadius::same(2), cap);
         if sel > 0.0 {
             painter.rect_stroke(
                 rect,
                 CornerRadius::same(theme::RADIUS),
-                Stroke::new(1.5, theme::ACCENT.gamma_multiply(0.7 * sel)),
+                Stroke::new(1.5, theme::accent().gamma_multiply(0.7 * sel)),
                 egui::StrokeKind::Inside,
             );
         }
@@ -339,125 +354,135 @@ impl Desktop {
         let output_name = self.output_name(state);
         let id = ui.id().with("master-strip");
         let mut commit = None;
-        let shown = widgets::surface(ui, Some(tone.color()), Margin::symmetric(14, 14), |ui| {
-            let inner = MASTER_W - 28.0;
-            ui.set_width(inner);
-            ui.spacing_mut().item_spacing.y = 6.0;
-            ui.vertical_centered(|ui| {
-                let (rect, _) =
-                    ui.allocate_exact_size(egui::vec2(34.0, 34.0), egui::Sense::hover());
-                emblem::paint(
-                    ui.painter(),
-                    rect.center(),
-                    17.0,
-                    Emblem::from_id(state.hub_id),
-                    if state.output.available { 1.0 } else { 0.0 },
-                );
-                ui.label(
-                    RichText::new(text_mixer_room_master.as_str())
-                        .font(theme::heading(14.0))
-                        .color(theme::TEXT),
-                );
-                ui.add(
-                    egui::Label::new(
-                        RichText::new(&output_name)
-                            .size(theme::SMALL)
-                            .color(theme::TEXT_3),
-                    )
-                    .truncate(),
-                );
-                widgets::pill(ui, status, tone);
-                ui.add_space(4.0);
-                ui.horizontal(|ui| {
-                    ui.spacing_mut().item_spacing.x = 4.0;
-                    // Scale labels | meter | limiter reduction | fader.
-                    let used = 26.0 + 14.0 + 4.0 + 6.0 + 14.0 + 30.0;
-                    ui.add_space(((inner - used) / 2.0).max(0.0));
-                    let (rect, _) = ui
-                        .allocate_exact_size(egui::vec2(26.0 + 14.0, TRAVEL), egui::Sense::hover());
-                    let meter = egui::Rect::from_min_max(
-                        egui::pos2(rect.right() - 14.0, rect.top()),
-                        rect.max,
+        let shown = widgets::surface_at(
+            ui,
+            crate::fx::Level::Raised,
+            theme::raised(),
+            Some(tone.color()),
+            Margin::symmetric(14, 14),
+            |ui| {
+                let inner = MASTER_W - 28.0;
+                ui.set_width(inner);
+                ui.spacing_mut().item_spacing.y = 6.0;
+                ui.vertical_centered(|ui| {
+                    let (rect, _) =
+                        ui.allocate_exact_size(egui::vec2(34.0, 34.0), egui::Sense::hover());
+                    emblem::paint(
+                        ui.painter(),
+                        rect.center(),
+                        17.0,
+                        Emblem::from_id(state.hub_id),
+                        if state.output.available { 1.0 } else { 0.0 },
                     );
-                    widgets::paint_level_vertical(ui, id.with("meter"), meter, peak, rms);
-                    widgets::paint_scale_vertical(ui.painter(), meter);
-                    let (gr, gr_response) =
-                        ui.allocate_exact_size(egui::vec2(6.0, TRAVEL), egui::Sense::hover());
-                    widgets::paint_reduction(ui.painter(), gr, limiter);
-                    gr_response.on_hover_text(
-                        text_mixer_limiter_gain_reduction_top_to_bottom_12_db.as_str(),
-                    );
-                    ui.add_space(10.0);
-                    ui.add_enabled_ui(can, |ui| {
-                        let (c, _) = self.gain_control(
-                            ui,
-                            0,
-                            current,
-                            text_mixer_master_volume.as_str(),
-                            FaderSize::Strip(TRAVEL),
-                        );
-                        commit = c;
-                    });
-                });
-                let shown = animation::ease_to(ui.ctx(), id.with("readout"), draft, 0.12);
-                ui.label(
-                    RichText::new(format!("{} dB", widgets::gain_text(shown)))
-                        .monospace()
-                        .size(24.0)
-                        .color(if draft > 0.0 {
-                            theme::WARNING
-                        } else {
-                            theme::TEXT
-                        }),
-                );
-                self.command_note(ui, 0);
-                ui.add_enabled_ui(can, |ui| {
-                    ui.horizontal(|ui| {
-                        ui.add_space(((inner - 132.0) / 2.0).max(0.0));
-                        if let Some(db) = widgets::segmented(
-                            ui,
-                            true,
-                            &[("−12", -12.0), ("−6", -6.0), ("0", 0.0)],
-                            current,
-                        ) {
-                            commit = Some(db);
-                        }
-                    });
-                });
-                if self.controls_room() {
-                    let muted = state.output.muted;
-                    if widgets::toggle_small(
-                        ui,
-                        self.writable(),
-                        muted,
-                        if muted {
-                            text_mixer_unmute_master.as_str()
-                        } else {
-                            text_mixer_mute_master.as_str()
-                        },
-                        Tone::Warning,
-                    )
-                    .clicked()
-                    {
-                        self.master_mute(!muted);
-                    }
-                } else {
-                    widgets::note(
-                        ui,
-                        text_mixer_master_controls_require_a_controller_or_administrator.as_str(),
-                    );
-                }
-                if let Some(g) = limiter.filter(|g| *g < 0.999 && *g > 0.0) {
                     ui.label(
-                        RichText::new(self.tr(&Message::MixerLimiterValue {
-                            value: (widgets::db_text(g)).to_string(),
-                        }))
-                        .size(theme::SMALL)
-                        .color(theme::WARNING),
+                        RichText::new(text_mixer_room_master.as_str())
+                            .font(theme::heading(14.0))
+                            .color(theme::text()),
                     );
-                }
-            });
-        });
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(&output_name)
+                                .size(theme::SMALL)
+                                .color(theme::text_3()),
+                        )
+                        .truncate(),
+                    );
+                    widgets::pill(ui, status, tone);
+                    ui.add_space(4.0);
+                    ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing.x = 4.0;
+                        // Scale labels | meter | limiter reduction | fader.
+                        let used = 26.0 + 14.0 + 4.0 + 6.0 + 14.0 + 30.0;
+                        ui.add_space(((inner - used) / 2.0).max(0.0));
+                        let (rect, _) = ui.allocate_exact_size(
+                            egui::vec2(26.0 + 14.0, TRAVEL),
+                            egui::Sense::hover(),
+                        );
+                        let meter = egui::Rect::from_min_max(
+                            egui::pos2(rect.right() - 14.0, rect.top()),
+                            rect.max,
+                        );
+                        widgets::paint_level_vertical(ui, id.with("meter"), meter, peak, rms);
+                        widgets::paint_scale_vertical(ui.painter(), meter);
+                        let (gr, gr_response) =
+                            ui.allocate_exact_size(egui::vec2(6.0, TRAVEL), egui::Sense::hover());
+                        widgets::paint_reduction(ui.painter(), gr, limiter);
+                        gr_response.on_hover_text(
+                            text_mixer_limiter_gain_reduction_top_to_bottom_12_db.as_str(),
+                        );
+                        ui.add_space(10.0);
+                        ui.add_enabled_ui(can, |ui| {
+                            let (c, _) = self.gain_control(
+                                ui,
+                                0,
+                                current,
+                                text_mixer_master_volume.as_str(),
+                                FaderSize::Strip(TRAVEL),
+                            );
+                            commit = c;
+                        });
+                    });
+                    let shown = animation::ease_to(ui.ctx(), id.with("readout"), draft, 0.12);
+                    ui.label(
+                        RichText::new(format!("{} dB", widgets::gain_text(shown)))
+                            .monospace()
+                            .size(24.0)
+                            .color(if draft > 0.0 {
+                                theme::warning()
+                            } else {
+                                theme::text()
+                            }),
+                    );
+                    self.command_note(ui, 0);
+                    ui.add_enabled_ui(can, |ui| {
+                        ui.horizontal(|ui| {
+                            ui.add_space(((inner - 132.0) / 2.0).max(0.0));
+                            if let Some(db) = widgets::segmented(
+                                ui,
+                                true,
+                                &[("−12", -12.0), ("−6", -6.0), ("0", 0.0)],
+                                current,
+                            ) {
+                                commit = Some(db);
+                            }
+                        });
+                    });
+                    if self.controls_room() {
+                        let muted = state.output.muted;
+                        if widgets::toggle_small(
+                            ui,
+                            self.writable(),
+                            muted,
+                            if muted {
+                                text_mixer_unmute_master.as_str()
+                            } else {
+                                text_mixer_mute_master.as_str()
+                            },
+                            Tone::Warning,
+                        )
+                        .clicked()
+                        {
+                            self.master_mute(!muted);
+                        }
+                    } else {
+                        widgets::note(
+                            ui,
+                            text_mixer_master_controls_require_a_controller_or_administrator
+                                .as_str(),
+                        );
+                    }
+                    if let Some(g) = limiter.filter(|g| *g < 0.999 && *g > 0.0) {
+                        ui.label(
+                            RichText::new(self.tr(&Message::MixerLimiterValue {
+                                value: (widgets::db_text(g)).to_string(),
+                            }))
+                            .size(theme::SMALL)
+                            .color(theme::warning()),
+                        );
+                    }
+                });
+            },
+        );
         // Remember the height for the input strips; when it changes, redo
         // this pass off-screen so strips never show one frame mismatched.
         let height = shown.response.rect.height();
@@ -467,13 +492,7 @@ impl Desktop {
             ui.ctx().data_mut(|d| d.insert_temp(key, height));
             ui.ctx().request_discard("console strip height");
         }
-        let rect = shown.response.rect;
-        let bar = egui::Rect::from_min_size(
-            rect.min + egui::vec2(18.0, 1.0),
-            egui::vec2(rect.width() - 36.0, 3.0),
-        );
-        ui.painter()
-            .rect_filled(bar, CornerRadius::same(2), theme::SRC_HUB);
+        widgets::top_cap(ui, shown.response.rect, theme::src_hub(), 96.0);
         if let Some(gain) = commit {
             self.master_gain(current, gain);
         }
@@ -494,7 +513,7 @@ impl Desktop {
                 ui.label(
                     RichText::new(text_mixer_last_60_seconds.as_str())
                         .font(theme::heading(theme::SECTION))
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                 );
                 widgets::note(
                     ui,
@@ -512,7 +531,7 @@ impl Desktop {
                                 egui::Label::new(
                                     RichText::new(&lane.name)
                                         .size(theme::SMALL)
-                                        .color(theme::TEXT_2),
+                                        .color(theme::text_2()),
                                 )
                                 .truncate(),
                             );
@@ -528,17 +547,13 @@ impl Desktop {
                             lane.source_color(),
                         ),
                         None => {
-                            ui.painter().rect_filled(
-                                rect,
-                                CornerRadius::same(4),
-                                theme::METER_TRACK,
-                            );
+                            crate::fx::well(ui.painter(), rect, 5, theme::meter_track());
                             ui.painter().text(
                                 rect.left_center() + egui::vec2(10.0, 0.0),
                                 egui::Align2::LEFT_CENTER,
                                 text_mixer_recording.as_str(),
                                 egui::FontId::proportional(theme::SMALL),
-                                theme::TEXT_3,
+                                theme::text_3(),
                             );
                         }
                     }

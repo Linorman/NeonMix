@@ -1,9 +1,12 @@
-//! Shared controls. Colours come from `theme`; motion from `animation`.
+//! Shared controls. Colours come from `theme`; elevation from `fx`; motion
+//! from `animation`.
 use crate::animation;
+use crate::fx::{self, Level};
 use crate::localization::text;
 use crate::theme;
 use eframe::egui::{
     self, Align, Color32, CornerRadius, Layout, Margin, Response, RichText, Stroke, StrokeKind, Ui,
+    epaint::RectShape,
 };
 use neonmix_i18n::Message;
 
@@ -21,23 +24,27 @@ pub enum Tone {
 impl Tone {
     pub fn color(self) -> Color32 {
         match self {
-            Self::Neutral => theme::TEXT_3,
-            Self::Accent => theme::ACCENT,
-            Self::Success => theme::SUCCESS,
-            Self::Warning => theme::WARNING,
-            Self::Danger => theme::DANGER,
-            Self::Solo => theme::SOLO,
+            Self::Neutral => theme::text_3(),
+            Self::Accent => theme::accent(),
+            Self::Success => theme::success(),
+            Self::Warning => theme::warning(),
+            Self::Danger => theme::danger(),
+            Self::Solo => theme::solo(),
         }
     }
 }
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Kind {
+    /// The one main action of a view: solid, high-contrast cap.
     Primary,
+    /// Raised neutral button.
     Secondary,
     Danger,
-    /// Destructive action that should not dominate (outline only).
+    /// Destructive action that should not dominate (tinted, not raised).
     Quiet,
+    /// Text-weight action; only hover shows its shape.
+    Ghost,
 }
 
 #[derive(Clone, Copy)]
@@ -65,63 +72,96 @@ impl Palette {
 fn palette(kind: Kind) -> Palette {
     match kind {
         Kind::Primary => Palette {
-            base: theme::ACCENT,
-            hover: theme::ACCENT_HOVER,
-            press: theme::ACCENT_PRESS,
-            text: theme::ON_ACCENT,
+            base: theme::primary(),
+            hover: theme::primary_hover(),
+            press: theme::primary_press(),
+            text: theme::on_primary(),
             stroke: Color32::TRANSPARENT,
         },
         Kind::Secondary => Palette {
-            base: theme::RAISED,
-            hover: theme::HOVER,
-            press: theme::SURFACE,
-            text: theme::TEXT,
-            stroke: theme::BORDER_STRONG,
+            base: theme::raised(),
+            hover: theme::hover(),
+            press: theme::surface(),
+            text: theme::text(),
+            stroke: theme::border_strong(),
         },
         Kind::Danger => Palette {
-            base: theme::DANGER,
-            hover: theme::DANGER_HOVER,
-            press: theme::DANGER.gamma_multiply(0.85),
-            text: theme::ON_DANGER,
+            base: theme::danger(),
+            hover: theme::danger_hover(),
+            press: theme::danger().gamma_multiply(0.85),
+            text: theme::on_danger(),
             stroke: Color32::TRANSPARENT,
         },
         Kind::Quiet => Palette {
+            base: theme::danger().gamma_multiply(0.10),
+            hover: theme::danger().gamma_multiply(0.17),
+            press: theme::danger().gamma_multiply(0.24),
+            text: danger_text(),
+            stroke: theme::danger().gamma_multiply(0.32),
+        },
+        Kind::Ghost => Palette {
             base: Color32::TRANSPARENT,
-            hover: theme::DANGER.gamma_multiply(0.14),
-            press: theme::DANGER.gamma_multiply(0.22),
-            text: theme::DANGER,
-            stroke: theme::DANGER.gamma_multiply(0.55),
+            hover: theme::hover().gamma_multiply(0.85),
+            press: theme::raised(),
+            text: theme::text_2(),
+            stroke: Color32::TRANSPARENT,
         },
     }
 }
 
-fn engaged(color: Color32) -> Palette {
-    Palette {
-        base: color,
-        hover: animation::lerp_color(color, Color32::WHITE, 0.15),
-        press: color.gamma_multiply(0.85),
-        text: theme::ON_ACCENT,
-        stroke: Color32::TRANSPARENT,
+/// Danger as text: the brighter tint on dark, the base on light paper.
+fn danger_text() -> Color32 {
+    if theme::is_light() {
+        theme::danger()
+    } else {
+        theme::danger_hover()
     }
 }
 
-const UNAVAILABLE: Palette = Palette {
-    base: theme::SURFACE,
-    hover: theme::SURFACE,
-    press: theme::SURFACE,
-    text: theme::TEXT_3,
-    stroke: theme::BORDER,
-};
+/// Latched state (Mute/Solo, selected chips): lit and pressed in, so it
+/// carries no shadow, a tinted fill, a ring and text in its tone.
+fn engaged(color: Color32) -> Palette {
+    Palette {
+        base: color.gamma_multiply(0.16),
+        hover: color.gamma_multiply(0.22),
+        press: color.gamma_multiply(0.28),
+        text: color,
+        stroke: color.gamma_multiply(0.48),
+    }
+}
+
+fn unavailable() -> Palette {
+    Palette {
+        base: theme::surface(),
+        hover: theme::surface(),
+        press: theme::surface(),
+        text: theme::text_3(),
+        stroke: theme::border(),
+    }
+}
 
 fn paint_focus(ui: &Ui, response: &Response) {
     if response.has_focus() {
         ui.painter().rect_stroke(
             response.rect.expand(2.0),
             CornerRadius::same(theme::CONTROL_RADIUS + 2),
-            Stroke::new(2.0, theme::ACCENT.gamma_multiply(0.85)),
+            Stroke::new(2.0, theme::accent().gamma_multiply(0.85)),
             StrokeKind::Outside,
         );
     }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum Height {
+    Regular,
+    Compact,
+    /// Segment inside a well (26px).
+    Inner,
+}
+
+/// Keyboard focus ring for custom-painted controls.
+pub fn focus_ring(ui: &Ui, response: &Response) {
+    paint_focus(ui, response);
 }
 
 struct Spec<'a> {
@@ -129,12 +169,12 @@ struct Spec<'a> {
     palette: Palette,
     enabled: bool,
     selected: Option<bool>,
-    compact: bool,
+    height: Height,
     /// Work started by this control is running: keep its colour and size,
     /// swap the label for a spinner and ignore further clicks.
     busy: bool,
     radius: CornerRadius,
-    /// Filled call to action: a soft halo of its own colour on hover.
+    /// Lit state: a soft halo of its own colour.
     halo: Option<Color32>,
 }
 
@@ -145,7 +185,7 @@ impl<'a> Spec<'a> {
             palette,
             enabled: true,
             selected: None,
-            compact: false,
+            height: Height::Regular,
             busy: false,
             radius: CornerRadius::same(theme::CONTROL_RADIUS),
             halo: None,
@@ -166,17 +206,73 @@ pub fn wrap_for(ui: &mut Ui, width: f32) {
     }
 }
 
+fn metrics(height: Height, ui: &Ui) -> (f32, f32, f32) {
+    match height {
+        Height::Regular => (
+            theme::BODY,
+            theme::CONTROL_HEIGHT,
+            ui.spacing().button_padding.x,
+        ),
+        Height::Compact => (theme::SMALL + 0.5, theme::COMPACT_HEIGHT, 10.0),
+        Height::Inner => (theme::SMALL + 0.5, 26.0, 11.0),
+    }
+}
+
+/// Button body: an opaque palette is a raised cap with a contact shadow
+/// that sinks while pressed; a translucent one (latched, quiet, ghost) is
+/// flat and reads as pressed in.
+fn button_shapes(
+    ctx: &egui::Context,
+    rect: egui::Rect,
+    radius: CornerRadius,
+    fill: Color32,
+    stroke: Color32,
+    raised: f32,
+) -> Vec<egui::Shape> {
+    let mut shapes = Vec::new();
+    if raised > 0.01 {
+        let r = radius.nw.max(radius.ne);
+        for shape in fx::shadow(rect, r, Level::Control) {
+            if let egui::Shape::Rect(mut s) = shape {
+                s.fill = s.fill.gamma_multiply(raised);
+                s.corner_radius = radius;
+                shapes.push(egui::Shape::Rect(s));
+            }
+        }
+        shapes.push(egui::Shape::Rect(
+            RectShape::filled(rect, radius, fill).with_texture(fx::ramp_texture(ctx), fx::FULL_UV),
+        ));
+        shapes.push(egui::Shape::Rect(RectShape::stroke(
+            rect,
+            radius,
+            Stroke::new(1.0, stroke),
+            StrokeKind::Inside,
+        )));
+        let inset = r as f32;
+        if rect.width() > 2.0 * inset {
+            shapes.push(egui::Shape::line_segment(
+                [
+                    egui::pos2(rect.left() + inset, rect.top() + 1.0),
+                    egui::pos2(rect.right() - inset, rect.top() + 1.0),
+                ],
+                Stroke::new(1.0, theme::edge_light().gamma_multiply(raised)),
+            ));
+        }
+    } else {
+        shapes.push(egui::Shape::Rect(RectShape::new(
+            rect,
+            radius,
+            fill,
+            Stroke::new(1.0, stroke),
+            StrokeKind::Inside,
+        )));
+    }
+    shapes
+}
+
 fn draw(ui: &mut Ui, spec: Spec<'_>) -> Response {
     {
-        let (size, height, pad) = if spec.compact {
-            (theme::SMALL + 0.5, theme::COMPACT_HEIGHT, 10.0)
-        } else {
-            (
-                theme::BODY,
-                theme::CONTROL_HEIGHT,
-                ui.spacing().button_padding.x,
-            )
-        };
+        let (size, height, pad) = metrics(spec.height, ui);
         let text_w = ui.fonts(|f| {
             f.layout_no_wrap(
                 spec.text.to_owned(),
@@ -188,11 +284,12 @@ fn draw(ui: &mut Ui, spec: Spec<'_>) -> Response {
         });
         wrap_for(ui, (text_w + 2.0 * pad).max(height));
     }
-    // Unavailable actions read as neutral, not as dimmed colour.
-    let palette = if spec.enabled || spec.busy {
+    // Unavailable actions read as neutral and flat, not as dimmed colour.
+    let available = spec.enabled || spec.busy;
+    let palette = if available {
         spec.palette
     } else {
-        UNAVAILABLE
+        unavailable()
     };
     ui.scope(|ui| {
         if !spec.enabled {
@@ -205,20 +302,16 @@ fn draw(ui: &mut Ui, spec: Spec<'_>) -> Response {
             palette.press,
             press,
         );
-        let (size, height) = if spec.compact {
-            ui.spacing_mut().button_padding = egui::vec2(10.0, 4.0);
-            (theme::SMALL + 0.5, theme::COMPACT_HEIGHT)
-        } else {
-            (theme::BODY, theme::CONTROL_HEIGHT)
-        };
+        let (size, height, pad) = metrics(spec.height, ui);
+        ui.spacing_mut().button_padding = egui::vec2(pad, 4.0);
         let text_color = if spec.busy {
             Color32::TRANSPARENT
         } else {
             palette.text
         };
         let mut button = egui::Button::new(RichText::new(spec.text).size(size).color(text_color))
-            .fill(fill)
-            .stroke(Stroke::new(1.0, palette.stroke))
+            .fill(Color32::TRANSPARENT)
+            .stroke(Stroke::NONE)
             .corner_radius(spec.radius)
             .min_size(egui::vec2(height, height))
             // A label never breaks inside its button; rows wrap instead.
@@ -231,13 +324,31 @@ fn draw(ui: &mut Ui, spec: Spec<'_>) -> Response {
             button = button.sense(egui::Sense::hover());
         }
         let halo_slot = ui.painter().add(egui::Shape::Noop);
+        let body_slot = ui.painter().add(egui::Shape::Noop);
         let response = ui.add(button);
+        // Opaque palettes are raised caps; translucent ones lie flat.
+        let raised = if available {
+            (palette.base.a() as f32 / 255.0).powi(4) * (1.0 - 0.8 * press)
+        } else {
+            0.0
+        };
+        ui.painter().set(
+            body_slot,
+            button_shapes(
+                ui.ctx(),
+                response.rect,
+                spec.radius,
+                fill,
+                palette.stroke,
+                raised,
+            ),
+        );
         if let Some(color) = spec.halo.filter(|_| spec.enabled) {
-            let strength = 0.10 + 0.22 * hover;
+            let strength = if theme::is_light() { 0.08 } else { 0.14 } + 0.14 * hover;
             ui.painter().set(
                 halo_slot,
-                egui::epaint::RectShape::filled(
-                    response.rect.translate(egui::vec2(0.0, 2.0)),
+                RectShape::filled(
+                    response.rect.translate(egui::vec2(0.0, 1.0)),
                     spec.radius,
                     color.gamma_multiply(strength),
                 )
@@ -265,22 +376,8 @@ fn draw(ui: &mut Ui, spec: Spec<'_>) -> Response {
     .inner
 }
 
-fn halo(kind: Kind) -> Option<Color32> {
-    match kind {
-        Kind::Primary => Some(theme::ACCENT),
-        Kind::Danger => Some(theme::DANGER),
-        _ => None,
-    }
-}
-
 pub fn button(ui: &mut Ui, text: &str, kind: Kind) -> Response {
-    draw(
-        ui,
-        Spec {
-            halo: halo(kind),
-            ..Spec::new(text, palette(kind))
-        },
-    )
+    draw(ui, Spec::new(text, palette(kind)))
 }
 
 pub fn button_enabled(ui: &mut Ui, enabled: bool, text: &str, kind: Kind) -> Response {
@@ -288,7 +385,6 @@ pub fn button_enabled(ui: &mut Ui, enabled: bool, text: &str, kind: Kind) -> Res
         ui,
         Spec {
             enabled,
-            halo: halo(kind),
             ..Spec::new(text, palette(kind))
         },
     )
@@ -301,18 +397,6 @@ pub fn button_busy(ui: &mut Ui, enabled: bool, busy: bool, text: &str, kind: Kin
         Spec {
             enabled,
             busy,
-            halo: halo(kind),
-            ..Spec::new(text, palette(kind))
-        },
-    )
-}
-
-/// Compact button of any kind, for tight rows such as the sidebar footer.
-pub fn button_compact(ui: &mut Ui, text: &str, kind: Kind) -> Response {
-    draw(
-        ui,
-        Spec {
-            compact: true,
             ..Spec::new(text, palette(kind))
         },
     )
@@ -323,14 +407,31 @@ pub fn small_button(ui: &mut Ui, enabled: bool, text: &str) -> Response {
         ui,
         Spec {
             enabled,
-            compact: true,
+            height: Height::Compact,
             ..Spec::new(text, palette(Kind::Secondary))
         },
     )
 }
 
-/// Latching control (Mute/Solo). Fill eases to `tone` while engaged.
+/// Latching control (Mute/Solo). Eases from a raised cap to a lit,
+/// pressed-in state in `tone`.
 pub fn toggle(ui: &mut Ui, enabled: bool, on: bool, text: &str, tone: Tone) -> Response {
+    toggle_sized(ui, enabled, on, text, tone, Height::Regular)
+}
+
+/// Compact latching control for dense console strips.
+pub fn toggle_small(ui: &mut Ui, enabled: bool, on: bool, text: &str, tone: Tone) -> Response {
+    toggle_sized(ui, enabled, on, text, tone, Height::Compact)
+}
+
+fn toggle_sized(
+    ui: &mut Ui,
+    enabled: bool,
+    on: bool,
+    text: &str,
+    tone: Tone,
+    height: Height,
+) -> Response {
     let key = ui.next_auto_id().with("engaged");
     let t = ui.ctx().animate_bool_with_time(key, on, 0.16);
     let palette = palette(Kind::Secondary).mix(engaged(tone.color()), t);
@@ -339,71 +440,100 @@ pub fn toggle(ui: &mut Ui, enabled: bool, on: bool, text: &str, tone: Tone) -> R
         Spec {
             enabled,
             selected: Some(on),
+            height,
             halo: on.then(|| tone.color()),
             ..Spec::new(text, palette)
         },
     )
 }
 
-/// Compact latching control for dense console strips.
-pub fn toggle_small(ui: &mut Ui, enabled: bool, on: bool, text: &str, tone: Tone) -> Response {
-    let key = ui.next_auto_id().with("engaged");
-    let t = ui.ctx().animate_bool_with_time(key, on, 0.16);
-    let palette = palette(Kind::Secondary).mix(engaged(tone.color()), t);
-    draw(
-        ui,
-        Spec {
-            enabled,
-            selected: Some(on),
-            compact: true,
-            halo: on.then(|| tone.color()),
-            ..Spec::new(text, palette)
-        },
-    )
+/// Selected segment: a small raised cap inside the well.
+fn segment_on() -> Palette {
+    Palette {
+        base: theme::hover(),
+        hover: theme::hover(),
+        press: theme::raised(),
+        text: theme::text(),
+        stroke: theme::border_strong(),
+    }
+}
+
+fn segment_off() -> Palette {
+    Palette {
+        base: Color32::TRANSPARENT,
+        hover: theme::text().gamma_multiply(0.05),
+        press: theme::text().gamma_multiply(0.08),
+        text: theme::text_3(),
+        stroke: Color32::TRANSPARENT,
+    }
+}
+
+/// Segmented single choice: segments sit in a recessed well and the chosen
+/// one rises out of it. Returns the index picked this frame.
+pub fn segments(
+    ui: &mut Ui,
+    enabled: bool,
+    labels: &[&str],
+    current: Option<usize>,
+) -> Option<usize> {
+    segments_clicked(ui, enabled, labels, current).filter(|i| current != Some(*i))
+}
+
+/// As `segments`, but also reports a click on the chosen segment (for
+/// choices whose current value can still be applied).
+pub fn segments_clicked(
+    ui: &mut Ui,
+    enabled: bool,
+    labels: &[&str],
+    current: Option<usize>,
+) -> Option<usize> {
+    let mut picked = None;
+    let slot = ui.painter().add(egui::Shape::Noop);
+    let shown = egui::Frame::new()
+        .inner_margin(Margin::same(3))
+        .show(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 2.0;
+                for (i, label) in labels.iter().enumerate() {
+                    let active = current == Some(i);
+                    let response = draw(
+                        ui,
+                        Spec {
+                            enabled,
+                            selected: Some(active),
+                            height: Height::Inner,
+                            radius: CornerRadius::same(7),
+                            ..Spec::new(label, if active { segment_on() } else { segment_off() })
+                        },
+                    );
+                    if response.clicked() {
+                        picked = Some(i);
+                    }
+                }
+            });
+        });
+    let rect = shown.response.rect;
+    ui.painter()
+        .with_clip_rect(rect.intersect(ui.clip_rect()))
+        .set(
+            slot,
+            egui::Shape::Vec(fx::well_shapes(
+                rect,
+                theme::CONTROL_RADIUS + 1,
+                theme::well(),
+            )),
+        );
+    picked
 }
 
 /// Joined single-choice buttons (gain presets). Returns the picked value
 /// when it differs from `current`.
 pub fn segmented(ui: &mut Ui, enabled: bool, items: &[(&str, f32)], current: f32) -> Option<f32> {
-    let mut picked = None;
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing.x = 0.0;
-        let last = items.len().saturating_sub(1);
-        for (i, (label, value)) in items.iter().enumerate() {
-            let active = (current - value).abs() < 0.25;
-            let r = theme::CONTROL_RADIUS;
-            let radius = CornerRadius {
-                nw: if i == 0 { r } else { 0 },
-                sw: if i == 0 { r } else { 0 },
-                ne: if i == last { r } else { 0 },
-                se: if i == last { r } else { 0 },
-            };
-            let palette = if active {
-                Palette {
-                    base: theme::ACCENT.gamma_multiply(0.2),
-                    hover: theme::ACCENT.gamma_multiply(0.26),
-                    press: theme::ACCENT.gamma_multiply(0.3),
-                    text: theme::ACCENT_HOVER,
-                    stroke: theme::ACCENT.gamma_multiply(0.6),
-                }
-            } else {
-                palette(Kind::Secondary)
-            };
-            let response = draw(
-                ui,
-                Spec {
-                    enabled,
-                    selected: Some(active),
-                    radius,
-                    ..Spec::new(label, palette)
-                },
-            );
-            if response.clicked() && !active {
-                picked = Some(*value);
-            }
-        }
-    });
-    picked
+    let labels: Vec<&str> = items.iter().map(|(label, _)| *label).collect();
+    let current = items
+        .iter()
+        .position(|(_, value)| (current - value).abs() < 0.25);
+    segments(ui, enabled, &labels, current).map(|i| items[i].1)
 }
 
 /// Raised card: lit gradient, hairline border and top highlight; `glow`
@@ -424,15 +554,112 @@ pub fn surface<R>(
             ui.ctx(),
             shown.response.rect,
             theme::RADIUS,
-            theme::SURFACE,
+            theme::surface(),
             glow,
         ),
     );
     egui::InnerResponse::new(shown.inner, shown.response)
 }
 
-/// Card with an optional subtitle under the title and a status rail on the
-/// left edge (live surfaces such as mixer lanes). The rail colour eases.
+/// Surface at an explicit elevation and base colour (console strips, the
+/// master strip, hero cards).
+pub fn surface_at<R>(
+    ui: &mut Ui,
+    level: Level,
+    base: Color32,
+    glow: Option<Color32>,
+    margin: Margin,
+    body: impl FnOnce(&mut Ui) -> R,
+) -> egui::InnerResponse<R> {
+    let slot = ui.painter().add(egui::Shape::Noop);
+    let shown = egui::Frame::new().inner_margin(margin).show(ui, body);
+    ui.painter().set(
+        slot,
+        fx::elevated(
+            ui.ctx(),
+            shown.response.rect,
+            theme::RADIUS,
+            base,
+            level,
+            glow,
+        ),
+    );
+    egui::InnerResponse::new(shown.inner, shown.response)
+}
+
+/// Numeric readout set into a small recessed display.
+pub fn readout_well(ui: &mut Ui, text: RichText) -> Response {
+    let slot = ui.painter().add(egui::Shape::Noop);
+    let shown = egui::Frame::new()
+        .inner_margin(Margin::symmetric(10, 3))
+        .show(ui, |ui| ui.label(text));
+    let rect = shown.response.rect;
+    ui.painter()
+        .with_clip_rect(rect.intersect(ui.clip_rect()))
+        .set(
+            slot,
+            egui::Shape::Vec(fx::well_shapes(rect, 7, theme::well())),
+        );
+    shown.inner
+}
+
+/// Status cap at the top-left of a card: names the card's state or source.
+pub fn lead_cap(ui: &Ui, rect: egui::Rect, color: Color32) {
+    let cap = egui::Rect::from_min_size(
+        egui::pos2(rect.left() + 20.0, rect.top()),
+        egui::vec2(36.0_f32.min(rect.width() - 40.0).max(8.0), 3.0),
+    );
+    fx::glow(ui.painter(), cap.center(), 14.0, color.gamma_multiply(0.35));
+    ui.painter().rect_filled(
+        cap,
+        CornerRadius {
+            nw: 0,
+            ne: 0,
+            sw: 2,
+            se: 2,
+        },
+        color,
+    );
+}
+
+/// Shadow for cards drawn with a plain `egui::Frame`.
+pub fn card_shadow() -> egui::Shadow {
+    egui::Shadow {
+        offset: [0, 6],
+        blur: 18,
+        spread: 0,
+        color: theme::shadow(0.4),
+    }
+}
+
+/// Short lit cap on the top edge of a surface: the colour names what the
+/// surface carries (a source type, a state).
+pub fn top_cap(ui: &Ui, rect: egui::Rect, color: Color32, width: f32) {
+    let width = width.min(rect.width() - 36.0).max(8.0);
+    let cap = egui::Rect::from_min_size(
+        egui::pos2(rect.center().x - width / 2.0, rect.top()),
+        egui::vec2(width, 3.0),
+    );
+    fx::glow(
+        ui.painter(),
+        cap.center(),
+        width * 0.35,
+        color.gamma_multiply(0.3),
+    );
+    ui.painter().rect_filled(
+        cap,
+        CornerRadius {
+            nw: 0,
+            ne: 0,
+            sw: 2,
+            se: 2,
+        },
+        color,
+    );
+}
+
+/// Card with an optional subtitle under the title and a status cap on the
+/// top edge (live surfaces such as mixer lanes). The cap colour eases.
 pub fn card_ex<R>(
     ui: &mut Ui,
     title: &str,
@@ -463,7 +690,7 @@ pub fn card_ex<R>(
                     egui::Label::new(
                         RichText::new(title)
                             .font(theme::heading(theme::SECTION))
-                            .color(theme::TEXT),
+                            .color(theme::text()),
                     )
                     .truncate(),
                 );
@@ -472,7 +699,7 @@ pub fn card_ex<R>(
                         egui::Label::new(
                             RichText::new(subtitle)
                                 .size(theme::SMALL)
-                                .color(theme::TEXT_3),
+                                .color(theme::text_3()),
                         )
                         .truncate(),
                     );
@@ -491,12 +718,7 @@ pub fn card_ex<R>(
     });
     if let Some(color) = rail {
         let color = animation::color(ui.ctx(), rail_id, color);
-        let rect = shown.response.rect;
-        let bar = egui::Rect::from_min_size(
-            egui::pos2(rect.left() + 1.0, rect.top() + 14.0),
-            egui::vec2(3.0, (rect.height() - 28.0).max(8.0)),
-        );
-        ui.painter().rect_filled(bar, CornerRadius::same(2), color);
+        lead_cap(ui, shown.response.rect, color);
     }
     shown.inner
 }
@@ -504,8 +726,9 @@ pub fn card_ex<R>(
 /// Inset row inside a card (list items, lanes).
 pub fn inset<R>(ui: &mut Ui, body: impl FnOnce(&mut Ui) -> R) -> R {
     egui::Frame::new()
-        .fill(theme::RAISED)
-        .corner_radius(CornerRadius::same(theme::CONTROL_RADIUS))
+        .fill(theme::inset())
+        .stroke(Stroke::new(1.0, theme::border()))
+        .corner_radius(CornerRadius::same(theme::CONTROL_RADIUS + 1))
         .inner_margin(Margin::symmetric(12, 10))
         .show(ui, |ui| {
             ui.set_min_width(ui.available_width());
@@ -515,19 +738,23 @@ pub fn inset<R>(ui: &mut Ui, body: impl FnOnce(&mut Ui) -> R) -> R {
 }
 
 pub fn caption(ui: &mut Ui, text: &str) -> Response {
-    ui.label(RichText::new(text).size(theme::SMALL).color(theme::TEXT_2))
+    ui.label(
+        RichText::new(text)
+            .size(theme::SMALL)
+            .color(theme::text_2()),
+    )
 }
 
 pub fn note(ui: &mut Ui, text: impl Into<String>) {
     ui.label(
         RichText::new(text.into())
             .size(theme::SMALL)
-            .color(theme::TEXT_3),
+            .color(theme::text_3()),
     );
 }
 
 pub fn error_text(ui: &mut Ui, text: impl Into<String>) {
-    ui.label(RichText::new(text.into()).color(theme::DANGER));
+    ui.label(RichText::new(text.into()).color(theme::danger()));
 }
 
 pub fn mono(ui: &mut Ui, text: impl Into<String>) {
@@ -536,7 +763,7 @@ pub fn mono(ui: &mut Ui, text: impl Into<String>) {
             RichText::new(text.into())
                 .monospace()
                 .size(theme::SMALL)
-                .color(theme::TEXT_3),
+                .color(theme::text_3()),
         )
         .wrap()
         .selectable(true),
@@ -567,8 +794,12 @@ pub fn field_sized(
     ui.vertical(|ui| {
         ui.spacing_mut().item_spacing.y = 4.0;
         let caption = ui.add(
-            egui::Label::new(RichText::new(label).size(theme::SMALL).color(theme::TEXT_2))
-                .sense(egui::Sense::click()),
+            egui::Label::new(
+                RichText::new(label)
+                    .size(theme::SMALL)
+                    .color(theme::text_2()),
+            )
+            .sense(egui::Sense::click()),
         );
         let response = ui
             .add(
@@ -600,8 +831,12 @@ pub fn title_field(
     ui.vertical(|ui| {
         ui.spacing_mut().item_spacing.y = 2.0;
         let caption = ui.add(
-            egui::Label::new(RichText::new(label).size(theme::SMALL).color(theme::TEXT_3))
-                .sense(egui::Sense::click()),
+            egui::Label::new(
+                RichText::new(label)
+                    .size(theme::SMALL)
+                    .color(theme::text_3()),
+            )
+            .sense(egui::Sense::click()),
         );
         let response = ui
             .scope(|ui| {
@@ -611,9 +846,9 @@ pub fn title_field(
                     egui::TextEdit::singleline(value)
                         .id(id)
                         .frame(false)
-                        .hint_text(RichText::new(hint).color(theme::TEXT_3))
+                        .hint_text(RichText::new(hint).color(theme::text_3()))
                         .font(theme::heading(22.0))
-                        .text_color(theme::TEXT)
+                        .text_color(theme::text())
                         .desired_width(ui.available_width().min(520.0))
                         .margin(egui::vec2(0.0, 2.0)),
                 )
@@ -626,11 +861,11 @@ pub fn title_field(
         let line = animation::lerp_color(
             animation::lerp_color(
                 Color32::TRANSPARENT,
-                theme::BORDER_STRONG,
+                theme::border_strong(),
                 ui.ctx()
                     .animate_bool_with_time(id.with("hover"), response.hovered(), 0.12),
             ),
-            theme::ACCENT,
+            theme::accent(),
             ui.ctx()
                 .animate_bool_with_time(id.with("focus"), response.has_focus(), 0.12),
         );
@@ -686,25 +921,41 @@ pub fn pill_sized(ui: &mut Ui, text: &str, tone: Tone, max_width: f32) -> Respon
     // The surrounding business scope plus control position owns animation;
     // localized display text never changes this identity.
     let color = animation::color(ui.ctx(), ui.next_auto_id().with("pill"), tone.color());
+    let dot = if tone == Tone::Neutral { 0.0 } else { 11.0 };
+    let ink = if tone == Tone::Neutral {
+        theme::text_2()
+    } else {
+        color
+    };
     let mut job = egui::text::LayoutJob::simple(
         text.to_owned(),
         egui::FontId::proportional(theme::SMALL),
-        color,
-        (max_width - 18.0).max(1.0),
+        ink,
+        (max_width - 20.0 - dot).max(1.0),
     );
     job.wrap.max_rows = 1;
     let galley = ui.painter().layout_job(job);
-    let size = galley.size() + egui::vec2(18.0, 6.0);
+    let size = galley.size() + egui::vec2(20.0 + dot, 6.0);
     let (rect, response) = ui.allocate_exact_size(size, egui::Sense::hover());
-    ui.painter().rect(
-        rect,
-        CornerRadius::same(255),
-        color.gamma_multiply(0.14),
-        Stroke::new(1.0, color.gamma_multiply(0.28)),
-        StrokeKind::Inside,
-    );
+    let tint = if tone == Tone::Neutral {
+        theme::text().gamma_multiply(0.07)
+    } else {
+        color.gamma_multiply(if theme::is_light() { 0.11 } else { 0.13 })
+    };
     ui.painter()
-        .galley(rect.center() - galley.size() / 2.0, galley, color);
+        .rect_filled(rect, CornerRadius::same(255), tint);
+    if dot > 0.0 {
+        ui.painter()
+            .circle_filled(egui::pos2(rect.left() + 12.0, rect.center().y), 3.0, color);
+    }
+    ui.painter().galley(
+        egui::pos2(
+            rect.left() + 10.0 + dot,
+            rect.center().y - galley.size().y / 2.0,
+        ),
+        galley,
+        ink,
+    );
     response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Label, true, text));
     response
 }
@@ -714,7 +965,7 @@ pub fn dot(ui: &mut Ui, text: &str, tone: Tone) -> Response {
     let galley = ui.painter().layout_no_wrap(
         text.to_owned(),
         egui::FontId::proportional(theme::SMALL),
-        theme::TEXT_2,
+        theme::text_2(),
     );
     let size = egui::vec2(14.0 + galley.size().x, galley.size().y.max(14.0));
     let (rect, response) = ui.allocate_exact_size(size, egui::Sense::hover());
@@ -726,7 +977,7 @@ pub fn dot(ui: &mut Ui, text: &str, tone: Tone) -> Response {
     ui.painter().galley(
         egui::pos2(rect.left() + 14.0, rect.center().y - galley.size().y / 2.0),
         galley,
-        theme::TEXT_2,
+        theme::text_2(),
     );
     response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Label, true, text));
     response
@@ -745,13 +996,13 @@ pub fn kv_grid<L: AsRef<str>>(ui: &mut Ui, id: &str, rows: &[(L, String)]) {
                 ui.label(
                     RichText::new(label.as_ref())
                         .size(theme::SMALL)
-                        .color(theme::TEXT_2),
+                        .color(theme::text_2()),
                 );
                 ui.label(
                     RichText::new(value)
                         .monospace()
                         .size(theme::MONO)
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                 );
                 ui.end_row();
             }
@@ -776,12 +1027,12 @@ pub fn metric(ui: &mut Ui, label: &str, value: &str, tone: Option<Tone>) {
     wrap_for(ui, width);
     ui.vertical(|ui| {
         ui.spacing_mut().item_spacing.y = 1.0;
-        ui.label(RichText::new(label).size(11.5).color(theme::TEXT_3));
+        ui.label(RichText::new(label).size(11.5).color(theme::text_3()));
         ui.label(
             RichText::new(value)
                 .monospace()
                 .size(theme::MONO + 0.5)
-                .color(tone.map_or(theme::TEXT, Tone::color)),
+                .color(tone.map_or(theme::text(), Tone::color)),
         );
     });
 }
@@ -792,13 +1043,13 @@ pub fn empty(ui: &mut Ui, title: &str, description: &str) {
         ui.label(
             RichText::new(title)
                 .font(theme::heading(theme::SECTION))
-                .color(theme::TEXT_2),
+                .color(theme::text_2()),
         );
         ui.add_space(2.0);
         ui.label(
             RichText::new(description)
                 .size(theme::SMALL + 0.5)
-                .color(theme::TEXT_3),
+                .color(theme::text_3()),
         );
     });
     ui.add_space(12.0);
@@ -836,12 +1087,13 @@ pub fn paint_level(ui: &Ui, id: egui::Id, bar: egui::Rect, peak: Option<f64>, rm
     let (peak_level, hold) = animation::meter(ui.ctx(), id.with("peak"), peak_db);
     let (rms_level, _) = animation::meter(ui.ctx(), id.with("rms"), rms_db);
     let painter = ui.painter();
-    let r = CornerRadius::same((bar.height() / 2.0).min(4.0) as u8);
-    painter.rect_filled(bar, r, theme::METER_TRACK);
+    let r = (bar.height() / 2.0).min(4.0) as u8;
+    fx::well(painter, bar.expand(1.0), r + 1, theme::meter_track());
+    painter.rect_filled(bar, CornerRadius::same(r), theme::meter_unlit());
     let zones = [
-        (METER_FLOOR_DB, -18.0, theme::METER_LOW),
-        (-18.0, -6.0, theme::METER_MID),
-        (-6.0, 0.0, theme::METER_HIGH),
+        (METER_FLOOR_DB, -18.0, theme::meter_low()),
+        (-18.0, -6.0, theme::meter_mid()),
+        (-6.0, 0.0, theme::meter_high()),
     ];
     let fill = |level: f32, alpha: f32| {
         for (from, to, color) in zones {
@@ -865,7 +1117,7 @@ pub fn paint_level(ui: &Ui, id: egui::Id, bar: egui::Rect, peak: Option<f64>, rm
         let x = meter_x(bar, hold);
         painter.line_segment(
             [egui::pos2(x, bar.top()), egui::pos2(x, bar.bottom())],
-            Stroke::new(2.0, theme::TEXT),
+            Stroke::new(2.0, theme::text()),
         );
     }
     // Segment gaps give the LED-ladder reading without per-cell drawing.
@@ -873,7 +1125,7 @@ pub fn paint_level(ui: &Ui, id: egui::Id, bar: egui::Rect, peak: Option<f64>, rm
     while x < bar.right() {
         painter.line_segment(
             [egui::pos2(x, bar.top()), egui::pos2(x, bar.bottom())],
-            Stroke::new(1.0, theme::METER_TRACK.gamma_multiply(0.85)),
+            Stroke::new(1.0, theme::meter_track()),
         );
         x += 4.0;
     }
@@ -898,11 +1150,12 @@ pub fn paint_level_vertical(
     let (peak_level, hold) = animation::meter(ui.ctx(), id.with("peak"), peak_db);
     let (rms_level, _) = animation::meter(ui.ctx(), id.with("rms"), rms_db);
     let painter = ui.painter();
-    painter.rect_filled(bar, CornerRadius::same(3), theme::METER_TRACK);
+    fx::well(painter, bar.expand(1.5), 4, theme::meter_track());
+    painter.rect_filled(bar, CornerRadius::same(2), theme::meter_unlit());
     let zones = [
-        (METER_FLOOR_DB, -18.0, theme::METER_LOW),
-        (-18.0, -6.0, theme::METER_MID),
-        (-6.0, 0.0, theme::METER_HIGH),
+        (METER_FLOOR_DB, -18.0, theme::meter_low()),
+        (-18.0, -6.0, theme::meter_mid()),
+        (-6.0, 0.0, theme::meter_high()),
     ];
     let fill = |level: f32, alpha: f32| {
         for (from, to, color) in zones {
@@ -925,7 +1178,7 @@ pub fn paint_level_vertical(
         painter.rect_stroke(
             bar,
             CornerRadius::same(3),
-            Stroke::new(1.0, theme::TEXT_3.gamma_multiply(0.35)),
+            Stroke::new(1.0, theme::text_3().gamma_multiply(0.35)),
             StrokeKind::Inside,
         );
     }
@@ -933,14 +1186,14 @@ pub fn paint_level_vertical(
         let y = meter_y(bar, hold);
         painter.line_segment(
             [egui::pos2(bar.left(), y), egui::pos2(bar.right(), y)],
-            Stroke::new(2.0, theme::TEXT),
+            Stroke::new(2.0, theme::text()),
         );
     }
     let mut y = bar.bottom() - 4.0;
     while y > bar.top() {
         painter.line_segment(
             [egui::pos2(bar.left(), y), egui::pos2(bar.right(), y)],
-            Stroke::new(1.0, theme::METER_TRACK.gamma_multiply(0.85)),
+            Stroke::new(1.0, theme::meter_track()),
         );
         y -= 4.0;
     }
@@ -961,28 +1214,28 @@ pub fn paint_scale_vertical(painter: &egui::Painter, bar: egui::Rect) {
                 egui::pos2(bar.left() - 4.0, y),
                 egui::pos2(bar.left() - 1.0, y),
             ],
-            Stroke::new(1.0, theme::TEXT_3),
+            Stroke::new(1.0, theme::text_3()),
         );
         painter.text(
             egui::pos2(bar.left() - 6.0, y),
             egui::Align2::RIGHT_CENTER,
             label,
             egui::FontId::proportional(9.5),
-            theme::TEXT_3,
+            theme::text_3(),
         );
     }
 }
 
 /// Limiter gain reduction, drawn down from the top (0…12 dB).
 pub fn paint_reduction(painter: &egui::Painter, rect: egui::Rect, limiter_gain: Option<f64>) {
-    painter.rect_filled(rect, CornerRadius::same(2), theme::METER_TRACK);
+    fx::well(painter, rect.expand(1.0), 3, theme::meter_track());
     if let Some(g) = limiter_gain.filter(|g| *g > 0.0 && *g < 0.999) {
         let reduction = (-20.0 * g.log10()) as f32;
         let h = rect.height() * (reduction / 12.0).clamp(0.02, 1.0);
         painter.rect_filled(
             egui::Rect::from_min_size(rect.min, egui::vec2(rect.width(), h)),
             CornerRadius::same(2),
-            theme::WARNING,
+            theme::warning(),
         );
     }
 }
@@ -1004,7 +1257,7 @@ fn paint_scale(ui: &Ui, bar: egui::Rect) {
                 egui::pos2(x, bar.bottom() + 2.0),
                 egui::pos2(x, bar.bottom() + 5.0),
             ],
-            Stroke::new(1.0, theme::TEXT_3),
+            Stroke::new(1.0, theme::text_3()),
         );
         if bar.width() > 260.0 || matches!(label, "−48" | "−24" | "−12" | "0") {
             let align = if db == 0.0 {
@@ -1017,7 +1270,7 @@ fn paint_scale(ui: &Ui, bar: egui::Rect) {
                 align,
                 label,
                 egui::FontId::proportional(9.5),
-                theme::TEXT_3,
+                theme::text_3(),
             );
         }
     }
@@ -1032,34 +1285,38 @@ fn readout(ui: &mut Ui, peak: Option<f64>, rms: Option<f64>) {
                 ui.label(
                     RichText::new(text(ui, &Message::WidgetsPeak))
                         .size(11.5)
-                        .color(theme::TEXT_3),
+                        .color(theme::text_3()),
                 );
                 ui.label(
                     RichText::new(db_text(p))
                         .monospace()
                         .size(theme::MONO)
-                        .color(if hot { theme::METER_HIGH } else { theme::TEXT }),
+                        .color(if hot {
+                            theme::meter_high()
+                        } else {
+                            theme::text()
+                        }),
                 );
             }
             None => {
                 ui.label(
                     RichText::new(text(ui, &Message::WidgetsLevelUnavailable))
                         .size(11.5)
-                        .color(theme::TEXT_3),
+                        .color(theme::text_3()),
                 );
             }
         }
         if let Some(r) = rms {
-            ui.label(RichText::new("RMS").size(11.5).color(theme::TEXT_3));
+            ui.label(RichText::new("RMS").size(11.5).color(theme::text_3()));
             ui.label(
                 RichText::new(db_text(r))
                     .monospace()
                     .size(theme::MONO)
-                    .color(theme::TEXT_2),
+                    .color(theme::text_2()),
             );
         }
         if peak.is_some() || rms.is_some() {
-            ui.label(RichText::new("dBFS").size(11.0).color(theme::TEXT_3));
+            ui.label(RichText::new("dBFS").size(11.0).color(theme::text_3()));
         }
     });
 }
@@ -1364,13 +1621,7 @@ pub fn fader(
         response.hovered() || response.dragged(),
         0.12,
     );
-    painter.rect_filled(rail, CornerRadius::same(3), theme::METER_TRACK);
-    painter.rect_stroke(
-        rail,
-        CornerRadius::same(3),
-        Stroke::new(1.0, theme::BORDER),
-        StrokeKind::Outside,
-    );
+    fx::well(painter, rail.expand(1.0), 4, theme::meter_track());
     let mut filled = rail;
     if vertical {
         filled.min.y = x;
@@ -1378,12 +1629,12 @@ pub fn fader(
         filled.max.x = x;
     }
     let fill = if shown > 0.0 {
-        theme::WARNING
+        theme::warning()
     } else {
-        theme::ACCENT
+        theme::accent()
     };
-    let fill = if enabled { fill } else { theme::TEXT_3 };
-    painter.rect_filled(filled, CornerRadius::same(3), fill.gamma_multiply(0.9));
+    let fill = if enabled { fill } else { theme::text_3() };
+    painter.rect_filled(filled, CornerRadius::same(3), fill.gamma_multiply(0.85));
     let tick = |p: f32, from: f32, to: f32, stroke: Stroke| {
         let seg = if vertical {
             [
@@ -1403,7 +1654,7 @@ pub fn fader(
         unity,
         -rail_h / 2.0 - 5.0,
         rail_h / 2.0 + 5.0,
-        Stroke::new(1.0, theme::TEXT_3),
+        Stroke::new(1.0, theme::text_3()),
     );
     if size != FaderSize::Row {
         for db in [-48.0, -24.0, -12.0, -6.0, 6.0] {
@@ -1411,7 +1662,7 @@ pub fn fader(
                 at(gain_to_t(db)),
                 rail_h / 2.0 + 3.0,
                 rail_h / 2.0 + 6.0,
-                Stroke::new(1.0, theme::BORDER_STRONG),
+                Stroke::new(1.0, theme::border_strong()),
             );
         }
     }
@@ -1446,7 +1697,7 @@ pub fn fader(
         let galley = top.layout_no_wrap(
             text,
             egui::FontId::monospace(12.0),
-            theme::ON_ACCENT.gamma_multiply(bubble),
+            theme::text().gamma_multiply(bubble),
         );
         let size = galley.size() + egui::vec2(12.0, 6.0);
         let bubble_rect = if vertical {
@@ -1456,15 +1707,23 @@ pub fn fader(
             let at = egui::pos2(x, handle.top() - 6.0 - 4.0 * (1.0 - bubble));
             egui::Rect::from_center_size(egui::pos2(at.x, at.y - size.y / 2.0), size)
         };
-        top.rect_filled(
+        for shape in fx::shadow(bubble_rect, 6, Level::Raised) {
+            if let egui::Shape::Rect(mut s) = shape {
+                s.fill = s.fill.gamma_multiply(bubble);
+                top.add(s);
+            }
+        }
+        top.rect(
             bubble_rect,
-            CornerRadius::same(5),
-            theme::ACCENT.gamma_multiply(bubble),
+            CornerRadius::same(6),
+            theme::overlay().gamma_multiply(bubble),
+            Stroke::new(1.0, theme::border_strong().gamma_multiply(bubble)),
+            StrokeKind::Inside,
         );
         top.galley(
             bubble_rect.center() - galley.size() / 2.0,
             galley,
-            theme::ON_ACCENT,
+            theme::text().gamma_multiply(bubble),
         );
     }
     Fader {
@@ -1473,8 +1732,9 @@ pub fn fader(
     }
 }
 
-/// Fader cap: dark body, lit edge, a centre line in the fill colour and a
-/// halo while hovered or dragged. `vertical` turns the centre line sideways.
+/// Fader cap: a light metal cap with a contact shadow, a dark groove that
+/// carries the fill colour, and a halo while hovered or dragged. `vertical`
+/// turns the groove sideways.
 fn paint_knob(
     painter: &egui::Painter,
     handle: egui::Rect,
@@ -1487,19 +1747,47 @@ fn paint_knob(
         crate::fx::glow(
             painter,
             handle.center(),
-            handle.width().max(handle.height()) * 0.7,
-            color.gamma_multiply(0.22 * hot),
+            handle.width().max(handle.height()) * 0.8,
+            color.gamma_multiply(0.25 * hot),
         );
     }
-    painter.rect(
+    let r = CornerRadius::same(5);
+    for shape in fx::shadow(handle, 5, Level::Raised) {
+        painter.add(shape);
+    }
+    let (top, bottom) = if enabled {
+        (theme::cap_top(), theme::cap_bottom())
+    } else {
+        (theme::raised(), theme::hover())
+    };
+    painter.rect_filled(handle, r, bottom);
+    // Upper half catches the light.
+    let upper = egui::Rect::from_min_max(
+        handle.min,
+        egui::pos2(handle.max.x, handle.center().y + 1.0),
+    );
+    painter.rect_filled(
+        upper,
+        CornerRadius {
+            nw: 5,
+            ne: 5,
+            sw: 2,
+            se: 2,
+        },
+        animation::lerp_color(top, bottom, 0.15),
+    );
+    painter.rect_stroke(
         handle,
-        CornerRadius::same(5),
-        animation::lerp_color(theme::RAISED, theme::HOVER, hot),
-        Stroke::new(
-            1.0,
-            animation::lerp_color(theme::BORDER_STRONG, color, 0.35 + 0.4 * hot),
-        ),
+        r,
+        Stroke::new(1.0, theme::shadow(0.35)),
         StrokeKind::Inside,
+    );
+    painter.line_segment(
+        [
+            egui::pos2(handle.left() + 5.0, handle.top() + 1.0),
+            egui::pos2(handle.right() - 5.0, handle.top() + 1.0),
+        ],
+        Stroke::new(1.0, Color32::WHITE.gamma_multiply(0.6)),
     );
     let c = handle.center();
     let line = if vertical {
@@ -1513,10 +1801,12 @@ fn paint_knob(
             egui::pos2(c.x, handle.bottom() - 4.0),
         ]
     };
-    painter.line_segment(
-        line,
-        Stroke::new(2.0, if enabled { color } else { theme::TEXT_3 }),
-    );
+    let groove = if enabled {
+        animation::lerp_color(color, Color32::BLACK, 0.25)
+    } else {
+        theme::text_3()
+    };
+    painter.line_segment(line, Stroke::new(2.0, groove));
 }
 
 /// Section label inside a page, with optional trailing content.
@@ -1525,7 +1815,7 @@ pub fn section(ui: &mut Ui, title: &str, trailing: impl FnOnce(&mut Ui)) {
         ui.label(
             RichText::new(title)
                 .font(theme::heading(theme::SECTION))
-                .color(theme::TEXT),
+                .color(theme::text()),
         );
         trailing(ui);
     });
@@ -1564,7 +1854,7 @@ pub fn panel(
         let openness = state.openness(ui.ctx());
         let header = ui.horizontal_top(|ui| {
             let (chev, _) = ui.allocate_exact_size(egui::vec2(16.0, 20.0), egui::Sense::hover());
-            crate::icons::chevron(ui.painter(), chev, openness, theme::TEXT_2);
+            crate::icons::chevron(ui.painter(), chev, openness, theme::text_2());
             // Leave room for trailing pills; long text wraps rather than
             // widening the panel past its column.
             let reserve = (ui.available_width() * 0.35).clamp(90.0, 180.0);
@@ -1575,7 +1865,7 @@ pub fn panel(
                     egui::Label::new(
                         RichText::new(title)
                             .font(theme::heading(theme::SECTION))
-                            .color(theme::TEXT),
+                            .color(theme::text()),
                     )
                     .selectable(false),
                 );
@@ -1584,7 +1874,7 @@ pub fn panel(
                         egui::Label::new(
                             RichText::new(subtitle)
                                 .size(theme::SMALL)
-                                .color(theme::TEXT_3),
+                                .color(theme::text_3()),
                         )
                         .wrap()
                         .selectable(false),
@@ -1644,9 +1934,9 @@ pub fn stepper(ui: &mut Ui, steps: &[(&str, Step)]) -> Option<usize> {
                     Stroke::new(
                         1.5,
                         if done {
-                            theme::SUCCESS.gamma_multiply(0.7)
+                            theme::success().gamma_multiply(0.7)
                         } else {
-                            theme::BORDER_STRONG
+                            theme::border_strong()
                         },
                     ),
                 );
@@ -1654,7 +1944,7 @@ pub fn stepper(ui: &mut Ui, steps: &[(&str, Step)]) -> Option<usize> {
             let galley = ui.painter().layout_no_wrap(
                 label.to_string(),
                 egui::FontId::proportional(theme::SMALL + 1.0),
-                theme::TEXT,
+                theme::text(),
             );
             let size = egui::vec2(28.0 + galley.size().x + 6.0, 24.0);
             let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
@@ -1676,13 +1966,17 @@ pub fn stepper(ui: &mut Ui, steps: &[(&str, Step)]) -> Option<usize> {
             });
             let circle = egui::pos2(rect.left() + 12.0, rect.center().y);
             let (fill, ring, text) = match step {
-                Step::Done => (theme::SUCCESS, theme::SUCCESS, theme::TEXT_2),
-                Step::Current => (theme::ACCENT, theme::ACCENT, theme::TEXT),
-                Step::Todo => (Color32::TRANSPARENT, theme::BORDER_STRONG, theme::TEXT_3),
+                Step::Done => (theme::success(), theme::success(), theme::text_2()),
+                Step::Current => (theme::accent(), theme::accent(), theme::text()),
+                Step::Todo => (
+                    Color32::TRANSPARENT,
+                    theme::border_strong(),
+                    theme::text_3(),
+                ),
             };
             let painter = ui.painter();
             if response.hovered() {
-                painter.rect_filled(rect.expand(2.0), CornerRadius::same(12), theme::HOVER);
+                painter.rect_filled(rect.expand(2.0), CornerRadius::same(12), theme::hover());
             }
             painter.circle(
                 circle,
@@ -1695,7 +1989,7 @@ pub fn stepper(ui: &mut Ui, steps: &[(&str, Step)]) -> Option<usize> {
                     painter,
                     crate::icons::square(circle, 13.0),
                     crate::icons::Icon::Check,
-                    theme::SUCCESS,
+                    theme::success(),
                 );
             } else {
                 painter.text(
@@ -1720,35 +2014,24 @@ pub fn stepper(ui: &mut Ui, steps: &[(&str, Step)]) -> Option<usize> {
     picked
 }
 
-/// Filter chips with counts. Returns the chip picked this frame.
+/// Filter chips with counts: the chosen one is a raised cap, the rest are
+/// text until hovered. Returns the chip picked this frame.
 pub fn chips(ui: &mut Ui, current: usize, items: &[(&str, usize)]) -> Option<usize> {
     let mut picked = None;
     ui.horizontal_wrapped(|ui| {
-        ui.spacing_mut().item_spacing.x = 6.0;
+        ui.spacing_mut().item_spacing.x = 4.0;
         for (i, (label, count)) in items.iter().enumerate() {
             let on = i == current;
             let text = format!("{label} {count}");
             let palette = if on {
-                Palette {
-                    base: theme::ACCENT.gamma_multiply(0.18),
-                    hover: theme::ACCENT.gamma_multiply(0.24),
-                    press: theme::ACCENT.gamma_multiply(0.3),
-                    text: theme::ACCENT_HOVER,
-                    stroke: theme::ACCENT.gamma_multiply(0.55),
-                }
+                palette(Kind::Secondary)
             } else {
-                Palette {
-                    base: Color32::TRANSPARENT,
-                    hover: theme::HOVER,
-                    press: theme::RAISED,
-                    text: theme::TEXT_2,
-                    stroke: theme::BORDER_STRONG,
-                }
+                palette(Kind::Ghost)
             };
             let response = draw(
                 ui,
                 Spec {
-                    compact: true,
+                    height: Height::Compact,
                     selected: Some(on),
                     radius: CornerRadius::same(255),
                     ..Spec::new(&text, palette)
@@ -1796,20 +2079,10 @@ pub fn tile(
 ) -> Response {
     let id = ui.next_auto_id();
     let (hover, _) = animation::interaction(ui.ctx(), id);
-    let fill = animation::lerp_color(
-        theme::SURFACE,
-        theme::RAISED,
-        hover.max(selected as u8 as f32),
-    );
-    let stroke = if selected {
-        tone.color().gamma_multiply(0.6)
-    } else {
-        theme::BORDER
-    };
-    let halo = ui.painter().add(egui::Shape::Noop);
+    let lift = hover.max(selected as u8 as f32);
+    let fill = animation::lerp_color(theme::surface(), theme::raised(), lift);
+    let back = ui.painter().add(egui::Shape::Noop);
     let frame = egui::Frame::new()
-        .fill(fill)
-        .stroke(Stroke::new(1.0, stroke))
         .corner_radius(CornerRadius::same(theme::RADIUS))
         .inner_margin(Margin::symmetric(14, 12))
         .show(ui, |ui| {
@@ -1819,7 +2092,7 @@ pub fn tile(
                 dot(ui, title, tone);
                 ui.label(RichText::new(value).font(theme::heading(20.0)).color(
                     if tone == Tone::Neutral || tone == Tone::Success {
-                        theme::TEXT
+                        theme::text()
                     } else {
                         tone.color()
                     },
@@ -1828,25 +2101,48 @@ pub fn tile(
                     egui::Label::new(
                         RichText::new(detail)
                             .size(theme::SMALL)
-                            .color(theme::TEXT_3),
+                            .color(theme::text_3()),
                     )
                     .truncate(),
                 );
             });
         });
+    let rect = frame.response.rect;
+    let mut shapes = Vec::new();
     if matches!(tone, Tone::Warning | Tone::Danger) {
         // Something needs attention: the tile glows in its state colour.
-        ui.painter().set(
-            halo,
-            egui::epaint::RectShape::filled(
-                frame.response.rect,
+        shapes.push(egui::Shape::Rect(
+            RectShape::filled(
+                rect,
                 CornerRadius::same(theme::RADIUS),
-                tone.color().gamma_multiply(0.14),
+                tone.color().gamma_multiply(0.16),
             )
-            .with_blur_width(16.0),
-        );
+            .with_blur_width(18.0),
+        ));
     }
-    let response = ui.interact(frame.response.rect, id, egui::Sense::click());
+    let level = if lift > 0.5 {
+        Level::Raised
+    } else {
+        Level::Card
+    };
+    shapes.extend(fx::elevated(
+        ui.ctx(),
+        rect,
+        theme::RADIUS,
+        fill,
+        level,
+        None,
+    ));
+    if selected {
+        shapes.push(egui::Shape::Rect(RectShape::stroke(
+            rect,
+            CornerRadius::same(theme::RADIUS),
+            Stroke::new(1.5, tone.color().gamma_multiply(0.6)),
+            StrokeKind::Inside,
+        )));
+    }
+    ui.painter().set(back, egui::Shape::Vec(shapes));
+    let response = ui.interact(rect, id, egui::Sense::click());
     response.widget_info(|| {
         egui::WidgetInfo::labeled(egui::WidgetType::Button, true, format!("{title}：{value}"))
     });
@@ -1862,19 +2158,222 @@ pub fn kbd(ui: &mut Ui, keys: &str) {
     let galley = ui.painter().layout_no_wrap(
         keys.to_owned(),
         egui::FontId::monospace(11.0),
-        theme::TEXT_2,
+        theme::text_2(),
     );
     let size = galley.size() + egui::vec2(10.0, 4.0);
     let (rect, _) = ui.allocate_exact_size(size, egui::Sense::hover());
-    ui.painter().rect(
+    paint_keycap(ui.painter(), rect);
+    ui.painter()
+        .galley(rect.center() - galley.size() / 2.0, galley, theme::text_2());
+}
+
+/// Quick-action entry that reads as a search field: a recessed well with a
+/// magnifier, placeholder and shortcut cap. Opens the command palette.
+/// `width` at or below 40 shows the magnifier only.
+pub fn search_field(
+    ui: &mut Ui,
+    width: f32,
+    placeholder: &str,
+    shortcut: &str,
+    label: &str,
+) -> Response {
+    let height = theme::CONTROL_HEIGHT + 2.0;
+    let (rect, response) = ui.allocate_exact_size(egui::vec2(width, height), egui::Sense::click());
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, label));
+    let hover = ui.ctx().animate_bool_with_time(
+        response.id.with("hover"),
+        response.hovered(),
+        animation::FAST,
+    );
+    let painter = ui.painter();
+    fx::well(
+        painter,
         rect,
-        CornerRadius::same(4),
-        theme::RAISED,
-        Stroke::new(1.0, theme::BORDER_STRONG),
+        theme::CONTROL_RADIUS + 1,
+        animation::lerp_color(theme::well(), theme::inset(), hover * 0.6),
+    );
+    let compact = width <= 40.0;
+    let icon_at = if compact {
+        rect.center()
+    } else {
+        egui::pos2(rect.left() + 18.0, rect.center().y)
+    };
+    crate::icons::paint(
+        painter,
+        crate::icons::square(icon_at, 14.0),
+        crate::icons::Icon::Search,
+        theme::text_3(),
+    );
+    if !compact {
+        let cap = painter.layout_no_wrap(
+            shortcut.to_owned(),
+            egui::FontId::monospace(11.0),
+            theme::text_3(),
+        );
+        let cap_rect = egui::Rect::from_min_size(
+            egui::pos2(
+                rect.right() - 8.0 - cap.size().x - 10.0,
+                rect.center().y - (cap.size().y + 4.0) / 2.0,
+            ),
+            cap.size() + egui::vec2(10.0, 4.0),
+        );
+        let text_max = cap_rect.left() - (rect.left() + 32.0) - 6.0;
+        if text_max > 24.0 {
+            let mut job = egui::text::LayoutJob::simple(
+                placeholder.to_owned(),
+                egui::FontId::proportional(theme::SMALL + 1.0),
+                theme::text_3(),
+                text_max,
+            );
+            job.wrap.max_rows = 1;
+            let galley = painter.layout_job(job);
+            painter.galley(
+                egui::pos2(rect.left() + 32.0, rect.center().y - galley.size().y / 2.0),
+                galley,
+                theme::text_3(),
+            );
+        }
+        paint_keycap(painter, cap_rect);
+        painter.galley(cap_rect.center() - cap.size() / 2.0, cap, theme::text_3());
+    }
+    if response.hovered() {
+        ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+    }
+    paint_focus(ui, &response);
+    response
+}
+
+/// Square icon-only button. `label` is its accessible name and tooltip.
+pub fn icon_button(
+    ui: &mut Ui,
+    icon: crate::icons::Icon,
+    label: &str,
+    kind: Kind,
+    size: f32,
+    busy: bool,
+) -> Response {
+    let palette = palette(kind);
+    let (rect, response) = ui.allocate_exact_size(
+        egui::vec2(size, size),
+        if busy {
+            egui::Sense::hover()
+        } else {
+            egui::Sense::click()
+        },
+    );
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, label));
+    let (hover, press) = animation::interaction(ui.ctx(), response.id);
+    let fill = animation::lerp_color(
+        animation::lerp_color(palette.base, palette.hover, hover),
+        palette.press,
+        press,
+    );
+    let raised = (palette.base.a() as f32 / 255.0).powi(4) * (1.0 - 0.8 * press);
+    let radius = CornerRadius::same(((size / 4.0).round() as u8).max(5));
+    ui.painter().extend(button_shapes(
+        ui.ctx(),
+        rect,
+        radius,
+        fill,
+        palette.stroke,
+        raised,
+    ));
+    if busy {
+        egui::Spinner::new()
+            .size(size * 0.45)
+            .color(palette.text)
+            .paint_at(
+                ui,
+                egui::Rect::from_center_size(rect.center(), egui::vec2(size * 0.5, size * 0.5)),
+            );
+    } else {
+        crate::icons::paint(
+            ui.painter(),
+            crate::icons::square(rect.center(), size * 0.5),
+            icon,
+            palette.text,
+        );
+    }
+    paint_focus(ui, &response);
+    response.on_hover_text(label)
+}
+
+/// Full-width row in a popup menu. `danger` colours a destructive item.
+pub fn menu_item(
+    ui: &mut Ui,
+    icon: Option<crate::icons::Icon>,
+    text: &str,
+    checked: bool,
+    danger: bool,
+) -> Response {
+    let width = ui.available_width().max(160.0);
+    let (rect, response) = ui.allocate_exact_size(egui::vec2(width, 30.0), egui::Sense::click());
+    response.widget_info(|| {
+        if icon.is_none() {
+            egui::WidgetInfo::selected(egui::WidgetType::SelectableLabel, true, checked, text)
+        } else {
+            egui::WidgetInfo::labeled(egui::WidgetType::Button, true, text)
+        }
+    });
+    let hover = ui.ctx().animate_bool_with_time(
+        response.id.with("hover"),
+        response.hovered() || response.has_focus(),
+        animation::FAST,
+    );
+    let ink = if danger { danger_text() } else { theme::text() };
+    let painter = ui.painter();
+    if hover > 0.0 {
+        let tint = if danger {
+            theme::danger().gamma_multiply(0.12)
+        } else {
+            theme::text().gamma_multiply(0.07)
+        };
+        painter.rect_filled(rect, CornerRadius::same(7), tint.gamma_multiply(hover));
+    }
+    if let Some(icon) = icon {
+        crate::icons::paint(
+            painter,
+            crate::icons::square(egui::pos2(rect.left() + 16.0, rect.center().y), 14.0),
+            icon,
+            if danger { ink } else { theme::text_2() },
+        );
+    } else if checked {
+        crate::icons::paint(
+            painter,
+            crate::icons::square(egui::pos2(rect.left() + 16.0, rect.center().y), 12.0),
+            crate::icons::Icon::Check,
+            theme::accent(),
+        );
+    }
+    let mut job = egui::text::LayoutJob::simple(
+        text.to_owned(),
+        egui::FontId::proportional(theme::SMALL + 1.0),
+        ink,
+        (rect.width() - 40.0).max(1.0),
+    );
+    job.wrap.max_rows = 1;
+    let galley = painter.layout_job(job);
+    painter.galley(
+        egui::pos2(rect.left() + 32.0, rect.center().y - galley.size().y / 2.0),
+        galley,
+        ink,
+    );
+    response
+}
+
+fn paint_keycap(painter: &egui::Painter, rect: egui::Rect) {
+    painter.rect_filled(
+        rect.translate(egui::vec2(0.0, 1.0)),
+        CornerRadius::same(5),
+        theme::shadow(0.5),
+    );
+    painter.rect(
+        rect,
+        CornerRadius::same(5),
+        theme::raised(),
+        Stroke::new(1.0, theme::border()),
         StrokeKind::Inside,
     );
-    ui.painter()
-        .galley(rect.center() - galley.size() / 2.0, galley, theme::TEXT_2);
 }
 
 /// Number of equal columns of at least `min_width` that fit.

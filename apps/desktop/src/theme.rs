@@ -3,67 +3,269 @@ use eframe::egui::{
     TextStyle,
 };
 use std::{
+    cell::Cell,
     collections::HashMap,
     path::{Path, PathBuf},
     sync::{Arc, Mutex, OnceLock},
 };
 
-// Surfaces, darkest to lightest. "Neon Console": near-black blue so the
-// source colours and live signal carry the page.
-pub const BG_DEEP: Color32 = Color32::from_rgb(0x05, 0x08, 0x0d);
-pub const BG: Color32 = Color32::from_rgb(0x09, 0x0e, 0x15);
-pub const SIDEBAR: Color32 = Color32::from_rgb(0x07, 0x0b, 0x11);
-pub const SURFACE: Color32 = Color32::from_rgb(0x0e, 0x15, 0x1f);
-pub const RAISED: Color32 = Color32::from_rgb(0x14, 0x20, 0x2e);
-pub const HOVER: Color32 = Color32::from_rgb(0x1a, 0x29, 0x39);
-pub const INPUT: Color32 = Color32::from_rgb(0x04, 0x07, 0x0b);
-pub const BORDER: Color32 = Color32::from_rgb(0x18, 0x24, 0x34);
-pub const BORDER_STRONG: Color32 = Color32::from_rgb(0x25, 0x36, 0x4a);
-/// 1px highlight along the top edge of raised surfaces.
-pub const EDGE_LIGHT: Color32 = Color32::from_rgba_premultiplied(13, 13, 13, 13);
+/// "Studio Graphite": layers differ by lightness and shadow, not by outline.
+/// Colour is reserved for where sound comes from, state and real levels.
+/// Every colour token exists once per mode; the active one follows egui's
+/// resolved theme (`sync`) so both modes share all painting code.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Mode {
+    Dark,
+    Light,
+}
 
-pub const TEXT: Color32 = Color32::from_rgb(0xea, 0xf2, 0xf8);
-pub const TEXT_2: Color32 = Color32::from_rgb(0xa5, 0xb8, 0xc8);
-pub const TEXT_3: Color32 = Color32::from_rgb(0x7a, 0x90, 0xa6);
+pub struct Palette {
+    // Elevation, lowest to highest. Wells are recessed below the canvas.
+    pub well: Color32,
+    pub bg: Color32,
+    pub sidebar: Color32,
+    pub surface: Color32,
+    pub raised: Color32,
+    pub hover: Color32,
+    pub overlay: Color32,
+    /// Rows recessed into a card (lists, lanes).
+    pub inset: Color32,
+    /// Hairlines are translucent so they read on every layer.
+    pub border: Color32,
+    pub border_strong: Color32,
+    /// 1px light catching the top edge of raised surfaces.
+    pub edge_light: Color32,
+    pub text: Color32,
+    pub text_2: Color32,
+    pub text_3: Color32,
+    /// Focus and selection only.
+    pub accent: Color32,
+    /// The one primary action per view: a solid, high-contrast cap.
+    pub primary: Color32,
+    pub primary_hover: Color32,
+    pub primary_press: Color32,
+    pub on_primary: Color32,
+    // Where a sound comes from. Never reused for state.
+    pub src_native: Color32,
+    pub src_airplay: Color32,
+    pub src_hub: Color32,
+    pub src_output: Color32,
+    /// Solo spotlight; distinct from the primary action.
+    pub solo: Color32,
+    pub success: Color32,
+    pub warning: Color32,
+    pub danger: Color32,
+    pub danger_hover: Color32,
+    pub on_danger: Color32,
+    // Meter zones: up to −18 dBFS nominal, −18…−6 caution, above −6 hot.
+    pub meter_low: Color32,
+    pub meter_mid: Color32,
+    pub meter_high: Color32,
+    pub meter_track: Color32,
+    /// Unlit LED cells stay faintly visible.
+    pub meter_unlit: Color32,
+    /// Fader cap body, top and bottom of its metal gradient.
+    pub cap_top: Color32,
+    pub cap_bottom: Color32,
+    /// Shadow ink and its strength for this mode.
+    pub shadow: Color32,
+    pub shadow_strength: f32,
+    /// Vertical lightness falloff of card gradients (0 = flat).
+    pub ramp_depth: u8,
+}
 
-// Focus, selection and the primary action only.
-pub const ACCENT: Color32 = Color32::from_rgb(0x38, 0xe1, 0xff);
-pub const ACCENT_HOVER: Color32 = Color32::from_rgb(0x7b, 0xeb, 0xff);
-pub const ACCENT_PRESS: Color32 = Color32::from_rgb(0x22, 0xc3, 0xe0);
-pub const ON_ACCENT: Color32 = Color32::from_rgb(0x02, 0x1a, 0x22);
+const fn rgb(hex: u32) -> Color32 {
+    Color32::from_rgb((hex >> 16) as u8, (hex >> 8) as u8, hex as u8)
+}
 
-// Where a sound comes from. Never reused for state.
-pub const SRC_NATIVE: Color32 = Color32::from_rgb(0x38, 0xe1, 0xff);
-pub const SRC_AIRPLAY: Color32 = Color32::from_rgb(0xa8, 0x8b, 0xff);
-pub const SRC_HUB: Color32 = Color32::from_rgb(0xe8, 0xfb, 0xff);
-pub const SRC_OUTPUT: Color32 = Color32::from_rgb(0xf2, 0xf6, 0xfa);
-/// Solo spotlight; distinct from the primary action.
-pub const SOLO: Color32 = Color32::from_rgb(0xff, 0xd3, 0x4d);
+pub const DARK: Palette = Palette {
+    well: rgb(0x07080a),
+    bg: rgb(0x0a0b0e),
+    sidebar: rgb(0x0f1115),
+    surface: rgb(0x15181d),
+    raised: rgb(0x1e2229),
+    hover: rgb(0x272c35),
+    overlay: rgb(0x232831),
+    inset: rgb(0x101216),
+    border: Color32::from_rgba_premultiplied(13, 13, 13, 13),
+    border_strong: Color32::from_rgba_premultiplied(26, 26, 26, 26),
+    edge_light: Color32::from_rgba_premultiplied(15, 15, 15, 15),
+    text: rgb(0xedeff3),
+    text_2: rgb(0xa3aab6),
+    text_3: rgb(0x8a92a0),
+    accent: rgb(0x3ccfe6),
+    primary: rgb(0xe9ecf1),
+    primary_hover: rgb(0xffffff),
+    primary_press: rgb(0xc5cad3),
+    on_primary: rgb(0x0a0b0e),
+    src_native: rgb(0x3ccfe6),
+    src_airplay: rgb(0xa08cff),
+    src_hub: rgb(0xe9edf2),
+    src_output: rgb(0xf2f4f7),
+    solo: rgb(0xf5c451),
+    success: rgb(0x45d483),
+    warning: rgb(0xf2a541),
+    danger: rgb(0xf06a6a),
+    danger_hover: rgb(0xff8a8a),
+    on_danger: rgb(0x2a0707),
+    meter_low: rgb(0x45d483),
+    meter_mid: rgb(0xf5c451),
+    meter_high: rgb(0xf06a6a),
+    meter_track: rgb(0x050607),
+    meter_unlit: Color32::from_rgba_premultiplied(14, 14, 14, 14),
+    cap_top: rgb(0xf2f4f7),
+    cap_bottom: rgb(0xaab2bd),
+    shadow: Color32::BLACK,
+    shadow_strength: 1.0,
+    ramp_depth: 44,
+};
 
-pub const SUCCESS: Color32 = Color32::from_rgb(0x4e, 0xe3, 0x9a);
-pub const WARNING: Color32 = Color32::from_rgb(0xff, 0xb5, 0x47);
-pub const DANGER: Color32 = Color32::from_rgb(0xff, 0x6b, 0x6b);
-pub const DANGER_HOVER: Color32 = Color32::from_rgb(0xff, 0x8e, 0x8e);
-pub const ON_DANGER: Color32 = Color32::from_rgb(0x2a, 0x07, 0x07);
+pub const LIGHT: Palette = Palette {
+    well: rgb(0xe2e5ea),
+    bg: rgb(0xeef0f3),
+    sidebar: rgb(0xe6e9ed),
+    surface: rgb(0xffffff),
+    raised: rgb(0xfafbfc),
+    hover: rgb(0xeff2f6),
+    overlay: rgb(0xffffff),
+    inset: rgb(0xf3f5f7),
+    border: Color32::from_rgba_premultiplied(0, 0, 0, 20),
+    border_strong: Color32::from_rgba_premultiplied(0, 0, 0, 38),
+    edge_light: Color32::from_rgba_premultiplied(255, 255, 255, 255),
+    text: rgb(0x14171c),
+    text_2: rgb(0x474e59),
+    text_3: rgb(0x626974),
+    accent: rgb(0x066c7d),
+    primary: rgb(0x1b1e24),
+    primary_hover: rgb(0x2d3139),
+    primary_press: rgb(0x0e1013),
+    on_primary: rgb(0xffffff),
+    src_native: rgb(0x066c7d),
+    src_airplay: rgb(0x6b4fe0),
+    src_hub: rgb(0x2b2f37),
+    src_output: rgb(0x1b1e24),
+    solo: rgb(0x875d04),
+    success: rgb(0x137033),
+    warning: rgb(0x994a07),
+    danger: rgb(0xb32f2f),
+    danger_hover: rgb(0xdc4a4a),
+    on_danger: rgb(0xffffff),
+    meter_low: rgb(0x22a35a),
+    meter_mid: rgb(0xe0a91e),
+    meter_high: rgb(0xe04848),
+    meter_track: rgb(0xd9dde3),
+    meter_unlit: Color32::from_rgba_premultiplied(0, 0, 0, 16),
+    cap_top: rgb(0xffffff),
+    cap_bottom: rgb(0xd3d8df),
+    shadow: rgb(0x101828),
+    shadow_strength: 0.32,
+    ramp_depth: 6,
+};
 
-// Meter zones: up to −18 dBFS nominal, −18…−6 caution, above −6 hot.
-pub const METER_LOW: Color32 = Color32::from_rgb(0x3e, 0xe0, 0x8c);
-pub const METER_MID: Color32 = Color32::from_rgb(0xff, 0xd3, 0x4d);
-pub const METER_HIGH: Color32 = Color32::from_rgb(0xff, 0x5a, 0x5a);
-pub const METER_TRACK: Color32 = Color32::from_rgb(0x06, 0x0b, 0x11);
+// UI state lives on the UI thread; thread-local keeps parallel tests apart.
+thread_local! {
+    static MODE: Cell<Mode> = const { Cell::new(Mode::Dark) };
+}
+
+pub fn mode() -> Mode {
+    MODE.with(Cell::get)
+}
+
+pub fn set_mode(mode: Mode) {
+    MODE.with(|m| m.set(mode));
+}
+
+pub fn is_light() -> bool {
+    mode() == Mode::Light
+}
+
+pub fn palette() -> &'static Palette {
+    match mode() {
+        Mode::Dark => &DARK,
+        Mode::Light => &LIGHT,
+    }
+}
+
+/// Follow the theme egui resolved for this frame (explicit choice or the
+/// system appearance). Call once at the start of every frame.
+pub fn sync(ctx: &egui::Context) {
+    set_mode(match ctx.theme() {
+        egui::Theme::Light => Mode::Light,
+        egui::Theme::Dark => Mode::Dark,
+    });
+}
+
+macro_rules! tokens {
+    ($($name:ident),* $(,)?) => {
+        $(
+            #[inline]
+            pub fn $name() -> Color32 {
+                palette().$name
+            }
+        )*
+    };
+}
+
+tokens!(
+    well,
+    bg,
+    sidebar,
+    surface,
+    raised,
+    hover,
+    overlay,
+    inset,
+    border,
+    border_strong,
+    edge_light,
+    text,
+    text_2,
+    text_3,
+    accent,
+    primary,
+    primary_hover,
+    primary_press,
+    on_primary,
+    src_native,
+    src_airplay,
+    src_hub,
+    src_output,
+    solo,
+    success,
+    warning,
+    danger,
+    danger_hover,
+    on_danger,
+    meter_low,
+    meter_mid,
+    meter_high,
+    meter_track,
+    meter_unlit,
+    cap_top,
+    cap_bottom,
+);
+
+/// Shadow ink at `alpha` (0…1) of this mode's strength.
+pub fn shadow(alpha: f32) -> Color32 {
+    let p = palette();
+    p.shadow
+        .gamma_multiply((alpha * p.shadow_strength).clamp(0.0, 1.0))
+}
 
 pub const RADIUS: u8 = 14;
 pub const CONTROL_RADIUS: u8 = 9;
 pub const CONTROL_HEIGHT: f32 = 32.0;
 pub const COMPACT_HEIGHT: f32 = 28.0;
 
-pub const TITLE: f32 = 22.0;
+pub const TITLE: f32 = 24.0;
 /// Room master readout, the largest number in the app.
 pub const DISPLAY: f32 = 34.0;
 pub const SECTION: f32 = 15.0;
 pub const BODY: f32 = 14.0;
 pub const SMALL: f32 = 12.0;
 pub const MONO: f32 = 12.5;
+/// Sidebar group captions.
+pub const GROUP: f32 = 11.0;
 
 /// Semibold CJK face for titles; falls back to the regular face when absent.
 pub fn heading(size: f32) -> FontId {
@@ -75,37 +277,58 @@ pub fn install(ctx: &egui::Context) -> bool {
     install_fonts(ctx)
 }
 
+/// Both modes are installed up front; egui picks one per frame from the
+/// theme preference and the system appearance.
 pub fn install_style(ctx: &egui::Context) {
-    let mut style = (*ctx.style()).clone();
-    style.visuals = egui::Visuals::dark();
+    ctx.set_style_of(
+        egui::Theme::Dark,
+        style_for(&ctx.style_of(egui::Theme::Dark), &DARK, false),
+    );
+    ctx.set_style_of(
+        egui::Theme::Light,
+        style_for(&ctx.style_of(egui::Theme::Light), &LIGHT, true),
+    );
+}
+
+fn style_for(base: &egui::Style, p: &Palette, light: bool) -> egui::Style {
+    let mut style = base.clone();
+    style.visuals = if light {
+        egui::Visuals::light()
+    } else {
+        egui::Visuals::dark()
+    };
+    let shadow = |alpha: f32| {
+        p.shadow
+            .gamma_multiply((alpha * p.shadow_strength).min(1.0))
+    };
     let v = &mut style.visuals;
-    v.panel_fill = BG;
-    v.window_fill = SURFACE;
-    v.window_stroke = Stroke::new(1.0, BORDER_STRONG);
+    v.panel_fill = p.bg;
+    v.window_fill = p.overlay;
+    v.window_stroke = Stroke::new(1.0, p.border_strong);
     v.window_corner_radius = CornerRadius::same(12);
     v.window_shadow = egui::Shadow {
+        offset: [0, 18],
+        blur: 48,
+        spread: 0,
+        color: shadow(0.7),
+    };
+    v.popup_shadow = egui::Shadow {
         offset: [0, 8],
         blur: 24,
         spread: 0,
-        color: Color32::from_black_alpha(110),
+        color: shadow(0.55),
     };
-    v.popup_shadow = egui::Shadow {
-        offset: [0, 4],
-        blur: 12,
-        spread: 0,
-        color: Color32::from_black_alpha(90),
-    };
-    v.menu_corner_radius = CornerRadius::same(CONTROL_RADIUS);
-    v.extreme_bg_color = INPUT;
-    v.faint_bg_color = RAISED;
-    v.code_bg_color = INPUT;
+    v.menu_corner_radius = CornerRadius::same(CONTROL_RADIUS + 1);
+    v.extreme_bg_color = p.well;
+    v.faint_bg_color = p.raised;
+    v.code_bg_color = p.well;
     v.override_text_color = None;
-    v.warn_fg_color = WARNING;
-    v.error_fg_color = DANGER;
-    v.hyperlink_color = ACCENT;
-    v.selection.bg_fill = ACCENT.gamma_multiply(0.35);
-    v.selection.stroke = Stroke::new(1.0, ACCENT);
-    v.text_cursor.stroke = Stroke::new(2.0, ACCENT);
+    v.warn_fg_color = p.warning;
+    v.error_fg_color = p.danger;
+    v.hyperlink_color = p.accent;
+    v.selection.bg_fill = p.accent.gamma_multiply(if light { 0.22 } else { 0.35 });
+    v.selection.stroke = Stroke::new(1.0, p.accent);
+    v.text_cursor.stroke = Stroke::new(2.0, p.accent);
     v.slider_trailing_fill = true;
     v.handle_shape = egui::style::HandleShape::Circle;
     v.striped = false;
@@ -113,46 +336,50 @@ pub fn install_style(ctx: &egui::Context) {
 
     let radius = CornerRadius::same(CONTROL_RADIUS);
     let w = &mut v.widgets;
-    w.noninteractive.bg_fill = SURFACE;
-    w.noninteractive.weak_bg_fill = SURFACE;
-    w.noninteractive.bg_stroke = Stroke::new(1.0, BORDER);
-    w.noninteractive.fg_stroke = Stroke::new(1.0, TEXT_2);
+    w.noninteractive.bg_fill = p.surface;
+    w.noninteractive.weak_bg_fill = p.surface;
+    w.noninteractive.bg_stroke = Stroke::new(1.0, p.border);
+    w.noninteractive.fg_stroke = Stroke::new(1.0, p.text_2);
     w.noninteractive.corner_radius = radius;
 
-    w.inactive.bg_fill = RAISED;
-    w.inactive.weak_bg_fill = RAISED;
-    w.inactive.bg_stroke = Stroke::new(1.0, BORDER_STRONG);
-    w.inactive.fg_stroke = Stroke::new(1.0, TEXT);
+    // `bg_fill` paints scrollbar handles and check boxes; `weak_bg_fill`
+    // paints buttons and combo boxes.
+    let handle = if light { rgb(0xc4c9d1) } else { rgb(0x353b45) };
+    w.inactive.bg_fill = handle;
+    w.inactive.weak_bg_fill = p.raised;
+    w.inactive.bg_stroke = Stroke::new(1.0, p.border_strong);
+    w.inactive.fg_stroke = Stroke::new(1.0, p.text);
     w.inactive.corner_radius = radius;
     w.inactive.expansion = 0.0;
 
-    w.hovered.bg_fill = HOVER;
-    w.hovered.weak_bg_fill = HOVER;
-    w.hovered.bg_stroke = Stroke::new(1.0, ACCENT.gamma_multiply(0.7));
-    w.hovered.fg_stroke = Stroke::new(1.5, TEXT);
+    w.hovered.bg_fill = if light { rgb(0xa9afb9) } else { rgb(0x4a5260) };
+    w.hovered.weak_bg_fill = p.hover;
+    w.hovered.bg_stroke = Stroke::new(1.0, p.border_strong);
+    w.hovered.fg_stroke = Stroke::new(1.5, p.text);
     w.hovered.corner_radius = radius;
     w.hovered.expansion = 0.0;
 
-    w.active.bg_fill = HOVER;
-    w.active.weak_bg_fill = HOVER;
-    w.active.bg_stroke = Stroke::new(1.0, ACCENT);
-    w.active.fg_stroke = Stroke::new(1.5, TEXT);
+    w.active.bg_fill = if light { rgb(0x8e95a1) } else { rgb(0x5d6676) };
+    w.active.weak_bg_fill = p.hover;
+    w.active.bg_stroke = Stroke::new(1.0, p.accent);
+    w.active.fg_stroke = Stroke::new(1.5, p.text);
     w.active.corner_radius = radius;
     w.active.expansion = 0.0;
 
-    w.open.bg_fill = RAISED;
-    w.open.weak_bg_fill = RAISED;
-    w.open.bg_stroke = Stroke::new(1.0, ACCENT);
-    w.open.fg_stroke = Stroke::new(1.0, TEXT);
+    w.open.bg_fill = p.raised;
+    w.open.weak_bg_fill = p.raised;
+    w.open.bg_stroke = Stroke::new(1.0, p.accent);
+    w.open.fg_stroke = Stroke::new(1.0, p.text);
     w.open.corner_radius = radius;
 
     let s = &mut style.spacing;
     s.scroll.floating = false;
+    s.scroll.foreground_color = false;
     s.scroll.bar_width = 8.0;
     s.scroll.bar_inner_margin = 4.0;
     s.scroll.bar_outer_margin = 2.0;
     s.item_spacing = egui::vec2(8.0, 8.0);
-    s.button_padding = egui::vec2(12.0, 6.0);
+    s.button_padding = egui::vec2(14.0, 6.0);
     // Combo boxes and text fields share the 32px button height.
     s.interact_size = egui::vec2(32.0, CONTROL_HEIGHT);
     s.menu_margin = Margin::same(6);
@@ -176,7 +403,7 @@ pub fn install_style(ctx: &egui::Context) {
         (TextStyle::Monospace, FontId::monospace(MONO)),
     ]
     .into();
-    ctx.set_style(style);
+    style
 }
 
 type Face = (std::path::PathBuf, u32);

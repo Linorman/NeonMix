@@ -46,3 +46,18 @@ id = "about-version"
 [[message]]
 id = "about-version-value"
 args = { version = "string" }
+
+[[message]]
+id = "about-appearance"
+
+[[message]]
+id = "about-theme-system"
+
+[[message]]
+id = "about-theme-dark"
+
+[[message]]
+id = "about-theme-light"
+
+[[message]]
+id = "about-theme-note"

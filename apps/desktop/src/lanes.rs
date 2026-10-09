@@ -38,9 +38,9 @@ impl Lane {
     /// Colour that names where the sound comes from.
     pub(crate) fn source_color(&self) -> egui::Color32 {
         if self.is_airplay() {
-            theme::SRC_AIRPLAY
+            theme::src_airplay()
         } else {
-            theme::SRC_NATIVE
+            theme::src_native()
         }
     }
 }
@@ -173,7 +173,8 @@ impl Desktop {
             let solo = mix("solo").and_then(Value::as_bool).unwrap_or(false);
             let solo_elsewhere = any_solo && !solo;
             let current = self.airplay_is_current();
-            let (peak, rms) = if current {
+            let waiting_audio = airplay["received_blocks"].as_u64() == Some(0);
+            let (peak, rms) = if current && !waiting_audio {
                 meter(
                     stream_id,
                     serde_json::json!(session_id),
@@ -200,6 +201,8 @@ impl Desktop {
                     Message::LaneMuted
                 } else if solo_elsewhere {
                     Message::LaneSoloMuted
+                } else if waiting_audio {
+                    Message::LaneWaitingForAudio
                 } else if starved {
                     Message::LaneAudioSupplyInterrupted
                 } else {
@@ -207,7 +210,7 @@ impl Desktop {
                 },
                 tone: if !current {
                     Tone::Neutral
-                } else if muted || solo_elsewhere || starved {
+                } else if muted || solo_elsewhere || starved || waiting_audio {
                     Tone::Warning
                 } else {
                     Tone::Success
@@ -417,6 +420,43 @@ impl AirplayMix {
 #[cfg(test)]
 mod freshness_tests {
     use super::*;
+    #[test]
+    fn connected_airplay_without_pcm_waits_but_valid_silence_is_receiving() {
+        let data: Value = serde_json::from_str(include_str!(
+            "../../../docs/evidence/ui-rebuild-20261004/fixtures/full.json"
+        ))
+        .unwrap();
+        let mut app = Desktop::empty(Client::new(".local/test-airplay-waiting"), true, false);
+        app.load_preview(&data);
+        for stream in app.snapshot.as_mut().unwrap().streams.values_mut() {
+            stream.mix.solo = false;
+        }
+        for count in [0, 10] {
+            for session in app.airplay.as_mut().unwrap()["sessions"]
+                .as_array_mut()
+                .unwrap()
+            {
+                session["mix"]["solo"] = Value::Bool(false);
+                session["mix"]["muted"] = Value::Bool(false);
+                session["received_blocks"] = serde_json::json!(count);
+            }
+            let lanes = app.lanes(app.snapshot.as_ref().unwrap());
+            for lane in lanes.iter().filter(|lane| lane.is_airplay()) {
+                assert_eq!(
+                    lane.status,
+                    if count == 0 {
+                        Message::LaneWaitingForAudio
+                    } else {
+                        Message::LaneReceiving
+                    }
+                );
+                assert!(lane.can_mix);
+                if count == 0 {
+                    assert!(lane.peak.is_none() && lane.rms.is_none());
+                }
+            }
+        }
+    }
     #[test]
     fn airplay_meter_deadline_never_changes_controls_or_channel_opacity() {
         let data: Value = serde_json::from_str(include_str!(

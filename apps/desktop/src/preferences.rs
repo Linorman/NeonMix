@@ -10,6 +10,26 @@ use std::{
 const VERSION: u64 = 2;
 const LIMIT: usize = 16 * 1024;
 
+/// Window appearance. `System` follows the OS light/dark setting.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub(crate) enum ThemeChoice {
+    #[default]
+    System,
+    Dark,
+    Light,
+}
+
+impl ThemeChoice {
+    pub fn preference(self) -> eframe::egui::ThemePreference {
+        match self {
+            Self::System => eframe::egui::ThemePreference::System,
+            Self::Dark => eframe::egui::ThemePreference::Dark,
+            Self::Light => eframe::egui::ThemePreference::Light,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(crate) struct UiPreferences {
     #[serde(default = "current_version")]
@@ -18,6 +38,8 @@ pub(crate) struct UiPreferences {
     pub reduce_motion: bool,
     #[serde(default)]
     pub language: LanguagePreference,
+    #[serde(default)]
+    pub theme: ThemeChoice,
     #[serde(flatten)]
     extra: serde_json::Map<String, serde_json::Value>,
 }
@@ -30,6 +52,7 @@ impl Default for UiPreferences {
             version: VERSION,
             reduce_motion: false,
             language: LanguagePreference::Auto,
+            theme: ThemeChoice::System,
             extra: Default::default(),
         }
     }
@@ -42,6 +65,7 @@ pub(crate) struct Preferences {
     pub read_failed: bool,
     language_dirty: bool,
     motion_dirty: bool,
+    theme_dirty: bool,
 }
 impl Preferences {
     pub fn memory() -> Self {
@@ -61,6 +85,7 @@ impl Preferences {
             read_failed,
             language_dirty: false,
             motion_dirty: false,
+            theme_dirty: false,
         }
     }
     pub fn language(&mut self, language: LanguagePreference) {
@@ -71,6 +96,11 @@ impl Preferences {
     pub fn motion(&mut self, on: bool) {
         self.value.reduce_motion = on;
         self.motion_dirty = true;
+        self.pending = true;
+    }
+    pub fn theme(&mut self, theme: ThemeChoice) {
+        self.value.theme = theme;
+        self.theme_dirty = true;
         self.pending = true;
     }
     pub fn save(&mut self) -> io::Result<()> {
@@ -113,6 +143,9 @@ impl Preferences {
         if self.motion_dirty {
             latest.reduce_motion = self.value.reduce_motion;
         }
+        if self.theme_dirty {
+            latest.theme = self.value.theme;
+        }
         latest.version = VERSION;
         let bytes = serde_json::to_vec_pretty(&latest).map_err(io::Error::other)?;
         files::replace(path, &bytes)?;
@@ -121,6 +154,7 @@ impl Preferences {
         self.read_failed = false;
         self.language_dirty = false;
         self.motion_dirty = false;
+        self.theme_dirty = false;
         Ok(())
     }
 }

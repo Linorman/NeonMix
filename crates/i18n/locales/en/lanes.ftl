@@ -34,3 +34,5 @@ device-sending = Sending
 device-idle = Idle
 
 lane-audio-supply-interrupted = Audio supply interrupted
+
+lane-waiting-for-audio = Connected · waiting for audio

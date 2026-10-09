@@ -109,3 +109,6 @@ fault-resource-owned-by-other-instance = Another background instance owns this v
 fault-local-feedback-loop = Capture and the local room use the same endpoint. Choose different devices.
 
 fault-local-feedback-check-unavailable = The local audio path could not be verified. Refresh network and devices, then retry.
+
+fault-capture-permission-denied = macOS has not allowed audio capture. Allow NeonMix in System Settings → Privacy & Security → Microphone, then start sending again.
+fault-capture-permission-pending = Microphone authorization is still pending. Respond to the system prompt, then start sending again.

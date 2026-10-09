@@ -1,15 +1,39 @@
-//! Window frame: icon sidebar with identity and process controls, a top bar
-//! that always answers "what is the room doing now", the page body, a status
-//! strip with 还原, the confirmation modal and the command palette.
+//! Window frame: a sidebar that names the room, groups the pages and holds
+//! identity and process controls; a top bar with the page title, quick
+//! actions and the room master; the page body; a status strip; the 还原
+//! toast, the confirmation modal and the command palette.
 use super::*;
+use crate::fx;
 use crate::widgets::{Kind, Tone};
 use egui::{Align, CornerRadius, Layout, Margin, Stroke};
 
 /// Wide windows keep line length and meter span readable.
 const CONTENT_MAX_WIDTH: f32 = 1180.0;
+/// Sidebar width in wide and narrow (< 820 px) windows.
+pub(crate) const SIDEBAR_WIDE: f32 = 232.0;
+pub(crate) const SIDEBAR_NARROW: f32 = 176.0;
+
+pub(crate) fn sidebar_width(window_width: f32) -> f32 {
+    if window_width < 820.0 {
+        SIDEBAR_NARROW
+    } else {
+        SIDEBAR_WIDE
+    }
+}
+
+/// Navigation groups: listen to the room, connect devices, look after the app.
+const NAV_GROUPS: [(Message, &[Page]); 3] = [
+    (Message::ShellGroupMonitor, &[Page::Live, Page::Mixer]),
+    (
+        Message::ShellGroupConnect,
+        &[Page::Hub, Page::Sender, Page::Devices],
+    ),
+    (Message::ShellGroupSystem, &[Page::Diagnostics, Page::About]),
+];
 
 impl Desktop {
     pub(crate) fn show(&mut self, ctx: &egui::Context) {
+        theme::sync(ctx);
         localization::install(ctx, self.localization.renderer.clone());
         self.process();
         self.track_events();
@@ -24,41 +48,51 @@ impl Desktop {
             self.shown_error = self.error;
         }
         self.shortcuts(ctx);
-        let narrow = ctx.screen_rect().width() < 820.0;
         let short = ctx.screen_rect().height() < 560.0;
+        let sidebar = sidebar_width(ctx.screen_rect().width());
         egui::SidePanel::left("navigation")
             .resizable(false)
-            .exact_width(if narrow { 164.0 } else { 212.0 })
+            .exact_width(sidebar)
+            .show_separator_line(false)
             .frame(
                 egui::Frame::new()
-                    .fill(theme::SIDEBAR)
-                    .inner_margin(Margin::symmetric(10, if short { 10 } else { 16 })),
+                    .fill(theme::sidebar())
+                    .inner_margin(Margin::symmetric(12, if short { 10 } else { 16 })),
             )
-            .show(ctx, |ui| self.sidebar(ui, short));
+            .show(ctx, |ui| {
+                // Hairline where the sidebar meets the page.
+                let r = ui.max_rect().expand2(egui::vec2(12.0, 16.0));
+                ui.painter().line_segment(
+                    [r.right_top(), r.right_bottom()],
+                    Stroke::new(1.0, theme::border()),
+                );
+                self.sidebar(ui, short)
+            });
         egui::TopBottomPanel::bottom("status")
             .exact_height(36.0)
+            .show_separator_line(false)
             .frame(
                 egui::Frame::new()
                     .fill(self.status_fill())
                     .inner_margin(Margin::symmetric(20, 2)),
             )
             .show(ctx, |ui| self.status_strip(ui));
-        egui::CentralPanel::default()
-            .frame(egui::Frame::new().fill(theme::BG).inner_margin(Margin {
-                left: 24,
+        let page = egui::CentralPanel::default()
+            .frame(egui::Frame::new().fill(theme::bg()).inner_margin(Margin {
+                left: 28,
                 right: 8,
-                top: if short { 10 } else { 14 },
+                top: if short { 10 } else { 16 },
                 bottom: 0,
             }))
             .show(ctx, |ui| {
                 // Ambient light that names the room state; it only moves
                 // when that state changes.
                 let ambient = if self.error {
-                    theme::DANGER.gamma_multiply(0.05)
+                    theme::danger().gamma_multiply(0.05)
                 } else if self.status.as_ref().is_some_and(|s| s.hub.running)
                     || self.snapshot.is_some()
                 {
-                    theme::ACCENT.gamma_multiply(0.045)
+                    theme::accent().gamma_multiply(0.04)
                 } else {
                     egui::Color32::TRANSPARENT
                 };
@@ -77,7 +111,7 @@ impl Desktop {
                         left: 0,
                         right: 16,
                         top: 0,
-                        bottom: 10,
+                        bottom: if short { 8 } else { 14 },
                     })
                     .show(ui, |ui| {
                         ui.set_max_width(ui.available_width().min(CONTENT_MAX_WIDTH));
@@ -100,7 +134,7 @@ impl Desktop {
                             })
                             .show(ui, |ui| {
                                 ui.set_max_width(ui.available_width().min(CONTENT_MAX_WIDTH));
-                                ui.spacing_mut().item_spacing.y = 14.0;
+                                ui.spacing_mut().item_spacing.y = 16.0;
                                 // No page-wide disable while an action runs: egui
                                 // would repaint every widget faded for the whole
                                 // round trip. The acting button shows progress and
@@ -121,6 +155,7 @@ impl Desktop {
                             });
                     });
             });
+        self.undo_toast(ctx, page.response.rect);
         self.confirm_modal(ctx);
         self.palette_ui(ctx);
         ctx.request_repaint_after(Duration::from_millis(200));
@@ -168,6 +203,9 @@ impl Desktop {
                 self.navigate(Page::ALL[i].0);
             }
         }
+        if ctx.input_mut(|input| input.consume_key(command, egui::Key::Comma)) {
+            self.navigate(Page::About);
+        }
         if !ctx.wants_keyboard_input()
             && self.undo_available()
             && ctx.input_mut(|i| i.consume_key(command, egui::Key::Z))
@@ -177,15 +215,151 @@ impl Desktop {
     }
 
     fn sidebar(&mut self, ui: &mut egui::Ui, short: bool) {
-        let shell_quit = crate::localization::renderer(ui.ctx()).render(&Message::ShellQuit);
-        let shell_hide = crate::localization::renderer(ui.ctx()).render(&Message::ShellHide);
-        let shell_stop_sending =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellStopSending);
+        let width = ui.available_width();
+        self.brand(ui);
+        ui.add_space(if short { 6.0 } else { 12.0 });
+        self.room_card(ui, short);
+        ui.add_space(if short { 2.0 } else { 4.0 });
+
+        let item_height = if short { 28.0 } else { 34.0 };
+        ui.spacing_mut().item_spacing.y = 0.0;
+        let pill_slot = ui.painter().add(egui::Shape::Noop);
+        let first_top = ui.cursor().top();
+        let mut selected_rect = None;
+        for (group, pages) in NAV_GROUPS {
+            if short {
+                ui.add_space(5.0);
+            } else {
+                ui.add_space(12.0);
+                let (rect, _) =
+                    ui.allocate_exact_size(egui::vec2(width, 18.0), egui::Sense::hover());
+                ui.painter().text(
+                    egui::pos2(rect.left() + 10.0, rect.center().y),
+                    egui::Align2::LEFT_CENTER,
+                    self.tr(&group),
+                    theme::heading(theme::GROUP),
+                    theme::text_3().gamma_multiply(0.85),
+                );
+                ui.add_space(4.0);
+            }
+            for &page in pages {
+                let index = Page::ALL.iter().position(|p| p.0 == page).unwrap_or(0);
+                let title = self.tr(&page.title());
+                let selected = self.page == page;
+                let (rect, response) =
+                    ui.allocate_exact_size(egui::vec2(width, item_height), egui::Sense::click());
+                response.widget_info(|| {
+                    egui::WidgetInfo::selected(egui::WidgetType::Button, true, selected, &title)
+                });
+                let hover = ui.ctx().animate_bool_with_time(
+                    response.id.with("hover"),
+                    response.hovered() || response.has_focus(),
+                    animation::FAST,
+                );
+                let active = ui.ctx().animate_bool_with_time(
+                    response.id.with("active"),
+                    selected,
+                    animation::PAGE,
+                );
+                let painter = ui.painter();
+                if hover > 0.0 && !selected {
+                    painter.rect_filled(
+                        rect,
+                        CornerRadius::same(theme::CONTROL_RADIUS),
+                        theme::text().gamma_multiply(0.05 * hover),
+                    );
+                }
+                if response.has_focus() {
+                    painter.rect_stroke(
+                        rect.shrink(1.0),
+                        CornerRadius::same(theme::CONTROL_RADIUS),
+                        Stroke::new(1.5, theme::accent()),
+                        egui::StrokeKind::Inside,
+                    );
+                }
+                let ink = animation::lerp_color(theme::text_3(), theme::accent(), active);
+                icons::paint(
+                    painter,
+                    icons::square(egui::pos2(rect.left() + 20.0, rect.center().y), 16.0),
+                    page.icon(),
+                    animation::lerp_color(ink, theme::text_2(), hover * (1.0 - active)),
+                );
+                painter.text(
+                    egui::pos2(rect.left() + 38.0, rect.center().y),
+                    egui::Align2::LEFT_CENTER,
+                    &title,
+                    if selected {
+                        theme::heading(theme::BODY)
+                    } else {
+                        egui::FontId::proportional(theme::BODY)
+                    },
+                    animation::lerp_color(theme::text_2(), theme::text(), active.max(hover * 0.6)),
+                );
+                let hint = match index {
+                    0..=5 => Some(widgets::command_hint(&(index + 1).to_string())),
+                    _ => Some(widgets::command_hint(",")),
+                };
+                if let Some(hint) = hint.filter(|_| !short && width > 190.0) {
+                    painter.text(
+                        egui::pos2(rect.right() - 10.0, rect.center().y),
+                        egui::Align2::RIGHT_CENTER,
+                        hint,
+                        egui::FontId::monospace(10.5),
+                        theme::text_3().gamma_multiply(0.45 + 0.55 * hover.max(active)),
+                    );
+                }
+                if selected {
+                    selected_rect = Some(rect);
+                }
+                if self.focus_after_modal && self.confirm.is_none() && selected {
+                    response.request_focus();
+                    self.focus_after_modal = false;
+                }
+                if response.clicked() {
+                    self.navigate(page);
+                }
+                ui.add_space(2.0);
+            }
+        }
+        // The selected item rises out of the sidebar; the cap slides between
+        // items instead of jumping.
+        if let Some(rect) = selected_rect {
+            let y = animation::ease_to(
+                ui.ctx(),
+                ui.id().with("nav-indicator"),
+                rect.top() - first_top,
+                0.22,
+            );
+            let pill =
+                egui::Rect::from_min_size(egui::pos2(rect.left(), first_top + y), rect.size());
+            ui.painter().set(
+                pill_slot,
+                egui::Shape::Vec(fx::elevated(
+                    ui.ctx(),
+                    pill,
+                    theme::CONTROL_RADIUS,
+                    theme::raised(),
+                    fx::Level::Control,
+                    None,
+                )),
+            );
+        }
+
+        ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
+            ui.spacing_mut().item_spacing.y = 8.0;
+            self.identity(ui, width, short);
+            if self.status.as_ref().is_some_and(|s| s.sender.running) {
+                self.sending_card(ui, width, short);
+            }
+        });
+    }
+
+    /// Product mark: four bars that follow the master RMS through meter
+    /// ballistics and rest in the logo shape in silence.
+    fn brand(&self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
-            ui.add_space(4.0);
+            ui.add_space(6.0);
             let (rect, _) = ui.allocate_exact_size(egui::vec2(18.0, 20.0), egui::Sense::hover());
-            // The mark is the room's output: bars follow the master RMS
-            // through meter ballistics and rest in the logo shape in silence.
             let rms = self
                 .meters_current()
                 .and_then(|v| v.pointer("/output/rms"))
@@ -203,209 +377,232 @@ impl Desktop {
                     _ => shape[i],
                 };
                 let x = rect.left() + 1.5 + i as f32 * 4.5;
+                let color = if i < 2 {
+                    theme::src_native()
+                } else {
+                    theme::src_airplay()
+                };
                 ui.painter().line_segment(
                     [
                         egui::pos2(x, rect.center().y - h / 2.0),
                         egui::pos2(x, rect.center().y + h / 2.0),
                     ],
-                    Stroke::new(2.5, theme::ACCENT),
+                    Stroke::new(2.5, color),
                 );
             }
             if level.is_some_and(|l| l > 0.05) {
-                crate::fx::glow(
+                fx::glow(
                     ui.painter(),
                     rect.center(),
                     14.0,
-                    theme::ACCENT.gamma_multiply(0.15),
+                    theme::accent().gamma_multiply(0.15),
                 );
             }
             ui.label(
                 RichText::new("NeonMix")
-                    .font(theme::heading(17.0))
-                    .color(theme::TEXT),
+                    .font(theme::heading(16.0))
+                    .color(theme::text()),
             );
         });
-        ui.add_space(if short { 8.0 } else { 18.0 });
+    }
 
-        let item_height = if short { 30.0 } else { 36.0 };
-        let item_width = ui.available_width();
-        let mut selected_top = None;
-        ui.spacing_mut().item_spacing.y = 0.0;
-        let first_top = ui.cursor().top();
-        for (i, (page, title)) in Page::ALL.into_iter().enumerate() {
-            let title = self.tr(&title);
-            let selected = self.page == page;
-            let (rect, response) =
-                ui.allocate_exact_size(egui::vec2(item_width, item_height), egui::Sense::click());
-            response.widget_info(|| {
-                egui::WidgetInfo::selected(egui::WidgetType::Button, true, selected, &title)
-            });
-            let hover = ui.ctx().animate_bool_with_time(
-                response.id.with("hover"),
-                response.hovered() || response.has_focus(),
-                animation::FAST,
-            );
-            let active = ui.ctx().animate_bool_with_time(
-                response.id.with("active"),
-                selected,
-                animation::PAGE,
-            );
-            let fill = animation::lerp_color(
-                animation::lerp_color(
-                    egui::Color32::TRANSPARENT,
-                    theme::HOVER.gamma_multiply(0.6),
-                    hover,
-                ),
-                theme::ACCENT.gamma_multiply(0.13),
-                active,
-            );
-            let painter = ui.painter();
-            painter.rect_filled(rect, CornerRadius::same(theme::CONTROL_RADIUS), fill);
-            if response.has_focus() {
-                painter.rect_stroke(
-                    rect.shrink(1.0),
-                    CornerRadius::same(theme::CONTROL_RADIUS),
-                    Stroke::new(1.5, theme::ACCENT),
-                    egui::StrokeKind::Inside,
+    /// The room this window looks at: name, state and live input count.
+    fn room_glance(&self) -> (String, String, Tone, Option<uuid::Uuid>) {
+        let status = self.status.as_ref();
+        let known_room =
+            self.remote_room.is_some() || status.is_some_and(|s| s.hub_settings.is_some());
+        let room = self
+            .remote_room
+            .clone()
+            .or_else(|| {
+                status
+                    .and_then(|s| s.hub_settings.as_ref())
+                    .map(|h| h.name.clone())
+            })
+            .unwrap_or_else(|| self.tr(&Message::ShellNoRoom));
+        let local_admin = self.credential == std::path::Path::new("hub/admin.json");
+        let (state, tone) = if status.is_some_and(|s| s.hub.running) {
+            (self.tr(&Message::ShellSharing), Tone::Success)
+        } else if local_admin && status.is_some_and(|s| s.hub_settings.is_some()) {
+            (self.tr(&Message::ShellNotSharing), Tone::Neutral)
+        } else if self.snapshot.is_some() && !self.writable() {
+            (self.tr(&Message::ShellStale), Tone::Warning)
+        } else if self.snapshot.is_some() {
+            (self.tr(&Message::ShellRoomConnected), Tone::Success)
+        } else {
+            (self.tr(&Message::ShellRoomDisconnected), Tone::Neutral)
+        };
+        let streams =
+            self.snapshot.as_ref().map_or(0, |s| s.streams.len()) + self.airplay_sessions().len();
+        let state = if known_room && streams > 0 {
+            self.tr(&Message::ShellRoomState {
+                state,
+                count: streams as u64,
+            })
+        } else {
+            state
+        };
+        (room, state, tone, self.snapshot.as_ref().map(|s| s.hub_id))
+    }
+
+    /// Room card at the top of the sidebar: emblem, name and state on every
+    /// page. Opens the room settings.
+    fn room_card(&mut self, ui: &mut egui::Ui, short: bool) {
+        let (room, state, tone, hub_id) = self.room_glance();
+        let tooltip = self.tr(&Message::ShellRoomTooltip);
+        let open = self.tr(&Message::ShellOpenRoom);
+        let width = ui.available_width();
+        let height = if short { 40.0 } else { 52.0 };
+        let (rect, response) =
+            ui.allocate_exact_size(egui::vec2(width, height), egui::Sense::click());
+        response.widget_info(|| {
+            egui::WidgetInfo::labeled(egui::WidgetType::Button, true, format!("{room} · {state}"))
+        });
+        let hover = ui.ctx().animate_bool_with_time(
+            response.id.with("hover"),
+            response.hovered(),
+            animation::FAST,
+        );
+        let base = animation::lerp_color(theme::surface(), theme::raised(), hover);
+        ui.painter().extend(fx::elevated(
+            ui.ctx(),
+            rect,
+            12,
+            base,
+            fx::Level::Card,
+            None,
+        ));
+        let painter = ui.painter();
+        let size = if short { 26.0 } else { 32.0 };
+        let center = egui::pos2(rect.left() + 10.0 + size / 2.0, rect.center().y);
+        match hub_id {
+            Some(id) => {
+                crate::emblem::paint(
+                    painter,
+                    center,
+                    size / 2.0,
+                    crate::emblem::Emblem::from_id(id),
+                    1.0,
                 );
             }
-            let ink = animation::lerp_color(theme::TEXT_3, theme::ACCENT, active);
-            icons::paint(
-                painter,
-                icons::square(egui::pos2(rect.left() + 22.0, rect.center().y), 16.0),
-                page.icon(),
-                animation::lerp_color(ink, theme::TEXT_2, hover * (1.0 - active)),
+            None => {
+                fx::dashed(
+                    painter,
+                    &(0..=40)
+                        .map(|i| {
+                            center
+                                + egui::Vec2::angled(i as f32 / 40.0 * std::f32::consts::TAU)
+                                    * (size / 2.0 - 1.0)
+                        })
+                        .collect::<Vec<_>>(),
+                    Stroke::new(1.2, theme::text_3()),
+                    3.0,
+                    3.0,
+                );
+            }
+        }
+        let left = center.x + size / 2.0 + 10.0;
+        let max = (rect.right() - 10.0 - left).max(1.0);
+        let line = |text: &str, font: egui::FontId, color: egui::Color32| {
+            let mut job = egui::text::LayoutJob::simple(text.to_owned(), font, color, max);
+            job.wrap.max_rows = 1;
+            painter.layout_job(job)
+        };
+        let name = line(&room, theme::heading(13.5), theme::text());
+        if short {
+            painter.galley(
+                egui::pos2(left, rect.center().y - name.size().y / 2.0),
+                name,
+                theme::text(),
             );
-            painter.text(
-                egui::pos2(rect.left() + 40.0, rect.center().y),
-                egui::Align2::LEFT_CENTER,
-                &title,
-                if selected {
-                    theme::heading(theme::BODY)
+        } else {
+            let detail = line(
+                &state,
+                egui::FontId::proportional(11.5),
+                if tone == Tone::Neutral {
+                    theme::text_3()
                 } else {
-                    egui::FontId::proportional(theme::BODY)
+                    tone.color()
                 },
-                animation::lerp_color(theme::TEXT_2, theme::TEXT, active.max(hover * 0.6)),
             );
-            if !short && item_width > 180.0 && i < 6 {
-                painter.text(
-                    egui::pos2(rect.right() - 10.0, rect.center().y),
-                    egui::Align2::RIGHT_CENTER,
-                    widgets::command_hint(&(i + 1).to_string()),
-                    egui::FontId::monospace(10.5),
-                    theme::TEXT_3.gamma_multiply(0.5 + 0.5 * hover),
-                );
-            }
-            if selected {
-                selected_top = Some(rect.top());
-            }
-            if self.focus_after_modal && self.confirm.is_none() && selected {
-                response.request_focus();
-                self.focus_after_modal = false;
-            }
-            if response.clicked() {
-                self.navigate(page);
-            }
-            ui.add_space(if short { 2.0 } else { 6.0 });
+            let top = rect.center().y - (name.size().y + detail.size().y + 2.0) / 2.0;
+            painter.galley(egui::pos2(left, top), name.clone(), theme::text());
+            let y = top + name.size().y + 2.0;
+            painter.circle_filled(
+                egui::pos2(left + 3.0, y + detail.size().y / 2.0),
+                3.0,
+                tone.color(),
+            );
+            painter.galley(egui::pos2(left + 10.0, y), detail, theme::text_3());
         }
-        // Indicator slides between items instead of jumping.
-        if let Some(top) = selected_top {
-            let y = animation::ease_to(
-                ui.ctx(),
-                ui.id().with("nav-indicator"),
-                top - first_top,
-                0.22,
-            );
-            let left = ui.min_rect().left();
-            let bar = egui::Rect::from_min_size(
-                egui::pos2(left, first_top + y + 9.0),
-                egui::vec2(3.0, item_height - 18.0),
-            );
-            crate::fx::glow(
-                ui.painter(),
-                bar.center(),
-                10.0,
-                theme::ACCENT.gamma_multiply(0.35),
-            );
-            ui.painter()
-                .rect_filled(bar, CornerRadius::same(2), theme::ACCENT);
+        if response.hovered() {
+            ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
         }
+        widgets::focus_ring(ui, &response);
+        let response = response.on_hover_text(format!("{room}\n{state}\n{tooltip}\n{open}"));
+        if response.clicked() {
+            self.navigate(Page::Hub);
+        }
+    }
 
-        ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
-            ui.spacing_mut().item_spacing.y = 6.0;
-            let width = ui.available_width();
-            let full = |ui: &mut egui::Ui, text: &str, kind: Kind, busy: bool| {
-                ui.allocate_ui_with_layout(
-                    egui::vec2(width, theme::CONTROL_HEIGHT),
-                    Layout::top_down_justified(Align::Min),
-                    |ui| widgets::button_busy(ui, true, busy, text, kind),
-                )
-                .inner
-            };
-            // Hide and quit share one row so the destructive pair never
-            // outweighs navigation; narrow sidebars use compact buttons.
-            let compact = width < 180.0;
-            let half = (width - 6.0) / 2.0;
-            let (hide, quit) = ui
-                .allocate_ui_with_layout(
-                    egui::vec2(width, theme::CONTROL_HEIGHT),
-                    Layout::left_to_right(Align::Center),
-                    |ui| {
-                        ui.spacing_mut().item_spacing.x = 6.0;
-                        let cell = |ui: &mut egui::Ui, text: &str, kind: Kind| {
-                            ui.allocate_ui_with_layout(
-                                egui::vec2(half, theme::CONTROL_HEIGHT),
-                                Layout::top_down_justified(Align::Min),
-                                |ui| {
-                                    if compact {
-                                        widgets::button_compact(ui, text, kind)
-                                    } else {
-                                        widgets::button(ui, text, kind)
-                                    }
-                                },
-                            )
-                            .inner
-                        };
-                        (
-                            cell(ui, &self.tr(&Message::ShellHideShort), Kind::Secondary),
-                            cell(ui, &self.tr(&Message::ShellQuitShort), Kind::Quiet),
-                        )
-                    },
-                )
-                .inner;
-            hide.widget_info(|| {
-                egui::WidgetInfo::labeled(egui::WidgetType::Button, true, &shell_hide)
-            });
-            quit.widget_info(|| {
-                egui::WidgetInfo::labeled(egui::WidgetType::Button, true, &shell_quit)
-            });
-            let hide = hide.on_hover_text(&shell_hide);
-            let quit = quit.on_hover_text(&shell_quit);
-            if hide.clicked() {
-                self.hide_window(ui.ctx());
-            }
-            if quit.clicked() {
-                self.confirmation(
-                    Message::ShellQuit,
-                    Message::ShellQuitConsequence,
-                    Request::Shutdown,
-                    quit.id,
-                );
-            }
-            if self.status.as_ref().is_some_and(|s| s.sender.running)
-                && full(
+    /// Shown only while this device sends: what is happening and the one
+    /// way to stop it.
+    fn sending_card(&mut self, ui: &mut egui::Ui, width: f32, short: bool) {
+        let stop = self.tr(&Message::ShellStopSending);
+        let sending = self.tr(&Message::ShellSendingNow);
+        let height = if short { 34.0 } else { 40.0 };
+        let (rect, _) = ui.allocate_exact_size(egui::vec2(width, height), egui::Sense::hover());
+        ui.painter().extend(fx::elevated(
+            ui.ctx(),
+            rect,
+            11,
+            theme::surface(),
+            fx::Level::Card,
+            None,
+        ));
+        let dot = egui::pos2(rect.left() + 14.0, rect.center().y);
+        fx::glow(
+            ui.painter(),
+            dot,
+            6.0,
+            theme::src_native().gamma_multiply(0.45),
+        );
+        ui.painter().circle_filled(dot, 3.5, theme::src_native());
+        let button = height - 12.0;
+        let max = rect.width() - 26.0 - button - 16.0;
+        let mut job = egui::text::LayoutJob::simple(
+            sending,
+            egui::FontId::proportional(theme::SMALL + 0.5),
+            theme::text(),
+            max.max(1.0),
+        );
+        job.wrap.max_rows = 1;
+        let galley = ui.painter().layout_job(job);
+        ui.painter().galley(
+            egui::pos2(rect.left() + 26.0, rect.center().y - galley.size().y / 2.0),
+            galley,
+            theme::text(),
+        );
+        let slot = egui::Rect::from_center_size(
+            egui::pos2(rect.right() - 6.0 - button / 2.0, rect.center().y),
+            egui::vec2(button, button),
+        );
+        let clicked = ui
+            .scope_builder(egui::UiBuilder::new().max_rect(slot), |ui| {
+                widgets::icon_button(
                     ui,
-                    shell_stop_sending.as_str(),
+                    icons::Icon::Stop,
+                    &stop,
                     Kind::Quiet,
+                    button,
                     self.pending_stop,
                 )
                 .clicked()
-            {
-                self.stop_sender();
-            }
-            ui.add_space(6.0);
-            self.identity(ui, width, short);
-        });
+            })
+            .inner;
+        if clicked {
+            self.stop_sender();
+        }
     }
 
     fn hide_window(&self, ctx: &egui::Context) {
@@ -416,20 +613,12 @@ impl Desktop {
         }
     }
 
-    /// Identity switcher at the foot of the sidebar: who this window acts as.
+    /// Who this window acts as, at the foot of the sidebar. The row opens a
+    /// menu to switch identity, hide the window or quit background audio.
     fn identity(&mut self, ui: &mut egui::Ui, width: f32, short: bool) {
-        let shell_role_admin =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellRoleAdmin);
-        let shell_role_controller =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellRoleController);
-        let shell_role_member =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellRoleMember);
-        let shell_unverified =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellUnverified);
-        let shell_unpaired =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellUnpaired);
-        let shell_identity =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellIdentity);
+        let shell_identity = self.tr(&Message::ShellIdentity);
+        let shell_hide = self.tr(&Message::ShellHide);
+        let shell_quit = self.tr(&Message::ShellQuit);
         let previous = self.credential.clone();
         // Display only: without live room state, show the role saved with
         // this identity (neutral) instead of warning "unverified" while a
@@ -440,66 +629,157 @@ impl Desktop {
             .and_then(|s| s.profiles.iter().find(|p| p.credential == self.credential))
             .and_then(|p| p.role);
         let (role, tone) = match (self.role(), saved) {
-            (Some(Role::Admin), _) => (shell_role_admin.as_str(), Tone::Accent),
-            (Some(Role::Controller), _) => (shell_role_controller.as_str(), Tone::Accent),
-            (Some(Role::Member), _) => (shell_role_member.as_str(), Tone::Neutral),
-            (None, Some(Role::Admin)) => (shell_role_admin.as_str(), Tone::Neutral),
-            (None, Some(Role::Controller)) => (shell_role_controller.as_str(), Tone::Neutral),
-            (None, Some(Role::Member)) => (shell_role_member.as_str(), Tone::Neutral),
-            (None, None) => (shell_unverified.as_str(), Tone::Warning),
+            (Some(Role::Admin), _) => (self.tr(&Message::ShellRoleAdmin), Tone::Accent),
+            (Some(Role::Controller), _) => (self.tr(&Message::ShellRoleController), Tone::Accent),
+            (Some(Role::Member), _) => (self.tr(&Message::ShellRoleMember), Tone::Neutral),
+            (None, Some(Role::Admin)) => (self.tr(&Message::ShellRoleAdmin), Tone::Neutral),
+            (None, Some(Role::Controller)) => {
+                (self.tr(&Message::ShellRoleController), Tone::Neutral)
+            }
+            (None, Some(Role::Member)) => (self.tr(&Message::ShellRoleMember), Tone::Neutral),
+            (None, None) => (self.tr(&Message::ShellUnverified), Tone::Warning),
         };
         let selected = self
             .status
             .as_ref()
             .and_then(|s| s.profiles.iter().find(|p| p.credential == self.credential))
-            .map_or(shell_unpaired.as_str().to_owned(), |p| {
+            .map_or(self.tr(&Message::ShellUnpaired), |p| {
                 profile_name(p, &self.localization.renderer)
             });
-        // Fixed height: inside the bottom-up stack an unsized child would
-        // overlap the buttons below it.
-        // Short windows drop the caption row; the combo keeps its name.
-        ui.allocate_ui_with_layout(
-            egui::vec2(width, if short { 32.0 } else { 60.0 }),
-            Layout::top_down(Align::Min),
+        let height = if short { 34.0 } else { 42.0 };
+        let (rect, response) =
+            ui.allocate_exact_size(egui::vec2(width, height), egui::Sense::click());
+        response.widget_info(|| {
+            egui::WidgetInfo::labeled(egui::WidgetType::ComboBox, true, &shell_identity)
+        });
+        let popup = egui::Id::new("identity-menu");
+        let open = ui.memory(|m| m.is_popup_open(popup));
+        let hover = ui.ctx().animate_bool_with_time(
+            response.id.with("hover"),
+            response.hovered() || open,
+            animation::FAST,
+        );
+        let painter = ui.painter();
+        if hover > 0.0 {
+            painter.rect_filled(
+                rect,
+                CornerRadius::same(theme::CONTROL_RADIUS + 1),
+                theme::text().gamma_multiply(0.05 * hover),
+            );
+        }
+        let avatar = egui::pos2(rect.left() + 8.0 + 14.0, rect.center().y);
+        painter.circle_filled(avatar, 14.0, theme::text().gamma_multiply(0.09));
+        painter.text(
+            avatar,
+            egui::Align2::CENTER_CENTER,
+            selected
+                .trim()
+                .chars()
+                .next()
+                .map(|c| c.to_uppercase().collect::<String>())
+                .unwrap_or_else(|| "?".into()),
+            theme::heading(12.0),
+            theme::text_2(),
+        );
+        let left = avatar.x + 22.0;
+        let max = (rect.right() - 30.0 - left).max(1.0);
+        let line = |text: &str, font: egui::FontId, color: egui::Color32| {
+            let mut job = egui::text::LayoutJob::simple(text.to_owned(), font, color, max);
+            job.wrap.max_rows = 1;
+            painter.layout_job(job)
+        };
+        let name = line(&selected, egui::FontId::proportional(13.0), theme::text());
+        if short {
+            painter.galley(
+                egui::pos2(left, rect.center().y - name.size().y / 2.0),
+                name,
+                theme::text(),
+            );
+        } else {
+            let detail = line(
+                &role,
+                egui::FontId::proportional(11.0),
+                if tone == Tone::Warning {
+                    theme::warning()
+                } else {
+                    theme::text_3()
+                },
+            );
+            let top = rect.center().y - (name.size().y + detail.size().y + 1.0) / 2.0;
+            painter.galley(egui::pos2(left, top), name.clone(), theme::text());
+            painter.galley(
+                egui::pos2(left, top + name.size().y + 1.0),
+                detail,
+                theme::text_3(),
+            );
+        }
+        icons::paint(
+            painter,
+            icons::square(egui::pos2(rect.right() - 16.0, rect.center().y), 14.0),
+            icons::Icon::More,
+            theme::text_3(),
+        );
+        widgets::focus_ring(ui, &response);
+        let response =
+            response.on_hover_text(self.tr(&Message::ShellCurrentIdentity { role: role.clone() }));
+        if response.clicked() {
+            ui.memory_mut(|m| m.toggle_popup(popup));
+        }
+        let mut hide = false;
+        let mut quit = false;
+        egui::popup::popup_above_or_below_widget(
+            ui,
+            popup,
+            &response,
+            egui::AboveOrBelow::Above,
+            egui::PopupCloseBehavior::CloseOnClickOutside,
             |ui| {
-                ui.spacing_mut().item_spacing.y = 4.0;
-                let label = (!short).then(|| {
-                    ui.horizontal(|ui| {
-                        let label = widgets::caption(ui, shell_identity.as_str());
-                        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                            widgets::pill(ui, role, tone);
-                        });
-                        label
-                    })
-                    .inner
-                });
-                ui.spacing_mut().interact_size.y = 30.0;
-                ui.spacing_mut().button_padding = egui::vec2(10.0, 4.0);
-                let response = egui::ComboBox::from_id_salt("credential")
-                    .width(width - 4.0)
-                    .truncate()
-                    .selected_text(RichText::new(selected).size(theme::SMALL + 1.0))
-                    .show_ui(ui, |ui| {
-                        if let Some(status) = &self.status {
-                            for p in status.profiles.iter().filter(|p| !p.pending) {
-                                widgets::select_value(
-                                    ui,
-                                    &mut self.credential,
-                                    p.credential.clone(),
-                                    profile_name(p, &self.localization.renderer),
-                                );
-                            }
+                ui.set_min_width(width.max(200.0));
+                ui.spacing_mut().item_spacing.y = 1.0;
+                ui.label(
+                    RichText::new(self.tr(&Message::ShellSwitchIdentity))
+                        .size(theme::GROUP)
+                        .color(theme::text_3()),
+                );
+                if let Some(status) = &self.status {
+                    for p in status.profiles.iter().filter(|p| !p.pending) {
+                        let name = profile_name(p, &self.localization.renderer);
+                        let current = p.credential == self.credential;
+                        if widgets::menu_item(ui, None, &name, current, false).clicked() {
+                            self.credential = p.credential.clone();
+                            ui.memory_mut(|m| m.close_popup());
                         }
-                    })
-                    .response
-                    .on_hover_text(self.tr(&Message::ShellCurrentIdentity { role: role.into() }));
-                let response = match label {
-                    Some(label) => response.labelled_by(label.id),
-                    None => response,
-                };
-                widgets::label_combo(&response, shell_identity.as_str());
+                    }
+                }
+                ui.add_space(4.0);
+                ui.separator();
+                ui.add_space(2.0);
+                if widgets::menu_item(ui, Some(icons::Icon::Hide), &shell_hide, false, false)
+                    .clicked()
+                {
+                    hide = true;
+                }
+                if widgets::menu_item(ui, Some(icons::Icon::Power), &shell_quit, false, true)
+                    .clicked()
+                {
+                    quit = true;
+                }
             },
         );
+        if hide || quit {
+            ui.memory_mut(|m| m.close_popup());
+        }
+        if hide {
+            self.hide_window(ui.ctx());
+        }
+        if quit {
+            self.confirmation(
+                Message::ShellQuit,
+                Message::ShellQuitConsequence,
+                Request::Shutdown,
+                response.id,
+            );
+        }
         if previous != self.credential {
             self.snapshot = None;
             self.diagnostics = None;
@@ -512,101 +792,40 @@ impl Desktop {
         }
     }
 
-    /// Room at a glance on every page: title, room state, a live master
-    /// meter (except on the mixer, which shows it large) and ⌘K.
+    /// Page title on the left; quick actions and, except on the mixer which
+    /// shows it large, the room master on the right.
     fn top_bar(&mut self, ui: &mut egui::Ui) {
-        let shell_no_room = crate::localization::renderer(ui.ctx()).render(&Message::ShellNoRoom);
-        let shell_sharing = crate::localization::renderer(ui.ctx()).render(&Message::ShellSharing);
-        let shell_not_sharing =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellNotSharing);
-        let shell_stale = crate::localization::renderer(ui.ctx()).render(&Message::ShellStale);
-        let shell_room_connected =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellRoomConnected);
-        let shell_room_disconnected =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellRoomDisconnected);
-        let shell_room_tooltip =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellRoomTooltip);
         let title = self.tr(&self.page.title());
-        let status = self.status.as_ref();
-        let room = self
-            .remote_room
-            .clone()
-            .or_else(|| {
-                status
-                    .and_then(|s| s.hub_settings.as_ref())
-                    .map(|h| h.name.clone())
-            })
-            .unwrap_or_else(|| shell_no_room.as_str().into());
-        let local_admin = self.credential == std::path::Path::new("hub/admin.json");
-        let (room_state, room_tone) = if status.is_some_and(|s| s.hub.running) {
-            (shell_sharing.as_str(), Tone::Success)
-        } else if local_admin && status.is_some_and(|s| s.hub_settings.is_some()) {
-            (shell_not_sharing.as_str(), Tone::Neutral)
-        } else if self.snapshot.is_some() && !self.writable() {
-            (shell_stale.as_str(), Tone::Warning)
-        } else if self.snapshot.is_some() {
-            (shell_room_connected.as_str(), Tone::Success)
-        } else {
-            (shell_room_disconnected.as_str(), Tone::Neutral)
-        };
-        let streams =
-            self.snapshot.as_ref().map_or(0, |s| s.streams.len()) + self.airplay_sessions().len();
-        let known_room =
-            self.remote_room.is_some() || status.is_some_and(|s| s.hub_settings.is_some());
-        let chip = if !known_room {
-            room
-        } else if streams > 0 {
-            self.tr(&Message::ShellRoomSummary {
-                room: room.clone(),
-                state: room_state.into(),
-                count: streams as u64,
-            })
-        } else {
-            format!("{room} · {room_state}")
-        };
-        let hub_id = self.snapshot.as_ref().map(|s| s.hub_id);
         let left = |ui: &mut egui::Ui| {
-            ui.label(
-                RichText::new(&title)
-                    .font(theme::heading(theme::TITLE))
-                    .color(theme::TEXT),
+            ui.add(
+                egui::Label::new(
+                    RichText::new(&title)
+                        .font(theme::heading(theme::TITLE))
+                        .color(theme::text()),
+                )
+                .truncate(),
             );
-            ui.add_space(6.0);
-            if let Some(id) = hub_id {
-                let (rect, _) =
-                    ui.allocate_exact_size(egui::vec2(18.0, 18.0), egui::Sense::hover());
-                crate::emblem::paint(
-                    ui.painter(),
-                    rect.center(),
-                    9.0,
-                    crate::emblem::Emblem::from_id(id),
-                    1.0,
-                );
-            }
-            // The chip shares this row with the title and emblem. Bounding
-            // it by the whole row lets a long name push actions off-window.
-            let width = ui.available_width();
-            let _ = widgets::pill_sized(ui, &chip, room_tone, width)
-                .on_hover_text(format!("{chip}\n{shell_room_tooltip}"));
         };
-        let actions_width = self.top_bar_actions_width(ui);
+        let actions_width = self.top_bar_actions_width(ui, false);
         let title_width = ui.fonts(|f| {
-            f.layout_no_wrap(title.clone(), theme::heading(theme::TITLE), theme::TEXT)
+            f.layout_no_wrap(title.clone(), theme::heading(theme::TITLE), theme::text())
                 .size()
                 .x
         });
         // Reserve actions first, using the actual localized labels instead
         // of a fixed breakpoint that only fits one language.
-        if ui.available_width() >= actions_width + title_width + 190.0 {
+        let compact = ui.available_width() < actions_width + title_width + 24.0;
+        let actions_width = self.top_bar_actions_width(ui, compact);
+        if ui.available_width() >= actions_width + title_width.min(120.0) + 16.0 {
             ui.horizontal(|ui| {
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.allocate_ui_with_layout(
-                        egui::vec2(actions_width, theme::CONTROL_HEIGHT),
+                        egui::vec2(actions_width, theme::CONTROL_HEIGHT + 2.0),
                         Layout::right_to_left(Align::Center),
-                        |ui| self.top_bar_actions(ui),
+                        |ui| self.top_bar_actions(ui, compact),
                     );
                     ui.allocate_ui_with_layout(
-                        egui::vec2(ui.available_width(), theme::CONTROL_HEIGHT),
+                        egui::vec2(ui.available_width(), theme::CONTROL_HEIGHT + 2.0),
                         Layout::left_to_right(Align::Center),
                         left,
                     );
@@ -616,7 +835,7 @@ impl Desktop {
             ui.horizontal(left);
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing.x = 6.0;
-                self.top_bar_actions(ui);
+                self.top_bar_actions(ui, true);
             });
         }
         if !self.cjk {
@@ -629,104 +848,158 @@ impl Desktop {
         }
     }
 
-    fn top_bar_actions_width(&self, ui: &egui::Ui) -> f32 {
-        let button_width = |text: String| {
-            ui.fonts(|f| {
-                f.layout_no_wrap(text, egui::FontId::proportional(theme::BODY), theme::TEXT)
-                    .size()
-                    .x
-            }) + 2.0 * ui.spacing().button_padding.x
+    fn master_mute_label(&self) -> String {
+        let muted = self.snapshot.as_ref().is_some_and(|s| s.output.muted);
+        self.tr(if muted {
+            &Message::ShellMasterUnmute
+        } else {
+            &Message::ShellMasterMute
+        })
+    }
+
+    fn search_width(compact: bool) -> f32 {
+        if compact { 36.0 } else { 232.0 }
+    }
+
+    /// Inner width of the master group, or `None` where it is not shown.
+    fn master_group_width(&self, ui: &egui::Ui) -> Option<f32> {
+        if self.page == Page::Mixer || self.snapshot.is_none() {
+            return None;
+        }
+        let gap = ui.spacing().item_spacing.x;
+        let text = |t: String, font: egui::FontId| {
+            ui.fonts(|f| f.layout_no_wrap(t, font, theme::text()).size().x)
         };
-        let mut width = button_width(self.tr(&Message::ShellQuickActions {
-            shortcut: widgets::command_hint("K"),
-        }))
-        .max(theme::CONTROL_HEIGHT);
-        if self.page != Page::Mixer && self.snapshot.is_some() {
-            width += 10.0 + 76.0 + 96.0 + 4.0 * ui.spacing().item_spacing.x;
-            if self.controls_room() {
-                width += button_width(self.tr(&Message::ShellMasterMute))
-                    .max(button_width(self.tr(&Message::ShellMasterUnmute)))
-                    .max(theme::CONTROL_HEIGHT)
-                    + ui.spacing().item_spacing.x;
-            }
+        let gain = text("−12.0 dB".into(), egui::FontId::monospace(theme::MONO));
+        let mut width = 16.0 + gap + 56.0 + gap + gain;
+        if self.controls_room() {
+            width +=
+                gap + text(
+                    self.tr(&Message::ShellMasterMute),
+                    egui::FontId::proportional(theme::SMALL + 0.5),
+                )
+                .max(text(
+                    self.tr(&Message::ShellMasterUnmute),
+                    egui::FontId::proportional(theme::SMALL + 0.5),
+                )) + 20.0;
+        }
+        Some(width.ceil())
+    }
+
+    fn top_bar_actions_width(&self, ui: &egui::Ui, compact: bool) -> f32 {
+        let gap = ui.spacing().item_spacing.x;
+        let mut width = Self::search_width(compact);
+        if let Some(group) = self.master_group_width(ui) {
+            width += gap + group + 13.0;
         }
         width.ceil()
     }
 
-    /// Right-to-left: ⌘K first (rightmost), then the master glance.
-    fn top_bar_actions(&mut self, ui: &mut egui::Ui) {
-        let shell_quick_tooltip =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellQuickTooltip);
-        let shell_master_unmute =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellMasterUnmute);
-        let shell_master_mute =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellMasterMute);
-        let shell_output_tooltip =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellOutputTooltip);
-        let palette = widgets::button(
+    /// Search field, then the master group: right-to-left in the bar (so the
+    /// master group sits rightmost), left-to-right when the bar wraps.
+    fn top_bar_actions(&mut self, ui: &mut egui::Ui, compact: bool) {
+        if ui.layout().prefer_right_to_left() {
+            self.top_bar_master(ui);
+            self.top_bar_search(ui, compact);
+        } else {
+            self.top_bar_search(ui, compact);
+            self.top_bar_master(ui);
+        }
+    }
+
+    fn top_bar_search(&mut self, ui: &mut egui::Ui, compact: bool) {
+        let quick = self.tr(&Message::ShellQuickActions {
+            shortcut: widgets::command_hint("K"),
+        });
+        let quick_tooltip = self.tr(&Message::ShellQuickTooltip);
+        let search = widgets::search_field(
             ui,
-            &self.tr(&Message::ShellQuickActions {
-                shortcut: widgets::command_hint("K"),
-            }),
-            Kind::Secondary,
+            Self::search_width(compact),
+            &self.tr(&Message::ShellSearchPlaceholder),
+            &widgets::command_hint("K"),
+            &quick,
         )
-        .on_hover_text(shell_quick_tooltip.as_str());
-        if palette.clicked() {
+        .on_hover_text(&quick_tooltip);
+        if search.clicked() {
             self.open_palette();
         }
-        if self.page == Page::Mixer {
-            return;
-        }
-        let Some(state) = self.snapshot.clone() else {
-            return;
-        };
-        ui.add_space(10.0);
-        if self.controls_room() {
-            let muted = state.output.muted;
-            if widgets::toggle(
-                ui,
-                self.writable(),
-                muted,
-                if muted {
-                    shell_master_unmute.as_str()
-                } else {
-                    shell_master_mute.as_str()
-                },
-                Tone::Warning,
-            )
-            .clicked()
-            {
-                self.master_mute(!muted);
-            }
-        }
-        ui.label(
-            RichText::new(format!("{} dB", widgets::gain_text(state.output.gain_db)))
-                .monospace()
-                .size(theme::MONO)
-                .color(theme::TEXT_2),
-        );
-        let meter = self.meters_current().and_then(|v| v.get("output"));
-        let (peak, rms) = (
-            meter.and_then(|v| v["peak"].as_f64()),
-            meter.and_then(|v| v["rms"].as_f64()),
-        );
-        // In a wrapped row the meter may use the remaining width; forcing
-        // 96 px would create a mostly empty extra header row in English.
-        let meter_width = if ui.layout().main_wrap() {
-            let remaining = ui.available_size_before_wrap().x;
-            if remaining >= 24.0 {
-                remaining.min(96.0)
-            } else {
-                96.0
-            }
-        } else {
-            96.0
-        };
-        let level = widgets::level(ui, "topbar-master", egui::vec2(meter_width, 6.0), peak, rms)
-            .interact(egui::Sense::click())
-            .on_hover_text(shell_output_tooltip.as_str());
-        if level.clicked() {
-            self.navigate(Page::Mixer);
+    }
+
+    fn top_bar_master(&mut self, ui: &mut egui::Ui) {
+        let output_tooltip = self.tr(&Message::ShellOutputTooltip);
+        if let Some(inner) = self.master_group_width(ui)
+            && let Some(state) = self.snapshot.clone()
+        {
+            let slot = ui.painter().add(egui::Shape::Noop);
+            let group = egui::Frame::new()
+                .inner_margin(Margin {
+                    left: 10,
+                    right: 3,
+                    top: 3,
+                    bottom: 3,
+                })
+                .show(ui, |ui| {
+                    ui.allocate_ui_with_layout(
+                        egui::vec2(inner, theme::COMPACT_HEIGHT),
+                        Layout::left_to_right(Align::Center),
+                        |ui| {
+                            let (icon, _) = ui
+                                .allocate_exact_size(egui::vec2(16.0, 16.0), egui::Sense::hover());
+                            icons::paint(ui.painter(), icon, icons::Icon::Speaker, theme::text_2());
+                            let meter = self.meters_current().and_then(|v| v.get("output"));
+                            let (peak, rms) = (
+                                meter.and_then(|v| v["peak"].as_f64()),
+                                meter.and_then(|v| v["rms"].as_f64()),
+                            );
+                            let level = widgets::level(
+                                ui,
+                                "topbar-master",
+                                egui::vec2(56.0, 6.0),
+                                peak,
+                                rms,
+                            )
+                            .interact(egui::Sense::click())
+                            .on_hover_text(&output_tooltip);
+                            if level.clicked() {
+                                self.navigate(Page::Mixer);
+                            }
+                            ui.label(
+                                RichText::new(format!(
+                                    "{} dB",
+                                    widgets::gain_text(state.output.gain_db)
+                                ))
+                                .monospace()
+                                .size(theme::MONO)
+                                .color(theme::text()),
+                            );
+                            if self.controls_room() {
+                                let muted = state.output.muted;
+                                if widgets::toggle_small(
+                                    ui,
+                                    self.writable(),
+                                    muted,
+                                    &self.master_mute_label(),
+                                    Tone::Warning,
+                                )
+                                .clicked()
+                                {
+                                    self.master_mute(!muted);
+                                }
+                            }
+                        },
+                    );
+                });
+            ui.painter().set(
+                slot,
+                egui::Shape::Vec(fx::elevated(
+                    ui.ctx(),
+                    group.response.rect,
+                    theme::CONTROL_RADIUS + 1,
+                    theme::raised(),
+                    fx::Level::Control,
+                    None,
+                )),
+            );
         }
     }
 
@@ -768,9 +1041,9 @@ impl Desktop {
     /// Steady fill; errors keep a quiet red tint instead of a flash.
     fn status_fill(&self) -> egui::Color32 {
         if self.error {
-            animation::lerp_color(theme::SIDEBAR, theme::DANGER, 0.08)
+            animation::lerp_color(theme::sidebar(), theme::danger(), 0.08)
         } else {
-            theme::SIDEBAR
+            theme::sidebar()
         }
     }
 
@@ -786,8 +1059,6 @@ impl Desktop {
             crate::localization::renderer(ui.ctx()).render(&Message::ShellPreviewBadge);
         let shell_online = crate::localization::renderer(ui.ctx()).render(&Message::ShellOnline);
         let shell_offline = crate::localization::renderer(ui.ctx()).render(&Message::ShellOffline);
-        let shell_restore_tooltip =
-            crate::localization::renderer(ui.ctx()).render(&Message::ShellRestoreTooltip);
         // New text eases in; nothing else in the strip moves or blinks.
         let appear = 0.35 + 0.65 * animation::fade_in(ui.ctx(), self.message_since.elapsed(), 0.22);
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -828,57 +1099,6 @@ impl Desktop {
             {
                 self.reconcile_intent();
             }
-            if self.undo_available() {
-                ui.ctx().request_repaint_after(Duration::from_millis(500));
-                let restore = widgets::small_button(
-                    ui,
-                    true,
-                    &self.tr(&Message::ShellRestoreButton {
-                        shortcut: widgets::command_hint("Z"),
-                    }),
-                )
-                .on_hover_text(shell_restore_tooltip.as_str());
-                if let Some(undo) = &self.undo {
-                    // The 8 s restore window, draining under the button.
-                    let left = 1.0 - undo.at.elapsed().as_secs_f32() / 8.0;
-                    let r = restore.rect;
-                    let line = egui::Rect::from_min_size(
-                        egui::pos2(r.left() + 4.0, r.bottom() + 1.0),
-                        egui::vec2((r.width() - 8.0) * left.clamp(0.0, 1.0), 2.0),
-                    );
-                    ui.painter().rect_filled(
-                        line,
-                        CornerRadius::same(1),
-                        theme::ACCENT.gamma_multiply(0.8),
-                    );
-                    ui.ctx().request_repaint_after(Duration::from_millis(100));
-                }
-                if restore.clicked() {
-                    self.restore_last();
-                }
-                if let Some(undo) = &self.undo {
-                    let label = self.tr(&Message::ShellAdjusted {
-                        change: self.tr(&undo.label),
-                    });
-                    let width = ((ui.available_width() - ui.spacing().item_spacing.x) * 0.5)
-                        .clamp(1.0, 280.0);
-                    ui.allocate_ui_with_layout(
-                        egui::vec2(width, 22.0),
-                        Layout::left_to_right(Align::Center),
-                        |ui| {
-                            ui.add(
-                                egui::Label::new(
-                                    RichText::new(&label)
-                                        .size(theme::SMALL)
-                                        .color(theme::TEXT_2),
-                                )
-                                .truncate(),
-                            )
-                            .on_hover_text(&label);
-                        },
-                    );
-                }
-            }
             ui.allocate_ui_with_layout(
                 egui::vec2(ui.available_width().max(0.0), 22.0),
                 Layout::left_to_right(Align::Center),
@@ -890,11 +1110,11 @@ impl Desktop {
                     if self.busy && !self.polling || self.pending_stop {
                         egui::Spinner::new()
                             .size(12.0)
-                            .color(theme::ACCENT)
+                            .color(theme::accent())
                             .paint_at(ui, slot);
                     } else if self.error {
                         ui.painter()
-                            .circle_filled(slot.center(), 3.5, theme::DANGER);
+                            .circle_filled(slot.center(), 3.5, theme::danger());
                         let code = self
                             .message
                             .id()
@@ -914,7 +1134,7 @@ impl Desktop {
                             ui.painter().rect_stroke(
                                 slot.expand(2.0),
                                 CornerRadius::same(3),
-                                Stroke::new(1.0, theme::ACCENT),
+                                Stroke::new(1.0, theme::accent()),
                                 egui::StrokeKind::Inside,
                             );
                         }
@@ -934,9 +1154,9 @@ impl Desktop {
                             .on_hover_cursor(egui::CursorIcon::PointingHand);
                     }
                     let color = if self.error {
-                        theme::DANGER
+                        theme::danger()
                     } else {
-                        theme::TEXT_2
+                        theme::text_2()
                     };
                     ui.add(
                         egui::Label::new(
@@ -952,6 +1172,138 @@ impl Desktop {
         });
     }
 
+    /// 还原: the last mixer change, floating above the page for the 8 s
+    /// restore window, with the time left draining along its bottom edge.
+    fn undo_toast(&mut self, ctx: &egui::Context, page: egui::Rect) {
+        if !self.undo_available() {
+            return;
+        }
+        let Some(undo) = &self.undo else {
+            return;
+        };
+        ctx.request_repaint_after(Duration::from_millis(100));
+        let left = (1.0 - undo.at.elapsed().as_secs_f32() / 8.0).clamp(0.0, 1.0);
+        let label = self.tr(&Message::ShellAdjusted {
+            change: self.tr(&undo.label),
+        });
+        let restore_text = self.tr(&Message::ShellRestoreButton {
+            shortcut: widgets::command_hint("Z"),
+        });
+        let restore_tooltip = self.tr(&Message::ShellRestoreTooltip);
+        // Measured up front so the toast has its final place on its first
+        // frame (an `Area` would spend that frame sizing itself).
+        let measure = |text: &str, size: f32| {
+            ctx.fonts(|f| {
+                f.layout_no_wrap(
+                    text.to_owned(),
+                    egui::FontId::proportional(size),
+                    theme::text(),
+                )
+                .size()
+                .x
+            })
+        };
+        let button_width = measure(&restore_text, theme::SMALL + 0.5) + 20.0;
+        let max_width = (page.width() - 48.0).clamp(200.0, 560.0);
+        let chrome = 12.0 + 18.0 + 10.0 + 10.0 + button_width + 8.0;
+        let text_width = measure(&label, theme::SMALL + 0.5)
+            .min(max_width - chrome)
+            .max(40.0);
+        let size = egui::vec2(chrome + text_width, 42.0);
+        let appear = animation::fade_in(ctx, undo.at.elapsed(), 0.16);
+        let rect = egui::Rect::from_center_size(
+            egui::pos2(
+                page.center().x,
+                page.bottom() - 20.0 - size.y / 2.0 + 6.0 * (1.0 - appear),
+            ),
+            size,
+        );
+        let mut restore = false;
+        let mut ui = egui::Ui::new(
+            ctx.clone(),
+            egui::Id::new("undo-toast"),
+            egui::UiBuilder::new()
+                .layer_id(egui::LayerId::new(
+                    egui::Order::Foreground,
+                    egui::Id::new("undo-toast"),
+                ))
+                .max_rect(rect),
+        );
+        let shadow = egui::Shadow {
+            offset: [0, 14],
+            blur: 36,
+            spread: 0,
+            color: theme::shadow(0.7),
+        };
+        ui.painter()
+            .add(shadow.as_shape(rect, CornerRadius::same(12)));
+        ui.painter().rect(
+            rect,
+            CornerRadius::same(12),
+            theme::overlay(),
+            Stroke::new(1.0, theme::border_strong()),
+            egui::StrokeKind::Inside,
+        );
+        let inner = rect.shrink2(egui::vec2(12.0, 7.0));
+        ui.scope_builder(
+            egui::UiBuilder::new()
+                .max_rect(egui::Rect::from_min_max(
+                    inner.min,
+                    egui::pos2(rect.right() - 8.0, inner.max.y),
+                ))
+                .layout(Layout::left_to_right(Align::Center)),
+            |ui| {
+                ui.spacing_mut().item_spacing.x = 10.0;
+                let (icon, _) =
+                    ui.allocate_exact_size(egui::vec2(18.0, 18.0), egui::Sense::hover());
+                ui.painter().circle_filled(
+                    icon.center(),
+                    9.0,
+                    theme::success().gamma_multiply(0.16),
+                );
+                icons::paint(
+                    ui.painter(),
+                    icons::square(icon.center(), 11.0),
+                    icons::Icon::Check,
+                    theme::success(),
+                );
+                ui.allocate_ui_with_layout(
+                    egui::vec2(text_width, 22.0),
+                    Layout::left_to_right(Align::Center),
+                    |ui| {
+                        ui.add(
+                            egui::Label::new(
+                                RichText::new(&label)
+                                    .size(theme::SMALL + 0.5)
+                                    .color(theme::text()),
+                            )
+                            .truncate(),
+                        )
+                        .on_hover_text(&label);
+                    },
+                );
+                if widgets::small_button(ui, true, &restore_text)
+                    .on_hover_text(&restore_tooltip)
+                    .clicked()
+                {
+                    restore = true;
+                }
+            },
+        );
+        let line = egui::Rect::from_min_size(
+            egui::pos2(rect.left() + 12.0, rect.bottom() - 2.5),
+            egui::vec2((rect.width() - 24.0) * left, 1.5),
+        );
+        ui.painter().rect_filled(
+            line,
+            CornerRadius::same(1),
+            theme::text_3().gamma_multiply(0.8),
+        );
+        if restore {
+            self.restore_last();
+        }
+    }
+
     fn confirm_modal(&mut self, ctx: &egui::Context) {
         let common_cancel = crate::localization::renderer(ctx).render(&Message::CommonCancel);
         let Some(mut confirmation) = self.confirm.take() else {
@@ -961,22 +1313,17 @@ impl Desktop {
         let mut execute = false;
         let busy = self.action_busy();
         let response = egui::Modal::new(egui::Id::new("confirm"))
-            .frame(
-                egui::Frame::popup(&ctx.style())
-                    .fill(theme::SURFACE)
-                    .stroke(Stroke::new(1.0, theme::BORDER_STRONG))
-                    .inner_margin(Margin::same(22))
-                    .corner_radius(CornerRadius::same(14)),
-            )
+            .backdrop_color(theme::shadow(0.45))
+            .frame(overlay_frame(ctx).inner_margin(Margin::same(22)))
             .show(ctx, |ui| {
                 ui.set_width((ctx.screen_rect().width() - 64.0).min(420.0));
                 ui.label(
                     RichText::new(self.tr(&confirmation.label))
                         .font(theme::heading(17.0))
-                        .color(theme::TEXT),
+                        .color(theme::text()),
                 );
                 ui.add_space(6.0);
-                ui.label(RichText::new(self.tr(&confirmation.consequence)).color(theme::TEXT_2));
+                ui.label(RichText::new(self.tr(&confirmation.consequence)).color(theme::text_2()));
                 ui.add_space(16.0);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     let action = self.tr(&confirmation.action_label());
@@ -1010,6 +1357,20 @@ impl Desktop {
             }
         }
     }
+}
+
+/// Frame of the highest layer: dialogs and the command palette.
+pub(crate) fn overlay_frame(ctx: &egui::Context) -> egui::Frame {
+    egui::Frame::popup(&ctx.style())
+        .fill(theme::overlay())
+        .stroke(Stroke::new(1.0, theme::border_strong()))
+        .corner_radius(CornerRadius::same(14))
+        .shadow(egui::Shadow {
+            offset: [0, 24],
+            blur: 64,
+            spread: 0,
+            color: theme::shadow(0.8),
+        })
 }
 
 pub(crate) fn profile_name(

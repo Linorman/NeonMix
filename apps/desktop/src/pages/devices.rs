@@ -189,10 +189,10 @@ impl Desktop {
         let (key, color, revoked) = match card {
             Card::Airplay(s) => (
                 s["source_id"].as_str().unwrap_or("airplay").to_owned(),
-                theme::SRC_AIRPLAY,
+                theme::src_airplay(),
                 s["revoked"].as_bool() == Some(true),
             ),
-            Card::Device(d, _) => (d.id.to_string(), theme::SRC_NATIVE, d.revoked),
+            Card::Device(d, _) => (d.id.to_string(), theme::src_native(), d.revoked),
         };
         let shown = widgets::surface(ui, None, Margin::symmetric(14, 12), |ui| {
             ui.set_min_width(ui.available_width());
@@ -207,21 +207,14 @@ impl Desktop {
             });
         });
         let rect = shown.response.rect;
+        widgets::lead_cap(ui, rect, if revoked { theme::text_3() } else { color });
         let painter = ui.painter();
-        painter.rect_filled(
-            egui::Rect::from_min_size(
-                rect.min + egui::vec2(16.0, 1.0),
-                egui::vec2(rect.width() - 32.0, 3.0),
-            ),
-            egui::CornerRadius::same(2),
-            if revoked { theme::TEXT_3 } else { color },
-        );
         if revoked {
             // Revoked identities stay listed but read as struck out.
             crate::fx::hatch(
                 painter,
                 rect.shrink(2.0),
-                theme::DANGER.gamma_multiply(0.10),
+                theme::danger().gamma_multiply(0.10),
                 9.0,
             );
         }
@@ -248,7 +241,7 @@ impl Desktop {
         let info = |ui: &mut egui::Ui| {
             ui.horizontal(|ui| {
                 let color = if device.revoked {
-                    theme::DANGER
+                    theme::danger()
                 } else {
                     role_color(device.role)
                 };
@@ -259,7 +252,7 @@ impl Desktop {
                         ui.label(
                             RichText::new(&device.name)
                                 .font(theme::heading(theme::BODY))
-                                .color(theme::TEXT),
+                                .color(theme::text()),
                         );
                         widgets::pill(ui, &renderer.render(&role_name(device.role)), Tone::Neutral);
                         let permission = if device.revoked {
@@ -385,7 +378,7 @@ impl Desktop {
                 }
                 for device in &self.devices {
                     ui.horizontal_wrapped(|ui| {
-                        ui.label(RichText::new(&device.name).color(theme::TEXT));
+                        ui.label(RichText::new(&device.name).color(theme::text()));
                         if device.output.is_some() {
                             widgets::pill(ui, text_devices_output.as_str(), Tone::Neutral);
                         }

@@ -108,7 +108,7 @@ pub fn paint(painter: &Painter, center: Pos2, radius: f32, emblem: Emblem, lit: 
             }
         }
     }
-    painter.circle_stroke(center, radius, Stroke::new(1.0, theme::BORDER_STRONG));
+    painter.circle_stroke(center, radius, Stroke::new(1.0, theme::border_strong()));
 }
 
 #[cfg(test)]

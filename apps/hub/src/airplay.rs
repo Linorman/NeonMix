@@ -1410,9 +1410,10 @@ fn run_worker(
                                 .iter()
                                 .any(|lane| lane.session.is_none() && lane.producer.is_some())
                                 && if e.resources.multi_receiver {
-                                    native + e.resources.admissions.claims.len() < 4
+                                    e.resources.admissions.claims.len() < admission::MULTI_CAPACITY
+                                        && native + e.resources.admissions.claims.len() < LANES
                                 } else {
-                                    native <= 1 && e.resources.admissions.claims.is_empty()
+                                    e.resources.admissions.claims.is_empty() && native < LANES
                                 }))
                 };
                 publisher.set(visible);

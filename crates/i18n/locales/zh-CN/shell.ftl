@@ -10,7 +10,7 @@ shell-page-devices = 设备管理
 
 shell-page-diagnostics = 诊断
 
-shell-page-about = 关于
+shell-page-about = 设置
 
 shell-processing = 正在处理…
 
@@ -150,3 +150,12 @@ shell-media-applied = 设置已保存，已应用到音频引擎。
 shell-media-stalled = 设置已保存，音频尚未应用；请检查输出或重试共享。
 shell-media-unknown = 设置已保存，音频应用进度尚未确认。
 shell-media-superseded = 设置已保存，但该值已被更新。
+shell-group-monitor = 监听
+shell-group-connect = 连接
+shell-group-system = 系统
+shell-search-placeholder = 搜索或执行操作
+shell-sending-now = 本机正在发送
+shell-account-menu = 身份与后台
+shell-switch-identity = 切换控制身份
+shell-open-room = 打开房间设置
+shell-room-state = { $state } · { $count } 路输入

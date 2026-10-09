@@ -1,0 +1,157 @@
+{
+  "before_bilibili": [
+    {
+      "receivers": [
+        {
+          "source": "other source",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 18264,
+          "released_blocks": 18200,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        },
+        {
+          "source": "iPad mini / iPadOS 18",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 0,
+          "released_blocks": 0,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        }
+      ]
+    },
+    {
+      "receivers": [
+        {
+          "source": "other source",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 18752,
+          "released_blocks": 18687,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        },
+        {
+          "source": "iPad mini / iPadOS 18",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 0,
+          "released_blocks": 0,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        }
+      ]
+    }
+  ],
+  "after_audio_app": [
+    {
+      "receivers": [
+        {
+          "source": "other source",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 147835,
+          "released_blocks": 147538,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        },
+        {
+          "source": "iPad mini / iPadOS 18",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 6569,
+          "released_blocks": 6323,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        }
+      ]
+    },
+    {
+      "receivers": [
+        {
+          "source": "other source",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 147835,
+          "released_blocks": 147538,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        },
+        {
+          "source": "iPad mini / iPadOS 18",
+          "active": true,
+          "format": {
+            "codec": "alac",
+            "source_frame_count": 352,
+            "source_rate": 44100
+          },
+          "received_blocks": 6569,
+          "released_blocks": 6323,
+          "muted": false,
+          "error": null,
+          "admission_denials": {}
+        }
+      ]
+    }
+  ],
+  "udp_header_observation": {
+    "sample_seconds": 8,
+    "ipad_rtp_packets": 701,
+    "ipad_rtp_packet_bytes": 44,
+    "distinct_encrypted_payload_prefixes": 1,
+    "other_source_rtp_packets": 834,
+    "other_source_packet_bytes_examples": [
+      781,
+      808,
+      791,
+      810
+    ],
+    "timing_and_sync_received": true,
+    "interpretation": "The receiver drops every 44-byte ALAC packet as a no-data/format marker. This is not decrypted proof of the payload contents."
+  },
+  "user_confirmation": "Same iPad and second entry produced audible sound after switching to a pure audio app.",
+  "limitations": [
+    "No proof of which Bilibili internal route selected the idle packets; no video/HLS implementation added.",
+    "No Apple multi-device long-duration acceptance claim."
+  ],
+  "additional_user_confirmation": "The first device also has no sound after switching to Bilibili; this is not specific to the second entry.",
+  "control_capture": "No control packets were captured during the requested switch window; no evidence of /play or a 415 response.",
+  "routing_user_confirmation": "NeonMix remains selected in system Control Center; video is played directly, without using the Bilibili cast button."
+}
