@@ -17,3 +17,7 @@
 # Local network-node connection material is never a source artifact.
 /node-*
 /.ssh-node-known-hosts
+
+# Keep working notes local; publish only the root project introduction.
+*.[mM][dD]
+!/README.md
